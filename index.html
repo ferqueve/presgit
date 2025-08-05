@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git para Principiantes</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Artyom.js (opcional para síntesis de voz) -->
+    <script src="artyom.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            animation: slideIn 0.5s ease-in-out;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            min-height: 500px;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide h1 {
+            color: #764ba2;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .slide h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+        }
+        
+        .git-icon {
+            font-size: 4rem;
+            color: #f05032;
+            margin-bottom: 20px;
+        }
+        
+        .concept-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            transition: transform 0.3s;
+        }
+        
+        .concept-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(255,255,255,0.3);
+            z-index: 1000;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        
+        .quiz-option {
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateX(10px);
+        }
+        
+        .quiz-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .voice-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .command-example {
+            background: #2d2d2d;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+        
+        .feature-list li {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        .feature-list i {
+            color: #667eea;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de progreso -->
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+    
+    <!-- Botón de voz -->
+    <button class="voice-btn" id="voiceBtn" title="Activar/Desactivar narración">
+        <i class="fas fa-volume-up"></i>
+    </button>
+    
+    <div class="presentation-container">
+        <!-- Slide 1: Introducción -->
+        <div class="slide active" data-slide="1">
+            <span class="slide-number">1 / 15</span>
+            <div class="text-center">
+                <i class="fab fa-git-alt git-icon"></i>
+                <h1>Git para Principiantes</h1>
+                <p class="lead">Aprende los conceptos fundamentales del control de versiones</p>
+                <div class="mt-4">
+                    <h3>¿Qué aprenderemos hoy?</h3>
+                    <ul class="feature-list list-unstyled text-start mt-3">
+                        <li><i class="fas fa-check-circle"></i> Qué es Git y para qué sirve</li>
+                        <li><i class="fas fa-check-circle"></i> Conceptos básicos: repositorio, commits, branches</li>
+                        <li><i class="fas fa-check-circle"></i> Trabajo colaborativo con Git</li>
+                        <li><i class="fas fa-check-circle"></i> Comandos esenciales</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 2: ¿Qué es Git? -->
+        <div class="slide" data-slide="2">
+            <span class="slide-number">2 / 15</span>
+            <h2><i class="fab fa-git-alt"></i> ¿Qué es Git?</h2>
+            <div class="concept-card">
+                <h4>Sistema de Control de Versiones</h4>
+                <p>Git es una herramienta que te permite guardar el historial de cambios de tu código, como una máquina del tiempo para tus archivos.</p>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>¿Por qué usar Git?</h4>
+                    <ul class="feature-list list-unstyled">
+                        <li><i class="fas fa-history"></i> Historial completo de cambios</li>
+                        <li><i class="fas fa-users"></i> Trabajo en equipo eficiente</li>
+                        <li><i class="fas fa-code-branch"></i> Experimentar sin miedo</li>
+                        <li><i class="fas fa-undo"></i> Revertir cambios fácilmente</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4>Analogía Simple</h4>
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb"></i> Imagina Git como Google Docs para programadores: 
+                        múltiples personas pueden trabajar en el mismo proyecto, ver el historial de cambios, 
+                        y recuperar versiones anteriores.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: Quiz 1 -->
+        <div class="slide" data-slide="3">
+            <span class="slide-number">3 / 15</span>
+            <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación</h2>
+            <div class="quiz-container">
+                <h4>¿Cuál es la principal función de Git?</h4>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 1)">
+                    <i class="far fa-circle"></i> A) Compilar código
+                </div>
+                <div class="quiz-option" data-answer="true" onclick="selectOption(this, 1)">
+                    <i class="far fa-circle"></i> B) Control de versiones y gestión del historial de cambios
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 1)">
+                    <i class="far fa-circle"></i> C) Ejecutar aplicaciones web
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 1)">
+                    <i class="far fa-circle"></i> D) Diseñar interfaces gráficas
+                </div>
+                <button class="btn btn-primary mt-3" onclick="checkAnswer(1)">Verificar Respuesta</button>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Repositorio -->
+        <div class="slide" data-slide="4">
+            <span class="slide-number">4 / 15</span>
+            <h2><i class="fas fa-folder-open"></i> ¿Qué es un Repositorio?</h2>
+            <div class="concept-card">
+                <h4>Tu Proyecto con Superpoderes</h4>
+                <p>Un repositorio (o "repo") es una carpeta especial donde Git guarda tu proyecto y todo su historial.</p>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>Tipos de Repositorios</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <strong><i class="fas fa-laptop"></i> Local:</strong> 
+                            En tu computadora
+                        </li>
+                        <li>
+                            <strong><i class="fas fa-cloud"></i> Remoto:</strong> 
+                            En servicios como GitHub, GitLab
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4>Crear un Repositorio</h4>
+                    <div class="command-example">
+                        $ git init<br>
+                        <span style="color: #999;"># Inicializa un nuevo repositorio</span>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-success mt-3">
+                <i class="fas fa-info-circle"></i> Un repositorio contiene todos los archivos de tu proyecto más la carpeta oculta <code>.git</code> con el historial.
+            </div>
+        </div>
+        
+        <!-- Slide 5: Staging Area -->
+        <div class="slide" data-slide="5">
+            <span class="slide-number">5 / 15</span>
+            <h2><i class="fas fa-layer-group"></i> Staging Area</h2>
+            <div class="concept-card">
+                <h4>La Sala de Espera de tus Cambios</h4>
+                <p>El staging area es como una zona de preparación donde seleccionas qué cambios quieres guardar en el próximo commit.</p>
+            </div>
+            <div class="text-center my-4">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8IS0tIFdvcmtpbmcgRGlyZWN0b3J5IC0tPgogIDxyZWN0IHg9IjIwIiB5PSI1MCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNmZmNjY2MiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iMTAiLz4KICA8dGV4dCB4PSI5NSIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+V29ya2luZzwvdGV4dD4KICA8dGV4dCB4PSI5NSIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+RGlyZWN0b3J5PC90ZXh0PgogIAogIDwhLS0gU3RhZ2luZyBBcmVhIC0tPgogIDxyZWN0IHg9IjIyNSIgeT0iNTAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZmZmZmNjIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIgcng9IjEwIi8+CiAgPHRleHQgeD0iMzAwIiB5PSIxMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSJib2xkIj5TdGFnaW5nPC90ZXh0PgogIDx0ZXh0IHg9IjMwMCIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+QXJlYTwvdGV4dD4KICAKICA8IS0tIFJlcG9zaXRvcnkgLS0+CiAgPHJlY3QgeD0iNDMwIiB5PSI1MCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNjY2ZmY2MiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iMTAiLz4KICA8dGV4dCB4PSI1MDUiIHk9IjEwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiPlJlcG9zaXRvcnk8L3RleHQ+CiAgPHRleHQgeD0iNTA1IiB5PSIxMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSJib2xkIj4oQ29tbWl0cyk8L3RleHQ+CiAgCiAgPCEtLSBBcnJvd3MgLS0+CiAgPGRlZnM+CiAgICA8bWFya2VyIGlkPSJhcnJvd2hlYWQiIG1hcmtlcldpZHRoPSIxMCIgbWFya2VySGVpZ2h0PSI3IiByZWZYPSI5IiByZWZZPSIzLjUiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwb2x5Z29uIHBvaW50cz0iMCAwLCAxMCAzLjUsIDAgNyIgZmlsbD0iIzMzMyIgLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KICAKICA8bGluZSB4MT0iMTcwIiB5MT0iMTAwIiB4Mj0iMjIwIiB5Mj0iMTAwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIgbWFya2VyLWVuZD0idXJsKCNhcnJvd2hlYWQpIi8+CiAgPHRleHQgeD0iMTk1IiB5PSI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMiI+Z2l0IGFkZDwvdGV4dD4KICAKICA8bGluZSB4MT0iMzc1IiB5MT0iMTAwIiB4Mj0iNDI1IiB5Mj0iMTAwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIgbWFya2VyLWVuZD0idXJsKCNhcnJvd2hlYWQpIi8+CiAgPHRleHQgeD0iNDAwIiB5PSI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMiI+Z2l0IGNvbW1pdDwvdGV4dD4KPC9zdmc+" alt="Flujo de Git" style="max-width: 100%; height: auto;">
+            </div>
+            <div class="command-example">
+                $ git add archivo.txt<br>
+                <span style="color: #999;"># Agrega archivo.txt al staging area</span><br><br>
+                $ git add .<br>
+                <span style="color: #999;"># Agrega todos los cambios al staging area</span>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Quiz 2 -->
+        <div class="slide" data-slide="6">
+            <span class="slide-number">6 / 15</span>
+            <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación</h2>
+            <div class="quiz-container">
+                <h4>¿Qué comando usas para agregar archivos al staging area?</h4>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 2)">
+                    <i class="far fa-circle"></i> A) git commit
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 2)">
+                    <i class="far fa-circle"></i> B) git push
+                </div>
+                <div class="quiz-option" data-answer="true" onclick="selectOption(this, 2)">
+                    <i class="far fa-circle"></i> C) git add
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 2)">
+                    <i class="far fa-circle"></i> D) git stage
+                </div>
+                <button class="btn btn-primary mt-3" onclick="checkAnswer(2)">Verificar Respuesta</button>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Commit -->
+        <div class="slide" data-slide="7">
+            <span class="slide-number">7 / 15</span>
+            <h2><i class="fas fa-save"></i> ¿Qué es un Commit?</h2>
+            <div class="concept-card">
+                <h4>Una Fotografía de tu Código</h4>
+                <p>Un commit es como tomar una foto del estado actual de tu proyecto. Cada commit tiene un mensaje que describe qué cambios hiciste.</p>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>Características de un Commit</h4>
+                    <ul class="feature-list list-unstyled">
+                        <li><i class="fas fa-fingerprint"></i> ID único (hash)</li>
+                        <li><i class="fas fa-user"></i> Autor</li>
+                        <li><i class="fas fa-calendar"></i> Fecha y hora</li>
+                        <li><i class="fas fa-comment"></i> Mensaje descriptivo</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4>Hacer un Commit</h4>
+                    <div class="command-example">
+                        $ git commit -m "Agregué login de usuarios"<br>
+                        <span style="color: #999;"># Crea un commit con mensaje</span>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Tip:</strong> Escribe mensajes claros y descriptivos
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Branches -->
+        <div class="slide" data-slide="8">
+            <span class="slide-number">8 / 15</span>
+            <h2><i class="fas fa-code-branch"></i> Branches (Ramas)</h2>
+            <div class="concept-card">
+                <h4>Universos Paralelos de tu Código</h4>
+                <p>Las branches te permiten crear versiones alternativas de tu proyecto para experimentar sin afectar la versión principal.</p>
+            </div>
+            <div class="text-center my-4">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8IS0tIE1haW4gYnJhbmNoIC0tPgogIDxsaW5lIHgxPSI1MCIgeTE9IjE1MCIgeDI9IjU1MCIgeTI9IjE1MCIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjMiLz4KICAKICA8IS0tIE1haW4gY29tbWl0cyAtLT4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxNTAiIHI9IjE1IiBmaWxsPSIjNjY3ZWVhIi8+CiAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMTUwIiByPSIxNSIgZmlsbD0iIzY2N2VlYSIvPgogIDxjaXJjbGUgY3g9IjMwMCIgY3k9IjE1MCIgcj0iMTUiIGZpbGw9IiM2NjdlZWEiLz4KICA8Y2lyY2xlIGN4PSI1MDAiIGN5PSIxNTAiIHI9IjE1IiBmaWxsPSIjNjY3ZWVhIi8+CiAgCiAgPCEtLSBGZWF0dXJlIGJyYW5jaCAtLT4KICA8bGluZSB4MT0iMzAwIiB5MT0iMTUwIiB4Mj0iMzUwIiB5Mj0iMTAwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxsaW5lIHgxPSIzNTAiIHkxPSIxMDAiIHgyPSI0NTAiIHkyPSIxMDAiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPGxpbmUgeDE9IjQ1MCIgeTE9IjEwMCIgeDI9IjUwMCIgeTI9IjE1MCIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjIiLz4KICAKICA8IS0tIEZlYXR1cmUgY29tbWl0cyAtLT4KICA8Y2lyY2xlIGN4PSIzNTAiIGN5PSIxMDAiIHI9IjEyIiBmaWxsPSIjZmY2YjZiIi8+CiAgPGNpcmNsZSBjeD0iNDAwIiBjeT0iMTAwIiByPSIxMiIgZmlsbD0iI2ZmNmI2YiIvPgogIDxjaXJjbGUgY3g9IjQ1MCIgY3k9IjEwMCIgcj0iMTIiIGZpbGw9IiNmZjZiNmIiLz4KICAKICA8IS0tIExhYmVscyAtLT4KICA8dGV4dCB4PSI1MCIgeT0iMTgwIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+bWFpbjwvdGV4dD4KICA8dGV4dCB4PSIzNTAiIHk9IjgwIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5mZWF0dXJlPC90ZXh0PgogIDx0ZXh0IHg9IjUwMCIgeT0iMTgwIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5tZXJnZTwvdGV4dD4KPC9zdmc+" alt="Branches de Git" style="max-width: 100%; height: auto;">
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Crear una Branch</h5>
+                    <div class="command-example">
+                        $ git branch nueva-funcionalidad<br>
+                        $ git checkout nueva-funcionalidad
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5>O en un solo comando</h5>
+                    <div class="command-example">
+                        $ git checkout -b nueva-funcionalidad
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Quiz 3 -->
+        <div class="slide" data-slide="9">
+            <span class="slide-number">9 / 15</span>
+            <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación</h2>
+            <div class="quiz-container">
+                <h4>¿Para qué sirven las branches en Git?</h4>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 3)">
+                    <i class="far fa-circle"></i> A) Para eliminar archivos del proyecto
+                </div>
+                <div class="quiz-option" data-answer="true" onclick="selectOption(this, 3)">
+                    <i class="far fa-circle"></i> B) Para crear versiones paralelas del código y experimentar
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 3)">
+                    <i class="far fa-circle"></i> C) Para comprimir el código
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 3)">
+                    <i class="far fa-circle"></i> D) Para cambiar el lenguaje de programación
+                </div>
+                <button class="btn btn-primary mt-3" onclick="checkAnswer(3)">Verificar Respuesta</button>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Push y Pull -->
+        <div class="slide" data-slide="10">
+            <span class="slide-number">10 / 15</span>
+            <h2><i class="fas fa-cloud-upload-alt"></i> Push y Pull</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <h4><i class="fas fa-upload"></i> Git Push</h4>
+                        <p>Envía tus commits locales al repositorio remoto (GitHub, GitLab, etc.)</p>
+                        <div class="command-example mt-3">
+                            $ git push origin main<br>
+                            <span style="color: #999;"># Sube cambios a la rama main</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <h4><i class="fas fa-download"></i> Git Pull</h4>
+                        <p>Descarga los cambios del repositorio remoto a tu repositorio local</p>
+                        <div class="command-example mt-3">
+                            $ git pull origin main<br>
+                            <span style="color: #999;"># Descarga cambios de main</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-sync"></i> <strong>Flujo típico:</strong> 
+                Pull (actualizar) → Hacer cambios → Add → Commit → Push (compartir)
+            </div>
+        </div>
+        
+        <!-- Slide 11: Merge -->
+        <div class="slide" data-slide="11">
+            <span class="slide-number">11 / 15</span>
+            <h2><i class="fas fa-code-branch"></i> Merge (Fusionar)</h2>
+            <div class="concept-card">
+                <h4>Uniendo Branches</h4>
+                <p>Merge combina los cambios de una branch con otra, típicamente para integrar una nueva funcionalidad a la rama principal.</p>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>Proceso de Merge</h4>
+                    <ol>
+                        <li>Cambiar a la rama destino (ej: main)</li>
+                        <li>Ejecutar el comando merge</li>
+                        <li>Resolver conflictos si existen</li>
+                        <li>Confirmar el merge</li>
+                    </ol>
+                </div>
+                <div class="col-md-6">
+                    <h4>Comandos</h4>
+                    <div class="command-example">
+                        $ git checkout main<br>
+                        <span style="color: #999;"># Cambiar a main</span><br><br>
+                        $ git merge nueva-funcionalidad<br>
+                        <span style="color: #999;"># Fusionar la branch</span>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Conflictos:</strong> 
+                Ocurren cuando Git no puede fusionar automáticamente. Debes resolverlos manualmente.
+            </div>
+        </div>
+        
+        <!-- Slide 12: Quiz 4 -->
+        <div class="slide" data-slide="12">
+            <span class="slide-number">12 / 15</span>
+            <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación</h2>
+            <div class="quiz-container">
+                <h4>¿Qué comando usas para descargar cambios del repositorio remoto?</h4>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 4)">
+                    <i class="far fa-circle"></i> A) git push
+                </div>
+                <div class="quiz-option" data-answer="true" onclick="selectOption(this, 4)">
+                    <i class="far fa-circle"></i> B) git pull
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 4)">
+                    <i class="far fa-circle"></i> C) git download
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 4)">
+                    <i class="far fa-circle"></i> D) git get
+                </div>
+                <button class="btn btn-primary mt-3" onclick="checkAnswer(4)">Verificar Respuesta</button>
+            </div>
+        </div>
+        
+        <!-- Slide 13: Trabajo Colaborativo -->
+        <div class="slide" data-slide="13">
+            <span class="slide-number">13 / 15</span>
+            <h2><i class="fas fa-users"></i> Trabajo Colaborativo con Git</h2>
+            <div class="concept-card">
+                <h4>Mejores Prácticas para Equipos</h4>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>Flujo de Trabajo Recomendado</h4>
+                    <ul class="feature-list list-unstyled">
+                        <li><i class="fas fa-check"></i> Crear branch para cada feature</li>
+                        <li><i class="fas fa-check"></i> Commits frecuentes y descriptivos</li>
+                        <li><i class="fas fa-check"></i> Pull requests para revisión</li>
+                        <li><i class="fas fa-check"></i> Code reviews antes de merge</li>
+                        <li><i class="fas fa-check"></i> Mantener main/master estable</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4>Plataformas Populares</h4>
+                    <div class="mb-3">
+                        <i class="fab fa-github fa-2x"></i> <strong>GitHub</strong>
+                        <p>La más popular para proyectos open source</p>
+                    </div>
+                    <div class="mb-3">
+                        <i class="fab fa-gitlab fa-2x" style="color: #fc6d26;"></i> <strong>GitLab</strong>
+                        <p>Completa con CI/CD integrado</p>
+                    </div>
+                    <div>
+                        <i class="fab fa-bitbucket fa-2x" style="color: #0052cc;"></i> <strong>Bitbucket</strong>
+                        <p>Popular en empresas con Atlassian</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 14: Quiz 5 -->
+        <div class="slide" data-slide="14">
+            <span class="slide-number">14 / 15</span>
+            <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación</h2>
+            <div class="quiz-container">
+                <h4>¿Cuál es una buena práctica al trabajar en equipo con Git?</h4>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 5)">
+                    <i class="far fa-circle"></i> A) Trabajar siempre directamente en la rama main
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 5)">
+                    <i class="far fa-circle"></i> B) Hacer commits con mensajes como "cambios" o "fix"
+                </div>
+                <div class="quiz-option" data-answer="true" onclick="selectOption(this, 5)">
+                    <i class="far fa-circle"></i> C) Crear una branch para cada nueva funcionalidad
+                </div>
+                <div class="quiz-option" data-answer="false" onclick="selectOption(this, 5)">
+                    <i class="far fa-circle"></i> D) Nunca hacer pull antes de push
+                </div>
+                <button class="btn btn-primary mt-3" onclick="checkAnswer(5)">Verificar Respuesta</button>
+            </div>
+        </div>
+        
+        <!-- Slide 15: Resultados -->
+        <div class="slide" data-slide="15">
+            <span class="slide-number">15 / 15</span>
+            <h2><i class="fas fa-trophy"></i> ¡Resultados Finales!</h2>
+            <div class="text-center">
+                <h3 id="finalScore" class="mb-4"></h3>
+                <canvas id="resultsChart" width="400" height="300"></canvas>
+                <div id="finalMessage" class="mt-4"></div>
+                <button class="btn btn-success btn-lg mt-3" onclick="restartPresentation()">
+                    <i class="fas fa-redo"></i> Reiniciar Presentación
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navegación -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+            <i class="fas fa-chevron-left"></i> Anterior
+        </button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">
+            Siguiente <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+    
+    <script>
+        // Variables globales
+        let currentSlide = 1;
+        const totalSlides = 15;
+        let scores = [];
+        let selectedAnswers = {};
+        let voiceEnabled = false;
+        const artyom = new Artyom();
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            updateNavigation();
+            initVoice();
+        });
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+        
+        // Cambiar diapositiva
+        function changeSlide(direction) {
+            const slides = document.querySelectorAll('.slide');
+            const newSlide = currentSlide + direction;
+            
+            if (newSlide >= 1 && newSlide <= totalSlides) {
+                slides[currentSlide - 1].classList.remove('active');
+                currentSlide = newSlide;
+                slides[currentSlide - 1].classList.add('active');
+                updateProgress();
+                updateNavigation();
+                
+                // Mostrar resultados si es la última diapositiva
+                if (currentSlide === totalSlides) {
+                    showResults();
+                }
+                
+                // Narrar contenido si está habilitado
+                if (voiceEnabled) {
+                    narrateSlide();
+                }
+            }
+        }
+        
+        // Actualizar barra de progreso
+        function updateProgress() {
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        // Actualizar botones de navegación
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentSlide === 1;
+            nextBtn.disabled = currentSlide === totalSlides;
+        }
+        
+        // Seleccionar opción en quiz
+        function selectOption(element, questionNumber) {
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('i').className = 'far fa-circle';
+            });
+            element.classList.add('selected');
+            element.querySelector('i').className = 'fas fa-check-circle';
+            selectedAnswers[questionNumber] = element.dataset.answer === 'true';
+        }
+        
+        // Verificar respuesta
+        function checkAnswer(questionNumber) {
+            if (selectedAnswers[questionNumber] === undefined) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Por favor selecciona una respuesta',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                return;
+            }
+            
+            const isCorrect = selectedAnswers[questionNumber];
+            scores.push(isCorrect ? 1 : 0);
+            
+            if (isCorrect) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Correcto!',
+                    text: 'Excelente respuesta',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    changeSlide(1);
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Incorrecto',
+                    text: 'No te preocupes, sigue aprendiendo',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    changeSlide(1);
+                });
+            }
+        }
+        
+        // Mostrar resultados finales
+        function showResults() {
+            const totalScore = scores.reduce((a, b) => a + b, 0);
+            const percentage = (totalScore / 5) * 100;
+            
+            document.getElementById('finalScore').innerHTML = 
+                `Tu puntuación: ${totalScore}/5 (${percentage}%)`;
+            
+            // Mensaje según el resultado
+            let message = '';
+            if (percentage === 100) {
+                message = '<div class="alert alert-success"><i class="fas fa-star"></i> ¡Perfecto! Dominas los conceptos básicos de Git</div>';
+            } else if (percentage >= 80) {
+                message = '<div class="alert alert-success"><i class="fas fa-thumbs-up"></i> ¡Muy bien! Tienes un buen entendimiento de Git</div>';
+            } else if (percentage >= 60) {
+                message = '<div class="alert alert-info"><i class="fas fa-book"></i> Bien, pero puedes mejorar. Repasa los conceptos</div>';
+            } else {
+                message = '<div class="alert alert-warning"><i class="fas fa-graduation-cap"></i> Necesitas practicar más. ¡No te rindas!</div>';
+            }
+            document.getElementById('finalMessage').innerHTML = message;
+            
+            // Crear gráfica
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pregunta 1', 'Pregunta 2', 'Pregunta 3', 'Pregunta 4', 'Pregunta 5'],
+                    datasets: [{
+                        label: 'Resultados',
+                        data: scores.map(s => s * 100),
+                        backgroundColor: scores.map(s => s === 1 ? '#28a745' : '#dc3545'),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y === 100 ? 'Correcta' : 'Incorrecta';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Reiniciar presentación
+        function restartPresentation() {
+            currentSlide = 1;
+            scores = [];
+            selectedAnswers = {};
+            
+            // Resetear todas las diapositivas
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === 0);
+            });
+            
+            // Resetear opciones de quiz
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('i').className = 'far fa-circle';
+            });
+            
+            updateProgress();
+            updateNavigation();
+        }
+        
+        // Inicializar voz (Artyom)
+        function initVoice() {
+            artyom.initialize({
+                lang: "es-ES",
+                continuous: false,
+                listen: false,
+                debug: false,
+                speed: 0.9
+            });
+            
+            document.getElementById('voiceBtn').addEventListener('click', function() {
+                voiceEnabled = !voiceEnabled;
+                this.innerHTML = voiceEnabled ? 
+                    '<i class="fas fa-volume-mute"></i>' : 
+                    '<i class="fas fa-volume-up"></i>';
+                
+                if (voiceEnabled) {
+                    narrateSlide();
+                } else {
+                    artyom.shutUp();
+                }
+            });
+        }
+        
+        // Narrar contenido de la diapositiva
+        function narrateSlide() {
+            const slide = document.querySelectorAll('.slide')[currentSlide - 1];
+            const title = slide.querySelector('h1, h2')?.textContent || '';
+            const content = slide.querySelector('.concept-card p')?.textContent || '';
+            
+            if (title) {
+                artyom.say(title + '. ' + content);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Figma para Principiantes - Presentación Interactiva</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .presentation-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 900px;
+            min-height: 600px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        .slide-title {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .slide-subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-btn.prev {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .nav-btn.next {
+            background: #667eea;
+            color: white;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .question-container {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .question-title {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .option-letter {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .option.selected .option-letter {
+            background: white;
+            color: #667eea;
+        }
+        
+        .figma-icon {
+            color: #f24e1e;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .benefit-card {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .benefit-card:hover {
+            transform: translateX(10px);
+        }
+        
+        .benefit-icon {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            background: #e9ecef;
+            height: 6px;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .score-summary {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .chart-container {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+        
+        .final-message {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .excellent { background: #d4edda; color: #155724; }
+        .good { background: #fff3cd; color: #856404; }
+        .needs-improvement { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Portada -->
+        <div class="slide active" id="slide-1">
+            <div class="slide-number">1/15</div>
+            <div class="slide-header">
+                <i class="fas fa-palette figma-icon"></i>
+                <h1 class="slide-title">Figma para Principiantes</h1>
+                <p class="slide-subtitle">Aprende todo sobre la herramienta de diseño más popular</p>
+            </div>
+            <div class="text-center">
+                <p class="lead">Una presentación interactiva completa</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 6.67%"></div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Comenzar <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 2: ¿Qué es Figma? -->
+        <div class="slide" id="slide-2">
+            <div class="slide-number">2/15</div>
+            <div class="slide-header">
+                <i class="fas fa-question-circle" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">¿Qué es Figma?</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="lead">Figma es una herramienta de diseño de interfaz de usuario (UI) y experiencia de usuario (UX) basada en la web.</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Herramienta de diseño colaborativo</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Basada en la nube</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Multiplataforma</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Gratuita para uso básico</li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fab fa-figma" style="color: #f24e1e; font-size: 8rem;"></i>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Pregunta 1 -->
+        <div class="slide" id="slide-3">
+            <div class="slide-number">3/15</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 1</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Cuál es la principal característica de Figma?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Es solo para diseño gráfico</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">B</div>
+                    <span>Es una herramienta colaborativa basada en la nube</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>Solo funciona en Windows</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Es muy costosa</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q1" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Historia y evolución -->
+        <div class="slide" id="slide-4">
+            <div class="slide-number">4/15</div>
+            <div class="slide-header">
+                <i class="fas fa-history" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">Historia y Evolución</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <i class="fas fa-calendar-alt benefit-icon"></i>
+                        <h5>2016 - Lanzamiento</h5>
+                        <p>Dylan Field y Evan Wallace fundan Figma</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-rocket benefit-icon"></i>
+                        <h5>2017-2019 - Crecimiento</h5>
+                        <p>Adopción masiva en equipos de diseño</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <i class="fas fa-crown benefit-icon"></i>
+                        <h5>2020-2022 - Liderazgo</h5>
+                        <p>Se convierte en el estándar de la industria</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-building benefit-icon"></i>
+                        <h5>2022 - Adobe</h5>
+                        <p>Adobe anuncia la compra por $20 billones</p>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 5: Para qué sirve Figma -->
+        <div class="slide" id="slide-5">
+            <div class="slide-number">5/15</div>
+            <div class="slide-header">
+                <i class="fas fa-tools" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">¿Para qué sirve Figma?</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-mobile-alt" style="color: #667eea; font-size: 3rem;"></i>
+                        <h5 class="mt-3">Diseño de Apps</h5>
+                        <p>Crear interfaces para aplicaciones móviles y web</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-users" style="color: #667eea; font-size: 3rem;"></i>
+                        <h5 class="mt-3">Colaboración</h5>
+                        <p>Trabajar en equipo en tiempo real</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-puzzle-piece" style="color: #667eea; font-size: 3rem;"></i>
+                        <h5 class="mt-3">Prototipado</h5>
+                        <p>Crear prototipos interactivos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-palette" style="color: #667eea; font-size: 3rem;"></i>
+                        <h5 class="mt-3">Design Systems</h5>
+                        <p>Crear y mantener sistemas de diseño</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-code" style="color: #667eea; font-size: 3rem;"></i>
+                        <h5 class="mt-3">Handoff</h5>
+                        <p>Facilitar el trabajo con desarrolladores</p>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 6: Pregunta 2 -->
+        <div class="slide" id="slide-6">
+            <div class="slide-number">6/15</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 2</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Cuál NO es un uso común de Figma?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Diseño de interfaces móviles</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">B</div>
+                    <span>Creación de prototipos</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">C</div>
+                    <span>Edición de videos</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Colaboración en equipo</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q2" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 7: Características principales -->
+        <div class="slide" id="slide-7">
+            <div class="slide-number">7/15</div>
+            <div class="slide-header">
+                <i class="fas fa-star" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">Características Principales</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <i class="fas fa-cloud benefit-icon"></i>
+                        <h5>Basado en la Nube</h5>
+                        <p>Accede desde cualquier navegador, sin instalación</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-users benefit-icon"></i>
+                        <h5>Colaboración Real</h5>
+                        <p>Múltiples personas pueden trabajar simultáneamente</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-vector-square benefit-icon"></i>
+                        <h5>Herramientas Vectoriales</h5>
+                        <p>Diseño con gráficos vectoriales escalables</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <i class="fas fa-layer-group benefit-icon"></i>
+                        <h5>Componentes</h5>
+                        <p>Elementos reutilizables para consistencia</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-play benefit-icon"></i>
+                        <h5>Prototipado</h5>
+                        <p>Crear interacciones y animaciones</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-comments benefit-icon"></i>
+                        <h5>Comentarios</h5>
+                        <p>Sistema de feedback integrado</p>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 8: Pregunta 3 -->
+        <div class="slide" id="slide-8">
+            <div class="slide-number">8/15</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 3</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Qué permite hacer la función de "Componentes" en Figma?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Solo cambiar colores</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">B</div>
+                    <span>Crear elementos reutilizables y mantener consistencia</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>Exportar imágenes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Hacer copias de seguridad</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q3" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 9: Beneficios -->
+        <div class="slide" id="slide-9">
+            <div class="slide-number">9/15</div>
+            <div class="slide-header">
+                <i class="fas fa-thumbs-up" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">Beneficios de Usar Figma</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <i class="fas fa-money-bill-wave benefit-icon"></i>
+                        <h5>Costo Eficiente</h5>
+                        <p>Plan gratuito robusto, precios accesibles para empresas</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-clock benefit-icon"></i>
+                        <h5>Ahorro de Tiempo</h5>
+                        <p>Flujo de trabajo más eficiente y colaborativo</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-sync-alt benefit-icon"></i>
+                        <h5>Actualizaciones Automáticas</h5>
+                        <p>Siempre tienes la última versión disponible</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <i class="fas fa-laptop-code benefit-icon"></i>
+                        <h5>Multiplataforma</h5>
+                        <p>Funciona en Windows, Mac, Linux y navegadores</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-handshake benefit-icon"></i>
+                        <h5>Facilita Handoff</h5>
+                        <p>Los desarrolladores pueden inspeccionar y exportar assets</p>
+                    </div>
+                    <div class="benefit-card">
+                        <i class="fas fa-graduation-cap benefit-icon"></i>
+                        <h5>Fácil Aprendizaje</h5>
+                        <p>Interfaz intuitiva y muchos recursos educativos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 10: Pregunta 4 -->
+        <div class="slide" id="slide-10">
+            <div class="slide-number">10/15</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 4</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Cuál es una ventaja principal de que Figma sea basado en la nube?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Es más lento que las aplicaciones locales</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">B</div>
+                    <span>Requiere mucho espacio en disco</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">C</div>
+                    <span>Permite colaboración en tiempo real desde cualquier dispositivo</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Solo funciona sin conexión a internet</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q4" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 11: Casos de uso -->
+        <div class="slide" id="slide-11">
+            <div class="slide-number">11/15</div>
+            <div class="slide-header">
+                <i class="fas fa-briefcase" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">Casos de Uso Comunes</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <i class="fas fa-mobile-alt" style="color: #667eea; font-size: 4rem;"></i>
+                    <h5 class="mt-3">Apps Móviles</h5>
+                    <p>Diseño de interfaces para iOS y Android</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <i class="fas fa-desktop" style="color: #667eea; font-size: 4rem;"></i>
+                    <h5 class="mt-3">Sitios Web</h5>
+                    <p>Diseño de páginas web responsivas</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <i class="fas fa-tablet-alt" style="color: #667eea; font-size: 4rem;"></i>
+                    <h5 class="mt-3">Apps de Escritorio</h5>
+                    <p>Interfaces para aplicaciones de escritorio</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 text-center mb-4">
+                    <i class="fas fa-chart-line" style="color: #667eea; font-size: 4rem;"></i>
+                    <h5 class="mt-3">Dashboards</h5>
+                    <p>Paneles de control y visualización de datos</p>
+                </div>
+                <div class="col-md-6 text-center mb-4">
+                    <i class="fas fa-shopping-cart" style="color: #667eea; font-size: 4rem;"></i>
+                    <h5 class="mt-3">E-commerce</h5>
+                    <p>Tiendas online y plataformas de venta</p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 12: Pregunta 5 -->
+        <div class="slide" id="slide-12">
+            <div class="slide-number">12/15</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 5</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Qué tipo de proyectos NO es común hacer en Figma?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Aplicaciones móviles</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">B</div>
+                    <span>Sitios web responsivos</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>Dashboards de datos</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">D</div>
+                    <span>Modelado 3D para videojuegos</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q5" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 13: Cómo empezar -->
+        <div class="slide" id="slide-13">
+            <div class="slide-number">13/15</div>
+            <div class="slide-header">
+                <i class="fas fa-play-circle" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">Cómo Empezar con Figma</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">1</span>
+                            <div>
+                                <h5>Crear Cuenta Gratuita</h5>
+                                <p>Visita figma.com y regístrate</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">2</span>
+                            <div>
+                                <h5>Explorar Plantillas</h5>
+                                <p>Usa templates para comenzar rápidamente</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">3</span>
+                            <div>
+                                <h5>Aprender con Tutoriales</h5>
+                                <p>Figma Academy y YouTube tienen recursos gratuitos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-card">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">4</span>
+                            <div>
+                                <h5>Practicar con Proyectos</h5>
+                                <p>Crea diseños simples para aprender las herramientas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">5</span>
+                            <div>
+                                <h5>Unirse a la Comunidad</h5>
+                                <p>Participa en foros y grupos de Figma</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">6</span>
+                            <div>
+                                <h5>Experimentar con Plugins</h5>
+                                <p>Descubre plugins que amplían la funcionalidad</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 14: Pregunta 6 -->
+        <div class="slide" id="slide-14">
+            <div class="slide-number">14/15</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta Final</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Cuál es el mejor primer paso para empezar con Figma?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Comprar la versión profesional inmediatamente</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">B</div>
+                    <span>Crear una cuenta gratuita y explorar plantillas</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>Descargar e instalar el software</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Tomar un curso universitario de diseño</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="showResults()" id="next-q6" disabled>
+                    Ver Resultados <i class="fas fa-chart-pie"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 15: Resumen y Resultados -->
+        <div class="slide" id="slide-15">
+            <div class="slide-number">15/15</div>
+            <div class="slide-header">
+                <i class="fas fa-trophy" style="color: #f39c12; font-size: 3rem;"></i>
+                <h2 class="slide-title">¡Resultados de tu Evaluación!</h2>
+            </div>
+            <div class="score-summary">
+                <h3 id="score-text">Puntuación: 0/6</h3>
+                <div class="chart-container">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+                <div id="performance-message" class="final-message">
+                    <!-- Mensaje dinámico basado en el rendimiento -->
+                </div>
+                <div class="mt-4">
+                    <h5>Resumen de Figma:</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">✅ Herramienta de diseño colaborativa basada en la nube</li>
+                        <li class="list-group-item">✅ Perfecta para diseño UI/UX, prototipado y design systems</li>
+                        <li class="list-group-item">✅ Facilita la colaboración en tiempo real</li>
+                        <li class="list-group-item">✅ Plan gratuito robusto disponible</li>
+                        <li class="list-group-item">✅ Multiplataforma y fácil de aprender</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="restartPresentation()" style="background: #27ae60;">
+                    <i class="fas fa-redo"></i> Comenzar de Nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 15;
+        let score = 0;
+        let answers = [];
+
+        function showSlide(n) {
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide-${n}`).classList.add('active');
+            
+            // Update progress bar
+            const progress = (n / totalSlides) * 100;
+            document.querySelector('.progress-fill').style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        function selectOption(element, isCorrect) {
+            // Remove previous selections
+            element.parentNode.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Select current option
+            element.classList.add('selected');
+            
+            // Store answer
+            const questionNumber = Math.ceil(currentSlide / 2) - 1; // Calculate question number
+            if (answers[questionNumber] === undefined) {
+                answers[questionNumber] = isCorrect;
+                if (isCorrect) {
+                    score++;
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Correcto!',
+                        text: 'Muy bien, continúa aprendiendo.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Incorrecto',
+                        text: 'No te preocupes, sigue aprendiendo.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            }
+            
+            // Enable next button
+            const nextBtn = document.getElementById(`next-q${Math.ceil(questionNumber + 1)}`);
+            if (nextBtn) {
+                nextBtn.disabled = false;
+            }
+        }
+
+        function showResults() {
+            currentSlide = 15;
+            showSlide(currentSlide);
+            
+            // Update score display
+            document.getElementById('score-text').textContent = `Puntuación: ${score}/6`;
+            
+            // Create pie chart
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Correctas', 'Incorrectas'],
+                    datasets: [{
+                        data: [score, 6 - score],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Show performance message
+            const messageElement = document.getElementById('performance-message');
+            const percentage = (score / 6) * 100;
+            
+            if (percentage >= 83) {
+                messageElement.innerHTML = `
+                    <div class="excellent">
+                        <i class="fas fa-trophy"></i>
+                        ¡Excelente! (${percentage.toFixed(0)}%) 
+                        <br>Tienes un gran entendimiento de Figma. ¡Estás listo para comenzar!
+                    </div>
+                `;
+            } else if (percentage >= 67) {
+                messageElement.innerHTML = `
+                    <div class="good">
+                        <i class="fas fa-thumbs-up"></i>
+                        ¡Bien hecho! (${percentage.toFixed(0)}%)
+                        <br>Tienes una buena base. Repasa algunos conceptos y estarás perfecto.
+                    </div>
+                `;
+            } else {
+                messageElement.innerHTML = `
+                    <div class="needs-improvement">
+                        <i class="fas fa-book"></i>
+                        Necesitas repasar (${percentage.toFixed(0)}%)
+                        <br>Te recomendamos revisar el material nuevamente. ¡No te rindas!
+                    </div>
+                `;
+            }
+            
+            // Show final congratulations
+            Swal.fire({
+                icon: 'info',
+                title: '¡Presentación Completada!',
+                html: `
+                    <p>Has terminado la presentación sobre Figma.</p>
+                    <p><strong>Tu puntuación: ${score}/6 (${percentage.toFixed(0)}%)</strong></p>
+                    <p>¡Esperamos que hayas aprendido mucho sobre esta increíble herramienta de diseño!</p>
+                `,
+                confirmButtonColor: '#667eea'
+            });
+        }
+
+        function restartPresentation() {
+            currentSlide = 1;
+            score = 0;
+            answers = [];
+            
+            // Reset all question buttons
+            document.querySelectorAll('[id^="next-q"]').forEach(btn => btn.disabled = true);
+            
+            // Remove all selections
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            showSlide(currentSlide);
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Reiniciado!',
+                text: 'La presentación ha sido reiniciada. ¡Buena suerte!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // Initialize
+        showSlide(currentSlide);
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>

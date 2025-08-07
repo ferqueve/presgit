@@ -3,1048 +3,1042 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Figma para Principiantes - Presentación Interactiva</title>
+    <title>Figma: Diseño Colaborativo Interactivo</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
+    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- SweetAlert2 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.20/sweetalert2.min.css" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            padding: 0;
+        :root {
+            --figma-purple: #8B5CF6;
+            --figma-blue: #3B82F6;
+            --figma-green: #10B981;
+            --figma-orange: #F59E0B;
         }
         
-        .presentation-container {
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
         
         .slide {
+            min-height: 100vh;
             display: none;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 40px;
-            width: 100%;
-            max-width: 900px;
-            min-height: 600px;
-            position: relative;
-            animation: slideIn 0.5s ease-out;
+            padding: 2rem 0;
         }
         
         .slide.active {
             display: block;
+            animation: slideIn 0.5s ease-in-out;
         }
         
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
-        .slide-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 20px;
-        }
-        
-        .slide-title {
-            color: #2c3e50;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .slide-subtitle {
-            color: #7f8c8d;
-            font-size: 1.2rem;
-        }
-        
-        .navigation {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-        }
-        
-        .nav-btn {
-            padding: 12px 24px;
+        .card {
             border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.95);
+        }
+        
+        .btn-figma {
+            background: linear-gradient(45deg, var(--figma-purple), var(--figma-blue));
+            border: none;
+            color: white;
             border-radius: 25px;
-            font-weight: bold;
+            padding: 10px 25px;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
         
-        .nav-btn.prev {
-            background: #95a5a6;
-            color: white;
-        }
-        
-        .nav-btn.next {
-            background: #667eea;
-            color: white;
-        }
-        
-        .nav-btn:hover {
+        .btn-figma:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .slide-number {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #667eea;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        
-        .question-container {
-            background: #f8f9ff;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px 0;
-        }
-        
-        .question-title {
-            color: #2c3e50;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .option {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-        
-        .option:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-        
-        .option.selected {
-            border-color: #667eea;
-            background: #667eea;
             color: white;
         }
         
-        .option-letter {
-            background: #667eea;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
-        }
-        
-        .option.selected .option-letter {
-            background: white;
-            color: #667eea;
-        }
-        
-        .figma-icon {
-            color: #f24e1e;
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-        
-        .benefit-card {
-            background: #f8f9ff;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 15px 0;
-            border-left: 5px solid #667eea;
-            transition: transform 0.3s ease;
-        }
-        
-        .benefit-card:hover {
-            transform: translateX(10px);
-        }
-        
-        .benefit-icon {
-            color: #667eea;
-            font-size: 2rem;
-            margin-bottom: 15px;
+        .feature-icon {
+            font-size: 3rem;
+            background: linear-gradient(45deg, var(--figma-purple), var(--figma-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .progress-bar {
-            background: #e9ecef;
-            height: 6px;
-            border-radius: 3px;
-            margin: 20px 0;
-            overflow: hidden;
+            background: linear-gradient(90deg, var(--figma-purple), var(--figma-blue));
         }
         
-        .progress-fill {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            height: 100%;
-            transition: width 0.5s ease;
-        }
-        
-        .score-summary {
-            text-align: center;
-            padding: 30px;
-            background: #f8f9ff;
+        .quiz-score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.9);
             border-radius: 15px;
-            margin: 20px 0;
+            padding: 10px 20px;
+            backdrop-filter: blur(10px);
         }
         
-        .chart-container {
-            width: 300px;
-            height: 300px;
-            margin: 20px auto;
-        }
-        
-        .final-message {
-            padding: 20px;
+        .tool-demo {
+            background: #f8f9fa;
             border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: bold;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid var(--figma-purple);
         }
         
-        .excellent { background: #d4edda; color: #155724; }
-        .good { background: #fff3cd; color: #856404; }
-        .needs-improvement { background: #f8d7da; color: #721c24; }
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="presentation-container">
-        <!-- Slide 1: Portada -->
-        <div class="slide active" id="slide-1">
-            <div class="slide-number">1/15</div>
-            <div class="slide-header">
-                <i class="fas fa-palette figma-icon"></i>
-                <h1 class="slide-title">Figma para Principiantes</h1>
-                <p class="slide-subtitle">Aprende todo sobre la herramienta de diseño más popular</p>
-            </div>
-            <div class="text-center">
-                <p class="lead">Una presentación interactiva completa</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 6.67%"></div>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Comenzar <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
+    <!-- Score Display -->
+    <div class="quiz-score">
+        <i class="fas fa-trophy text-warning"></i>
+        <span id="scoreDisplay">Puntuación: 0/0</span>
+    </div>
 
-        <!-- Slide 2: ¿Qué es Figma? -->
-        <div class="slide" id="slide-2">
-            <div class="slide-number">2/15</div>
-            <div class="slide-header">
-                <i class="fas fa-question-circle" style="color: #667eea; font-size: 3rem;"></i>
-                <h2 class="slide-title">¿Qué es Figma?</h2>
-            </div>
-            <div class="row">
+    <!-- Progress Bar -->
+    <div class="progress fixed-top" style="height: 5px;">
+        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+    </div>
+
+    <!-- Slide 1: Introducción -->
+    <div class="slide active" id="slide1">
+        <div class="container">
+            <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <p class="lead">Figma es una herramienta de diseño de interfaz de usuario (UI) y experiencia de usuario (UX) basada en la web.</p>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Herramienta de diseño colaborativo</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Basada en la nube</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Multiplataforma</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Gratuita para uso básico</li>
-                    </ul>
-                </div>
-                <div class="col-md-4 text-center">
-                    <i class="fab fa-figma" style="color: #f24e1e; font-size: 8rem;"></i>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 3: Pregunta 1 -->
-        <div class="slide" id="slide-3">
-            <div class="slide-number">3/15</div>
-            <div class="slide-header">
-                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
-                <h2 class="slide-title">Pregunta 1</h2>
-            </div>
-            <div class="question-container">
-                <div class="question-title">¿Cuál es la principal característica de Figma?</div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">A</div>
-                    <span>Es solo para diseño gráfico</span>
-                </div>
-                <div class="option" onclick="selectOption(this, true)">
-                    <div class="option-letter">B</div>
-                    <span>Es una herramienta colaborativa basada en la nube</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">C</div>
-                    <span>Solo funciona en Windows</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">D</div>
-                    <span>Es muy costosa</span>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()" id="next-q1" disabled>
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 4: Historia y evolución -->
-        <div class="slide" id="slide-4">
-            <div class="slide-number">4/15</div>
-            <div class="slide-header">
-                <i class="fas fa-history" style="color: #667eea; font-size: 3rem;"></i>
-                <h2 class="slide-title">Historia y Evolución</h2>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <i class="fas fa-calendar-alt benefit-icon"></i>
-                        <h5>2016 - Lanzamiento</h5>
-                        <p>Dylan Field y Evan Wallace fundan Figma</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-rocket benefit-icon"></i>
-                        <h5>2017-2019 - Crecimiento</h5>
-                        <p>Adopción masiva en equipos de diseño</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <i class="fas fa-crown benefit-icon"></i>
-                        <h5>2020-2022 - Liderazgo</h5>
-                        <p>Se convierte en el estándar de la industria</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-building benefit-icon"></i>
-                        <h5>2022 - Adobe</h5>
-                        <p>Adobe anuncia la compra por $20 billones</p>
-                    </div>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 5: Para qué sirve Figma -->
-        <div class="slide" id="slide-5">
-            <div class="slide-number">5/15</div>
-            <div class="slide-header">
-                <i class="fas fa-tools" style="color: #667eea; font-size: 3rem;"></i>
-                <h2 class="slide-title">¿Para qué sirve Figma?</h2>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-mobile-alt" style="color: #667eea; font-size: 3rem;"></i>
-                        <h5 class="mt-3">Diseño de Apps</h5>
-                        <p>Crear interfaces para aplicaciones móviles y web</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-users" style="color: #667eea; font-size: 3rem;"></i>
-                        <h5 class="mt-3">Colaboración</h5>
-                        <p>Trabajar en equipo en tiempo real</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-puzzle-piece" style="color: #667eea; font-size: 3rem;"></i>
-                        <h5 class="mt-3">Prototipado</h5>
-                        <p>Crear prototipos interactivos</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="text-center">
-                        <i class="fas fa-palette" style="color: #667eea; font-size: 3rem;"></i>
-                        <h5 class="mt-3">Design Systems</h5>
-                        <p>Crear y mantener sistemas de diseño</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="text-center">
-                        <i class="fas fa-code" style="color: #667eea; font-size: 3rem;"></i>
-                        <h5 class="mt-3">Handoff</h5>
-                        <p>Facilitar el trabajo con desarrolladores</p>
-                    </div>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 6: Pregunta 2 -->
-        <div class="slide" id="slide-6">
-            <div class="slide-number">6/15</div>
-            <div class="slide-header">
-                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
-                <h2 class="slide-title">Pregunta 2</h2>
-            </div>
-            <div class="question-container">
-                <div class="question-title">¿Cuál NO es un uso común de Figma?</div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">A</div>
-                    <span>Diseño de interfaces móviles</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">B</div>
-                    <span>Creación de prototipos</span>
-                </div>
-                <div class="option" onclick="selectOption(this, true)">
-                    <div class="option-letter">C</div>
-                    <span>Edición de videos</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">D</div>
-                    <span>Colaboración en equipo</span>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()" id="next-q2" disabled>
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 7: Características principales -->
-        <div class="slide" id="slide-7">
-            <div class="slide-number">7/15</div>
-            <div class="slide-header">
-                <i class="fas fa-star" style="color: #667eea; font-size: 3rem;"></i>
-                <h2 class="slide-title">Características Principales</h2>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <i class="fas fa-cloud benefit-icon"></i>
-                        <h5>Basado en la Nube</h5>
-                        <p>Accede desde cualquier navegador, sin instalación</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-users benefit-icon"></i>
-                        <h5>Colaboración Real</h5>
-                        <p>Múltiples personas pueden trabajar simultáneamente</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-vector-square benefit-icon"></i>
-                        <h5>Herramientas Vectoriales</h5>
-                        <p>Diseño con gráficos vectoriales escalables</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <i class="fas fa-layer-group benefit-icon"></i>
-                        <h5>Componentes</h5>
-                        <p>Elementos reutilizables para consistencia</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-play benefit-icon"></i>
-                        <h5>Prototipado</h5>
-                        <p>Crear interacciones y animaciones</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-comments benefit-icon"></i>
-                        <h5>Comentarios</h5>
-                        <p>Sistema de feedback integrado</p>
-                    </div>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 8: Pregunta 3 -->
-        <div class="slide" id="slide-8">
-            <div class="slide-number">8/15</div>
-            <div class="slide-header">
-                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
-                <h2 class="slide-title">Pregunta 3</h2>
-            </div>
-            <div class="question-container">
-                <div class="question-title">¿Qué permite hacer la función de "Componentes" en Figma?</div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">A</div>
-                    <span>Solo cambiar colores</span>
-                </div>
-                <div class="option" onclick="selectOption(this, true)">
-                    <div class="option-letter">B</div>
-                    <span>Crear elementos reutilizables y mantener consistencia</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">C</div>
-                    <span>Exportar imágenes</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">D</div>
-                    <span>Hacer copias de seguridad</span>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()" id="next-q3" disabled>
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 9: Beneficios -->
-        <div class="slide" id="slide-9">
-            <div class="slide-number">9/15</div>
-            <div class="slide-header">
-                <i class="fas fa-thumbs-up" style="color: #667eea; font-size: 3rem;"></i>
-                <h2 class="slide-title">Beneficios de Usar Figma</h2>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <i class="fas fa-money-bill-wave benefit-icon"></i>
-                        <h5>Costo Eficiente</h5>
-                        <p>Plan gratuito robusto, precios accesibles para empresas</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-clock benefit-icon"></i>
-                        <h5>Ahorro de Tiempo</h5>
-                        <p>Flujo de trabajo más eficiente y colaborativo</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-sync-alt benefit-icon"></i>
-                        <h5>Actualizaciones Automáticas</h5>
-                        <p>Siempre tienes la última versión disponible</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <i class="fas fa-laptop-code benefit-icon"></i>
-                        <h5>Multiplataforma</h5>
-                        <p>Funciona en Windows, Mac, Linux y navegadores</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-handshake benefit-icon"></i>
-                        <h5>Facilita Handoff</h5>
-                        <p>Los desarrolladores pueden inspeccionar y exportar assets</p>
-                    </div>
-                    <div class="benefit-card">
-                        <i class="fas fa-graduation-cap benefit-icon"></i>
-                        <h5>Fácil Aprendizaje</h5>
-                        <p>Interfaz intuitiva y muchos recursos educativos</p>
-                    </div>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 10: Pregunta 4 -->
-        <div class="slide" id="slide-10">
-            <div class="slide-number">10/15</div>
-            <div class="slide-header">
-                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
-                <h2 class="slide-title">Pregunta 4</h2>
-            </div>
-            <div class="question-container">
-                <div class="question-title">¿Cuál es una ventaja principal de que Figma sea basado en la nube?</div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">A</div>
-                    <span>Es más lento que las aplicaciones locales</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">B</div>
-                    <span>Requiere mucho espacio en disco</span>
-                </div>
-                <div class="option" onclick="selectOption(this, true)">
-                    <div class="option-letter">C</div>
-                    <span>Permite colaboración en tiempo real desde cualquier dispositivo</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">D</div>
-                    <span>Solo funciona sin conexión a internet</span>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()" id="next-q4" disabled>
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 11: Casos de uso -->
-        <div class="slide" id="slide-11">
-            <div class="slide-number">11/15</div>
-            <div class="slide-header">
-                <i class="fas fa-briefcase" style="color: #667eea; font-size: 3rem;"></i>
-                <h2 class="slide-title">Casos de Uso Comunes</h2>
-            </div>
-            <div class="row">
-                <div class="col-md-4 text-center mb-4">
-                    <i class="fas fa-mobile-alt" style="color: #667eea; font-size: 4rem;"></i>
-                    <h5 class="mt-3">Apps Móviles</h5>
-                    <p>Diseño de interfaces para iOS y Android</p>
-                </div>
-                <div class="col-md-4 text-center mb-4">
-                    <i class="fas fa-desktop" style="color: #667eea; font-size: 4rem;"></i>
-                    <h5 class="mt-3">Sitios Web</h5>
-                    <p>Diseño de páginas web responsivas</p>
-                </div>
-                <div class="col-md-4 text-center mb-4">
-                    <i class="fas fa-tablet-alt" style="color: #667eea; font-size: 4rem;"></i>
-                    <h5 class="mt-3">Apps de Escritorio</h5>
-                    <p>Interfaces para aplicaciones de escritorio</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 text-center mb-4">
-                    <i class="fas fa-chart-line" style="color: #667eea; font-size: 4rem;"></i>
-                    <h5 class="mt-3">Dashboards</h5>
-                    <p>Paneles de control y visualización de datos</p>
-                </div>
-                <div class="col-md-6 text-center mb-4">
-                    <i class="fas fa-shopping-cart" style="color: #667eea; font-size: 4rem;"></i>
-                    <h5 class="mt-3">E-commerce</h5>
-                    <p>Tiendas online y plataformas de venta</p>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 12: Pregunta 5 -->
-        <div class="slide" id="slide-12">
-            <div class="slide-number">12/15</div>
-            <div class="slide-header">
-                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
-                <h2 class="slide-title">Pregunta 5</h2>
-            </div>
-            <div class="question-container">
-                <div class="question-title">¿Qué tipo de proyectos NO es común hacer en Figma?</div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">A</div>
-                    <span>Aplicaciones móviles</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">B</div>
-                    <span>Sitios web responsivos</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">C</div>
-                    <span>Dashboards de datos</span>
-                </div>
-                <div class="option" onclick="selectOption(this, true)">
-                    <div class="option-letter">D</div>
-                    <span>Modelado 3D para videojuegos</span>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()" id="next-q5" disabled>
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Slide 13: Cómo empezar -->
-        <div class="slide" id="slide-13">
-            <div class="slide-number">13/15</div>
-            <div class="slide-header">
-                <i class="fas fa-play-circle" style="color: #667eea; font-size: 3rem;"></i>
-                <h2 class="slide-title">Cómo Empezar con Figma</h2>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">1</span>
-                            <div>
-                                <h5>Crear Cuenta Gratuita</h5>
-                                <p>Visita figma.com y regístrate</p>
+                    <div class="card text-center">
+                        <div class="card-body p-5">
+                            <i class="fab fa-figma feature-icon mb-4"></i>
+                            <h1 class="display-4 mb-4">
+                                <span class="highlight">Figma</span>
+                            </h1>
+                            <p class="lead mb-4">La herramienta de diseño colaborativo que revolucionó la forma de crear interfaces digitales</p>
+                            <div class="row text-center mb-4">
+                                <div class="col-md-4">
+                                    <i class="fas fa-users feature-icon"></i>
+                                    <h5>Colaborativo</h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-cloud feature-icon"></i>
+                                    <h5>En la nube</h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-mobile-alt feature-icon"></i>
+                                    <h5>Multiplataforma</h5>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">2</span>
-                            <div>
-                                <h5>Explorar Plantillas</h5>
-                                <p>Usa templates para comenzar rápidamente</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">3</span>
-                            <div>
-                                <h5>Aprender con Tutoriales</h5>
-                                <p>Figma Academy y YouTube tienen recursos gratuitos</p>
-                            </div>
+                            <button class="btn btn-figma" onclick="nextSlide()">
+                                <i class="fas fa-rocket me-2"></i>Comenzar el viaje
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="benefit-card">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">4</span>
-                            <div>
-                                <h5>Practicar con Proyectos</h5>
-                                <p>Crea diseños simples para aprender las herramientas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: ¿Qué es Figma? -->
+    <div class="slide" id="slide2">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-4">
+                                <i class="fas fa-question-circle text-primary"></i>
+                                ¿Qué es Figma?
+                            </h2>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="lead">Figma es una herramienta de diseño de interfaz de usuario basada en la web que permite a los equipos:</p>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Diseñar interfaces y experiencias digitales
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Colaborar en tiempo real
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Crear prototipos interactivos
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Mantener sistemas de diseño
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="tool-demo">
+                                        <h5><i class="fas fa-history text-info"></i> Historia</h5>
+                                        <p>Fundada en <strong>2012</strong> por Dylan Field y Evan Wallace</p>
+                                        <p>Lanzada públicamente en <strong>2016</strong></p>
+                                        <p>Adquirida por Adobe en <strong>2022</strong> por $20 mil millones</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">5</span>
-                            <div>
-                                <h5>Unirse a la Comunidad</h5>
-                                <p>Participa en foros y grupos de Figma</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-3" style="font-size: 1.2rem;">6</span>
-                            <div>
-                                <h5>Experimentar con Plugins</h5>
-                                <p>Descubre plugins que amplían la funcionalidad</p>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-figma me-3" onclick="showQuiz(1)">
+                                    <i class="fas fa-brain me-2"></i>¡Pregunta!
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="nextSlide()">
+                                    Continuar <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="nextSlide()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
+        </div>
+    </div>
+
+    <!-- Slide 3: Características Principales -->
+    <div class="slide" id="slide3">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-star text-warning"></i>
+                                Características Principales
+                            </h2>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="tool-demo">
+                                        <h5><i class="fas fa-vector-square text-primary"></i> Diseño Vectorial</h5>
+                                        <p>Herramientas profesionales para crear gráficos escalables y precisos</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="tool-demo">
+                                        <h5><i class="fas fa-users text-success"></i> Colaboración en Tiempo Real</h5>
+                                        <p>Múltiples usuarios pueden trabajar simultáneamente en el mismo archivo</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="tool-demo">
+                                        <h5><i class="fas fa-mobile-alt text-info"></i> Prototipado</h5>
+                                        <p>Crea prototipos interactivos con transiciones y animaciones</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="tool-demo">
+                                        <h5><i class="fas fa-layer-group text-warning"></i> Sistemas de Diseño</h5>
+                                        <p>Componentes reutilizables y bibliotecas compartidas</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="tool-demo">
+                                        <h5><i class="fas fa-code text-danger"></i> Inspect Mode</h5>
+                                        <p>Especificaciones de diseño automáticas para desarrolladores</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="tool-demo">
+                                        <h5><i class="fas fa-puzzle-piece text-purple"></i> Plugins</h5>
+                                        <p>Ecosistema extenso de complementos y integraciones</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-figma me-3" onclick="showQuiz(2)">
+                                    <i class="fas fa-question me-2"></i>Pregunta
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="nextSlide()">
+                                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Slide 14: Pregunta 6 -->
-        <div class="slide" id="slide-14">
-            <div class="slide-number">14/15</div>
-            <div class="slide-header">
-                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
-                <h2 class="slide-title">Pregunta Final</h2>
-            </div>
-            <div class="question-container">
-                <div class="question-title">¿Cuál es el mejor primer paso para empezar con Figma?</div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">A</div>
-                    <span>Comprar la versión profesional inmediatamente</span>
+    <!-- Slide 4: Herramientas Básicas -->
+    <div class="slide" id="slide4">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-tools text-primary"></i>
+                                Herramientas Básicas
+                            </h2>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <div class="feature-icon mb-3">
+                                            <i class="fas fa-mouse-pointer"></i>
+                                        </div>
+                                        <h5>Herramienta de Selección</h5>
+                                        <p><kbd>V</kbd> - Seleccionar y mover objetos</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <div class="feature-icon mb-3">
+                                            <i class="fas fa-square"></i>
+                                        </div>
+                                        <h5>Frame Tool</h5>
+                                        <p><kbd>F</kbd> - Crear marcos y contenedores</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <div class="feature-icon mb-3">
+                                            <i class="fas fa-shapes"></i>
+                                        </div>
+                                        <h5>Formas</h5>
+                                        <p><kbd>R</kbd> Rectángulo, <kbd>O</kbd> Círculo</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <div class="feature-icon mb-3">
+                                            <i class="fas fa-font"></i>
+                                        </div>
+                                        <h5>Texto</h5>
+                                        <p><kbd>T</kbd> - Añadir y editar texto</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <div class="feature-icon mb-3">
+                                            <i class="fas fa-pen-nib"></i>
+                                        </div>
+                                        <h5>Pen Tool</h5>
+                                        <p><kbd>P</kbd> - Dibujar formas personalizadas</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <div class="feature-icon mb-3">
+                                            <i class="fas fa-hand-paper"></i>
+                                        </div>
+                                        <h5>Hand Tool</h5>
+                                        <p><kbd>H</kbd> - Navegar por el canvas</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-4">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Consejo:</strong> Usa <kbd>Cmd/Ctrl + /</kbd> para ver todos los atajos de teclado
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-figma me-3" onclick="showQuiz(3)">
+                                    <i class="fas fa-keyboard me-2"></i>Quiz de Atajos
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="nextSlide()">
+                                    Continuar <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="option" onclick="selectOption(this, true)">
-                    <div class="option-letter">B</div>
-                    <span>Crear una cuenta gratuita y explorar plantillas</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">C</div>
-                    <span>Descargar e instalar el software</span>
-                </div>
-                <div class="option" onclick="selectOption(this, false)">
-                    <div class="option-letter">D</div>
-                    <span>Tomar un curso universitario de diseño</span>
-                </div>
-            </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="showResults()" id="next-q6" disabled>
-                    Ver Resultados <i class="fas fa-chart-pie"></i>
-                </button>
             </div>
         </div>
+    </div>
 
-        <!-- Slide 15: Resumen y Resultados -->
-        <div class="slide" id="slide-15">
-            <div class="slide-number">15/15</div>
-            <div class="slide-header">
-                <i class="fas fa-trophy" style="color: #f39c12; font-size: 3rem;"></i>
-                <h2 class="slide-title">¡Resultados de tu Evaluación!</h2>
+    <!-- Slide 5: Colaboración -->
+    <div class="slide" id="slide5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-users text-success"></i>
+                                Colaboración en Tiempo Real
+                            </h2>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-share-alt text-primary"></i> Compartir y Permisos</h4>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-eye text-info me-2"></i>
+                                            <strong>Viewer:</strong> Solo puede ver el diseño
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-comment text-warning me-2"></i>
+                                            <strong>Commenter:</strong> Puede añadir comentarios
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-edit text-success me-2"></i>
+                                            <strong>Editor:</strong> Puede editar el archivo
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-comments text-primary"></i> Funciones Colaborativas</h4>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Cursores en vivo:</strong> Ve dónde están trabajando otros
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Comentarios:</strong> Feedback contextual directo
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Historial de versiones:</strong> Rastrea todos los cambios
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="alert alert-success">
+                                        <h5><i class="fas fa-lightbulb me-2"></i>Mejores Prácticas de Colaboración</h5>
+                                        <ul class="mb-0">
+                                            <li>Organiza tus archivos en proyectos y equipos</li>
+                                            <li>Usa nombres descriptivos para frames y componentes</li>
+                                            <li>Establece guías de estilo y sistemas de nomenclatura</li>
+                                            <li>Aprovecha las bibliotecas de componentes compartidas</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-figma me-3" onclick="showQuiz(4)">
+                                    <i class="fas fa-users me-2"></i>Quiz Colaboración
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="nextSlide()">
+                                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="score-summary">
-                <h3 id="score-text">Puntuación: 0/6</h3>
-                <div class="chart-container">
-                    <canvas id="resultsChart"></canvas>
-                </div>
-                <div id="performance-message" class="final-message">
-                    <!-- Mensaje dinámico basado en el rendimiento -->
-                </div>
-                <div class="mt-4">
-                    <h5>Resumen de Figma:</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">✅ Herramienta de diseño colaborativa basada en la nube</li>
-                        <li class="list-group-item">✅ Perfecta para diseño UI/UX, prototipado y design systems</li>
-                        <li class="list-group-item">✅ Facilita la colaboración en tiempo real</li>
-                        <li class="list-group-item">✅ Plan gratuito robusto disponible</li>
-                        <li class="list-group-item">✅ Multiplataforma y fácil de aprender</li>
-                    </ul>
+        </div>
+    </div>
+
+    <!-- Slide 6: Prototipado -->
+    <div class="slide" id="slide6">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-play-circle text-info"></i>
+                                Prototipado Interactivo
+                            </h2>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-link text-primary"></i> Tipos de Conexiones</h4>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Tap/Click:</strong> Navegación básica entre pantallas
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Hover:</strong> Estados de interacción
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Drag:</strong> Gestos de arrastre
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Key/Gamepad:</strong> Controles de teclado
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-magic text-warning"></i> Transiciones</h4>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Instant:</strong> Cambio inmediato
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Dissolve:</strong> Fundido entre pantallas
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Smart Animate:</strong> Animación inteligente
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Move In/Out:</strong> Deslizamientos direccionales
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <h4><i class="fas fa-cogs text-success"></i> Configuración Avanzada</h4>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="text-center p-3 border rounded">
+                                                <i class="fas fa-clock feature-icon"></i>
+                                                <h6>Duración</h6>
+                                                <p class="small">300ms - 1000ms</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="text-center p-3 border rounded">
+                                                <i class="fas fa-chart-line feature-icon"></i>
+                                                <h6>Easing</h6>
+                                                <p class="small">Linear, Ease In/Out</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="text-center p-3 border rounded">
+                                                <i class="fas fa-undo feature-icon"></i>
+                                                <h6>Rebote</h6>
+                                                <p class="small">Animación de retorno</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-figma me-3" onclick="showQuiz(5)">
+                                    <i class="fas fa-play me-2"></i>Quiz Prototipado
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="nextSlide()">
+                                    Continuar <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="navigation">
-                <button class="nav-btn prev" onclick="prevSlide()">
-                    <i class="fas fa-arrow-left"></i> Anterior
-                </button>
-                <button class="nav-btn next" onclick="restartPresentation()" style="background: #27ae60;">
-                    <i class="fas fa-redo"></i> Comenzar de Nuevo
-                </button>
+        </div>
+    </div>
+
+    <!-- Slide 7: Componentes y Design Systems -->
+    <div class="slide" id="slide7">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-cubes text-purple"></i>
+                                Componentes y Design Systems
+                            </h2>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-puzzle-piece text-primary"></i> Componentes</h4>
+                                    <p>Los componentes son elementos reutilizables que mantienen consistencia en tu diseño.</p>
+                                    
+                                    <div class="tool-demo mb-2">
+                                        <strong><i class="fas fa-layer-group text-info me-2"></i>Master Component:</strong> El componente original
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong><i class="fas fa-copy text-success me-2"></i>Instance:</strong> Copia del componente
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong><i class="fas fa-edit text-warning me-2"></i>Overrides:</strong> Modificaciones en instancias
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-sliders-h text-success"></i> Variantes</h4>
+                                    <p>Las variantes permiten crear diferentes estados de un componente.</p>
+                                    
+                                    <div class="alert alert-info">
+                                        <strong>Ejemplo: Botón</strong><br>
+                                        • State: Default, Hover, Active<br>
+                                        • Size: Small, Medium, Large<br>
+                                        • Type: Primary, Secondary
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <h4><i class="fas fa-book text-info"></i> Bibliotecas de Componentes</h4>
+                                    <div class="row">
+                                        <div class="col-md-4 text-center">
+                                            <i class="fas fa-share-alt feature-icon"></i>
+                                            <h6>Compartir</h6>
+                                            <p class="small">Publica bibliotecas para tu equipo</p>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <i class="fas fa-sync-alt feature-icon"></i>
+                                            <h6>Sincronizar</h6>
+                                            <p class="small">Actualizaciones automáticas</p>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <i class="fas fa-tags feature-icon"></i>
+                                            <h6>Versionar</h6>
+                                            <p class="small">Control de versiones</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <h5><i class="fas fa-star me-2"></i>Beneficios de los Design Systems</h5>
+                                <ul class="mb-0">
+                                    <li><strong>Consistencia:</strong> Experiencia uniforme</li>
+                                    <li><strong>Eficiencia:</strong> Desarrollo más rápido</li>
+                                    <li><strong>Escalabilidad:</strong> Fácil mantenimiento</li>
+                                    <li><strong>Colaboración:</strong> Lenguaje común del equipo</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-figma me-3" onclick="showQuiz(6)">
+                                    <i class="fas fa-cubes me-2"></i>Quiz Componentes
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="nextSlide()">
+                                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Plugins y Ecosistema -->
+    <div class="slide" id="slide8">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-plug text-warning"></i>
+                                Plugins y Ecosistema
+                            </h2>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-download text-primary"></i> Plugins Populares</h4>
+                                    
+                                    <div class="tool-demo mb-2">
+                                        <strong>Unsplash:</strong> Imágenes gratuitas directamente en Figma
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Content Reel:</strong> Genera texto y datos de prueba
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>IconScout:</strong> Millones de iconos y ilustraciones
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Stark:</strong> Herramientas de accesibilidad
+                                    </div>
+                                    <div class="tool-demo mb-2">
+                                        <strong>Autoflow:</strong> Diagramas de flujo automáticos
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-code text-success"></i> Desarrollo</h4>
+                                    <p>Figma ofrece una API robusta para crear plugins personalizados:</p>
+                                    
+                                    <div class="alert alert-light">
+                                        <code>
+                                            // Plugin API básico<br>
+                                            figma.createRectangle();<br>
+                                            figma.createText();<br>
+                                            figma.currentPage.selection;
+                                        </code>
+                                    </div>
+                                    
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>JavaScript/TypeScript</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Acceso completo a la API</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>UI personalizable</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Publicación en Community</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h4><i class="fas fa-link text-info"></i> Integraciones</h4>
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <i class="fab fa-slack feature-icon"></i>
+                                            <h6>Slack</h6>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <i class="fab fa-trello feature-icon"></i>
+                                            <h6>Trello</h6>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <i class="fab fa-github feature-icon"></i>
+                                            <h6>GitHub</h6>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <i class="fas fa-code-branch feature-icon"></i>
+                                            <h6>Zeplin</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-figma me-3" onclick="showQuiz(7)">
+                                    <i class="fas fa-puzzle-piece me-2"></i>Quiz Plugins
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="nextSlide()">
+                                    Continuar <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide Final: Resumen -->
+    <div class="slide" id="slide9">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body p-5 text-center">
+                            <h2 class="mb-4">
+                                <i class="fas fa-graduation-cap text-success"></i>
+                                ¡Felicidades!
+                            </h2>
+                            
+                            <p class="lead mb-4">Has completado la presentación interactiva sobre Figma</p>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <i class="fas fa-check-circle feature-icon text-success"></i>
+                                    <h5>Conceptos Básicos</h5>
+                                    <p>Qué es Figma y sus características</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-tools feature-icon text-primary"></i>
+                                    <h5>Herramientas</h5>
+                                    <p>Dominio de las herramientas principales</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-rocket feature-icon text-warning"></i>
+                                    <h5>Funciones Avanzadas</h5>
+                                    <p>Prototipado y sistemas de diseño</p>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-success mb-4">
+                                <h5><i class="fas fa-lightbulb me-2"></i>Próximos Pasos</h5>
+                                <ul class="list-unstyled mb-0">
+                                    <li>• Crea tu primera cuenta en Figma</li>
+                                    <li>• Explora los templates de la comunidad</li>
+                                    <li>• Únete a equipos y proyectos colaborativos</li>
+                                    <li>• Practica con proyectos personales</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button class="btn btn-figma me-3" onclick="showFinalQuiz()">
+                                    <i class="fas fa-trophy me-2"></i>Quiz Final
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="restartPresentation()">
+                                    <i class="fas fa-redo me-2"></i>Reiniciar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.20/sweetalert2.all.min.js"></script>
 
     <script>
         let currentSlide = 1;
-        const totalSlides = 15;
+        let totalSlides = 9;
         let score = 0;
-        let answers = [];
-
-        function showSlide(n) {
-            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
-            document.getElementById(`slide-${n}`).classList.add('active');
-            
-            // Update progress bar
-            const progress = (n / totalSlides) * 100;
-            document.querySelector('.progress-fill').style.width = progress + '%';
+        let questionsAnswered = 0;
+        
+        const quizData = {
+            1: {
+                question: "¿En qué año fue fundada Figma?",
+                options: ["2010", "2012", "2014", "2016"],
+                correct: 1,
+                explanation: "Figma fue fundada en 2012 por Dylan Field y Evan Wallace, aunque fue lanzada públicamente en 2016."
+            },
+            2: {
+                question: "¿Cuál es la principal ventaja de la colaboración en tiempo real de Figma?",
+                options: [
+                    "Ahorra espacio en disco",
+                    "Múltiples usuarios pueden trabajar simultáneamente",
+                    "Es más barato que otras herramientas",
+                    "No requiere internet"
+                ],
+                correct: 1,
+                explanation: "La colaboración en tiempo real permite que múltiples diseñadores trabajen simultáneamente en el mismo archivo, viendo los cursores y cambios de otros en vivo."
+            },
+            3: {
+                question: "¿Cuál es el atajo de teclado para la herramienta Frame en Figma?",
+                options: ["F", "R", "T", "P"],
+                correct: 0,
+                explanation: "La tecla 'F' activa la herramienta Frame, que es fundamental para crear contenedores y estructurar tus diseños."
+            },
+            4: {
+                question: "¿Qué tipo de permiso permite solo ver el diseño sin editarlo?",
+                options: ["Editor", "Commenter", "Viewer", "Admin"],
+                correct: 2,
+                explanation: "El permiso 'Viewer' solo permite ver el diseño sin poder editarlo o añadir comentarios."
+            },
+            5: {
+                question: "¿Qué transición de Figma crea animaciones inteligentes entre elementos similares?",
+                options: ["Dissolve", "Move In", "Smart Animate", "Instant"],
+                correct: 2,
+                explanation: "Smart Animate detecta automáticamente elementos similares entre frames y crea transiciones fluidas entre ellos."
+            },
+            6: {
+                question: "¿Cómo se llama el componente original del cual se crean las copias?",
+                options: ["Instance", "Variant", "Master Component", "Override"],
+                correct: 2,
+                explanation: "El Master Component es el componente original y principal, del cual se crean todas las instancias (copias)."
+            },
+            7: {
+                question: "¿Qué plugin de Figma es popular para añadir imágenes gratuitas?",
+                options: ["Content Reel", "Unsplash", "IconScout", "Stark"],
+                correct: 1,
+                explanation: "Unsplash es el plugin más popular para añadir imágenes gratuitas de alta calidad directamente en Figma."
+            }
+        };
+        
+        function updateProgress() {
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
         }
-
+        
+        function updateScore() {
+            document.getElementById('scoreDisplay').textContent = `Puntuación: ${score}/${questionsAnswered}`;
+        }
+        
+        function showSlide(slideNumber) {
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Show current slide
+            document.getElementById(`slide${slideNumber}`).classList.add('active');
+            currentSlide = slideNumber;
+            updateProgress();
+        }
+        
         function nextSlide() {
             if (currentSlide < totalSlides) {
-                currentSlide++;
-                showSlide(currentSlide);
+                showSlide(currentSlide + 1);
             }
         }
-
-        function prevSlide() {
-            if (currentSlide > 1) {
-                currentSlide--;
-                showSlide(currentSlide);
-            }
-        }
-
-        function selectOption(element, isCorrect) {
-            // Remove previous selections
-            element.parentNode.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+        
+        function showQuiz(quizNumber) {
+            const quiz = quizData[quizNumber];
+            if (!quiz) return;
             
-            // Select current option
-            element.classList.add('selected');
-            
-            // Store answer
-            const questionNumber = Math.ceil(currentSlide / 2) - 1; // Calculate question number
-            if (answers[questionNumber] === undefined) {
-                answers[questionNumber] = isCorrect;
-                if (isCorrect) {
-                    score++;
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Correcto!',
-                        text: 'Muy bien, continúa aprendiendo.',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Incorrecto',
-                        text: 'No te preocupes, sigue aprendiendo.',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                }
-            }
-            
-            // Enable next button
-            const nextBtn = document.getElementById(`next-q${Math.ceil(questionNumber + 1)}`);
-            if (nextBtn) {
-                nextBtn.disabled = false;
-            }
-        }
-
-        function showResults() {
-            currentSlide = 15;
-            showSlide(currentSlide);
-            
-            // Update score display
-            document.getElementById('score-text').textContent = `Puntuación: ${score}/6`;
-            
-            // Create pie chart
-            const ctx = document.getElementById('resultsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Correctas', 'Incorrectas'],
-                    datasets: [{
-                        data: [score, 6 - score],
-                        backgroundColor: ['#28a745', '#dc3545'],
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-            
-            // Show performance message
-            const messageElement = document.getElementById('performance-message');
-            const percentage = (score / 6) * 100;
-            
-            if (percentage >= 83) {
-                messageElement.innerHTML = `
-                    <div class="excellent">
-                        <i class="fas fa-trophy"></i>
-                        ¡Excelente! (${percentage.toFixed(0)}%) 
-                        <br>Tienes un gran entendimiento de Figma. ¡Estás listo para comenzar!
-                    </div>
-                `;
-            } else if (percentage >= 67) {
-                messageElement.innerHTML = `
-                    <div class="good">
-                        <i class="fas fa-thumbs-up"></i>
-                        ¡Bien hecho! (${percentage.toFixed(0)}%)
-                        <br>Tienes una buena base. Repasa algunos conceptos y estarás perfecto.
-                    </div>
-                `;
-            } else {
-                messageElement.innerHTML = `
-                    <div class="needs-improvement">
-                        <i class="fas fa-book"></i>
-                        Necesitas repasar (${percentage.toFixed(0)}%)
-                        <br>Te recomendamos revisar el material nuevamente. ¡No te rindas!
-                    </div>
-                `;
-            }
-            
-            // Show final congratulations
             Swal.fire({
-                icon: 'info',
-                title: '¡Presentación Completada!',
-                html: `
-                    <p>Has terminado la presentación sobre Figma.</p>
-                    <p><strong>Tu puntuación: ${score}/6 (${percentage.toFixed(0)}%)</strong></p>
-                    <p>¡Esperamos que hayas aprendido mucho sobre esta increíble herramienta de diseño!</p>
+                title: `<i class="fas fa-question-circle"></i> Pregunta ${quizNumber}`,
+                text: quiz.question,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: quiz.options[0],
+                cancelButtonText: 'Cancelar',
+                showDenyButton: true,
+                showCloseButton: true,
+                denyButtonText: quiz.options[1],
+                footer: `
+                    <button class="btn btn-outline-primary btn-sm me-2" onclick="selectOption(${quizNumber}, 2)">
+                        ${quiz.options[2]}
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="selectOption(${quizNumber}, 3)">
+                        ${quiz.options[3]}
+                    </button>
                 `,
-                confirmButtonColor: '#667eea'
+                allowOutsideClick: false,
+                customClass: {
+                    confirmButton: 'btn btn-primary me-2',
+                    denyButton: 'btn btn-secondary me-2',
+                    cancelButton: 'btn btn-outline-secondary'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    selectOption(quizNumber, 0);
+                } else if (result.isDenied) {
+                    selectOption(quizNumber, 1);
+                }
             });
         }
-
+        
+        function selectOption(quizNumber, selectedOption) {
+            const quiz = quizData[quizNumber];
+            const isCorrect = selectedOption === quiz.correct;
+            
+            questionsAnswered++;
+            if (isCorrect) {
+                score++;
+            }
+            
+            updateScore();
+            
+            Swal.fire({
+                title: isCorrect ? '¡Correcto!' : '¡Incorrecto!',
+                text: quiz.explanation,
+                icon: isCorrect ? 'success' : 'error',
+                confirmButtonText: 'Continuar',
+                customClass: {
+                    confirmButton: 'btn btn-figma'
+                }
+            });
+        }
+        
+        function showFinalQuiz() {
+            const finalQuestions = [
+                {
+                    question: "¿Figma fue adquirida por qué empresa en 2022?",
+                    options: ["Google", "Microsoft", "Adobe", "Apple"],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál es la duración típica recomendada para transiciones de prototipo?",
+                    options: ["100-200ms", "300-1000ms", "2-3 segundos", "5-10 segundos"],
+                    correct: 1
+                }
+            ];
+            
+            let currentQuestion = 0;
+            
+            function askQuestion() {
+                const q = finalQuestions[currentQuestion];
+                Swal.fire({
+                    title: `Pregunta Final ${currentQuestion + 1}/2`,
+                    text: q.question,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: q.options[0],
+                    cancelButtonText: q.options[1],
+                    showDenyButton: true,
+                    denyButtonText: q.options[2],
+                    footer: `<button class="btn btn-outline-primary" onclick="selectFinalOption(${currentQuestion}, 3)">${q.options[3]}</button>`,
+                    allowOutsideClick: false
+                }).then((result) => {
+                    let selected = -1;
+                    if (result.isConfirmed) selected = 0;
+                    else if (result.dismiss === Swal.DismissReason.cancel) selected = 1;
+                    else if (result.isDenied) selected = 2;
+                    
+                    if (selected !== -1) {
+                        selectFinalOption(currentQuestion, selected);
+                    }
+                });
+            }
+            
+            window.selectFinalOption = function(questionIndex, selectedOption) {
+                const q = finalQuestions[questionIndex];
+                const isCorrect = selectedOption === q.correct;
+                
+                questionsAnswered++;
+                if (isCorrect) score++;
+                updateScore();
+                
+                if (currentQuestion < finalQuestions.length - 1) {
+                    currentQuestion++;
+                    setTimeout(() => {
+                        askQuestion();
+                    }, 1000);
+                } else {
+                    // Show final results
+                    const percentage = Math.round((score / questionsAnswered) * 100);
+                    let message = '';
+                    let icon = '';
+                    
+                    if (percentage >= 80) {
+                        message = '¡Excelente dominio de Figma! 🏆';
+                        icon = 'success';
+                    } else if (percentage >= 60) {
+                        message = '¡Buen conocimiento de Figma! 👍';
+                        icon = 'success';
+                    } else {
+                        message = 'Sigue practicando, ¡vas por buen camino! 📚';
+                        icon = 'info';
+                    }
+                    
+                    Swal.fire({
+                        title: 'Presentación Completada',
+                        html: `
+                            <div class="text-center">
+                                <h4>${message}</h4>
+                                <p class="lead">Puntuación Final: ${score}/${questionsAnswered} (${percentage}%)</p>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar bg-success" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        `,
+                        icon: icon,
+                        confirmButtonText: 'Finalizar',
+                        customClass: {
+                            confirmButton: 'btn btn-figma'
+                        }
+                    });
+                }
+            };
+            
+            askQuestion();
+        }
+        
         function restartPresentation() {
             currentSlide = 1;
             score = 0;
-            answers = [];
-            
-            // Reset all question buttons
-            document.querySelectorAll('[id^="next-q"]').forEach(btn => btn.disabled = true);
-            
-            // Remove all selections
-            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-            
-            showSlide(currentSlide);
+            questionsAnswered = 0;
+            updateScore();
+            showSlide(1);
             
             Swal.fire({
-                icon: 'success',
-                title: '¡Reiniciado!',
-                text: 'La presentación ha sido reiniciada. ¡Buena suerte!',
+                title: '¡Presentación reiniciada!',
+                text: 'Vamos a empezar de nuevo',
+                icon: 'info',
                 timer: 2000,
                 showConfirmButton: false
             });
         }
-
-        // Initialize
-        showSlide(currentSlide);
-
-        // Add keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowRight') nextSlide();
-            if (e.key === 'ArrowLeft') prevSlide();
+        
+        // Initialize presentation
+        updateProgress();
+        updateScore();
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft' && currentSlide > 1) {
+                showSlide(currentSlide - 1);
+            }
         });
     </script>
 </body>

@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trabajo Colaborativo: VSCode + GitHub Branches</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .presentation-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 950px;
+            min-height: 650px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 20px;
+        }
+        
+        .slide-title {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .slide-subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-btn.prev {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .nav-btn.next {
+            background: #1e3c72;
+            color: white;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #1e3c72;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .question-container {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .question-title {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            border-color: #1e3c72;
+            background: #f8f9ff;
+        }
+        
+        .option.selected {
+            border-color: #1e3c72;
+            background: #1e3c72;
+            color: white;
+        }
+        
+        .option-letter {
+            background: #1e3c72;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .option.selected .option-letter {
+            background: white;
+            color: #1e3c72;
+        }
+        
+        .git-icon {
+            color: #f05032;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .github-icon {
+            color: #333;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .vscode-icon {
+            color: #007acc;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .concept-card {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            border-left: 5px solid #1e3c72;
+            transition: transform 0.3s ease;
+        }
+        
+        .concept-card:hover {
+            transform: translateX(10px);
+        }
+        
+        .concept-icon {
+            color: #1e3c72;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            background: #e9ecef;
+            height: 6px;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .code-comment {
+            color: #5c6370;
+        }
+        
+        .code-command {
+            color: #61dafb;
+        }
+        
+        .step-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-number {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .workflow-diagram {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .branch-visual {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .branch-main {
+            background: #28a745;
+        }
+        
+        .branch-feature {
+            background: #007bff;
+        }
+        
+        .branch-develop {
+            background: #6f42c1;
+        }
+        
+        .score-summary {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .chart-container {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+        
+        .final-message {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .excellent { background: #d4edda; color: #155724; }
+        .good { background: #fff3cd; color: #856404; }
+        .needs-improvement { background: #f8d7da; color: #721c24; }
+        
+        .developer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .developer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Portada -->
+        <div class="slide active" id="slide-1">
+            <div class="slide-number">1/18</div>
+            <div class="slide-header">
+                <div class="d-flex justify-content-center gap-4 mb-3">
+                    <i class="fab fa-git-alt git-icon"></i>
+                    <i class="fab fa-github github-icon"></i>
+                    <i class="fas fa-code vscode-icon"></i>
+                </div>
+                <h1 class="slide-title">Trabajo Colaborativo</h1>
+                <p class="slide-subtitle">VSCode + GitHub: Branches en Acción</p>
+            </div>
+            <div class="text-center">
+                <p class="lead">Caso práctico: Dos desarrolladores, un proyecto</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 5.56%"></div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Comenzar <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 2: El Escenario -->
+        <div class="slide" id="slide-2">
+            <div class="slide-number">2/18</div>
+            <div class="slide-header">
+                <i class="fas fa-users" style="color: #1e3c72; font-size: 3rem;"></i>
+                <h2 class="slide-title">El Escenario</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="developer-card">
+                        <div class="developer-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h5>Ana - Frontend Developer</h5>
+                        <p><strong>Tarea:</strong> Crear la interfaz de login</p>
+                        <p><strong>Branch:</strong> <span class="branch-visual branch-feature">feature/login-ui</span></p>
+                        <small>Especializada en React y CSS</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="developer-card">
+                        <div class="developer-avatar">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h5>Carlos - Backend Developer</h5>
+                        <p><strong>Tarea:</strong> API de autenticación</p>
+                        <p><strong>Branch:</strong> <span class="branch-visual branch-feature">feature/auth-api</span></p>
+                        <small>Experto en Node.js y MongoDB</small>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card mt-4">
+                <h5><i class="fas fa-lightbulb concept-icon"></i>Proyecto: Sistema de Login</h5>
+                <p>Ambos desarrolladores trabajarán simultáneamente en el mismo repositorio, pero en <strong>branches diferentes</strong> para evitar conflictos y mantener el código organizado.</p>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 3: ¿Qué son las Branches? -->
+        <div class="slide" id="slide-3">
+            <div class="slide-number">3/18</div>
+            <div class="slide-header">
+                <i class="fas fa-code-branch" style="color: #1e3c72; font-size: 3rem;"></i>
+                <h2 class="slide-title">¿Qué son las Branches?</h2>
+            </div>
+            <div class="workflow-diagram">
+                <h5>Visualización de Branches</h5>
+                <div class="mt-4">
+                    <div class="mb-3">
+                        <span class="branch-visual branch-main">main</span>
+                        <span style="margin: 0 20px;">←→</span>
+                        <span>Rama principal del proyecto</span>
+                    </div>
+                    <div class="mb-3">
+                        <span class="branch-visual branch-feature">feature/login-ui</span>
+                        <span style="margin: 0 20px;">←→</span>
+                        <span>Rama de Ana para UI</span>
+                    </div>
+                    <div class="mb-3">
+                        <span class="branch-visual branch-feature">feature/auth-api</span>
+                        <span style="margin: 0 20px;">←→</span>
+                        <span>Rama de Carlos para API</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <i class="fas fa-shield-alt concept-icon"></i>
+                        <h5>Ventajas</h5>
+                        <ul>
+                            <li>Trabajo paralelo sin conflictos</li>
+                            <li>Historial limpio y organizado</li>
+                            <li>Fácil reversión de cambios</li>
+                            <li>Testing independiente</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <i class="fas fa-cogs concept-icon"></i>
+                        <h5>Flujo típico</h5>
+                        <ul>
+                            <li>Crear branch desde main</li>
+                            <li>Desarrollar la funcionalidad</li>
+                            <li>Hacer commits regulares</li>
+                            <li>Pull Request para merger</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Pregunta 1 -->
+        <div class="slide" id="slide-4">
+            <div class="slide-number">4/18</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 1</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Cuál es la principal ventaja de trabajar con branches en Git?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Hace que el código sea más rápido</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">B</div>
+                    <span>Permite trabajo paralelo sin conflictos entre desarrolladores</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>Reduce el tamaño del repositorio</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Elimina la necesidad de hacer commits</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q1" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 5: Configuración inicial -->
+        <div class="slide" id="slide-5">
+            <div class="slide-number">5/18</div>
+            <div class="slide-header">
+                <i class="fas fa-cog" style="color: #1e3c72; font-size: 3rem;"></i>
+                <h2 class="slide-title">Configuración Inicial</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-download me-2"></i>Clonar el Repositorio</h5>
+                    <div class="code-block">
+                        <span class="code-comment"># Ana y Carlos clonan el repo</span><br>
+                        <span class="code-command">git clone https://github.com/empresa/login-app.git</span><br>
+                        <span class="code-command">cd login-app</span>
+                    </div>
+                    
+                    <h5 class="mt-4"><i class="fas fa-user-cog me-2"></i>Configurar Git</h5>
+                    <div class="code-block">
+                        <span class="code-command">git config user.name "Tu Nombre"</span><br>
+                        <span class="code-command">git config user.email "tu@email.com"</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-eye me-2"></i>Ver Branches Existentes</h5>
+                    <div class="code-block">
+                        <span class="code-command">git branch -a</span><br>
+                        <span class="code-comment"># Muestra:</span><br>
+                        * main<br>
+                        <span style="color: #e06c75;">origin/main</span>
+                    </div>
+                    
+                    <h5 class="mt-4"><i class="fas fa-sync me-2"></i>Actualizar desde Remoto</h5>
+                    <div class="code-block">
+                        <span class="code-command">git fetch origin</span><br>
+                        <span class="code-command">git pull origin main</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card mt-4">
+                <h5><i class="fas fa-info-circle concept-icon"></i>Estado Inicial</h5>
+                <p>Ambos desarrolladores tienen la misma versión del código en la rama <code>main</code>. Ahora cada uno creará su propia branch para trabajar de forma independiente.</p>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 6: Ana crea su branch -->
+        <div class="slide" id="slide-6">
+            <div class="slide-number">6/18</div>
+            <div class="slide-header">
+                <i class="fas fa-user" style="color: #667eea; font-size: 3rem;"></i>
+                <h2 class="slide-title">Ana: Creando Branch para UI</h2>
+            </div>
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div>
+                    <h5>Crear y cambiar a nueva branch</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-comment"># Ana crea su branch para la UI del login</span><br>
+                        <span class="code-command">git checkout -b feature/login-ui</span><br>
+                        <span class="code-comment"># Equivale a:</span><br>
+                        <span class="code-comment"># git branch feature/login-ui</span><br>
+                        <span class="code-comment"># git checkout feature/login-ui</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div>
+                    <h5>Verificar la branch actual</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-command">git branch</span><br>
+                        <span class="code-comment"># Salida:</span><br>
+                        * <span style="color: #61dafb;">feature/login-ui</span><br>
+                        &nbsp;&nbsp;main
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div>
+                    <h5>Ana comienza a trabajar en VSCode</h5>
+                    <p>Abre VSCode y crea los archivos para la interfaz de login:</p>
+                    <ul>
+                        <li><code>components/Login.jsx</code></li>
+                        <li><code>styles/login.css</code></li>
+                        <li><code>pages/LoginPage.jsx</code></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 7: Carlos crea su branch -->
+        <div class="slide" id="slide-7">
+            <div class="slide-number">7/18</div>
+            <div class="slide-header">
+                <i class="fas fa-user-tie" style="color: #764ba2; font-size: 3rem;"></i>
+                <h2 class="slide-title">Carlos: Creando Branch para API</h2>
+            </div>
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div>
+                    <h5>Carlos también crea su branch</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-comment"># Carlos trabaja en paralelo</span><br>
+                        <span class="code-command">git checkout main</span><br>
+                        <span class="code-command">git checkout -b feature/auth-api</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div>
+                    <h5>Verificar el estado</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-command">git status</span><br>
+                        <span style="color: #98c379;">On branch feature/auth-api</span><br>
+                        <span>nothing to commit, working tree clean</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div>
+                    <h5>Carlos desarrolla el backend</h5>
+                    <p>En VSCode, Carlos crea:</p>
+                    <ul>
+                        <li><code>routes/auth.js</code></li>
+                        <li><code>controllers/authController.js</code></li>
+                        <li><code>middleware/validateToken.js</code></li>
+                        <li><code>models/User.js</code></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="concept-card mt-3">
+                <h5><i class="fas fa-info-circle concept-icon"></i>¡Importante!</h5>
+                <p>Tanto Ana como Carlos están trabajando desde la misma versión de <code>main</code>, pero en branches completamente separadas. Sus cambios no se interfieren entre sí.</p>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 8: Pregunta 2 -->
+        <div class="slide" id="slide-8">
+            <div class="slide-number">8/18</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 2</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Qué comando se usa para crear y cambiar a una nueva branch en un solo paso?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>git branch nueva-rama</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">B</div>
+                    <span>git checkout -b nueva-rama</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>git switch nueva-rama</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>git create nueva-rama</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q2" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 9: Desarrollo y Commits -->
+        <div class="slide" id="slide-9">
+            <div class="slide-number">9/18</div>
+            <div class="slide-header">
+                <i class="fas fa-code" style="color: #1e3c72; font-size: 3rem;"></i>
+                <h2 class="slide-title">Desarrollando en Paralelo</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <h5><i class="fas fa-user me-2"></i>Ana - Frontend</h5>
+                        <div class="code-block">
+                            <span class="code-comment"># Ana hace commits regulares</span><br>
+                            <span class="code-command">git add components/Login.jsx</span><br>
+                            <span class="code-command">git commit -m "Add Login component structure"</span><br><br>
+                            
+                            <span class="code-command">git add styles/login.css</span><br>
+                            <span class="code-command">git commit -m "Add login styles and responsive design"</span><br><br>
+                            
+                            <span class="code-command">git add pages/LoginPage.jsx</span><br>
+                            <span class="code-command">git commit -m "Create login page with form validation"</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <h5><i class="fas fa-user-tie me-2"></i>Carlos - Backend</h5>
+                        <div class="code-block">
+                            <span class="code-comment"># Carlos también hace commits</span><br>
+                            <span class="code-command">git add models/User.js</span><br>
+                            <span class="code-command">git commit -m "Create User model with validation"</span><br><br>
+                            
+                            <span class="code-command">git add routes/auth.js</span><br>
+                            <span class="code-command">git commit -m "Add authentication routes"</span><br><br>
+                            
+                            <span class="code-command">git add controllers/authController.js</span><br>
+                            <span class="code-command">git commit -m "Implement login and register controllers"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card mt-3">
+                <h5><i class="fas fa-lightbulb concept-icon"></i>Buenas Prácticas</h5>
+                <ul>
+                    <li><strong>Commits frecuentes:</strong> Pequeños cambios, descripciones claras</li>
+                    <li><strong>Mensajes descriptivos:</strong> Usar formato convencional (feat:, fix:, docs:)</li>
+                    <li><strong>Testing:</strong> Probar cada funcionalidad antes de commit</li>
+                    <li><strong>Sincronización:</strong> Pull de main regularmente para evitar conflictos grandes</li>
+                </ul>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 10: Push a GitHub -->
+        <div class="slide" id="slide-10">
+            <div class="slide-number">10/18</div>
+            <div class="slide-header">
+                <i class="fab fa-github" style="color: #333; font-size: 3rem;"></i>
+                <h2 class="slide-title">Enviando Cambios a GitHub</h2>
+            </div>
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div>
+                    <h5>Ana sube su branch</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-comment"># Primera vez que sube la branch</span><br>
+                        <span class="code-command">git push -u origin feature/login-ui</span><br>
+                        <span class="code-comment"># -u establece el tracking con el remoto</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div>
+                    <h5>Carlos también sube su branch</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-command">git push -u origin feature/auth-api</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div>
+                    <h5>Pushes posteriores</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-comment"># Ya no necesitan -u</span><br>
+                        <span class="code-command">git push</span><br>
+                        <span class="code-comment"># Git sabe a dónde enviar los cambios</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workflow-diagram mt-4">
+                <h5>Estado en GitHub</h5>
+                <div class="mt-3">
+                    <span class="branch-visual branch-main">main</span>
+                    <span class="branch-visual branch-feature">feature/login-ui</span>
+                    <span class="branch-visual branch-feature">feature/auth-api</span>
+                </div>
+                <p class="mt-3">Ahora GitHub tiene 3 branches: la principal (main) y las dos de desarrollo</p>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 11: Pregunta 3 -->
+        <div class="slide" id="slide-11">
+            <div class="slide-number">11/18</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 3</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Qué hace el parámetro -u en el comando git push -u origin rama?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Hace que el push sea más rápido</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">B</div>
+                    <span>Elimina archivos innecesarios</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">C</div>
+                    <span>Establece el tracking entre la rama local y remota</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Actualiza automáticamente la rama main</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q3" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 12: Pull Requests -->
+        <div class="slide" id="slide-12">
+            <div class="slide-number">12/18</div>
+            <div class="slide-header">
+                <i class="fas fa-code-branch" style="color: #1e3c72; font-size: 3rem;"></i>
+                <h2 class="slide-title">Creando Pull Requests</h2>
+            </div>
+            <div class="concept-card">
+                <h5><i class="fas fa-info-circle concept-icon"></i>¿Qué es un Pull Request?</h5>
+                <p>Un Pull Request (PR) es una solicitud para fusionar cambios de una branch a otra (normalmente a main). Permite revisión de código y discusión antes de la fusión.</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h5>Ana crea su PR</h5>
+                            <ul>
+                                <li>Va a GitHub.com</li>
+                                <li>Click en "Compare & pull request"</li>
+                                <li>Título: "Add login UI components"</li>
+                                <li>Descripción detallada de cambios</li>
+                                <li>Asigna a Carlos como reviewer</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div>
+                            <h5>Carlos crea su PR</h5>
+                            <ul>
+                                <li>Mismo proceso en GitHub</li>
+                                <li>Título: "Implement authentication API"</li>
+                                <li>Documenta endpoints y uso</li>
+                                <li>Asigna a Ana como reviewer</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card mt-3">
+                <h5><i class="fas fa-eye concept-icon"></i>Proceso de Review</h5>
+                <ul>
+                    <li><strong>Code Review:</strong> Revisar código línea por línea</li>
+                    <li><strong>Tests:</strong> Verificar que los tests pasan</li>
+                    <li><strong>Comentarios:</strong> Sugerir mejoras o hacer preguntas</li>
+                    <li><strong>Aprobación:</strong> Aprobar o solicitar cambios</li>
+                </ul>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 13: Manejo de Conflictos -->
+        <div class="slide" id="slide-13">
+            <div class="slide-number">13/18</div>
+            <div class="slide-header">
+                <i class="fas fa-exclamation-triangle" style="color: #f39c12; font-size: 3rem;"></i>
+                <h2 class="slide-title">¿Qué pasa si hay conflictos?</h2>
+            </div>
+            <div class="concept-card">
+                <h5><i class="fas fa-info-circle concept-icon"></i>Escenario: Archivo Compartido</h5>
+                <p>Imagina que tanto Ana como Carlos modificaron el archivo <code>package.json</code> para agregar dependencias diferentes.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div>
+                    <h5>Actualizar desde main antes de merge</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-comment"># Ana actualiza su branch desde main</span><br>
+                        <span class="code-command">git checkout feature/login-ui</span><br>
+                        <span class="code-command">git fetch origin</span><br>
+                        <span class="code-command">git merge origin/main</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div>
+                    <h5>Si hay conflictos, Git te avisa</h5>
+                    <div class="code-block mt-2">
+                        <span style="color: #e06c75;">Auto-merging package.json</span><br>
+                        <span style="color: #e06c75;">CONFLICT (content): Merge conflict in package.json</span><br>
+                        <span style="color: #e06c75;">Automatic merge failed; fix conflicts and then commit the result.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div>
+                    <h5>Resolver en VSCode</h5>
+                    <p>VSCode muestra los conflictos visualmente:</p>
+                    <ul>
+                        <li><strong>HEAD (tu branch):</strong> Tus cambios</li>
+                        <li><strong>Incoming:</strong> Cambios de main</li>
+                        <li>Opciones: Accept Current, Accept Incoming, Accept Both</li>
+                        <li>Editar manualmente si es necesario</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 14: Pregunta 4 -->
+        <div class="slide" id="slide-14">
+            <div class="slide-number">14/18</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 4</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Cuándo suelen ocurrir los conflictos en Git?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Solo cuando se trabaja en branches diferentes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">B</div>
+                    <span>Cuando dos personas modifican las mismas líneas del mismo archivo</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>Siempre que se hace un push</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>Solo cuando se trabaja sin internet</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q4" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 15: Merge exitoso -->
+        <div class="slide" id="slide-15">
+            <div class="slide-number">15/18</div>
+            <div class="slide-header">
+                <i class="fas fa-check-circle" style="color: #28a745; font-size: 3rem;"></i>
+                <h2 class="slide-title">¡Merge Exitoso!</h2>
+            </div>
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div>
+                    <h5>Ana's PR es aprobado y merged</h5>
+                    <p>Después de la revisión de Carlos, el PR de Ana se fusiona a main</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div>
+                    <h5>Carlos actualiza su branch</h5>
+                    <div class="code-block mt-2">
+                        <span class="code-comment"># Carlos necesita los cambios de Ana</span><br>
+                        <span class="code-command">git checkout main</span><br>
+                        <span class="code-command">git pull origin main</span><br>
+                        <span class="code-command">git checkout feature/auth-api</span><br>
+                        <span class="code-command">git merge main</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div>
+                    <h5>Carlos's PR también se merge</h5>
+                    <p>Ahora main contiene tanto la UI como la API</p>
+                </div>
+            </div>
+            
+            <div class="workflow-diagram mt-4">
+                <h5>Estado Final</h5>
+                <div class="mt-3 mb-3">
+                    <span class="branch-visual branch-main">main</span> ← <strong>¡Contiene ambas funcionalidades!</strong>
+                </div>
+                <ul class="text-start">
+                    <li>✅ UI de login (trabajo de Ana)</li>
+                    <li>✅ API de autenticación (trabajo de Carlos)</li>
+                    <li>✅ Integración completa funcionando</li>
+                    <li>✅ Historial limpio y organizado</li>
+                </ul>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 16: Pregunta 5 -->
+        <div class="slide" id="slide-16">
+            <div class="slide-number">16/18</div>
+            <div class="slide-header">
+                <i class="fas fa-question" style="color: #e74c3c; font-size: 3rem;"></i>
+                <h2 class="slide-title">Pregunta 5</h2>
+            </div>
+            <div class="question-container">
+                <div class="question-title">¿Qué debe hacer Carlos después de que el PR de Ana se merge a main?</div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">A</div>
+                    <span>Eliminar su branch inmediatamente</span>
+                </div>
+                <div class="option" onclick="selectOption(this, true)">
+                    <div class="option-letter">B</div>
+                    <span>Actualizar su branch con los cambios de main</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">C</div>
+                    <span>Crear un nuevo repositorio</span>
+                </div>
+                <div class="option" onclick="selectOption(this, false)">
+                    <div class="option-letter">D</div>
+                    <span>No hacer nada, seguir trabajando normalmente</span>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="nextSlide()" id="next-q5" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 17: Limpieza y buenas prácticas -->
+        <div class="slide" id="slide-17">
+            <div class="slide-number">17/18</div>
+            <div class="slide-header">
+                <i class="fas fa-broom" style="color: #1e3c72; font-size: 3rem;"></i>
+                <h2 class="slide-title">Limpieza y Buenas Prácticas</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <h5><i class="fas fa-trash-alt concept-icon"></i>Limpieza de Branches</h5>
+                        <div class="code-block">
+                            <span class="code-comment"># Eliminar branches locales</span><br>
+                            <span class="code-command">git branch -d feature/login-ui</span><br>
+                            <span class="code-command">git branch -d feature/auth-api</span><br><br>
+                            
+                            <span class="code-comment"># Eliminar del remoto</span><br>
+                            <span class="code-command">git push origin --delete feature/login-ui</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="concept-card">
+                        <h5><i class="fas fa-sync concept-icon"></i>Mantener main actualizado</h5>
+                        <div class="code-block">
+                            <span class="code-command">git checkout main</span><br>
+                            <span class="code-command">git pull origin main</span><br><br>
+                            
+                            <span class="code-comment"># Ver branches remotas</span><br>
+                            <span class="code-command">git branch -r</span><br><br>
+                            
+                            <span class="code-comment"># Limpiar referencias</span><br>
+                            <span class="code-command">git remote prune origin</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="concept-card">
+                <h5><i class="fas fa-star concept-icon"></i>Mejores Prácticas del Flujo</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li><strong>Nombres descriptivos:</strong> feature/login-ui, bugfix/auth-validation</li>
+                            <li><strong>Branches cortas:</strong> 1-3 días de trabajo máximo</li>
+                            <li><strong>Pull regular:</strong> Actualizar desde main frecuentemente</li>
+                            <li><strong>Tests:</strong> Verificar que todo funciona antes de PR</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul>
+                            <li><strong>Reviews significativas:</strong> No solo "LGTM"</li>
+                            <li><strong>Documentación:</strong> PR descriptions detalladas</li>
+                            <li><strong>Comunicación:</strong> Avisar cambios importantes al equipo</li>
+                            <li><strong>Limpieza:</strong> Eliminar branches después del merge</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="showResults()">
+                    Ver Resultados <i class="fas fa-chart-pie"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 18: Resumen y Resultados -->
+        <div class="slide" id="slide-18">
+            <div class="slide-number">18/18</div>
+            <div class="slide-header">
+                <i class="fas fa-trophy" style="color: #f39c12; font-size: 3rem;"></i>
+                <h2 class="slide-title">¡Resultados de tu Evaluación!</h2>
+            </div>
+            <div class="score-summary">
+                <h3 id="score-text">Puntuación: 0/5</h3>
+                <div class="chart-container">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+                <div id="performance-message" class="final-message">
+                    <!-- Mensaje dinámico basado en el rendimiento -->
+                </div>
+                <div class="mt-4">
+                    <h5>Resumen del Flujo Colaborativo:</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">✅ Clonar repositorio</li>
+                                <li class="list-group-item">✅ Crear branches específicas</li>
+                                <li class="list-group-item">✅ Desarrollar en paralelo</li>
+                                <li class="list-group-item">✅ Commits regulares y descriptivos</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">✅ Push a GitHub</li>
+                                <li class="list-group-item">✅ Pull Requests para revisión</li>
+                                <li class="list-group-item">✅ Resolver conflictos si ocurren</li>
+                                <li class="list-group-item">✅ Merge y limpieza final</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="nav-btn prev" onclick="prevSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="nav-btn next" onclick="restartPresentation()" style="background: #27ae60;">
+                    <i class="fas fa-redo"></i> Comenzar de Nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 18;
+        let score = 0;
+        let answers = [];
+
+        function showSlide(n) {
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide-${n}`).classList.add('active');
+            
+            // Update progress bar
+            const progress = (n / totalSlides) * 100;
+            document.querySelector('.progress-fill').style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        function selectOption(element, isCorrect) {
+            // Remove previous selections
+            element.parentNode.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Select current option
+            element.classList.add('selected');
+            
+            // Determine question number based on slide
+            let questionNumber;
+            if (currentSlide === 4) questionNumber = 1;
+            else if (currentSlide === 8) questionNumber = 2;
+            else if (currentSlide === 11) questionNumber = 3;
+            else if (currentSlide === 14) questionNumber = 4;
+            else if (currentSlide === 16) questionNumber = 5;
+            
+            // Store answer if not already answered
+            if (answers[questionNumber - 1] === undefined) {
+                answers[questionNumber - 1] = isCorrect;
+                if (isCorrect) {
+                    score++;
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Correcto!',
+                        text: 'Excelente comprensión del flujo colaborativo.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Incorrecto',
+                        text: 'Repasa este concepto, es importante para el trabajo en equipo.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            }
+            
+            // Enable next button
+            const nextBtn = document.getElementById(`next-q${questionNumber}`);
+            if (nextBtn) {
+                nextBtn.disabled = false;
+            }
+        }
+
+        function showResults() {
+            currentSlide = 18;
+            showSlide(currentSlide);
+            
+            // Update score display
+            document.getElementById('score-text').textContent = `Puntuación: ${score}/5`;
+            
+            // Create pie chart
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Correctas', 'Incorrectas'],
+                    datasets: [{
+                        data: [score, 5 - score],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Show performance message
+            const messageElement = document.getElementById('performance-message');
+            const percentage = (score / 5) * 100;
+            
+            if (percentage >= 80) {
+                messageElement.innerHTML = `
+                    <div class="excellent">
+                        <i class="fas fa-trophy"></i>
+                        ¡Excelente! (${percentage.toFixed(0)}%) 
+                        <br>Dominas el flujo colaborativo con Git y GitHub. ¡Listo para trabajar en equipo!
+                    </div>
+                `;
+            } else if (percentage >= 60) {
+                messageElement.innerHTML = `
+                    <div class="good">
+                        <i class="fas fa-thumbs-up"></i>
+                        ¡Bien hecho! (${percentage.toFixed(0)}%)
+                        <br>Tienes una buena base. Practica un poco más y dominarás el flujo completamente.
+                    </div>
+                `;
+            } else {
+                messageElement.innerHTML = `
+                    <div class="needs-improvement">
+                        <i class="fas fa-book"></i>
+                        Necesitas repasar (${percentage.toFixed(0)}%)
+                        <br>El trabajo colaborativo es clave en el desarrollo. ¡Practica más con Git!
+                    </div>
+                `;
+            }
+            
+            // Show final congratulations
+            Swal.fire({
+                icon: 'info',
+                title: '¡Presentación Completada!',
+                html: `
+                    <p>Has terminado el caso práctico de trabajo colaborativo.</p>
+                    <p><strong>Tu puntuación: ${score}/5 (${percentage.toFixed(0)}%)</strong></p>
+                    <p>¡Ahora estás preparado para trabajar en equipo con Git y GitHub!</p>
+                `,
+                confirmButtonColor: '#1e3c72'
+            });
+        }
+
+        function restartPresentation() {
+            currentSlide = 1;
+            score = 0;
+            answers = [];
+            
+            // Reset all question buttons
+            document.querySelectorAll('[id^="next-q"]').forEach(btn => btn.disabled = true);
+            
+            // Remove all selections
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            showSlide(currentSlide);
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Reiniciado!',
+                text: 'La presentación ha sido reiniciada. ¡A practicar el flujo colaborativo!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // Initialize
+        showSlide(currentSlide);
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h1 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            border-radius: 15px;
+            padding: 12px 20px;
+            border: 2px solid #e1e5e9;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .input-group-text {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #e1e5e9;
+            border-right: none;
+            border-radius: 15px 0 0 15px;
+        }
+        
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 15px 15px 0;
+        }
+        
+        .input-group .form-control:focus {
+            border-left: none;
+        }
+        
+        .btn-login {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 15px;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            color: white;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert-error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            border: none;
+            color: white;
+            border-radius: 15px;
+            animation: slideInDown 0.3s ease;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .btn-login.loading {
+            animation: pulse 1s infinite;
+        }
+        
+        @media (max-width: 768px) {
+            .login-card {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .login-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 10px;
+            }
+            
+            .login-card {
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1><i class="fas fa-lock"></i> Iniciar Sesión</h1>
+                <p class="text-muted">Ingresa tus credenciales para acceder</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control" id="username" placeholder="Ingresa tu usuario" required autocomplete="username">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required autocomplete="current-password">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div id="loginError" class="alert alert-error hidden" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <span id="errorMessage"></span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-login" id="submitBtn">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+            
+            <div class="mt-4 text-center">
+                <small class="text-muted">
+                    <strong>Demo:</strong><br>
+                    📧 admin | 🔑 123456<br>
+                    📧 user | 🔑 password<br>
+                    📧 manager | 🔑 admin123
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Credenciales válidas (en un entorno real, esto se validaría en el servidor)
+        const validCredentials = [
+            { username: 'admin', password: '123456', fullName: 'Administrador', role: 'admin' },
+            { username: 'user', password: 'password', fullName: 'Usuario Normal', role: 'user' },
+            { username: 'manager', password: 'admin123', fullName: 'Gerente', role: 'manager' }
+        ];
+        
+        // Elementos del DOM
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        // Función para mostrar error
+        function showError(message) {
+            errorMessage.textContent = message;
+            loginError.classList.remove('hidden');
+            
+            setTimeout(() => {
+                loginError.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Función para validar credenciales
+        function validateCredentials(username, password) {
+            return validCredentials.find(cred => 
+                cred.username === username && cred.password === password
+            );
+        }
+        
+        // Función para redirigir al dashboard
+        function redirectToDashboard(user) {
+            // Crear los parámetros para el dashboard
+            const params = new URLSearchParams({
+                username: user.username,
+                fullName: user.fullName,
+                role: user.role,
+                loginTime: new Date().toISOString()
+            });
+            
+            // Mostrar feedback visual
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> ¡Éxito! Redirigiendo...';
+            submitBtn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+            
+            // Pequeña pausa para mostrar el éxito antes de redirigir
+            setTimeout(() => {
+                // En un entorno real, aquí harías window.location.href = 'dashboard.html?' + params.toString();
+                
+                window.location.href='dashboard.html';
+                
+                // Resetear el formulario para simular la redirección
+                resetForm();
+            }, 1500);
+        }
+        
+        // Función para resetear el formulario
+        function resetForm() {
+            usernameInput.value = '';
+            passwordInput.value = '';
+            loginError.classList.add('hidden');
+            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+            submitBtn.style.background = '';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+        }
+        
+        // Event listener para el formulario de login
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            // Validación de campos vacíos
+            if (!username || !password) { //Si falta usuario o password.
+                showError('Por favor, completa todos los campos.');
+                return;
+            }
+            
+            // Validar credenciales
+            const user = validateCredentials(username, password);
+            
+            if (user) {
+                // Deshabilitar el botón y mostrar loading
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+                
+                // Simular delay de autenticación
+                setTimeout(() => {
+                    redirectToDashboard(user);
+                }, 1000);
+                
+            } else {
+                showError('Usuario o contraseña incorrectos.');
+                
+                // Agregar un pequeño shake effect al formulario
+                document.querySelector('.login-card').style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    document.querySelector('.login-card').style.animation = '';
+                }, 500);
+            }
+        });
+        
+        // Agregar animación shake para errores
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+        
+        // Auto-focus en el campo de usuario al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            usernameInput.focus();
+            console.log('Página de login cargada');
+            console.log('Credenciales disponibles:', validCredentials.map(c => `${c.username}/${c.password}`));
+        });
+        
+        // Limpiar errores cuando el usuario empiece a escribir
+        [usernameInput, passwordInput].forEach(input => {
+            input.addEventListener('input', function() {
+                if (!loginError.classList.contains('hidden')) {
+                    loginError.classList.add('hidden');
+                }
+            });
+        });
+        
+        // Manejar Enter en los campos
+        [usernameInput, passwordInput].forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    loginForm.dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

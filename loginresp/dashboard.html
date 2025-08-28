@@ -519,7 +519,8 @@
                 setTimeout(() => {
                     // En un entorno real, aquí harías window.location.href = 'login.html';
                     // Como estamos en un artifact, vamos a simular la redirección
-                    alert('Sesión cerrada exitosamente.\n\nEn un entorno real, serías redirigido a la página de login.');
+                    alert('Sesión cerrada exitosamente.');
+                    window.location.href="index.html";
                     
                     // Resetear para simular logout
                     logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Salir';

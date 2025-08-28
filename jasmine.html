@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jasmine - Framework de Testing para Estudiantes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8e44ad;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --dark-bg: #2c3e50;
+            --card-bg: #34495e;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .slide {
+            min-height: calc(100vh - 76px);
+            padding: 2rem 0;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-card {
+            background: var(--dark-bg);
+            color: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-bottom: 1px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 8px;
+            margin-right: 15px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f57; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #28ca42; }
+
+        pre {
+            margin: 0;
+            background: transparent !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .step-number {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+        }
+
+        .test-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .test-pass {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .test-fail {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .test-pending {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .matcher-card {
+            border-left: 4px solid var(--primary-color);
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .jasmine-logo {
+            font-size: 4rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de progreso -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- Contador de slides -->
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">8</span>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-vial me-2"></i>Jasmine Testing Masterclass
+            </a>
+            <div class="navbar-nav ms-auto">
+                <button class="btn btn-outline-light me-2" onclick="previousSlide()">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <button class="btn btn-primary" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Slide 1: Introducción -->
+    <div class="slide active" id="slide1">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card text-center">
+                        <div class="card-body p-5">
+                            <div class="jasmine-logo mb-4">
+                                <i class="fas fa-vial"></i>
+                            </div>
+                            <h1 class="display-4 fw-bold mb-4">Jasmine</h1>
+                            <h3 class="text-muted mb-4">Framework de Testing BDD para JavaScript</h3>
+                            <p class="lead mb-4">
+                                Aprende a escribir pruebas elegantes y legibles para tu código JavaScript con Jasmine
+                            </p>
+                            <div class="row g-4 mt-4">
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-feather text-success fa-2x me-3"></i>
+                                        <div>
+                                            <h5>Sintaxis Elegante</h5>
+                                            <p class="mb-0">Tests que se leen como especificaciones</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-battery-full text-warning fa-2x me-3"></i>
+                                        <div>
+                                            <h5>Todo Incluido</h5>
+                                            <p class="mb-0">No necesitas librerías adicionales</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-rocket text-info fa-2x me-3"></i>
+                                        <div>
+                                            <h5>BDD Ready</h5>
+                                            <p class="mb-0">Behavior Driven Development integrado</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-lg mt-4" onclick="showDemo('intro')">
+                                <i class="fas fa-play me-2"></i>Ver Demo de Testing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: ¿Qué es Jasmine? -->
+    <div class="slide" id="slide2">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-question-circle text-primary me-3"></i>¿Qué es Jasmine?
+                            </h2>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-microscope fa-3x text-primary mb-3"></i>
+                                            <h5>Framework de Testing</h5>
+                                            <p>Herramienta para escribir y ejecutar pruebas unitarias de JavaScript</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-comments fa-3x text-success mb-3"></i>
+                                            <h5>Behavior Driven Development</h5>
+                                            <p>Tests que describen el comportamiento esperado en lenguaje natural</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5">
+                                <h4 class="text-center mb-4">Características Principales</h4>
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">1</div>
+                                            <div>
+                                                <h5>Sintaxis Descriptiva</h5>
+                                                <p class="mb-0">Los tests se leen como especificaciones en inglés</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">2</div>
+                                            <div>
+                                                <h5>Sin Dependencias</h5>
+                                                <p class="mb-0">Framework independiente, no necesita otras librerías</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">3</div>
+                                            <div>
+                                                <h5>Spies y Mocks</h5>
+                                                <p class="mb-0">Herramientas integradas para simular comportamiento</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">4</div>
+                                            <div>
+                                                <h5>Testing Asíncrono</h5>
+                                                <p class="mb-0">Soporte nativo para Promises y async/await</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-lightbulb me-2"></i>Ejemplo de BDD</h5>
+                                <div class="code-card">
+                                    <pre><code class="language-javascript">describe("Una calculadora", function() {
+  it("debería sumar dos números correctamente", function() {
+    expect(calculadora.sumar(2, 3)).toBe(5);
+  });
+  
+  it("debería manejar números negativos", function() {
+    expect(calculadora.sumar(-1, 1)).toBe(0);
+  });
+});</code></pre>
+                                </div>
+                                <p class="mb-0 mt-2">¡Se lee casi como una conversación en español!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Instalación -->
+    <div class="slide" id="slide3">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-download text-primary me-3"></i>Instalación y Configuración
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-terminal me-2 text-success"></i>Opción 1: CDN (Más rápida)</h4>
+                                    <p>Ideal para empezar rápidamente o proyectos pequeños</p>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>index.html</span>
+                                        </div>
+                                        <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.0/jasmine.css"&gt;
+  &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.0/jasmine.js"&gt;&lt;/script&gt;
+  &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.0/jasmine-html.js"&gt;&lt;/script&gt;
+  &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.0/boot0.js"&gt;&lt;/script&gt;
+  &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.0/boot1.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-box me-2 text-info"></i>Opción 2: NPM (Proyectos)</h4>
+                                    <p>Para proyectos profesionales con Node.js</p>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>Terminal</span>
+                                        </div>
+                                        <pre><code class="language-bash"># Instalar Jasmine
+npm install --save-dev jasmine
+
+# Inicializar configuración
+npx jasmine init
+
+# Ejecutar tests
+npx jasmine</code></pre>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <h6>Estructura de archivos:</h6>
+                                        <div class="code-card">
+                                            <pre><code class="language-text">proyecto/
+├── spec/
+│   ├── support/jasmine.json
+│   └── calculadora.spec.js
+├── src/
+│   └── calculadora.js
+└── package.json</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4><i class="fas fa-rocket me-2 text-warning"></i>Configuración con package.json</h4>
+                                <div class="code-card">
+                                    <div class="code-header">
+                                        <div class="code-dots">
+                                            <div class="dot red"></div>
+                                            <div class="dot yellow"></div>
+                                            <div class="dot green"></div>
+                                        </div>
+                                        <span>package.json</span>
+                                    </div>
+                                    <pre><code class="language-json">{
+  "name": "mi-proyecto-jasmine",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jasmine",
+    "test:watch": "jasmine --watch"
+  },
+  "devDependencies": {
+    "jasmine": "^5.1.0"
+  }
+}</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-success mt-4">
+                                <h5><i class="fas fa-check-circle me-2"></i>Verificar Instalación</h5>
+                                <p class="mb-2">Ejecuta este comando para verificar que todo funciona:</p>
+                                <code>npm test</code>
+                                <p class="mt-2 mb-0">Deberías ver el runner de Jasmine ejecutándose correctamente.</p>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-play-circle me-2"></i>¿Listo para el primer test?</h5>
+                                <button class="btn btn-light" onclick="showDemo('setup')">
+                                    <i class="fas fa-cog me-2"></i>Ver Setup Completo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Primer Test -->
+    <div class="slide" id="slide4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-rocket text-primary me-3"></i>Tu Primer Test con Jasmine
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-lg-7">
+                                    <h4 class="mb-3">Estructura Básica</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>calculadora.spec.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">// Función a testear
+function calculadora() {
+  return {
+    sumar: function(a, b) {
+      return a + b;
+    },
+    restar: function(a, b) {
+      return a - b;
+    },
+    multiplicar: function(a, b) {
+      return a * b;
+    },
+    dividir: function(a, b) {
+      if (b === 0) {
+        throw new Error('División por cero');
+      }
+      return a / b;
+    }
+  };
+}
+
+// Tests con Jasmine
+describe("Calculadora", function() {
+  let calc;
+  
+  beforeEach(function() {
+    calc = calculadora();
+  });
+  
+  describe("Suma", function() {
+    it("debería sumar números positivos", function() {
+      expect(calc.sumar(2, 3)).toBe(5);
+    });
+    
+    it("debería sumar números negativos", function() {
+      expect(calc.sumar(-1, -1)).toBe(-2);
+    });
+    
+    it("debería sumar cero correctamente", function() {
+      expect(calc.sumar(5, 0)).toBe(5);
+    });
+  });
+  
+  describe("División", function() {
+    it("debería dividir números normalmente", function() {
+      expect(calc.dividir(10, 2)).toBe(5);
+    });
+    
+    it("debería lanzar error al dividir por cero", function() {
+      expect(function() {
+        calc.dividir(10, 0);
+      }).toThrow();
+    });
+  });
+});</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-5">
+                                    <h4 class="mb-3">Elementos Clave</h4>
+                                    <div class="timeline">
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-layer-group text-primary fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>describe()</code></h6>
+                                                    <p class="small mb-0">Agrupa tests relacionados en una "suite"</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>it()</code></h6>
+                                                    <p class="small mb-0">Define un test individual (especificación)</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-bullseye text-warning fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>expect()</code></h6>
+                                                    <p class="small mb-0">Define lo que esperamos que pase</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-cog text-info fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>beforeEach()</code></h6>
+                                                    <p class="small mb-0">Se ejecuta antes de cada test</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <h5>Resultado del Test:</h5>
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body p-3">
+                                                <div class="test-status test-pass">✓ debería sumar números positivos</div>
+                                                <div class="test-status test-pass">✓ debería sumar números negativos</div>
+                                                <div class="test-status test-pass">✓ debería sumar cero correctamente</div>
+                                                <div class="test-status test-pass">✓ debería dividir números normalmente</div>
+                                                <div class="test-status test-pass">✓ debería lanzar error al dividir por cero</div>
+                                                <hr class="my-2">
+                                                <small class="text-success fw-bold">5 specs, 0 failures</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-4">
+                                <h5><i class="fas fa-lightbulb me-2"></i>Mejores Prácticas</h5>
+                                <ul class="mb-0">
+                                    <li><strong>Describe el comportamiento:</strong> Usa frases que expliquen qué hace la función</li>
+                                    <li><strong>Arrange, Act, Assert:</strong> Prepara, ejecuta, verifica</li>
+                                    <li><strong>Un concepto por test:</strong> Cada <code>it()</code> debe probar una sola cosa</li>
+                                    <li><strong>Nombres descriptivos:</strong> Los tests deben ser documentación viviente</li>
+                                </ul>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-play-circle me-2"></i>Ejecutar Tests</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success" onclick="showDemo('firstTest')">
+                                        <i class="fas fa-play me-2"></i>Ver Ejecución
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="showDemo('testStructure')">
+                                        <i class="fas fa-info-circle me-2"></i>Explicar Estructura
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Matchers -->
+    <div class="slide" id="slide5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-crosshairs text-primary me-3"></i>Matchers: El Poder de las Aserciones
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Matchers Básicos</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>matchers-basicos.spec.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">describe("Matchers básicos", function() {
+  it("toBe - igualdad exacta (===)", function() {
+    expect(true).toBe(true);
+    expect(1).toBe(1);
+    expect("hola").toBe("hola");
+  });
+  
+  it("toEqual - igualdad de valor", function() {
+    let obj1 = { nombre: "Juan", edad: 25 };
+    let obj2 = { nombre: "Juan", edad: 25 };
+    
+    expect(obj1).toEqual(obj2); // ✓ Pasa
+    expect(obj1).not.toBe(obj2); // ✓ Diferentes objetos
+  });
+  
+  it("toBeTruthy/toBeFalsy", function() {
+    expect("cualquier string").toBeTruthy();
+    expect(1).toBeTruthy();
+    expect([]).toBeTruthy();
+    
+    expect("").toBeFalsy();
+    expect(0).toBeFalsy();
+    expect(null).toBeFalsy();
+    expect(undefined).toBeFalsy();
+  });
+  
+  it("toBeNull/toBeUndefined", function() {
+    let variable;
+    expect(variable).toBeUndefined();
+    expect(null).toBeNull();
+  });
+  
+  it("toContain - para arrays y strings", function() {
+    expect([1, 2, 3, 4]).toContain(3);
+    expect("Hola mundo").toContain("mundo");
+  });
+});</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Matchers Avanzados</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>matchers-avanzados.spec.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">describe("Matchers avanzados", function() {
+  it("toMatch - expresiones regulares", function() {
+    expect("juan@email.com").toMatch(/\w+@\w+\.\w+/);
+    expect("Hola Mundo").toMatch(/^Hola/);
+  });
+  
+  it("toThrow - excepciones", function() {
+    let funcionPeligrosa = function() {
+      throw new Error("¡Algo salió mal!");
+    };
+    
+    expect(funcionPeligrosa).toThrow();
+    expect(funcionPeligrosa).toThrowError("¡Algo salió mal!");
+  });
+  
+  it("toBeCloseTo - números con decimales", function() {
+    expect(0.1 + 0.2).toBeCloseTo(0.3, 2);
+  });
+  
+  it("toBeGreaterThan/toBeLessThan", function() {
+    expect(10).toBeGreaterThan(5);
+    expect(3).toBeLessThan(10);
+    expect(5).toBeGreaterThanOrEqual(5);
+    expect(5).toBeLessThanOrEqual(5);
+  });
+  
+  it("toHaveBeenCalled - para spies", function() {
+    let objeto = {
+      metodo: function() { return "original"; }
+    };
+    
+    spyOn(objeto, 'metodo');
+    objeto.metodo();
+    
+    expect(objeto.metodo).toHaveBeenCalled();
+  });
+});</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="mb-3">Referencia Rápida de Matchers</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="matcher-card">
+                                            <h6 class="text-primary mb-2">Igualdad</h6>
+                                            <code>.toBe()</code> - Igualdad exacta (===)<br>
+                                            <code>.toEqual()</code> - Igualdad de valor<br>
+                                            <code>.not.toBe()</code> - Negación
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="matcher-card">
+                                            <h6 class="text-success mb-2">Booleanos</h6>
+                                            <code>.toBeTruthy()</code> - Valor truthy<br>
+                                            <code>.toBeFalsy()</code> - Valor falsy<br>
+                                            <code>.toBeNull()</code> - Es null
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="matcher-card">
+                                            <h6 class="text-warning mb-2">Números</h6>
+                                            <code>.toBeGreaterThan()</code> - Mayor que<br>
+                                            <code>.toBeLessThan()</code> - Menor que<br>
+                                            <code>.toBeCloseTo()</code> - Aproximado
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="matcher-card">
+                                            <h6 class="text-info mb-2">Strings y Arrays</h6>
+                                            <code>.toContain()</code> - Contiene elemento<br>
+                                            <code>.toMatch()</code> - Coincide regex<br>
+                                            <code>.toHaveLength()</code> - Longitud específica
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-flask me-2"></i>Ejemplo Interactivo</h5>
+                                <p>Veamos todos estos matchers en acción:</p>
+                                <button class="btn btn-primary" onclick="showDemo('matchers')">
+                                    <i class="fas fa-magic me-2"></i>Demo de Matchers
+                                </button>
+                            </div>
+
+                            <div class="alert alert-warning mt-4">
+                                <h5><i class="fas fa-exclamation-triangle me-2"></i>Tip Importante</h5>
+                                <p class="mb-0">
+                                    Usa <code>.toEqual()</code> para objetos y arrays, <code>.toBe()</code> para primitivos. 
+                                    Recuerda que <code>.not</code> puede negarse cualquier matcher.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Hooks y Setup -->
+    <div class="slide" id="slide6">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-cogs text-primary me-3"></i>Hooks: Setup y Teardown
+                            </h2>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Los Hooks</strong> te permiten ejecutar código antes y después de los tests, 
+                                manteniendo tu código DRY (Don't Repeat Yourself) y organizando la preparación de datos.
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Tipos de Hooks</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>hooks-ejemplo.spec.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">describe("Usuario", function() {
+  let usuario;
+  let baseDatos;
+  
+  // Se ejecuta UNA VEZ antes de todos los tests
+  beforeAll(function() {
+    console.log("🚀 Configurando base de datos...");
+    baseDatos = new BaseDatos();
+    baseDatos.conectar();
+  });
+  
+  // Se ejecuta ANTES de cada test individual
+  beforeEach(function() {
+    console.log("📝 Preparando usuario para el test...");
+    usuario = new Usuario("Juan", "juan@test.com");
+    baseDatos.limpiar();
+  });
+  
+  // Se ejecuta DESPUÉS de cada test individual
+  afterEach(function() {
+    console.log("🧹 Limpiando después del test...");
+    usuario = null;
+  });
+  
+  // Se ejecuta UNA VEZ después de todos los tests
+  afterAll(function() {
+    console.log("🔐 Cerrando base de datos...");
+    baseDatos.desconectar();
+  });
+  
+  it("debería crear usuario con nombre", function() {
+    expect(usuario.nombre).toBe("Juan");
+  });
+  
+  it("debería tener email válido", function() {
+    expect(usuario.email).toBe("juan@test.com");
+  });
+  
+  it("debería poder cambiar nombre", function() {
+    usuario.cambiarNombre("Pedro");
+    expect(usuario.nombre).toBe("Pedro");
+  });
+});</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Flujo de Ejecución</h4>
+                                    <div class="timeline">
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-play-circle text-success fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>beforeAll()</code></h6>
+                                                    <p class="small mb-0">Setup inicial - conexiones, configuraciones globales</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-arrow-down text-primary fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>beforeEach()</code></h6>
+                                                    <p class="small mb-0">Preparar datos para cada test específico</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-vial text-warning fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>it("test")</code></h6>
+                                                    <p class="small mb-0">El test individual se ejecuta</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-arrow-up text-info fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>afterEach()</code></h6>
+                                                    <p class="small mb-0">Limpieza después de cada test</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-stop-circle text-danger fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>afterAll()</code></h6>
+                                                    <p class="small mb-0">Limpieza final - cerrar conexiones</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="mb-3">Ejemplo Práctico: Testing de API</h4>
+                                <div class="code-card">
+                                    <div class="code-header">
+                                        <div class="code-dots">
+                                            <div class="dot red"></div>
+                                            <div class="dot yellow"></div>
+                                            <div class="dot green"></div>
+                                        </div>
+                                        <span>api-tests.spec.js</span>
+                                    </div>
+                                    <pre><code class="language-javascript">describe("API de Tareas", function() {
+  let servidor;
+  let cliente;
+  let tareaTest;
+  
+  beforeAll(async function() {
+    // Configurar servidor de pruebas
+    servidor = new ServidorTest();
+    await servidor.iniciar();
+    
+    cliente = new ClienteAPI('http://localhost:3000');
+  });
+  
+  beforeEach(function() {
+    // Crear datos de prueba para cada test
+    tareaTest = {
+      titulo: "Tarea de prueba",
+      descripcion: "Esta es una tarea para testing",
+      completada: false
+    };
+  });
+  
+  afterEach(async function() {
+    // Limpiar base de datos después de cada test
+    await cliente.limpiarTareas();
+  });
+  
+  afterAll(async function() {
+    // Cerrar servidor al terminar todos los tests
+    await servidor.cerrar();
+  });
+  
+  describe("POST /tareas", function() {
+    it("debería crear una nueva tarea", async function() {
+      const respuesta = await cliente.crearTarea(tareaTest);
+      
+      expect(respuesta.status).toBe(201);
+      expect(respuesta.data.titulo).toBe(tareaTest.titulo);
+      expect(respuesta.data.id).toBeDefined();
+    });
+    
+    it("debería rechazar tarea sin título", async function() {
+      delete tareaTest.titulo;
+      
+      try {
+        await cliente.crearTarea(tareaTest);
+        fail("Debería haber lanzado error");
+      } catch (error) {
+        expect(error.status).toBe(400);
+      }
+    });
+  });
+  
+  describe("GET /tareas", function() {
+    it("debería listar todas las tareas", async function() {
+      // Crear algunas tareas primero
+      await cliente.crearTarea(tareaTest);
+      await cliente.crearTarea({...tareaTest, titulo: "Otra tarea"});
+      
+      const respuesta = await cliente.obtenerTareas();
+      
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.data.length).toBe(2);
+    });
+  });
+});</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-4">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0"><i class="fas fa-thumbs-up me-2"></i>Buenas Prácticas</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="small mb-0">
+                                                <li>Usa <code>beforeAll</code> para setup costoso (conexiones DB)</li>
+                                                <li>Usa <code>beforeEach</code> para datos de test específicos</li>
+                                                <li>Siempre limpia en <code>afterEach</code> para evitar interferencia</li>
+                                                <li>Cierra recursos en <code>afterAll</code></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-header bg-warning">
+                                            <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Evita</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="small mb-0">
+                                                <li>No compartas estado entre tests</li>
+                                                <li>No hagas tests dependientes del orden</li>
+                                                <li>No olvides limpiar recursos</li>
+                                                <li>No pongas lógica de test en hooks</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-play-circle me-2"></i>Ver Hooks en Acción</h5>
+                                <button class="btn btn-primary" onclick="showDemo('hooks')">
+                                    <i class="fas fa-cogs me-2"></i>Demo de Hooks
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Spies y Mocks -->
+    <div class="slide" id="slide7">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-user-secret text-primary me-3"></i>Spies y Mocks: Testing Avanzado
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">¿Qué son los Spies?</h4>
+                                    <p>Los <strong>spies</strong> te permiten "espiar" funciones para verificar si fueron llamadas, con qué parámetros, cuántas veces, etc.</p>
+                                    
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>spies-basico.spec.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">describe("Spies básicos", function() {
+  it("debería verificar si se llamó una función", function() {
+    let objeto = {
+      metodo: function(mensaje) {
+        console.log("Original:", mensaje);
+        return "resultado original";
+      }
+    };
+    
+    // Crear un spy
+    spyOn(objeto, 'metodo');
+    
+    // Llamar al método
+    objeto.metodo("hola mundo");
+    
+    // Verificar que se llamó
+    expect(objeto.metodo).toHaveBeenCalled();
+    expect(objeto.metodo).toHaveBeenCalledWith("hola mundo");
+    expect(objeto.metodo).toHaveBeenCalledTimes(1);
+  });
+  
+  it("debería poder simular valores de retorno", function() {
+    let calculadora = {
+      sumar: function(a, b) {
+        return a + b;
+      }
+    };
+    
+    // Spy que retorna un valor específico
+    spyOn(calculadora, 'sumar').and.returnValue(100);
+    
+    let resultado = calculadora.sumar(2, 3);
+    
+    expect(resultado).toBe(100);
+    expect(calculadora.sumar).toHaveBeenCalledWith(2, 3);
+  });
+  
+  it("debería poder simular errores", function() {
+    let servicio = {
+      obtenerDatos: function() {
+        return "datos reales";
+      }
+    };
+    
+    spyOn(servicio, 'obtenerDatos').and.throwError("Error de conexión");
+    
+    expect(function() {
+      servicio.obtenerDatos();
+    }).toThrowError("Error de conexión");
+  });
+});</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Tipos de Spies</h4>
+                                    <div class="timeline">
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-eye text-primary fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>spyOn(obj, 'method')</code></h6>
+                                                    <p class="small mb-0">Espía función existente, bloquea ejecución original</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-phone text-success fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>.and.callThrough()</code></h6>
+                                                    <p class="small mb-0">Espía pero también ejecuta función original</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-reply text-warning fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>.and.returnValue()</code></h6>
+                                                    <p class="small mb-0">Retorna un valor específico siempre</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-bomb text-danger fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>.and.throwError()</code></h6>
+                                                    <p class="small mb-0">Lanza una excepción específica</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-code text-info fa-2x me-3"></i>
+                                                <div>
+                                                    <h6><code>.and.callFake()</code></h6>
+                                                    <p class="small mb-0">Ejecuta función personalizada</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="mb-3">Ejemplo Avanzado: Testing de Servicios</h4>
+                                <div class="code-card">
+                                    <div class="code-header">
+                                        <div class="code-dots">
+                                            <div class="dot red"></div>
+                                            <div class="dot yellow"></div>
+                                            <div class="dot green"></div>
+                                        </div>
+                                        <span>servicio-usuario.spec.js</span>
+                                    </div>
+                                    <pre><code class="language-javascript">// Clase a testear
+class ServicioUsuario {
+  constructor(baseDatos, notificaciones) {
+    this.baseDatos = baseDatos;
+    this.notificaciones = notificaciones;
+  }
+  
+  async crearUsuario(datosUsuario) {
+    // Validar datos
+    if (!datosUsuario.email) {
+      throw new Error('Email requerido');
+    }
+    
+    // Guardar en base de datos
+    const usuario = await this.baseDatos.guardar(datosUsuario);
+    
+    // Enviar notificación de bienvenida
+    await this.notificaciones.enviarBienvenida(usuario.email);
+    
+    return usuario;
+  }
+}
+
+// Tests con spies
+describe("ServicioUsuario", function() {
+  let servicio;
+  let mockBaseDatos;
+  let mockNotificaciones;
+  
+  beforeEach(function() {
+    // Crear objetos mock
+    mockBaseDatos = {
+      guardar: jasmine.createSpy('guardar').and.returnValue(
+        Promise.resolve({ id: 1, email: 'test@test.com' })
+      )
+    };
+    
+    mockNotificaciones = {
+      enviarBienvenida: jasmine.createSpy('enviarBienvenida').and.returnValue(
+        Promise.resolve()
+      )
+    };
+    
+    servicio = new ServicioUsuario(mockBaseDatos, mockNotificaciones);
+  });
+  
+  describe("crearUsuario", function() {
+    it("debería guardar usuario en base de datos", async function() {
+      const datosUsuario = { email: 'juan@test.com', nombre: 'Juan' };
+      
+      await servicio.crearUsuario(datosUsuario);
+      
+      expect(mockBaseDatos.guardar).toHaveBeenCalledWith(datosUsuario);
+    });
+    
+    it("debería enviar notificación de bienvenida", async function() {
+      const datosUsuario = { email: 'juan@test.com', nombre: 'Juan' };
+      
+      await servicio.crearUsuario(datosUsuario);
+      
+      expect(mockNotificaciones.enviarBienvenida).toHaveBeenCalledWith('juan@test.com');
+    });
+    
+    it("debería manejar error de base de datos", async function() {
+      mockBaseDatos.guardar.and.throwError('Error de conexión');
+      
+      const datosUsuario = { email: 'juan@test.com', nombre: 'Juan' };
+      
+      try {
+        await servicio.crearUsuario(datosUsuario);
+        fail('Debería haber lanzado error');
+      } catch (error) {
+        expect(error.message).toBe('Error de conexión');
+        expect(mockNotificaciones.enviarBienvenida).not.toHaveBeenCalled();
+      }
+    });
+    
+    it("debería validar email requerido", async function() {
+      const datosUsuario = { nombre: 'Juan' }; // Sin email
+      
+      try {
+        await servicio.crearUsuario(datosUsuario);
+        fail('Debería haber lanzado error');
+      } catch (error) {
+        expect(error.message).toBe('Email requerido');
+        expect(mockBaseDatos.guardar).not.toHaveBeenCalled();
+      }
+    });
+  });
+});</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-4">
+                                <div class="col-md-4">
+                                    <div class="card text-center h-100">
+                                        <div class="card-body">
+                                            <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                                            <h6>Verificaciones</h6>
+                                            <ul class="small text-start">
+                                                <li><code>toHaveBeenCalled()</code></li>
+                                                <li><code>toHaveBeenCalledWith()</code></li>
+                                                <li><code>toHaveBeenCalledTimes()</code></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center h-100">
+                                        <div class="card-body">
+                                            <i class="fas fa-magic text-warning fa-2x mb-2"></i>
+                                            <h6>Simulaciones</h6>
+                                            <ul class="small text-start">
+                                                <li><code>.and.returnValue()</code></li>
+                                                <li><code>.and.throwError()</code></li>
+                                                <li><code>.and.callFake()</code></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center h-100">
+                                        <div class="card-body">
+                                            <i class="fas fa-tools text-info fa-2x mb-2"></i>
+                                            <h6>Creación</h6>
+                                            <ul class="small text-start">
+                                                <li><code>spyOn(obj, 'method')</code></li>
+                                                <li><code>jasmine.createSpy()</code></li>
+                                                <li><code>jasmine.createSpyObj()</code></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-user-secret me-2"></i>Demo de Spies</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-primary" onclick="showDemo('spies')">
+                                        <i class="fas fa-eye me-2"></i>Ver Spies
+                                    </button>
+                                    <button class="btn btn-success" onclick="showDemo('mocks')">
+                                        <i class="fas fa-clone me-2"></i>Ver Mocks
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Proyectos Prácticos -->
+    <div class="slide" id="slide8">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-project-diagram text-primary me-3"></i>Proyectos Prácticos para Estudiantes
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Proyecto 1: E-commerce Testing</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Crea una suite completa de tests para un carrito de compras.</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">class CarritoCompras {
+  constructor() {
+    this.productos = [];
+    this.descuentos = [];
+  }
+  
+  agregarProducto(producto) {
+    if (!producto.id || !producto.precio) {
+      throw new Error('Producto inválido');
+    }
+    this.productos.push(producto);
+  }
+  
+  calcularTotal() {
+    const subtotal = this.productos.reduce((sum, p) => sum + p.precio, 0);
+    const descuentoTotal = this.descuentos.reduce((sum, d) => sum + d, 0);
+    return Math.max(0, subtotal - descuentoTotal);
+  }
+  
+  aplicarDescuento(monto) {
+    this.descuentos.push(monto);
+  }
+}
+
+describe("CarritoCompras", function() {
+  let carrito;
+  
+  beforeEach(function() {
+    carrito = new CarritoCompras();
+  });
+  
+  describe("agregar productos", function() {
+    it("debería agregar producto válido", function() {
+      const producto = { id: 1, nombre: "Laptop", precio: 1000 };
+      carrito.agregarProducto(producto);
+      expect(carrito.productos.length).toBe(1);
+    });
+    
+    it("debería rechazar producto sin precio", function() {
+      expect(() => {
+        carrito.agregarProducto({ id: 1, nombre: "Test" });
+      }).toThrowError("Producto inválido");
+    });
+  });
+  
+  describe("calcular total", function() {
+    beforeEach(function() {
+      carrito.agregarProducto({ id: 1, precio: 100 });
+      carrito.agregarProducto({ id: 2, precio: 200 });
+    });
+    
+    it("debería sumar precios de productos", function() {
+      expect(carrito.calcularTotal()).toBe(300);
+    });
+    
+    it("debería aplicar descuentos", function() {
+      carrito.aplicarDescuento(50);
+      expect(carrito.calcularTotal()).toBe(250);
+    });
+  });
+});</code></pre>
+                                            </div>
+                                            <div class="alert alert-info small">
+                                                <strong>Aprenderás:</strong> Testing de clases, validaciones, cálculos, manejo de errores
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="fas fa-server me-2"></i>Proyecto 2: API Service Testing</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Testea un servicio que consume APIs con spies y mocks.</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">class ServicioClima {
+  constructor(httpClient) {
+    this.httpClient = httpClient;
+    this.baseUrl = 'https://api.clima.com';
+  }
+  
+  async obtenerClima(ciudad) {
+    try {
+      const respuesta = await this.httpClient.get(
+        `${this.baseUrl}/weather?city=${ciudad}`
+      );
+      return {
+        ciudad: respuesta.data.city,
+        temperatura: respuesta.data.temp,
+        descripcion: respuesta.data.description
+      };
+    } catch (error) {
+      throw new Error(`Error obteniendo clima: ${error.message}`);
+    }
+  }
+  
+  async obtenerPronostico(ciudad, dias = 5) {
+    const respuesta = await this.httpClient.get(
+      `${this.baseUrl}/forecast?city=${ciudad}&days=${dias}`
+    );
+    return respuesta.data.forecast;
+  }
+}
+
+describe("ServicioClima", function() {
+  let servicio;
+  let mockHttpClient;
+  
+  beforeEach(function() {
+    mockHttpClient = jasmine.createSpyObj('httpClient', ['get']);
+    servicio = new ServicioClima(mockHttpClient);
+  });
+  
+  describe("obtenerClima", function() {
+    it("debería retornar datos formateados", async function() {
+      // Arrange
+      const respuestaAPI = {
+        data: {
+          city: "Madrid",
+          temp: 25,
+          description: "Soleado"
+        }
+      };
+      mockHttpClient.get.and.returnValue(Promise.resolve(respuestaAPI));
+      
+      // Act
+      const resultado = await servicio.obtenerClima("Madrid");
+      
+      // Assert
+      expect(resultado).toEqual({
+        ciudad: "Madrid",
+        temperatura: 25,
+        descripcion: "Soleado"
+      });
+      expect(mockHttpClient.get).toHaveBeenCalledWith(
+        'https://api.clima.com/weather?city=Madrid'
+      );
+    });
+    
+    it("debería manejar errores de API", async function() {
+      mockHttpClient.get.and.rejectWith(new Error('Network error'));
+      
+      try {
+        await servicio.obtenerClima("Madrid");
+        fail("Debería haber lanzado error");
+      } catch (error) {
+        expect(error.message).toContain("Error obteniendo clima");
+      }
+    });
+  });
+});</code></pre>
+                                            </div>
+                                            <div class="alert alert-info small">
+                                                <strong>Aprenderás:</strong> Testing async/await, mocking HTTP, manejo de errores
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-warning">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Proyecto 3: Validador de Formularios</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Testing exhaustivo de validaciones de formularios.</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">class ValidadorFormulario {
+  static validarEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
+  
+  static validarPassword(password) {
+    const errores = [];
+    
+    if (password.length < 8) {
+      errores.push('Mínimo 8 caracteres');
+    }
+    if (!/[A-Z]/.test(password)) {
+      errores.push('Debe tener mayúscula');
+    }
+    if (!/[0-9]/.test(password)) {
+      errores.push('Debe tener número');
+    }
+    
+    return {
+      valida: errores.length === 0,
+      errores: errores
+    };
+  }
+  
+  static validarEdad(edad) {
+    return edad >= 18 && edad <= 120;
+  }
+}
+
+describe("ValidadorFormulario", function() {
+  describe("validarEmail", function() {
+    it("debería aceptar emails válidos", function() {
+      const emailsValidos = [
+        "user@domain.com",
+        "test.user+tag@example.co.uk",
+        "user123@subdomain.example.org"
+      ];
+      
+      emailsValidos.forEach(email => {
+        expect(ValidadorFormulario.validarEmail(email)).toBe(true);
+      });
+    });
+    
+    it("debería rechazar emails inválidos", function() {
+      const emailsInvalidos = [
+        "invalid-email",
+        "@domain.com",
+        "user@",
+        "user@domain",
+        ""
+      ];
+      
+      emailsInvalidos.forEach(email => {
+        expect(ValidadorFormulario.validarEmail(email)).toBe(false);
+      });
+    });
+  });
+  
+  describe("validarPassword", function() {
+    it("debería aceptar password válida", function() {
+      const resultado = ValidadorFormulario.validarPassword("MiPassword123");
+      expect(resultado.valida).toBe(true);
+      expect(resultado.errores).toEqual([]);
+    });
+    
+    it("debería detectar múltiples errores", function() {
+      const resultado = ValidadorFormulario.validarPassword("abc");
+      expect(resultado.valida).toBe(false);
+      expect(resultado.errores).toContain("Mínimo 8 caracteres");
+      expect(resultado.errores).toContain("Debe tener mayúscula");
+      expect(resultado.errores).toContain("Debe tener número");
+    });
+  });
+});</code></pre>
+                                            </div>
+                                            <div class="alert alert-info small">
+                                                <strong>Aprenderás:</strong> Testing de regex, validaciones múltiples, edge cases
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Proyecto 4: Juego de Memoria</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Testing de lógica de juego con estados y eventos.</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">class JuegoMemoria {
+  constructor() {
+    this.tablero = [];
+    this.cartasDestapadas = [];
+    this.puntuacion = 0;
+    this.intentos = 0;
+    this.juegoTerminado = false;
+  }
+  
+  inicializar(cartas) {
+    this.tablero = this.mezclarCartas([...cartas, ...cartas]);
+    this.reiniciarEstado();
+  }
+  
+  destaparCarta(indice) {
+    if (this.juegoTerminado || this.cartasDestapadas.length >= 2) {
+      return false;
+    }
+    
+    const carta = this.tablero[indice];
+    if (carta.destapada) return false;
+    
+    carta.destapada = true;
+    this.cartasDestapadas.push({ carta, indice });
+    
+    if (this.cartasDestapadas.length === 2) {
+      this.verificarPareja();
+    }
+    
+    return true;
+  }
+  
+  verificarPareja() {
+    this.intentos++;
+    const [carta1, carta2] = this.cartasDestapadas;
+    
+    if (carta1.carta.valor === carta2.carta.valor) {
+      // Pareja encontrada
+      this.puntuacion += 10;
+      this.cartasDestapadas = [];
+      this.verificarVictoria();
+    } else {
+      // No es pareja, tapar después de un delay
+      setTimeout(() => {
+        carta1.carta.destapada = false;
+        carta2.carta.destapada = false;
+        this.cartasDestapadas = [];
+      }, 1000);
+    }
+  }
+}
+
+describe("JuegoMemoria", function() {
+  let juego;
+  
+  beforeEach(function() {
+    juego = new JuegoMemoria();
+    jasmine.clock().install(); // Para controlar setTimeout
+  });
+  
+  afterEach(function() {
+    jasmine.clock().uninstall();
+  });
+  
+  describe("inicialización", function() {
+    it("debería crear tablero con cartas duplicadas", function() {
+      const cartas = [
+        { valor: 'A' },
+        { valor: 'B' },
+        { valor: 'C' }
+      ];
+      
+      juego.inicializar(cartas);
+      
+      expect(juego.tablero.length).toBe(6);
+      expect(juego.puntuacion).toBe(0);
+      expect(juego.intentos).toBe(0);
+    });
+  });
+  
+  describe("destapar cartas", function() {
+    beforeEach(function() {
+      juego.inicializar([{ valor: 'A' }, { valor: 'B' }]);
+    });
+    
+    it("debería permitir destapar primera carta", function() {
+      const resultado = juego.destaparCarta(0);
+      
+      expect(resultado).toBe(true);
+      expect(juego.cartasDestapadas.length).toBe(1);
+      expect(juego.tablero[0].destapada).toBe(true);
+    });
+    
+    it("no debería permitir destapar carta ya destapada", function() {
+      juego.destaparCarta(0);
+      const resultado = juego.destaparCarta(0);
+      
+      expect(resultado).toBe(false);
+      expect(juego.cartasDestapadas.length).toBe(1);
+    });
+    
+    it("debería verificar pareja al destapar segunda carta", function() {
+      spyOn(juego, 'verificarPareja');
+      
+      juego.destaparCarta(0);
+      juego.destaparCarta(1);
+      
+      expect(juego.verificarPareja).toHaveBeenCalled();
+      expect(juego.cartasDestapadas.length).toBe(2);
+    });
+  });
+  
+  describe("verificar parejas", function() {
+    it("debería aumentar puntuación con pareja correcta", function() {
+      // Configurar tablero con pareja conocida
+      juego.tablero = [
+        { valor: 'A', destapada: false },
+        { valor: 'A', destapada: false }
+      ];
+      juego.cartasDestapadas = [
+        { carta: juego.tablero[0], indice: 0 },
+        { carta: juego.tablero[1], indice: 1 }
+      ];
+      
+      juego.verificarPareja();
+      
+      expect(juego.puntuacion).toBe(10);
+      expect(juego.intentos).toBe(1);
+      expect(juego.cartasDestapadas.length).toBe(0);
+    });
+    
+    it("debería tapar cartas incorrectas después de delay", function() {
+      juego.tablero = [
+        { valor: 'A', destapada: true },
+        { valor: 'B', destapada: true }
+      ];
+      juego.cartasDestapadas = [
+        { carta: juego.tablero[0], indice: 0 },
+        { carta: juego.tablero[1], indice: 1 }
+      ];
+      
+      juego.verificarPareja();
+      
+      // Avanzar el tiempo simulado
+      jasmine.clock().tick(1001);
+      
+      expect(juego.tablero[0].destapada).toBe(false);
+      expect(juego.tablero[1].destapada).toBe(false);
+      expect(juego.cartasDestapadas.length).toBe(0);
+    });
+  });
+});</code></pre>
+                                            </div>
+                                            <div class="alert alert-info small">
+                                                <strong>Aprenderás:</strong> Testing con timers, estados de juego, jasmine.clock()
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5">
+                                <h4 class="text-center mb-4">🎯 Ejercicios Adicionales</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                                                <h6>Sistema de Login</h6>
+                                                <p class="small">Testea autenticación, sesiones, permisos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <i class="fas fa-chart-bar fa-2x text-warning mb-2"></i>
+                                                <h6>Dashboard Analytics</h6>
+                                                <p class="small">Testing de gráficos y métricas</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <i class="fas fa-comments fa-2x text-success mb-2"></i>
+                                                <h6>Chat en Tiempo Real</h6>
+                                                <p class="small">Testing de WebSockets y eventos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <i class="fas fa-mobile-alt fa-2x text-info mb-2"></i>
+                                                <h6>App Responsive</h6>
+                                                <p class="small">Testing cross-browser y dispositivos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-5">
+                                <h3 class="mb-3">🏆 ¡Felicitaciones!</h3>
+                                <p class="lead">Has dominado Jasmine Testing Framework</p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <button class="btn btn-primary btn-lg" onclick="showCertificate()">
+                                        <i class="fas fa-award me-2"></i>Obtener Certificado
+                                    </button>
+                                    <button class="btn btn-success btn-lg" onclick="showResources()">
+                                        <i class="fas fa-book me-2"></i>Recursos Avanzados
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.0/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+    <script>
+        let currentSlideIndex = 0;
+        const totalSlides = 8;
+
+        function updateProgressBar() {
+            const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateSlideCounter() {
+            document.getElementById('currentSlide').textContent = currentSlideIndex + 1;
+            document.getElementById('totalSlides').textContent = totalSlides;
+        }
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            const targetSlide = document.getElementById(`slide${index + 1}`);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                currentSlideIndex = index;
+                updateProgressBar();
+                updateSlideCounter();
+                
+                setTimeout(() => {
+                    Prism.highlightAll();
+                }, 100);
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                showSlide(currentSlideIndex + 1);
+            } else {
+                Swal.fire({
+                    title: '🎉 ¡Curso Completado!',
+                    text: '¡Eres un experto en Jasmine Testing!',
+                    icon: 'success',
+                    confirmButtonText: 'Reiniciar',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cerrar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showSlide(0);
+                    }
+                });
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlideIndex > 0) {
+                showSlide(currentSlideIndex - 1);
+            }
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'ArrowRight':
+                case ' ':
+                    event.preventDefault();
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    previousSlide();
+                    break;
+                case 'Home':
+                    event.preventDefault();
+                    showSlide(0);
+                    break;
+                case 'End':
+                    event.preventDefault();
+                    showSlide(totalSlides - 1);
+                    break;
+            }
+        });
+
+        // Demos interactivos
+        function showDemo(type) {
+            const demos = {
+                'intro': {
+                    title: '🧪 ¿Por qué Testing?',
+                    html: `
+                        <div class="text-left">
+                            <h5>El testing automatizado te permite:</h5>
+                            <ul>
+                                <li>✅ <strong>Detectar bugs temprano</strong> - Antes que lleguen a producción</li>
+                                <li>✅ <strong>Refactorizar con confianza</strong> - Cambiar código sin romper funcionalidad</li>
+                                <li>✅ <strong>Documentar comportamiento</strong> - Los tests son documentación viviente</li>
+                                <li>✅ <strong>Mejorar diseño</strong> - Código testeable es mejor código</li>
+                                <li>✅ <strong>Dormir tranquilo</strong> - Tu código funciona como esperas</li>
+                            </ul>
+                            <div class="alert alert-success mt-3">
+                                <strong>Jasmine hace que escribir tests sea fácil y divertido!</strong>
+                            </div>
+                        </div>
+                    `
+                },
+                'setup': {
+                    title: '⚙️ Setup Completo',
+                    html: `
+                        <div class="text-left">
+                            <h5>Pasos para configurar Jasmine:</h5>
+                            <ol>
+                                <li><strong>Crear proyecto:</strong> <code>mkdir mi-proyecto && cd mi-proyecto</code></li>
+                                <li><strong>Inicializar npm:</strong> <code>npm init -y</code></li>
+                                <li><strong>Instalar Jasmine:</strong> <code>npm install --save-dev jasmine</code></li>
+                                <li><strong>Configurar:</strong> <code>npx jasmine init</code></li>
+                                <li><strong>Crear primer test:</strong> En carpeta <code>spec/</code></li>
+                                <li><strong>Ejecutar:</strong> <code>npm test</code></li>
+                            </ol>
+                            <div class="alert alert-info mt-3">
+                                <strong>¡Y ya tienes testing profesional configurado!</strong>
+                            </div>
+                        </div>
+                    `
+                },
+                'firstTest': {
+                    title: '🚀 Ejecución del Primer Test',
+                    html: `
+                        <div class="text-left">
+                            <h5>Al ejecutar <code>npm test</code> verás:</h5>
+                            <div style="background: #000; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace;">
+                                Started<br>
+                                ✓ Calculadora debería sumar números positivos<br>
+                                ✓ Calculadora debería sumar números negativos<br>
+                                ✓ Calculadora debería sumar cero correctamente<br>
+                                ✓ Calculadora debería dividir números normalmente<br>
+                                ✓ Calculadora debería lanzar error al dividir por cero<br><br>
+                                <span style="color: #0f0;">5 specs, 0 failures</span><br>
+                                Finished in 0.008 seconds
+                            </div>
+                            <p class="mt-3"><strong>¡Cada ✓ es un test que pasa!</strong></p>
+                        </div>
+                    `
+                },
+                'testStructure': {
+                    title: '🏗️ Estructura de Tests',
+                    html: `
+                        <div class="text-left">
+                            <h5>Anatomía de un test Jasmine:</h5>
+                            <ul>
+                                <li><strong><code>describe("Suite")</code></strong> - Agrupa tests relacionados</li>
+                                <li><strong><code>it("especificación")</code></strong> - Un test individual</li>
+                                <li><strong><code>expect(valor)</code></strong> - Lo que verificamos</li>
+                                <li><strong><code>.toBe(esperado)</code></strong> - El matcher/comparación</li>
+                            </ul>
+                            <div class="alert alert-success mt-3">
+                                <strong>Tip:</strong> Los nombres de tests deben completar la frase:<br>
+                                "It should [nombre del test]" → "Debería [nombre del test]"
+                            </div>
+                        </div>
+                    `
+                },
+                'matchers': {
+                    title: '🎯 Demo de Matchers',
+                    html: `
+                        <div class="text-left">
+                            <h5>Ejemplos de matchers en acción:</h5>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                <code>expect(2 + 2).toBe(4)</code> ✅<br>
+                                <code>expect({a:1}).toEqual({a:1})</code> ✅<br>
+                                <code>expect("hello").toContain("ell")</code> ✅<br>
+                                <code>expect(null).toBeNull()</code> ✅<br>
+                                <code>expect(0.1 + 0.2).toBeCloseTo(0.3)</code> ✅<br>
+                                <code>expect(() => { throw Error() }).toThrow()</code> ✅
+                            </div>
+                            <p class="mt-3"><strong>Cada matcher está diseñado para una situación específica!</strong></p>
+                        </div>
+                    `
+                },
+                'hooks': {
+                    title: '🪝 Hooks en Acción',
+                    html: `
+                        <div class="text-left">
+                            <h5>Orden de ejecución:</h5>
+                            <ol>
+                                <li><strong>beforeAll()</strong> - Una vez al inicio</li>
+                                <li><strong>beforeEach()</strong> - Antes de cada test</li>
+                                <li><strong>it("test 1")</strong> - Primer test</li>
+                                <li><strong>afterEach()</strong> - Después del test 1</li>
+                                <li><strong>beforeEach()</strong> - Antes del test 2</li>
+                                <li><strong>it("test 2")</strong> - Segundo test</li>
+                                <li><strong>afterEach()</strong> - Después del test 2</li>
+                                <li><strong>afterAll()</strong> - Una vez al final</li>
+                            </ol>
+                            <div class="alert alert-info mt-3">
+                                <strong>Los hooks mantienen tus tests limpios y organizados!</strong>
+                            </div>
+                        </div>
+                    `
+                },
+                'spies': {
+                    title: '🕵️ Spies en Acción',
+                    html: `
+                        <div class="text-left">
+                            <h5>¿Qué puede hacer un Spy?</h5>
+                            <ul>
+                                <li>🔍 <strong>Verificar llamadas:</strong> ¿Se ejecutó la función?</li>
+                                <li>📝 <strong>Capturar argumentos:</strong> ¿Con qué parámetros?</li>
+                                <li>🔢 <strong>Contar ejecuciones:</strong> ¿Cuántas veces?</li>
+                                <li>🎭 <strong>Simular respuestas:</strong> Controlar qué retorna</li>
+                                <li>💥 <strong>Simular errores:</strong> Probar casos de error</li>
+                            </ul>
+                            <div class="alert alert-success mt-3">
+                                <strong>Los spies te permiten testear sin dependencias externas!</strong>
+                            </div>
+                        </div>
+                    `
+                },
+                'mocks': {
+                    title: '🎭 Mocks Explicados',
+                    html: `
+                        <div class="text-left">
+                            <h5>Diferencias clave:</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h6>🕵️ Spy</h6>
+                                    <ul class="small">
+                                        <li>Espía función existente</li>
+                                        <li>Puede llamar original</li>
+                                        <li>Verifica comportamiento</li>
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <h6>🎭 Mock</h6>
+                                    <ul class="small">
+                                        <li>Reemplaza completamente</li>
+                                        <li>Comportamiento controlado</li>
+                                        <li>Simula dependencias</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning mt-3">
+                                <strong>Usa mocks para aislar tu código de dependencias externas!</strong>
+                            </div>
+                        </div>
+                    `
+                }
+            };
+            
+            const demo = demos[type];
+            if (demo) {
+                Swal.fire({
+                    title: demo.title,
+                    html: demo.html,
+                    width: '600px',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#8e44ad'
+                });
+            }
+        }
+
+        function showCertificate() {
+            Swal.fire({
+                title: '🏆 ¡Certificado de Jasmine Expert!',
+                html: `
+                    <div style="border: 3px solid #8e44ad; padding: 20px; border-radius: 15px; background: linear-gradient(135deg, #8e44ad, #3498db); color: white;">
+                        <h3>🧪 Certificado de Especialización</h3>
+                        <p>Este certifica que has dominado</p>
+                        <h4><strong>Jasmine Testing Framework</strong></h4>
+                        <p><em>Behavior Driven Development & Unit Testing</em></p>
+                        <hr style="border-color: rgba(255,255,255,0.3);">
+                        <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
+                        <p><strong>Competencias dominadas:</strong></p>
+                        <small>BDD • Unit Testing • Spies & Mocks • Hooks • Matchers • Async Testing</small>
+                        <div class="mt-3">
+                            <i class="fas fa-vial fa-2x"></i>
+                        </div>
+                    </div>
+                `,
+                width: '500px',
+                confirmButtonText: 'Descargar PDF',
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '📥 Descarga Lista',
+                        text: 'Función de descarga disponible en versión completa',
+                        timer: 2000
+                    });
+                }
+            });
+        }
+
+        function showResources() {
+            Swal.fire({
+                title: '📚 Recursos Avanzados de Jasmine',
+                html: `
+                    <div class="text-left">
+                        <h5>📖 Documentación Oficial:</h5>
+                        <ul>
+                            <li>🌐 <a href="https://jasmine.github.io/" target="_blank">Jasmine.github.io</a></li>
+                            <li>📚 <a href="https://jasmine.github.io/api/" target="_blank">API Documentation</a></li>
+                        </ul>
+                        
+                        <h5>🚀 Herramientas Complementarias:</h5>
+                        <ul>
+                            <li>⚡ <strong>Karma:</strong> Test runner para navegadores</li>
+                            <li>🔧 <strong>Protractor:</strong> E2E testing (Angular)</li>
+                            <li>📊 <strong>Istanbul:</strong> Code coverage</li>
+                            <li>🌐 <strong>Jest:</strong> Alternativa moderna</li>
+                        </ul>
+                        
+                        <h5>💡 Conceptos Avanzados:</h5>
+                        <ul>
+                            <li>🎯 Custom Matchers</li>
+                            <li>🔄 Async/Await Testing</li>
+                            <li>📱 Testing en React/Angular</li>
+                            <li>🏗️ Test Architecture Patterns</li>
+                            <li>📈 TDD & BDD Workflows</li>
+                        </ul>
+                        
+                        <h5>🎓 Siguiente Nivel:</h5>
+                        <ul>
+                            <li>🧪 Integration Testing</li>
+                            <li>🌐 Cross-browser Testing</li>
+                            <li>⚡ Performance Testing</li>
+                            <li>🤖 Visual Regression Testing</li>
+                        </ul>
+                    </div>
+                `,
+                width: '700px',
+                confirmButtonText: 'Guardar Enlaces',
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar'
+            });
+        }
+
+        // Inicializar presentación
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgressBar();
+            updateSlideCounter();
+            Prism.highlightAll();
+            
+            // Mensaje de bienvenida
+            setTimeout(() => {
+                Swal.fire({
+                    title: '🧪 ¡Bienvenido a Jasmine!',
+                    text: 'Aprenderás testing profesional con JavaScript. ¡Empecemos!',
+                    icon: 'info',
+                    iconColor: '#8e44ad',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    background: '#fff',
+                    customClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    }
+                });
+            }, 1000);
+        });
+
+        // Funciones adicionales para mejorar la experiencia
+        function showTestResults() {
+            Swal.fire({
+                title: '📊 Resultados de Testing',
+                html: `
+                    <div class="text-left">
+                        <h5>Estado de los Tests:</h5>
+                        <div class="mb-3">
+                            <span class="test-status test-pass">✓ Calculadora - Suma</span>
+                            <span class="test-status test-pass">✓ Calculadora - Resta</span>
+                            <span class="test-status test-pass">✓ Calculadora - Multiplicación</span>
+                            <span class="test-status test-fail">✗ Calculadora - División</span>
+                            <span class="test-status test-pending">⏸ Calculadora - Raíz cuadrada</span>
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>Resumen:</strong> 3 pasaron, 1 falló, 1 pendiente<br>
+                            <strong>Cobertura:</strong> 85% del código testeado
+                        </div>
+                    </div>
+                `,
+                width: '500px',
+                confirmButtonText: 'Entendido'
+            });
+        }
+
+        // Easter egg - Konami Code para mostrar estadísticas avanzadas
+        let konamiCode = [38,38,40,40,37,39,37,39,66,65];
+        let konamiIndex = 0;
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    konamiIndex = 0;
+                    Swal.fire({
+                        title: '🎊 ¡Easter Egg Encontrado!',
+                        text: '¡Has desbloqueado el modo desarrollador experto!',
+                        icon: 'success',
+                        confirmButtonText: '¡Genial!',
+                        footer: '<small>Konami Code detectado 🎮</small>'
+                    });
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        // Función para simular ejecución de tests
+        function runLiveTest() {
+            let testResults = [
+                '🚀 Iniciando suite de tests...',
+                '✅ describe("Calculadora")',
+                '  ✅ it("debería sumar números positivos")',
+                '  ✅ it("debería restar números")',
+                '  ✅ it("debería multiplicar")',
+                '  ❌ it("debería dividir por cero") - Error: División por cero no controlada',
+                '📊 Resultados: 3 pasaron, 1 falló',
+                '🎯 Cobertura de código: 87%'
+            ];
+            
+            Swal.fire({
+                title: '🧪 Ejecutando Tests en Vivo',
+                html: '<div id="testOutput" style="text-align: left; font-family: monospace; background: #000; color: #0f0; padding: 15px; border-radius: 8px; min-height: 200px;"></div>',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    const output = document.getElementById('testOutput');
+                    let i = 0;
+                    const interval = setInterval(() => {
+                        if (i < testResults.length) {
+                            output.innerHTML += testResults[i] + '<br>';
+                            i++;
+                        } else {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                Swal.close();
+                            }, 2000);
+                        }
+                    }, 800);
+                }
+            });
+        }
+
+        // Agregar función al objeto window para uso global
+        window.runLiveTest = runLiveTest;
+        window.showTestResults = showTestResults;
+
+        // Mejorar accesibilidad
+        document.addEventListener('focus', function(e) {
+            if (e.target.matches('button, a, input')) {
+                e.target.style.outline = '2px solid #8e44ad';
+            }
+        });
+
+        document.addEventListener('blur', function(e) {
+            if (e.target.matches('button, a, input')) {
+                e.target.style.outline = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

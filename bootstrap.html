@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap - Presentación Interactiva</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.12/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --text-light: #ecf0f1;
+            --bg-light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            min-height: 100vh;
+            color: var(--text-light);
+        }
+
+        .presentation-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .slide {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            color: var(--primary-color);
+            min-height: 500px;
+        }
+
+        .slide.active {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .slide h2 {
+            color: var(--secondary-color);
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .grid-example {
+            background: var(--bg-light);
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .grid-example .row > div {
+            background: var(--accent-color);
+            color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .breakpoint-table {
+            background: var(--bg-light);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: var(--bg-light);
+            border-left: 4px solid var(--accent-color);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .quiz-option {
+            background: var(--bg-light);
+            border: 2px solid #dee2e6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-color);
+            background: #e8f4f8;
+        }
+
+        .progress-bar-container {
+            background: rgba(255, 255, 255, 0.2);
+            height: 6px;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: var(--accent-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .icon-large {
+            font-size: 3em;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="presentation-container">
+            <!-- Barra de progreso -->
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <!-- Diapositiva 1: Título -->
+            <div class="slide active" id="slide1">
+                <div class="text-center">
+                    <i class="fab fa-bootstrap icon-large"></i>
+                    <h1>Bootstrap Framework</h1>
+                    <p class="lead">Una introducción completa al framework CSS más popular del mundo</p>
+                    <hr>
+                    <p><i class="fas fa-user-graduate"></i> Presentación interactiva para el aula</p>
+                    <p><i class="fas fa-calendar"></i> 2024</p>
+                </div>
+            </div>
+
+            <!-- Diapositiva 2: ¿Qué es Bootstrap? -->
+            <div class="slide" id="slide2">
+                <div class="slide-counter">2 / 18</div>
+                <h1><i class="fas fa-question-circle"></i> ¿Qué es Bootstrap?</h1>
+                
+                <div class="feature-card">
+                    <h3><i class="fas fa-code"></i> Definición</h3>
+                    <p>Bootstrap es un <strong>framework front-end</strong> gratuito y de código abierto que facilita el desarrollo de sitios web responsive y mobile-first.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3><i class="fas fa-history"></i> Historia</h3>
+                    <p>Creado por <strong>Mark Otto</strong> y <strong>Jacob Thornton</strong> en Twitter en 2010. Originalmente llamado "Twitter Blueprint".</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3><i class="fas fa-star"></i> Popularidad</h3>
+                    <p>Es el framework CSS más popular en GitHub con más de <strong>160,000 estrellas</strong> y utilizado por millones de desarrolladores.</p>
+                </div>
+            </div>
+
+            <!-- Diapositiva 3: Para qué sirve Bootstrap -->
+            <div class="slide" id="slide3">
+                <div class="slide-counter">3 / 12</div>
+                <h1><i class="fas fa-tools"></i> ¿Para qué sirve Bootstrap?</h1>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-mobile-alt"></i> Desarrollo Responsive</h4>
+                            <p>Crea sitios que se adaptan automáticamente a diferentes tamaños de pantalla.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-clock"></i> Desarrollo Rápido</h4>
+                            <p>Acelera el proceso de desarrollo con componentes pre-construidos.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-paint-brush"></i> Consistencia Visual</h4>
+                            <p>Mantiene un diseño coherente en todo el proyecto.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-puzzle-piece"></i> Componentes Listos</h4>
+                            <p>Incluye botones, formularios, navegación, modales y mucho más.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 3: Para qué sirve Bootstrap -->
+            <div class="slide" id="slide3">
+                <div class="slide-counter">3 / 18</div>
+                <h1><i class="fas fa-tools"></i> ¿Para qué sirve Bootstrap?</h1>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-mobile-alt"></i> Desarrollo Responsive</h4>
+                            <p>Crea sitios que se adaptan automáticamente a diferentes tamaños de pantalla.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-clock"></i> Desarrollo Rápido</h4>
+                            <p>Acelera el proceso de desarrollo con componentes pre-construidos.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-paint-brush"></i> Consistencia Visual</h4>
+                            <p>Mantiene un diseño coherente en todo el proyecto.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-puzzle-piece"></i> Componentes Listos</h4>
+                            <p>Incluye botones, formularios, navegación, modales y mucho más.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 4: Ejemplos de Componentes -->
+            <div class="slide" id="slide4">
+                <div class="slide-counter">4 / 18</div>
+                <h1><i class="fas fa-cubes"></i> Ejemplos de Componentes</h1>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-mouse-pointer"></i> Botones</h4>
+                            <div class="mb-3">
+                                <button class="btn btn-primary me-2">Primary</button>
+                                <button class="btn btn-success me-2">Success</button>
+                                <button class="btn btn-warning me-2">Warning</button>
+                                <button class="btn btn-danger">Danger</button>
+                            </div>
+                            <small><code>.btn .btn-primary</code></small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Alertas</h4>
+                            <div class="alert alert-success mb-2" role="alert">
+                                <i class="fas fa-check-circle"></i> ¡Operación exitosa!
+                            </div>
+                            <div class="alert alert-warning mb-0" role="alert">
+                                <i class="fas fa-exclamation-triangle"></i> Ten cuidado con esto
+                            </div>
+                            <small><code>.alert .alert-success</code></small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-id-card"></i> Cards</h4>
+                            <div class="card" style="width: 100%;">
+                                <div class="card-body">
+                                    <h5 class="card-title">Título de la Card</h5>
+                                    <p class="card-text">Contenido de la tarjeta con información relevante.</p>
+                                    <a href="#" class="btn btn-primary btn-sm">Acción</a>
+                                </div>
+                            </div>
+                            <small><code>.card .card-body</code></small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-list"></i> Badges y Progress</h4>
+                            <div class="mb-2">
+                                <span class="badge bg-primary me-1">Nuevo</span>
+                                <span class="badge bg-success me-1">Activo</span>
+                                <span class="badge bg-warning me-1">Pendiente</span>
+                                <span class="badge bg-danger">Urgente</span>
+                            </div>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-success" style="width: 75%;">75%</div>
+                            </div>
+                            <small><code>.badge .progress .progress-bar</code></small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-bell"></i> Toast</h4>
+                            <div class="toast show" style="position: relative;">
+                                <div class="toast-header">
+                                    <strong class="me-auto">Bootstrap</strong>
+                                    <small>hace 2 min</small>
+                                </div>
+                                <div class="toast-body">
+                                    ¡Notificación de ejemplo!
+                                </div>
+                            </div>
+                            <small><code>.toast .toast-header .toast-body</code></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 5: Quiz 1 -->
+            <div class="slide" id="slide5">
+                <div class="slide-counter">5 / 18</div>
+                <h1><i class="fas fa-question"></i> Pregunta 1</h1>
+                <div class="text-center">
+                    <h3>¿Quiénes crearon Bootstrap?</h3>
+                    <div class="quiz-option" onclick="checkAnswer(1, false)">
+                        A) Bill Gates y Steve Jobs
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(1, true)">
+                        B) Mark Otto y Jacob Thornton
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(1, false)">
+                        C) Larry Page y Sergey Brin
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(1, false)">
+                        D) Mark Zuckerberg y Eduardo Saverin
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 6: Sistema de Grillas -->
+            <div class="slide" id="slide6">
+                <div class="slide-counter">6 / 18</div>
+                <h1><i class="fas fa-th"></i> Sistema de Grillas</h1>
+                
+                <p class="lead">El sistema de grillas de Bootstrap está basado en <strong>12 columnas</strong> y utiliza Flexbox.</p>
+
+                <h3>Conceptos Clave:</h3>
+                <ul>
+                    <li><strong>Container:</strong> Envuelve el contenido y proporciona padding</li>
+                    <li><strong>Row:</strong> Agrupa las columnas horizontalmente</li>
+                    <li><strong>Column:</strong> Define el ancho del contenido</li>
+                </ul>
+
+                <div class="grid-example">
+                    <h4>Ejemplo Visual:</h4>
+                    <div class="row">
+                        <div class="col-4">col-4</div>
+                        <div class="col-4">col-4</div>
+                        <div class="col-4">col-4</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">col-6</div>
+                        <div class="col-6">col-6</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">col-12</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 7: Más Ejemplos de Grillas -->
+            <div class="slide" id="slide7">
+                <div class="slide-counter">7 / 18</div>
+                <h1><i class="fas fa-th-large"></i> Más Ejemplos de Grillas</h1>
+                
+                <div class="feature-card">
+                    <h3>Combinaciones Comunes:</h3>
+                    
+                    <div class="grid-example mb-4">
+                        <h5>Dos Columnas (50% - 50%)</h5>
+                        <div class="row">
+                            <div class="col-6">col-6</div>
+                            <div class="col-6">col-6</div>
+                        </div>
+                        <small><code>&lt;div class="col-6"&gt;</code></small>
+                    </div>
+                    
+                    <div class="grid-example mb-4">
+                        <h5>Tres Columnas (33% - 33% - 33%)</h5>
+                        <div class="row">
+                            <div class="col-4">col-4</div>
+                            <div class="col-4">col-4</div>
+                            <div class="col-4">col-4</div>
+                        </div>
+                        <small><code>&lt;div class="col-4"&gt;</code></small>
+                    </div>
+                    
+                    <div class="grid-example mb-4">
+                        <h5>Layout Asimétrico (25% - 75%)</h5>
+                        <div class="row">
+                            <div class="col-3">col-3 (Sidebar)</div>
+                            <div class="col-9">col-9 (Contenido Principal)</div>
+                        </div>
+                        <small><code>&lt;div class="col-3"&gt; y &lt;div class="col-9"&gt;</code></small>
+                    </div>
+                    
+                    <div class="grid-example">
+                        <h5>Cuatro Columnas (25% cada una)</h5>
+                        <div class="row">
+                            <div class="col-3">col-3</div>
+                            <div class="col-3">col-3</div>
+                            <div class="col-3">col-3</div>
+                            <div class="col-3">col-3</div>
+                        </div>
+                        <small><code>&lt;div class="col-3"&gt;</code></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 8: Estructura HTML -->
+            <div class="slide" id="slide8">
+                <div class="slide-counter">8 / 18</div>
+                <h1><i class="fas fa-code"></i> Estructura HTML Básica</h1>
+                
+                <div class="feature-card">
+                    <h3>Estructura típica de Bootstrap:</h3>
+                    <pre><code>&lt;div class="container"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-4"&gt;
+      Columna 1
+    &lt;/div&gt;
+    &lt;div class="col-md-4"&gt;
+      Columna 2
+    &lt;/div&gt;
+    &lt;div class="col-md-4"&gt;
+      Columna 3
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-square"></i> Container</h4>
+                        <ul>
+                            <li><code>.container</code> - Ancho fijo</li>
+                            <li><code>.container-fluid</code> - Ancho completo</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-columns"></i> Columnas</h4>
+                        <ul>
+                            <li>Máximo 12 columnas por fila</li>
+                            <li>Se pueden combinar diferentes anchos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 9: Ejemplos Prácticos con Código -->
+            <div class="slide" id="slide9">
+                <div class="slide-counter">9 / 18</div>
+                <h1><i class="fas fa-code"></i> Ejemplos Prácticos con Código</h1>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4>Layout de Blog</h4>
+                            <pre><code>&lt;div class="container"&gt;
+  &lt;div class="row"&gt;
+    &lt;main class="col-md-8"&gt;
+      &lt;!-- Artículos --&gt;
+    &lt;/main&gt;
+    &lt;aside class="col-md-4"&gt;
+      &lt;!-- Sidebar --&gt;
+    &lt;/aside&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            <small>Layout típico: 67% contenido, 33% sidebar</small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>Galería de Productos</h4>
+                            <pre><code>&lt;div class="row"&gt;
+  &lt;div class="col-sm-6 col-md-4 col-lg-3"&gt;
+    &lt;!-- Producto 1 --&gt;
+  &lt;/div&gt;
+  &lt;div class="col-sm-6 col-md-4 col-lg-3"&gt;
+    &lt;!-- Producto 2 --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            <small>Responsive: 1→2→3→4 columnas</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4>Header con Navegación</h4>
+                            <pre><code>&lt;div class="container"&gt;
+  &lt;div class="row align-items-center"&gt;
+    &lt;div class="col-md-3"&gt;
+      &lt;!-- Logo --&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-9"&gt;
+      &lt;!-- Menú --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            <small>Logo pequeño, menú amplio</small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>Dashboard</h4>
+                            <pre><code>&lt;div class="row"&gt;
+  &lt;div class="col-lg-2"&gt;
+    &lt;!-- Sidebar menú --&gt;
+  &lt;/div&gt;
+  &lt;div class="col-lg-10"&gt;
+    &lt;!-- Contenido dashboard --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            <small>Sidebar estrecho, contenido amplio</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 10: Quiz 2 -->
+            <div class="slide" id="slide10">
+                <div class="slide-counter">10 / 18</div>
+                <h1><i class="fas fa-question"></i> Pregunta 2</h1>
+                <div class="text-center">
+                    <h3>¿Cuántas columnas tiene el sistema de grillas de Bootstrap?</h3>
+                    <div class="quiz-option" onclick="checkAnswer(2, false)">
+                        A) 10 columnas
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(2, true)">
+                        B) 12 columnas
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(2, false)">
+                        C) 16 columnas
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(2, false)">
+                        D) 24 columnas
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 11: Breakpoints -->
+            <div class="slide" id="slide11">
+                <div class="slide-counter">11 / 18</div>
+                <h1><i class="fas fa-mobile-alt"></i> Breakpoints y Tamaños de Pantalla</h1>
+                
+                <p class="lead">Bootstrap define 6 breakpoints para diferentes tamaños de dispositivos:</p>
+
+                <div class="breakpoint-table">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Breakpoint</th>
+                                <th>Prefijo de Clase</th>
+                                <th>Ancho Mínimo</th>
+                                <th>Dispositivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Extra Small</strong></td>
+                                <td><code>col-</code></td>
+                                <td>&lt; 576px</td>
+                                <td>Teléfonos</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Small</strong></td>
+                                <td><code>col-sm-</code></td>
+                                <td>≥ 576px</td>
+                                <td>Teléfonos grandes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Medium</strong></td>
+                                <td><code>col-md-</code></td>
+                                <td>≥ 768px</td>
+                                <td>Tablets</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Large</strong></td>
+                                <td><code>col-lg-</code></td>
+                                <td>≥ 992px</td>
+                                <td>Laptops</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Extra Large</strong></td>
+                                <td><code>col-xl-</code></td>
+                                <td>≥ 1200px</td>
+                                <td>Desktops</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Extra Extra Large</strong></td>
+                                <td><code>col-xxl-</code></td>
+                                <td>≥ 1400px</td>
+                                <td>Pantallas grandes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Diapositiva 12: Ejemplos de Breakpoints en Acción -->
+            <div class="slide" id="slide12">
+                <div class="slide-counter">12 / 18</div>
+                <h1><i class="fas fa-expand-arrows-alt"></i> Ejemplos de Breakpoints en Acción</h1>
+                
+                <div class="feature-card">
+                    <h3>Casos Reales de Uso:</h3>
+                    
+                    <div class="mb-4">
+                        <h4><i class="fas fa-store"></i> E-commerce</h4>
+                        <div class="grid-example">
+                            <div class="row">
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                    <div style="background: #8e44ad; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+                                        Producto 1<br>
+                                        <small>XS:12 SM:6 MD:4 LG:3</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                    <div style="background: #e67e22; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+                                        Producto 2<br>
+                                        <small>1→2→3→4 por fila</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                    <div style="background: #16a085; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+                                        Producto 3<br>
+                                        <small>Responsive Grid</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                    <div style="background: #c0392b; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+                                        Producto 4<br>
+                                        <small>col-*-*</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <small><code>col-12 col-sm-6 col-md-4 col-lg-3</code></small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h4><i class="fas fa-newspaper"></i> Layout de Noticias</h4>
+                        <div class="grid-example">
+                            <div class="row">
+                                <div class="col-12 col-lg-8">
+                                    <div style="background: #2980b9; color: white; padding: 20px; border-radius: 5px; margin-bottom: 10px;">
+                                        Artículo Principal<br>
+                                        <small>Móvil: Ancho completo | Desktop: 67%</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-4">
+                                    <div style="background: #7f8c8d; color: white; padding: 20px; border-radius: 5px; margin-bottom: 10px;">
+                                        Sidebar<br>
+                                        <small>Móvil: Ancho completo | Desktop: 33%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <small><code>col-12 col-lg-8</code> y <code>col-12 col-lg-4</code></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 13: Ejemplos Responsive -->
+            <div class="slide" id="slide13">
+                <div class="slide-counter">13 / 18</div>
+                <h1><i class="fas fa-laptop-mobile"></i> Ejemplos Responsive</h1>
+                
+                <div class="feature-card">
+                    <h3>Comportamiento Responsive:</h3>
+                    <p><code>col-12 col-md-6 col-lg-4</code></p>
+                    <ul>
+                        <li><strong>Móviles:</strong> 12 columnas (ancho completo)</li>
+                        <li><strong>Tablets:</strong> 6 columnas (mitad del ancho)</li>
+                        <li><strong>Desktop:</strong> 4 columnas (tercio del ancho)</li>
+                    </ul>
+                </div>
+
+                <div class="grid-example">
+                    <h4>Demostración Visual:</h4>
+                    <div class="row">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div style="background: #e74c3c; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+                                Responsive Box 1
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div style="background: #27ae60; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+                                Responsive Box 2
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div style="background: #f39c12; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+                                Responsive Box 3
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 14: Clases Utilitarias -->
+            <div class="slide" id="slide14">
+                <div class="slide-counter">14 / 18</div>
+                <h1><i class="fas fa-magic"></i> Clases Utilitarias</h1>
+                
+                <p class="lead">Bootstrap incluye muchas clases utilitarias para estilos rápidos</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-arrows-alt"></i> Espaciado (Margin/Padding)</h4>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                                <div style="background: #3498db; color: white; padding: 10px;" class="mb-3">mb-3 (margin-bottom)</div>
+                                <div style="background: #e74c3c; color: white; padding: 10px;" class="p-4">p-4 (padding all)</div>
+                            </div>
+                            <small><code>.m-* .p-* .mt-* .mb-* .ms-* .me-*</code></small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-font"></i> Tipografía</h4>
+                            <p class="text-start">text-start (izquierda)</p>
+                            <p class="text-center">text-center (centro)</p>
+                            <p class="text-end">text-end (derecha)</p>
+                            <p class="fw-bold">fw-bold (negrita)</p>
+                            <p class="fst-italic">fst-italic (cursiva)</p>
+                            <small><code>.text-* .fw-* .fst-*</code></small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-palette"></i> Colores</h4>
+                            <div class="mb-2">
+                                <span class="badge bg-primary me-1">bg-primary</span>
+                                <span class="badge bg-success me-1">bg-success</span>
+                                <span class="badge bg-warning me-1">bg-warning</span>
+                                <span class="badge bg-danger">bg-danger</span>
+                            </div>
+                            <div class="mb-3">
+                                <p class="text-primary mb-1">text-primary</p>
+                                <p class="text-success mb-1">text-success</p>
+                                <p class="text-warning mb-1">text-warning</p>
+                                <p class="text-danger mb-0">text-danger</p>
+                            </div>
+                            <small><code>.bg-* .text-*</code></small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-eye"></i> Visibilidad</h4>
+                            <div class="mb-2">
+                                <div class="d-block bg-info text-white p-2 mb-1" style="border-radius: 3px;">d-block (visible)</div>
+                                <div class="d-none bg-secondary text-white p-2 mb-1" style="border-radius: 3px;">d-none (oculto)</div>
+                                <div class="d-none d-md-block bg-success text-white p-2" style="border-radius: 3px;">d-none d-md-block</div>
+                            </div>
+                            <small><code>.d-* .d-md-* .d-lg-*</code></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 15: Quiz 3 -->
+            <div class="slide" id="slide15">
+                <div class="slide-counter">15 / 18</div>
+                <h1><i class="fas fa-question"></i> Pregunta 3</h1>
+                <div class="text-center">
+                    <h3>¿Qué prefijo se usa para tablets en Bootstrap?</h3>
+                    <div class="quiz-option" onclick="checkAnswer(3, false)">
+                        A) col-sm-
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(3, true)">
+                        B) col-md-
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(3, false)">
+                        C) col-lg-
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(3, false)">
+                        D) col-xl-
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 16: Quiz 4 -->
+            <div class="slide" id="slide16">
+                <div class="slide-counter">16 / 18</div>
+                <h1><i class="fas fa-question"></i> Pregunta 4</h1>
+                <div class="text-center">
+                    <h3>¿Cuál es la clase correcta para ocultar un elemento solo en dispositivos móviles?</h3>
+                    <div class="quiz-option" onclick="checkAnswer(4, true)">
+                        A) d-none d-md-block
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(4, false)">
+                        B) d-block d-md-none
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(4, false)">
+                        C) hidden-xs
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(4, false)">
+                        D) invisible-mobile
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diapositiva 17: Ejemplos de Formularios -->
+            <div class="slide" id="slide17">
+                <div class="slide-counter">17 / 18</div>
+                <h1><i class="fas fa-wpforms"></i> Ejemplos de Formularios</h1>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4>Formulario Básico</h4>
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" placeholder="tu@email.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input">
+                                    <label class="form-check-label">Recordarme</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enviar</button>
+                            </form>
+                            <small class="mt-2 d-block"><code>.form-control .form-label .form-check</code></small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4>Controles de Formulario</h4>
+                            <div class="mb-3">
+                                <label class="form-label">Select</label>
+                                <select class="form-select">
+                                    <option>Opción 1</option>
+                                    <option>Opción 2</option>
+                                    <option>Opción 3</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Textarea</label>
+                                <textarea class="form-control" rows="3" placeholder="Tu mensaje..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Rango</label>
+                                <input type="range" class="form-range">
+                            </div>
+                            <small><code>.form-select .form-range</code></small>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>Input Groups</h4>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">@</span>
+                                <input type="text" class="form-control" placeholder="Usuario">
+                            </div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Buscar...">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <small class="mt-2 d-block"><code>.input-group .input-group-text</code></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" id="slide18">
+                <div class="slide-counter">18 / 18</div>
+                <h1><i class="fas fa-star"></i> Ventajas de Bootstrap</h1>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-rocket"></i> Rapidez</h4>
+                            <p>Acelera significativamente el desarrollo web</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-users"></i> Comunidad</h4>
+                            <p>Gran comunidad y abundante documentación</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-mobile-alt"></i> Mobile-First</h4>
+                            <p>Diseñado primero para dispositivos móviles</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h4><i class="fas fa-puzzle-piece"></i> Modular</h4>
+                            <p>Puedes usar solo las partes que necesites</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-paint-brush"></i> Personalizable</h4>
+                            <p>Fácil de customizar con SASS/SCSS</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4><i class="fas fa-check"></i> Compatibilidad</h4>
+                            <p>Compatible con todos los navegadores modernos</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <div class="feature-card">
+                        <h3>🎉 ¡Felicitaciones!</h3>
+                        <p class="lead">Has completado la introducción a Bootstrap</p>
+                        <div class="mt-3">
+                            <button class="btn btn-primary me-2" onclick="restartPresentation()">
+                                <i class="fas fa-redo"></i> Reiniciar
+                            </button>
+                            <button class="btn btn-success" onclick="showFinalScore()">
+                                <i class="fas fa-chart-bar"></i> Ver Resultados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegación -->
+            <div class="navigation">
+                <button class="nav-btn" onclick="previousSlide()" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <span id="slideInfo" style="color: white; margin: 0 20px;">1 / 18</span>
+                <button class="nav-btn" onclick="nextSlide()" id="nextBtn">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.12/sweetalert2.all.min.js"></script>
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 18;
+        let score = 0;
+        let questionsAnswered = 0;
+
+        // Actualizar barra de progreso
+        function updateProgress() {
+            const progress = (currentSlide / totalSlides) * 100;
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
+        }
+
+        // Mostrar diapositiva
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+            
+            const currentSlideElement = document.getElementById(`slide${currentSlide}`);
+            const slideInfo = document.getElementById('slideInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (currentSlideElement) {
+                currentSlideElement.classList.add('active');
+            }
+            
+            if (slideInfo) {
+                slideInfo.textContent = `${currentSlide} / ${totalSlides}`;
+            }
+            
+            // Actualizar botones de navegación
+            if (prevBtn) {
+                prevBtn.disabled = (currentSlide === 1);
+            }
+            if (nextBtn) {
+                nextBtn.disabled = (currentSlide === totalSlides);
+            }
+            
+            updateProgress();
+        }
+
+        // Siguiente diapositiva
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Diapositiva anterior
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Verificar respuesta
+        function checkAnswer(questionNum, isCorrect) {
+            if (isCorrect) {
+                score++;
+                Swal.fire({
+                    title: '¡Correcto!',
+                    text: '¡Excelente! Has respondido correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'Continuar',
+                    confirmButtonColor: '#27ae60'
+                }).then(() => {
+                    nextSlide();
+                });
+            } else {
+                let correctAnswer = '';
+                switch(questionNum) {
+                    case 1:
+                        correctAnswer = 'La respuesta correcta es: Mark Otto y Jacob Thornton crearon Bootstrap en Twitter.';
+                        break;
+                    case 2:
+                        correctAnswer = 'La respuesta correcta es: Bootstrap tiene un sistema de 12 columnas.';
+                        break;
+                    case 3:
+                        correctAnswer = 'La respuesta correcta es: col-md- se usa para tablets (≥768px).';
+                        break;
+                    case 4:
+                        correctAnswer = 'La respuesta correcta es: d-none d-md-block oculta en móviles y muestra en tablets+.';
+                        break;
+                }
+                
+                Swal.fire({
+                    title: 'Incorrecto',
+                    text: correctAnswer,
+                    icon: 'error',
+                    confirmButtonText: 'Continuar',
+                    confirmButtonColor: '#e74c3c'
+                }).then(() => {
+                    nextSlide();
+                });
+            }
+            questionsAnswered++;
+        }
+
+        // Reiniciar presentación
+        function restartPresentation() {
+            currentSlide = 1;
+            score = 0;
+            questionsAnswered = 0;
+            showSlide(1);
+        }
+
+        // Mostrar puntuación final
+        function showFinalScore() {
+            const percentage = questionsAnswered > 0 ? Math.round((score / questionsAnswered) * 100) : 0;
+            let message = '';
+            let icon = '';
+            
+            if (percentage >= 80) {
+                message = '¡Excelente! Tienes un gran dominio de Bootstrap.';
+                icon = 'success';
+            } else if (percentage >= 60) {
+                message = '¡Bien! Tienes conocimientos sólidos de Bootstrap.';
+                icon = 'info';
+            } else {
+                message = 'Puedes mejorar. Te recomiendo revisar la presentación nuevamente.';
+                icon = 'warning';
+            }
+            
+            Swal.fire({
+                title: 'Resultados del Quiz',
+                text: `Puntuación: ${score}/${questionsAnswered} (${percentage}%)\n${message}`,
+                icon: icon,
+                confirmButtonText: 'Cerrar'
+            });
+        }
+
+        // Navegación por teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+
+        // Inicialización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            showSlide(1);
+        });
+        
+        // Fallback para inicialización inmediata si el DOM ya está cargado
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                showSlide(1);
+            });
+        } else {
+            showSlide(1);
+        }
+    </script>
+</body>
+</html>

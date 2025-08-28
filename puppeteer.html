@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puppeteer - Automatización Web para Estudiantes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .slide {
+            min-height: calc(100vh - 76px);
+            padding: 2rem 0;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-card {
+            background: var(--dark-bg);
+            color: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 8px;
+            margin-right: 15px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f57; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #28ca42; }
+
+        pre {
+            margin: 0;
+            background: transparent !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .step-number {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de progreso -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- Contador de slides -->
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">8</span>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-robot me-2"></i>Puppeteer Masterclass
+            </a>
+            <div class="navbar-nav ms-auto">
+                <button class="btn btn-outline-light me-2" onclick="previousSlide()">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <button class="btn btn-primary" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Slide 1: Introducción -->
+    <div class="slide active" id="slide1">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card text-center">
+                        <div class="card-body p-5">
+                            <i class="fas fa-robot fa-4x text-primary mb-4"></i>
+                            <h1 class="display-4 fw-bold mb-4">Puppeteer</h1>
+                            <h3 class="text-muted mb-4">Automatización Web para Estudiantes</h3>
+                            <p class="lead mb-4">
+                                Aprende a controlar navegadores web de forma programática para testing, scraping y automatización
+                            </p>
+                            <div class="row g-4 mt-4">
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                                        <div>
+                                            <h5>Fácil de Aprender</h5>
+                                            <p class="mb-0">API intuitiva y bien documentada</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-lightning-bolt text-warning fa-2x me-3"></i>
+                                        <div>
+                                            <h5>Rápido y Potente</h5>
+                                            <p class="mb-0">Control completo de Chrome/Chromium</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-tools text-info fa-2x me-3"></i>
+                                        <div>
+                                            <h5>Versátil</h5>
+                                            <p class="mb-0">Testing, scraping, PDFs y más</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-lg mt-4" onclick="showDemo('intro')">
+                                <i class="fas fa-play me-2"></i>Ver Demo Interactiva
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: ¿Qué es Puppeteer? -->
+    <div class="slide" id="slide2">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-question-circle text-primary me-3"></i>¿Qué es Puppeteer?
+                            </h2>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-code fa-3x text-primary mb-3"></i>
+                                            <h5>Librería de Node.js</h5>
+                                            <p>Desarrollada por Google para controlar navegadores Chrome/Chromium</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-browser fa-3x text-success mb-3"></i>
+                                            <h5>API de Alto Nivel</h5>
+                                            <p>Interfaz simple para tareas complejas de automatización web</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5">
+                                <h4 class="text-center mb-4">¿Para qué se usa?</h4>
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">1</div>
+                                            <div>
+                                                <h5>Testing Automatizado</h5>
+                                                <p class="mb-0">Pruebas E2E, pruebas de interfaz y regresión</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">2</div>
+                                            <div>
+                                                <h5>Web Scraping</h5>
+                                                <p class="mb-0">Extracción de datos de sitios web dinámicos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">3</div>
+                                            <div>
+                                                <h5>Generación de PDFs</h5>
+                                                <p class="mb-0">Convertir páginas web en documentos PDF</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="step-number">4</div>
+                                            <div>
+                                                <h5>Capturas de Pantalla</h5>
+                                                <p class="mb-0">Screenshots automatizados de páginas web</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Instalación -->
+    <div class="slide" id="slide3">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-download text-primary me-3"></i>Instalación y Configuración
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-terminal me-2 text-success"></i>Paso 1: Instalar Node.js</h4>
+                                    <p>Asegúrate de tener Node.js instalado (versión 12 o superior)</p>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>Terminal</span>
+                                        </div>
+                                        <pre><code class="language-bash">node --version
+npm --version</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h4><i class="fas fa-folder-plus me-2 text-info"></i>Paso 2: Crear Proyecto</h4>
+                                    <p>Inicializa un nuevo proyecto de Node.js</p>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>Terminal</span>
+                                        </div>
+                                        <pre><code class="language-bash">mkdir mi-proyecto-puppeteer
+cd mi-proyecto-puppeteer
+npm init -y</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4><i class="fas fa-download me-2 text-warning"></i>Paso 3: Instalar Puppeteer</h4>
+                                <p>Instala Puppeteer - esto también descargará Chromium automáticamente</p>
+                                <div class="code-card">
+                                    <div class="code-header">
+                                        <div class="code-dots">
+                                            <div class="dot red"></div>
+                                            <div class="dot yellow"></div>
+                                            <div class="dot green"></div>
+                                        </div>
+                                        <span>Terminal</span>
+                                    </div>
+                                    <pre><code class="language-bash"># Instalación básica
+npm install puppeteer
+
+# O si prefieres no descargar Chromium
+npm install puppeteer-core</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>¡Importante!</strong> La instalación de Puppeteer descarga una versión completa de Chromium (~170MB). 
+                                Si tienes problemas de espacio, puedes usar puppeteer-core y configurar tu propio navegador.
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-play-circle me-2"></i>Prueba la Instalación</h5>
+                                <p>Crea un archivo <code>test.js</code> y ejecuta este código:</p>
+                                <div class="code-card">
+                                    <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+console.log('¡Puppeteer instalado correctamente!');
+console.log('Versión:', puppeteer.version);</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Primer Script -->
+    <div class="slide" id="slide4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-rocket text-primary me-3"></i>Tu Primer Script con Puppeteer
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-lg-7">
+                                    <h4 class="mb-3">Captura de Pantalla Básica</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>ejemplo-basico.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+(async () => {
+  // 1. Lanzar el navegador
+  const browser = await puppeteer.launch();
+  
+  // 2. Crear una nueva página
+  const page = await browser.newPage();
+  
+  // 3. Navegar a una URL
+  await page.goto('https://example.com');
+  
+  // 4. Tomar captura de pantalla
+  await page.screenshot({ 
+    path: 'ejemplo.png' 
+  });
+  
+  // 5. Cerrar el navegador
+  await browser.close();
+  
+  console.log('¡Captura guardada como ejemplo.png!');
+})();</code></pre>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <button class="btn btn-success me-2" onclick="showDemo('basicScript')">
+                                            <i class="fas fa-play me-2"></i>Ejecutar Demo
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="explainCode('basic')">
+                                            <i class="fas fa-info-circle me-2"></i>Explicar Código
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-5">
+                                    <h4 class="mb-3">Explicación Paso a Paso</h4>
+                                    <div class="timeline">
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <div class="step-number">1</div>
+                                                <div>
+                                                    <h6>Lanzar Navegador</h6>
+                                                    <p class="small mb-0">Puppeteer abre una instancia de Chromium</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <div class="step-number">2</div>
+                                                <div>
+                                                    <h6>Nueva Página</h6>
+                                                    <p class="small mb-0">Crea una nueva pestaña/página</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <div class="step-number">3</div>
+                                                <div>
+                                                    <h6>Navegar</h6>
+                                                    <p class="small mb-0">Visita la URL especificada</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <div class="step-number">4</div>
+                                                <div>
+                                                    <h6>Capturar</h6>
+                                                    <p class="small mb-0">Guarda screenshot de la página</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <div class="step-number">5</div>
+                                                <div>
+                                                    <h6>Cerrar</h6>
+                                                    <p class="small mb-0">Libera recursos del navegador</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-success mt-4">
+                                <h5><i class="fas fa-terminal me-2"></i>¿Cómo ejecutar?</h5>
+                                <p class="mb-2">Guarda el código en un archivo llamado <code>ejemplo-basico.js</code> y ejecuta:</p>
+                                <code>node ejemplo-basico.js</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Interacción con Páginas -->
+    <div class="slide" id="slide5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-mouse-pointer text-primary me-3"></i>Interacción con Páginas Web
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Seleccionar Elementos</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>seleccionar-elementos.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+(async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  
+  await page.goto('https://example.com');
+  
+  // Seleccionar por selector CSS
+  const titulo = await page.$('h1');
+  
+  // Obtener texto
+  const textoTitulo = await page.$eval(
+    'h1', 
+    el => el.textContent
+  );
+  
+  console.log('Título:', textoTitulo);
+  
+  await browser.close();
+})();</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Hacer Clic y Escribir</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>interaccion.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+(async () => {
+  const browser = await puppeteer.launch({
+    headless: false // Ver el navegador
+  });
+  const page = await browser.newPage();
+  
+  await page.goto('https://google.com');
+  
+  // Escribir en campo de búsqueda
+  await page.type('input[name="q"]', 'Puppeteer');
+  
+  // Hacer clic en botón buscar
+  await page.click('input[value="Buscar con Google"]');
+  
+  // Esperar a que cargue
+  await page.waitForNavigation();
+  
+  console.log('Búsqueda realizada!');
+  
+  await browser.close();
+})();</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="mb-3">Métodos de Selección Más Comunes</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="card border-primary">
+                                            <div class="card-body">
+                                                <h6 class="text-primary">page.$('selector')</h6>
+                                                <p class="small mb-0">Selecciona el primer elemento que coincida</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-success">
+                                            <div class="card-body">
+                                                <h6 class="text-success">page.$$('selector')</h6>
+                                                <p class="small mb-0">Selecciona todos los elementos que coincidan</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-warning">
+                                            <div class="card-body">
+                                                <h6 class="text-warning">page.$eval()</h6>
+                                                <p class="small mb-0">Ejecuta función en el primer elemento</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-info">
+                                            <div class="card-body">
+                                                <h6 class="text-info">page.$$eval()</h6>
+                                                <p class="small mb-0">Ejecuta función en todos los elementos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-lightbulb me-2"></i>Ejercicio Práctico</h5>
+                                <p>Prueba este script que automatiza una búsqueda en Google:</p>
+                                <button class="btn btn-light" onclick="showDemo('googleSearch')">
+                                    <i class="fas fa-search me-2"></i>Ver Demo de Búsqueda
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Esperas y Sincronización -->
+    <div class="slide" id="slide6">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-clock text-primary me-3"></i>Esperas y Sincronización
+                            </h2>
+
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>¡Muy Importante!</strong> Las páginas web cargan de forma asíncrona. 
+                                Debes esperar a que los elementos estén disponibles antes de interactuar con ellos.
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Tipos de Espera</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>esperas.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+(async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  
+  await page.goto('https://example.com');
+  
+  // 1. Esperar por tiempo fijo
+  await page.waitForTimeout(2000); // 2 segundos
+  
+  // 2. Esperar a que aparezca un elemento
+  await page.waitForSelector('h1');
+  
+  // 3. Esperar navegación
+  await page.click('a[href="/about"]');
+  await page.waitForNavigation();
+  
+  // 4. Esperar por función personalizada
+  await page.waitForFunction(() => {
+    return document.title.includes('About');
+  });
+  
+  await browser.close();
+})();</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Estrategias de Espera</h4>
+                                    <div class="timeline">
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-stopwatch text-danger fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>waitForTimeout()</h6>
+                                                    <p class="small mb-0">Espera fija - úsala solo cuando sea necesario</p>
+                                                    <code class="small">await page.waitForTimeout(1000);</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-search text-success fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>waitForSelector()</h6>
+                                                    <p class="small mb-0">Espera hasta que aparezca un elemento</p>
+                                                    <code class="small">await page.waitForSelector('.button');</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-route text-info fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>waitForNavigation()</h6>
+                                                    <p class="small mb-0">Espera a que termine la navegación</p>
+                                                    <code class="small">await page.waitForNavigation();</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-cog text-warning fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>waitForFunction()</h6>
+                                                    <p class="small mb-0">Espera hasta que una condición sea verdadera</p>
+                                                    <code class="small">await page.waitForFunction(...);</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="mb-3">Ejemplo Práctico: Formulario Dinámico</h4>
+                                <div class="code-card">
+                                    <div class="code-header">
+                                        <div class="code-dots">
+                                            <div class="dot red"></div>
+                                            <div class="dot yellow"></div>
+                                            <div class="dot green"></div>
+                                        </div>
+                                        <span>formulario-dinamico.js</span>
+                                    </div>
+                                    <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+(async () => {
+  const browser = await puppeteer.launch({ headless: false });
+  const page = await browser.newPage();
+  
+  await page.goto('https://ejemplo-formulario.com');
+  
+  // Llenar formulario paso a paso
+  await page.type('#nombre', 'Juan Pérez');
+  
+  // Esperar a que aparezca el campo email (puede cargarse dinámicamente)
+  await page.waitForSelector('#email', { visible: true });
+  await page.type('#email', 'juan@example.com');
+  
+  // Clic en enviar y esperar respuesta
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'networkidle0' }),
+    page.click('#enviar')
+  ]);
+  
+  // Verificar que llegamos a la página de confirmación
+  await page.waitForSelector('.mensaje-exito');
+  
+  console.log('Formulario enviado exitosamente!');
+  
+  await browser.close();
+})();</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-4">
+                                <h5><i class="fas fa-lightbulb me-2"></i>Mejores Prácticas</h5>
+                                <ul class="mb-0">
+                                    <li>Siempre usa <code>waitForSelector()</code> antes de interactuar con elementos</li>
+                                    <li>Evita <code>waitForTimeout()</code> - es impredecible</li>
+                                    <li>Usa <code>{ waitUntil: 'networkidle0' }</code> para páginas con muchas solicitudes AJAX</li>
+                                    <li>Combina acciones con esperas usando <code>Promise.all()</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Testing Web -->
+    <div class="slide" id="slide7">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-vial text-primary me-3"></i>Testing Automatizado con Puppeteer
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-lg-8">
+                                    <h4 class="mb-3">Ejemplo de Test E2E Completo</h4>
+                                    <div class="code-card">
+                                        <div class="code-header">
+                                            <div class="code-dots">
+                                                <div class="dot red"></div>
+                                                <div class="dot yellow"></div>
+                                                <div class="dot green"></div>
+                                            </div>
+                                            <span>test-login.js</span>
+                                        </div>
+                                        <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+async function testLogin() {
+  const browser = await puppeteer.launch({ headless: false });
+  const page = await browser.newPage();
+  
+  try {
+    console.log('🚀 Iniciando test de login...');
+    
+    // 1. Navegar a la página de login
+    await page.goto('https://example.com/login');
+    await page.waitForSelector('#username');
+    
+    // 2. Llenar credenciales
+    await page.type('#username', 'usuario@test.com');
+    await page.type('#password', 'password123');
+    
+    // 3. Hacer clic en iniciar sesión
+    await Promise.all([
+      page.waitForNavigation(),
+      page.click('#login-btn')
+    ]);
+    
+    // 4. Verificar que el login fue exitoso
+    const welcomeMessage = await page.$('.welcome-message');
+    
+    if (welcomeMessage) {
+      console.log('✅ Test PASÓ: Login exitoso');
+      
+      // Verificar elementos de la página de inicio
+      const profileLink = await page.$('#profile-link');
+      const logoutBtn = await page.$('#logout-btn');
+      
+      if (profileLink && logoutBtn) {
+        console.log('✅ Test PASÓ: Elementos de navegación presentes');
+      } else {
+        console.log('❌ Test FALLÓ: Faltan elementos de navegación');
+      }
+      
+    } else {
+      console.log('❌ Test FALLÓ: Login no exitoso');
+    }
+    
+  } catch (error) {
+    console.log('❌ Test ERROR:', error.message);
+  } finally {
+    await browser.close();
+  }
+}
+
+testLogin();</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <h4 class="mb-3">Casos de Prueba Comunes</h4>
+                                    <div class="timeline">
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-user-lock text-primary fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>Login/Logout</h6>
+                                                    <p class="small mb-0">Autenticación de usuarios</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-shopping-cart text-success fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>E-commerce</h6>
+                                                    <p class="small mb-0">Proceso de compra completo</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-edit text-warning fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>Formularios</h6>
+                                                    <p class="small mb-0">Validación y envío</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="d-flex">
+                                                <i class="fas fa-mobile-alt text-info fa-2x me-3"></i>
+                                                <div>
+                                                    <h6>Responsive</h6>
+                                                    <p class="small mb-0">Diferentes tamaños de pantalla</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <h5>Herramientas de Verificación</h5>
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body p-3">
+                                                <ul class="list-unstyled mb-0 small">
+                                                    <li><i class="fas fa-check text-success me-2"></i>Elementos presentes</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Texto correcto</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>URLs esperadas</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Valores de campos</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Estados de elementos</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="mb-3">Test de Formulario con Validaciones</h4>
+                                <div class="code-card">
+                                    <div class="code-header">
+                                        <div class="code-dots">
+                                            <div class="dot red"></div>
+                                            <div class="dot yellow"></div>
+                                            <div class="dot green"></div>
+                                        </div>
+                                        <span>test-formulario.js</span>
+                                    </div>
+                                    <pre><code class="language-javascript">async function testFormValidation() {
+  const browser = await puppeteer.launch({ headless: false });
+  const page = await browser.newPage();
+  
+  await page.goto('https://example.com/contact');
+  
+  // Test: Envío de formulario vacío (debe fallar)
+  await page.click('#submit-btn');
+  
+  const errorMessage = await page.$('.error-message');
+  if (errorMessage) {
+    console.log('✅ Validación funciona: Error mostrado correctamente');
+  }
+  
+  // Test: Llenar formulario correctamente
+  await page.type('#name', 'Juan Pérez');
+  await page.type('#email', 'juan@test.com');
+  await page.type('#message', 'Este es un mensaje de prueba');
+  
+  // Enviar formulario válido
+  await Promise.all([
+    page.waitForSelector('.success-message'),
+    page.click('#submit-btn')
+  ]);
+  
+  console.log('✅ Formulario enviado correctamente');
+  
+  await browser.close();
+}
+
+testFormValidation();</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="interactive-demo mt-4">
+                                <h5><i class="fas fa-play-circle me-2"></i>Ejecuta los Tests</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-primary" onclick="showDemo('loginTest')">
+                                        <i class="fas fa-user me-2"></i>Demo Login Test
+                                    </button>
+                                    <button class="btn btn-success" onclick="showDemo('formTest')">
+                                        <i class="fas fa-edit me-2"></i>Demo Form Test
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Proyectos Prácticos -->
+    <div class="slide" id="slide8">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-5">
+                                <i class="fas fa-project-diagram text-primary me-3"></i>Proyectos Prácticos para Estudiantes
+                            </h2>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="fas fa-camera me-2"></i>Proyecto 1: Monitor de Precios</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Crea un script que monitoree precios de productos y te notifique cuando bajen.</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+async function monitorPrice(url, selector) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  
+  await page.goto(url);
+  
+  const price = await page.$eval(selector, 
+    el => el.textContent.replace(/[^\d.,]/g, '')
+  );
+  
+  console.log(`Precio actual: $${price}`);
+  
+  // Aquí puedes agregar lógica para:
+  // - Guardar precio en base de datos
+  // - Enviar notificación si baja
+  // - Generar gráficos históricos
+  
+  await browser.close();
+  return parseFloat(price);
+}
+
+// Ejecutar cada hora
+setInterval(() => {
+  monitorPrice('https://tienda.com/producto', '.price');
+}, 3600000);</code></pre>
+                                            </div>
+                                            <div class="alert alert-info small">
+                                                <strong>Aprenderás:</strong> Web scraping, timers, notificaciones, almacenamiento de datos
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="fas fa-file-pdf me-2"></i>Proyecto 2: Generador de Reportes</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Automatiza la generación de reportes PDF de dashboards web.</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+async function generateReport(url) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  
+  // Configurar viewport para reportes
+  await page.setViewport({ 
+    width: 1200, 
+    height: 800 
+  });
+  
+  await page.goto(url, { 
+    waitUntil: 'networkidle0' 
+  });
+  
+  // Esperar a que carguen los gráficos
+  await page.waitForSelector('.chart-container');
+  
+  // Generar PDF
+  await page.pdf({
+    path: `reporte-${Date.now()}.pdf`,
+    format: 'A4',
+    printBackground: true,
+    margin: { top: '20px', bottom: '20px' }
+  });
+  
+  await browser.close();
+  console.log('Reporte generado exitosamente!');
+}
+
+generateReport('https://dashboard.com');</code></pre>
+                                            </div>
+                                            <div class="alert alert-info small">
+                                                <strong>Aprenderás:</strong> PDFs, esperas avanzadas, configuración de viewport
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-warning">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Proyecto 3: Bot de Redes Sociales</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Automatiza publicaciones y interacciones básicas (¡con responsabilidad!).</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+async function postContent(message) {
+  const browser = await puppeteer.launch({ 
+    headless: false 
+  });
+  const page = await browser.newPage();
+  
+  // Login (debes manejar autenticación)
+  await page.goto('https://red-social.com/login');
+  
+  // Esperar y llenar credenciales
+  await page.waitForSelector('#username');
+  await page.type('#username', process.env.USERNAME);
+  await page.type('#password', process.env.PASSWORD);
+  
+  await Promise.all([
+    page.waitForNavigation(),
+    page.click('#login-btn')
+  ]);
+  
+  // Crear nueva publicación
+  await page.waitForSelector('#new-post');
+  await page.click('#new-post');
+  
+  await page.type('.post-textarea', message);
+  await page.click('.publish-btn');
+  
+  console.log('Publicación creada!');
+  await browser.close();
+}
+
+// Usar con moderación y respeto
+postContent('¡Hola desde Puppeteer!');</code></pre>
+                                            </div>
+                                            <div class="alert alert-warning small">
+                                                <strong>Importante:</strong> Respeta términos de servicio y límites de APIs
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Proyecto 4: Testing Suite</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Crea una suite completa de tests automatizados para tu sitio web.</p>
+                                            <div class="code-card mb-3">
+                                                <pre><code class="language-javascript">const puppeteer = require('puppeteer');
+
+class TestSuite {
+  constructor() {
+    this.results = [];
+  }
+  
+  async runTest(name, testFunction) {
+    try {
+      console.log(`🧪 Ejecutando: ${name}`);
+      await testFunction();
+      this.results.push({name, status: 'PASS'});
+      console.log(`✅ ${name}: PASSED`);
+    } catch (error) {
+      this.results.push({name, status: 'FAIL', error: error.message});
+      console.log(`❌ ${name}: FAILED - ${error.message}`);
+    }
+  }
+  
+  async runAllTests() {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    
+    await this.runTest('Homepage loads', async () => {
+      await page.goto('https://mysite.com');
+      await page.waitForSelector('h1');
+    });
+    
+    await this.runTest('Contact form works', async () => {
+      await page.goto('https://mysite.com/contact');
+      await page.type('#name', 'Test User');
+      await page.type('#email', 'test@test.com');
+      await page.click('#submit');
+      await page.waitForSelector('.success');
+    });
+    
+    await browser.close();
+    this.generateReport();
+  }
+  
+  generateReport() {
+    const passed = this.results.filter(r => r.status === 'PASS').length;
+    const total = this.results.length;
+    console.log(`\n📊 Resumen: ${passed}/${total} tests pasaron`);
+  }
+}
+
+new TestSuite().runAllTests();</code></pre>
+                                            </div>
+                                            <div class="alert alert-info small">
+                                                <strong>Aprenderás:</strong> Arquitectura de testing, reportes, manejo de errores
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5">
+                                <h4 class="text-center mb-4">🎯 Desafíos para Practicar</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                                                <h6>Scraper de Noticias</h6>
+                                                <p class="small">Extrae titulares de varios sitios de noticias</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <i class="fas fa-weather-sun fa-2x text-warning mb-2"></i>
+                                                <h6>Monitor del Clima</h6>
+                                                <p class="small">Capturas diarias del pronóstico</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <i class="fas fa-graduation-cap fa-2x text-success mb-2"></i>
+                                                <h6>Portal Académico</h6>
+                                                <p class="small">Automatiza check de calificaciones</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-5">
+                                <h3 class="mb-3">🎉 ¡Felicitaciones!</h3>
+                                <p class="lead">Has completado la introducción a Puppeteer</p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <button class="btn btn-primary btn-lg" onclick="showCertificate()">
+                                        <i class="fas fa-certificate me-2"></i>Generar Certificado
+                                    </button>
+                                    <button class="btn btn-success btn-lg" onclick="showResources()">
+                                        <i class="fas fa-book me-2"></i>Recursos Adicionales
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.0/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+    <script>
+        let currentSlideIndex = 0;
+        const totalSlides = 8;
+
+        function updateProgressBar() {
+            const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateSlideCounter() {
+            document.getElementById('currentSlide').textContent = currentSlideIndex + 1;
+            document.getElementById('totalSlides').textContent = totalSlides;
+        }
+
+        function showSlide(index) {
+            // Ocultar todas las slides
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            // Mostrar slide actual
+            const targetSlide = document.getElementById(`slide${index + 1}`);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                currentSlideIndex = index;
+                updateProgressBar();
+                updateSlideCounter();
+                
+                // Re-highlight code blocks
+                setTimeout(() => {
+                    Prism.highlightAll();
+                }, 100);
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                showSlide(currentSlideIndex + 1);
+            } else {
+                Swal.fire({
+                    title: '🎉 ¡Presentación Completada!',
+                    text: '¡Has terminado el curso de Puppeteer!',
+                    icon: 'success',
+                    confirmButtonText: 'Reiniciar',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cerrar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showSlide(0);
+                    }
+                });
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlideIndex > 0) {
+                showSlide(currentSlideIndex - 1);
+            }
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'ArrowRight':
+                case ' ':
+                    event.preventDefault();
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    previousSlide();
+                    break;
+                case 'Home':
+                    event.preventDefault();
+                    showSlide(0);
+                    break;
+                case 'End':
+                    event.preventDefault();
+                    showSlide(totalSlides - 1);
+                    break;
+            }
+        });
+
+        // Funciones para demos interactivas
+        function showDemo(type) {
+            const demos = {
+                'intro': {
+                    title: '🤖 ¿Qué puede hacer Puppeteer?',
+                    html: `
+                        <div class="text-left">
+                            <h5>Puppeteer puede automatizar:</h5>
+                            <ul>
+                                <li>✅ Navegar por sitios web</li>
+                                <li>✅ Hacer clic en botones y enlaces</li>
+                                <li>✅ Llenar formularios</li>
+                                <li>✅ Tomar capturas de pantalla</li>
+                                <li>✅ Generar PDFs</li>
+                                <li>✅ Probar aplicaciones web</li>
+                                <li>✅ Extraer datos (scraping)</li>
+                                <li>✅ Simular dispositivos móviles</li>
+                            </ul>
+                            <p><strong>¡Todo esto programáticamente!</strong></p>
+                        </div>
+                    `
+                },
+                'basicScript': {
+                    title: '📸 Demo: Captura de Pantalla',
+                    html: `
+                        <div class="text-left">
+                            <h5>Este script:</h5>
+                            <ol>
+                                <li>Abre un navegador invisible (headless)</li>
+                                <li>Navega a example.com</li>
+                                <li>Espera a que cargue completamente</li>
+                                <li>Toma una captura de pantalla</li>
+                                <li>Guarda la imagen como 'ejemplo.png'</li>
+                                <li>Cierra el navegador</li>
+                            </ol>
+                            <div class="alert alert-success mt-3">
+                                <strong>Resultado:</strong> Tendrás un archivo PNG con la captura de la página!
+                            </div>
+                        </div>
+                    `
+                },
+                'googleSearch': {
+                    title: '🔍 Demo: Búsqueda Automatizada',
+                    html: `
+                        <div class="text-left">
+                            <h5>Script de búsqueda en Google:</h5>
+                            <pre><code>const puppeteer = require('puppeteer');
+
+(async () => {
+  const browser = await puppeteer.launch({ headless: false });
+  const page = await browser.newPage();
+  
+  await page.goto('https://google.com');
+  await page.type('input[name="q"]', 'Puppeteer tutorial');
+  await page.keyboard.press('Enter');
+  
+  await page.waitForSelector('h3');
+  const results = await page.$$eval('h3', titles => 
+    titles.map(title => title.textContent)
+  );
+  
+  console.log('Primeros resultados:', results.slice(0, 5));
+  await browser.close();
+})();</code></pre>
+                            <p><strong>¿Qué hace?</strong> Busca "Puppeteer tutorial" y extrae los títulos de los resultados.</p>
+                        </div>
+                    `
+                },
+                'loginTest': {
+                    title: '🔐 Demo: Test de Login',
+                    html: `
+                        <div class="text-left">
+                            <h5>Flujo del test:</h5>
+                            <ol>
+                                <li>🌐 Navegar a página de login</li>
+                                <li>📝 Llenar usuario y contraseña</li>
+                                <li>🔘 Hacer clic en "Iniciar Sesión"</li>
+                                <li>⏳ Esperar navegación</li>
+                                <li>✅ Verificar elementos de usuario logueado</li>
+                                <li>📊 Reportar resultado del test</li>
+                            </ol>
+                            <div class="alert alert-info mt-3">
+                                <strong>Beneficios:</strong> Detecta errores automáticamente, prueba diferentes escenarios, puede ejecutarse continuamente.
+                            </div>
+                        </div>
+                    `
+                },
+                'formTest': {
+                    title: '📋 Demo: Test de Formulario',
+                    html: `
+                        <div class="text-left">
+                            <h5>Casos de prueba:</h5>
+                            <ul>
+                                <li>❌ Envío con campos vacíos (debe fallar)</li>
+                                <li>❌ Email inválido (debe mostrar error)</li>
+                                <li>❌ Mensaje muy corto (validación)</li>
+                                <li>✅ Todos los campos válidos (debe enviarse)</li>
+                                <li>✅ Mensaje de confirmación visible</li>
+                            </ul>
+                            <div class="alert alert-success mt-3">
+                                <strong>Automatización:</strong> El test verifica todos estos casos en segundos, detectando problemas que podrían pasar desapercibidos manualmente.
+                            </div>
+                        </div>
+                    `
+                }
+            };
+            
+            const demo = demos[type];
+            if (demo) {
+                Swal.fire({
+                    title: demo.title,
+                    html: demo.html,
+                    width: '600px',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        }
+
+        function explainCode(type) {
+            Swal.fire({
+                title: '💡 Explicación del Código',
+                html: `
+                    <div class="text-left">
+                        <h5>Conceptos clave:</h5>
+                        <ul>
+                            <li><strong>async/await:</strong> Para manejar operaciones asíncronas</li>
+                            <li><strong>puppeteer.launch():</strong> Inicia el navegador</li>
+                            <li><strong>browser.newPage():</strong> Crea una nueva pestaña</li>
+                            <li><strong>page.goto():</strong> Navega a una URL</li>
+                            <li><strong>page.screenshot():</strong> Toma captura</li>
+                            <li><strong>browser.close():</strong> Cierra el navegador</li>
+                        </ul>
+                        <div class="alert alert-warning mt-3">
+                            <strong>Importante:</strong> Siempre cerrar el navegador para liberar memoria!
+                        </div>
+                    </div>
+                `,
+                width: '500px',
+                confirmButtonText: 'Entendido'
+            });
+        }
+
+        function showCertificate() {
+            Swal.fire({
+                title: '🏆 ¡Certificado de Finalización!',
+                html: `
+                    <div style="border: 3px solid #667eea; padding: 20px; border-radius: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                        <h3>Certificado de Finalización</h3>
+                        <p>Este certifica que has completado exitosamente el</p>
+                        <h4><strong>Curso de Puppeteer</strong></h4>
+                        <p><em>Automatización Web para Estudiantes</em></p>
+                        <hr style="border-color: rgba(255,255,255,0.3);">
+                        <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
+                        <p><strong>Habilidades adquiridas:</strong></p>
+                        <small>Web Scraping • Testing Automatizado • Generación de PDFs • Capturas de Pantalla</small>
+                    </div>
+                `,
+                width: '500px',
+                confirmButtonText: 'Descargar',
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('📥', 'Función de descarga disponible en versión completa', 'info');
+                }
+            });
+        }
+
+        function showResources() {
+            Swal.fire({
+                title: '📚 Recursos Adicionales',
+                html: `
+                    <div class="text-left">
+                        <h5>Documentación Oficial:</h5>
+                        <ul>
+                            <li>🌐 <a href="https://pptr.dev/" target="_blank">Puppeteer.dev</a></li>
+                            <li>📖 <a href="https://github.com/puppeteer/puppeteer" target="_blank">GitHub Repository</a></li>
+                        </ul>
+                        
+                        <h5>Tutoriales Avanzados:</h5>
+                        <ul>
+                            <li>🎥 Puppeteer + Jest para testing</li>
+                            <li>🔧 Dockerizar aplicaciones Puppeteer</li>
+                            <li>⚡ Optimización de performance</li>
+                            <li>🚀 Deploy en producción</li>
+                        </ul>
+                        
+                        <h5>Proyectos Inspiradores:</h5>
+                        <ul>
+                            <li>🤖 Bots de automatización</li>
+                            <li>📊 Dashboards automatizados</li>
+                            <li>🔍 Herramientas de monitoreo</li>
+                        </ul>
+                    </div>
+                `,
+                width: '600px',
+                confirmButtonText: 'Guardar Enlaces'
+            });
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgressBar();
+            updateSlideCounter();
+            Prism.highlightAll();
+            
+            // Mensaje de bienvenida
+            setTimeout(() => {
+                Swal.fire({
+                    title: '👋 ¡Bienvenido al Curso!',
+                    text: 'Usa las flechas del teclado o los botones para navegar. ¡Empecemos!',
+                    icon: 'info',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

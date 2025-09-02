@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrays y localStorage - Presentación Interactiva</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.20/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .slide {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+        
+        .slide.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #28a745;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .question-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .question-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #28a745;
+        }
+        
+        .question-option.selected {
+            background: rgba(40, 167, 69, 0.3);
+            border-color: #28a745;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        
+        .score-display {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-custom {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            margin: 0 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 1rem;
+            left: 2rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Score Display -->
+    <div class="score-display">
+        <i class="fas fa-star text-warning"></i>
+        <span id="score">0</span> / <span id="total-questions">6</span>
+    </div>
+    
+    <!-- Slide 1: Portada -->
+    <div class="slide active" id="slide-1">
+        <div class="slide-number">1 / 13</div>
+        <div class="container h-100 d-flex align-items-center justify-content-center">
+            <div class="text-center">
+                <div class="slide-content">
+                    <h1 class="display-3 mb-4">
+                        <i class="fas fa-code text-warning"></i>
+                        Arrays & localStorage
+                    </h1>
+                    <h2 class="mb-4">Programación JavaScript Avanzada</h2>
+                    <p class="lead mb-4">
+                        Domina los métodos de arrays y aprende a persistir datos con localStorage
+                    </p>
+                    <div class="row text-center mt-5">
+                        <div class="col-md-4">
+                            <i class="fas fa-list-ul fa-3x mb-3 text-info"></i>
+                            <h5>Arrays</h5>
+                            <p>push, pop, splice, sort, filter, map</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-database fa-3x mb-3 text-success"></i>
+                            <h5>localStorage</h5>
+                            <p>Almacenamiento local persistente</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-shopping-cart fa-3x mb-3 text-warning"></i>
+                            <h5>Proyecto</h5>
+                            <p>Carrito de compras práctico</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 2: Array métodos básicos -->
+    <div class="slide" id="slide-2">
+        <div class="slide-number">2 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-plus-circle text-success"></i> Métodos Arrays: push() y pop()</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-arrow-right text-info"></i> push()</h4>
+                        <p>Añade uno o más elementos al final del array</p>
+                        <div class="code-block">
+let productos = ['laptop', 'mouse'];
+productos.push('teclado');
+// ['laptop', 'mouse', 'teclado']
+
+productos.push('monitor', 'webcam');
+// ['laptop', 'mouse', 'teclado', 'monitor', 'webcam']
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-arrow-left text-warning"></i> pop()</h4>
+                        <p>Elimina y devuelve el último elemento</p>
+                        <div class="code-block">
+let productos = ['laptop', 'mouse', 'teclado'];
+let ultimo = productos.pop();
+// ultimo = 'teclado'
+// productos = ['laptop', 'mouse']
+
+console.log(ultimo); // 'teclado'
+console.log(productos.length); // 2
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>Tip:</strong> Ambos métodos modifican el array original y devuelven información útil.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 3: Pregunta sobre push/pop -->
+    <div class="slide" id="slide-3">
+        <div class="slide-number">3 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-question-circle text-warning"></i> Pregunta 1</h2>
+                <h4>¿Cuál será el resultado del siguiente código?</h4>
+                <div class="code-block mb-4">
+let carrito = ['manzana', 'pan'];
+carrito.push('leche');
+let item = carrito.pop();
+console.log(carrito.length);
+                </div>
+                
+                <div class="question-options" data-question="1" data-correct="1">
+                    <div class="question-option" data-value="0">
+                        <strong>A)</strong> 3
+                    </div>
+                    <div class="question-option" data-value="1">
+                        <strong>B)</strong> 2
+                    </div>
+                    <div class="question-option" data-value="2">
+                        <strong>C)</strong> 1
+                    </div>
+                    <div class="question-option" data-value="3">
+                        <strong>D)</strong> Error
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button class="btn btn-success btn-custom" onclick="checkAnswer(1)" disabled id="check-1">
+                        <i class="fas fa-check"></i> Verificar Respuesta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 4: splice() -->
+    <div class="slide" id="slide-4">
+        <div class="slide-number">4 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-cut text-danger"></i> Método splice(): El más versátil</h2>
+                <p class="lead">splice() puede eliminar, insertar y reemplazar elementos en cualquier posición</p>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-trash text-danger"></i> Eliminar</h5>
+                        <div class="code-block">
+let productos = ['A', 'B', 'C', 'D'];
+// Eliminar 2 elementos desde posición 1
+productos.splice(1, 2);
+// ['A', 'D']
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-plus text-success"></i> Insertar</h5>
+                        <div class="code-block">
+let productos = ['A', 'D'];
+// Insertar en posición 1, eliminar 0
+productos.splice(1, 0, 'B', 'C');
+// ['A', 'B', 'C', 'D']
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-exchange-alt text-warning"></i> Reemplazar</h5>
+                        <div class="code-block">
+let productos = ['A', 'X', 'Y', 'D'];
+// Reemplazar 2 elementos desde posición 1
+productos.splice(1, 2, 'B', 'C');
+// ['A', 'B', 'C', 'D']
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning mt-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Sintaxis:</strong> array.splice(inicio, cantidadEliminar, ...elementosAñadir)
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 5: Pregunta sobre splice -->
+    <div class="slide" id="slide-5">
+        <div class="slide-number">5 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-question-circle text-warning"></i> Pregunta 2</h2>
+                <h4>¿Qué resultado tendrá este código?</h4>
+                <div class="code-block mb-4">
+let precios = [10, 20, 30, 40, 50];
+precios.splice(2, 1, 99);
+console.log(precios);
+                </div>
+                
+                <div class="question-options" data-question="2" data-correct="2">
+                    <div class="question-option" data-value="0">
+                        <strong>A)</strong> [10, 20, 99, 40, 50]
+                    </div>
+                    <div class="question-option" data-value="1">
+                        <strong>B)</strong> [10, 20, 30, 99, 50]
+                    </div>
+                    <div class="question-option" data-value="2">
+                        <strong>C)</strong> [10, 20, 99, 40, 50]
+                    </div>
+                    <div class="question-option" data-value="3">
+                        <strong>D)</strong> [99, 10, 20, 40, 50]
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button class="btn btn-success btn-custom" onclick="checkAnswer(2)" disabled id="check-2">
+                        <i class="fas fa-check"></i> Verificar Respuesta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 6: sort, filter, map -->
+    <div class="slide" id="slide-6">
+        <div class="slide-number">6 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-filter text-info"></i> Métodos Avanzados: sort, filter, map</h2>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-sort text-primary"></i> sort()</h5>
+                        <p>Ordena los elementos del array</p>
+                        <div class="code-block">
+let precios = [30, 10, 50, 20];
+precios.sort((a, b) => a - b);
+// [10, 20, 30, 50]
+
+let productos = ['zebra', 'apple', 'book'];
+productos.sort();
+// ['apple', 'book', 'zebra']
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-filter text-success"></i> filter()</h5>
+                        <p>Filtra elementos que cumplen una condición</p>
+                        <div class="code-block">
+let productos = [
+  {nombre: 'laptop', precio: 800},
+  {nombre: 'mouse', precio: 25},
+  {nombre: 'teclado', precio: 60}
+];
+
+let caros = productos.filter(p => p.precio > 50);
+// [{nombre: 'laptop', precio: 800}, 
+//  {nombre: 'teclado', precio: 60}]
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-map text-warning"></i> map()</h5>
+                        <p>Transforma cada elemento del array</p>
+                        <div class="code-block">
+let precios = [10, 20, 30];
+let conImpuesto = precios.map(p => p * 1.21);
+// [12.1, 24.2, 36.3]
+
+let productos = ['laptop', 'mouse'];
+let mayus = productos.map(p => p.toUpperCase());
+// ['LAPTOP', 'MOUSE']
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Importante:</strong> filter() y map() NO modifican el array original, devuelven uno nuevo.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 7: Pregunta sobre métodos avanzados -->
+    <div class="slide" id="slide-7">
+        <div class="slide-number">7 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-question-circle text-warning"></i> Pregunta 3</h2>
+                <h4>¿Cuántos elementos tendrá el array resultante?</h4>
+                <div class="code-block mb-4">
+let productos = [
+  {nombre: 'laptop', categoria: 'tech'},
+  {nombre: 'camisa', categoria: 'ropa'},
+  {nombre: 'mouse', categoria: 'tech'},
+  {nombre: 'zapatos', categoria: 'ropa'}
+];
+let tech = productos.filter(p => p.categoria === 'tech');
+                </div>
+                
+                <div class="question-options" data-question="3" data-correct="1">
+                    <div class="question-option" data-value="0">
+                        <strong>A)</strong> 1
+                    </div>
+                    <div class="question-option" data-value="1">
+                        <strong>B)</strong> 2
+                    </div>
+                    <div class="question-option" data-value="2">
+                        <strong>C)</strong> 3
+                    </div>
+                    <div class="question-option" data-value="3">
+                        <strong>D)</strong> 4
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button class="btn btn-success btn-custom" onclick="checkAnswer(3)" disabled id="check-3">
+                        <i class="fas fa-check"></i> Verificar Respuesta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 8: Introducción localStorage -->
+    <div class="slide" id="slide-8">
+        <div class="slide-number">8 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-database text-success"></i> Introducción a localStorage</h2>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>¿Qué es localStorage?</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Almacenamiento local del navegador</li>
+                            <li><i class="fas fa-check text-success"></i> Los datos persisten después de cerrar la página</li>
+                            <li><i class="fas fa-check text-success"></i> Disponible en todos los navegadores modernos</li>
+                            <li><i class="fas fa-check text-success"></i> Almacena hasta ~10MB por dominio</li>
+                        </ul>
+                        
+                        <h4 class="mt-4">¿Para qué sirve?</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-shopping-cart text-warning"></i> Carritos de compra</li>
+                            <li><i class="fas fa-user-cog text-info"></i> Preferencias del usuario</li>
+                            <li><i class="fas fa-save text-primary"></i> Formularios no enviados</li>
+                            <li><i class="fas fa-history text-secondary"></i> Historial de navegación</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Métodos básicos</h4>
+                        <div class="code-block">
+// Guardar datos
+localStorage.setItem('clave', 'valor');
+
+// Recuperar datos
+let valor = localStorage.getItem('clave');
+
+// Eliminar un elemento
+localStorage.removeItem('clave');
+
+// Limpiar todo
+localStorage.clear();
+
+// Obtener cantidad de elementos
+let cantidad = localStorage.length;
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning mt-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Limitación:</strong> localStorage solo puede almacenar strings, no objetos directamente.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 9: Pregunta sobre localStorage -->
+    <div class="slide" id="slide-9">
+        <div class="slide-number">9 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-question-circle text-warning"></i> Pregunta 4</h2>
+                <h4>¿Cuál es la principal limitación de localStorage?</h4>
+                
+                <div class="question-options" data-question="4" data-correct="2">
+                    <div class="question-option" data-value="0">
+                        <strong>A)</strong> No funciona en navegadores modernos
+                    </div>
+                    <div class="question-option" data-value="1">
+                        <strong>B)</strong> Los datos se pierden al cerrar el navegador
+                    </div>
+                    <div class="question-option" data-value="2">
+                        <strong>C)</strong> Solo puede almacenar strings, no objetos
+                    </div>
+                    <div class="question-option" data-value="3">
+                        <strong>D)</strong> Tiene un límite de 1KB por dominio
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button class="btn btn-success btn-custom" onclick="checkAnswer(4)" disabled id="check-4">
+                        <i class="fas fa-check"></i> Verificar Respuesta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 10: JSON.stringify y JSON.parse -->
+    <div class="slide" id="slide-10">
+        <div class="slide-number">10 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-exchange-alt text-info"></i> JSON.stringify() y JSON.parse()</h2>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-arrow-right text-success"></i> JSON.stringify()</h4>
+                        <p>Convierte objetos JavaScript a string JSON</p>
+                        <div class="code-block">
+let producto = {
+    nombre: 'Laptop',
+    precio: 899,
+    categoria: 'tecnologia'
+};
+
+let productoString = JSON.stringify(producto);
+console.log(productoString);
+// '{"nombre":"Laptop","precio":899,"categoria":"tecnologia"}'
+
+// Guardar en localStorage
+localStorage.setItem('producto', productoString);
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-arrow-left text-warning"></i> JSON.parse()</h4>
+                        <p>Convierte string JSON de vuelta a objeto JavaScript</p>
+                        <div class="code-block">
+// Recuperar de localStorage
+let productoString = localStorage.getItem('producto');
+
+let producto = JSON.parse(productoString);
+console.log(producto);
+// {nombre: 'Laptop', precio: 899, categoria: 'tecnologia'}
+
+// Ahora podemos usar el objeto normalmente
+console.log(producto.nombre); // 'Laptop'
+console.log(producto.precio); // 899
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-lightbulb"></i> Patrón común para arrays:</h5>
+                            <div class="code-block">
+// Guardar array
+let carrito = [{nombre: 'laptop', precio: 899}, {nombre: 'mouse', precio: 25}];
+localStorage.setItem('carrito', JSON.stringify(carrito));
+
+// Recuperar array
+let carritoGuardado = JSON.parse(localStorage.getItem('carrito')) || [];
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 11: Pregunta sobre JSON -->
+    <div class="slide" id="slide-11">
+        <div class="slide-number">11 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-question-circle text-warning"></i> Pregunta 5</h2>
+                <h4>¿Cuál es la forma correcta de guardar un array en localStorage?</h4>
+                
+                <div class="question-options" data-question="5" data-correct="1">
+                    <div class="question-option" data-value="0">
+                        <strong>A)</strong> localStorage.setItem('array', array);
+                    </div>
+                    <div class="question-option" data-value="1">
+                        <strong>B)</strong> localStorage.setItem('array', JSON.stringify(array));
+                    </div>
+                    <div class="question-option" data-value="2">
+                        <strong>C)</strong> localStorage.array = array;
+                    </div>
+                    <div class="question-option" data-value="3">
+                        <strong>D)</strong> localStorage.push(array);
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button class="btn btn-success btn-custom" onclick="checkAnswer(5)" disabled id="check-5">
+                        <i class="fas fa-check"></i> Verificar Respuesta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 12: Pregunta final -->
+    <div class="slide" id="slide-12">
+        <div class="slide-number">12 / 13</div>
+        <div class="container h-100 d-flex align-items-center">
+            <div class="slide-content w-100">
+                <h2><i class="fas fa-question-circle text-warning"></i> Pregunta 6</h2>
+                <h4>¿Qué devuelve este código?</h4>
+                <div class="code-block mb-4">
+let productos = [{precio: 50}, {precio: 30}, {precio: 80}];
+let resultado = productos.map(p => p.precio).filter(precio => precio > 40);
+console.log(resultado.length);
+                </div>
+                
+                <div class="question-options" data-question="6" data-correct="1">
+                    <div class="question-option" data-value="0">
+                        <strong>A)</strong> 1
+                    </div>
+                    <div class="question-option" data-value="1">
+                        <strong>B)</strong> 2
+                    </div>
+                    <div class="question-option" data-value="2">
+                        <strong>C)</strong> 3
+                    </div>
+                    <div class="question-option" data-value="3">
+                        <strong>D)</strong> Error
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button class="btn btn-success btn-custom" onclick="checkAnswer(6)" disabled id="check-6">
+                        <i class="fas fa-check"></i> Verificar Respuesta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 13: Ejercicio Práctico -->
+    <div class="slide" id="slide-13">
+        <div class="slide-number">13 / 13</div>
+        <div class="container h-100">
+            <div class="slide-content">
+                <h2><i class="fas fa-shopping-cart text-success"></i> Ejercicio Práctico: Carrito de Compras</h2>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Productos Disponibles</h4>
+                        <div id="productos-lista" class="mb-4">
+                            <div class="card mb-2" style="background: rgba(255,255,255,0.1); border: none;">
+                                <div class="card-body text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>Laptop Gaming</h6>
+                                        <small>$899</small>
+                                    </div>
+                                    <button class="btn btn-success btn-sm" onclick="agregarAlCarrito('Laptop Gaming', 899)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card mb-2" style="background: rgba(255,255,255,0.1); border: none;">
+                                <div class="card-body text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>Mouse Inalámbrico</h6>
+                                        <small>$25</small>
+                                    </div>
+                                    <button class="btn btn-success btn-sm" onclick="agregarAlCarrito('Mouse Inalámbrico', 25)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card mb-2" style="background: rgba(255,255,255,0.1); border: none;">
+                                <div class="card-body text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>Teclado Mecánico</h6>
+                                        <small>$75</small>
+                                    </div>
+                                    <button class="btn btn-success btn-sm" onclick="agregarAlCarrito('Teclado Mecánico', 75)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card mb-2" style="background: rgba(255,255,255,0.1); border: none;">
+                                <div class="card-body text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>Monitor 24"</h6>
+                                        <small>$199</small>
+                                    </div>
+                                    <button class="btn btn-success btn-sm" onclick="agregarAlCarrito('Monitor 24\"', 199)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button class="btn btn-warning btn-custom" onclick="limpiarCarrito()">
+                                <i class="fas fa-trash"></i> Limpiar Carrito
+                            </button>
+                            <button class="btn btn-info btn-custom" onclick="mostrarEstadisticas()">
+                                <i class="fas fa-chart-bar"></i> Estadísticas
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4>Mi Carrito <span id="carrito-count" class="badge bg-success">0</span></h4>
+                        <div id="carrito-contenido" class="mb-4" style="min-height: 200px; max-height: 300px; overflow-y: auto;">
+                            <div class="text-center text-muted mt-5">
+                                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                                <p>Tu carrito está vacío</p>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Total: $<span id="total-precio">0</span></h6>
+                        </div>
+                        
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-console"></i> Consola del Navegador</h6>
+                            <small>Abre la consola del navegador (F12) para ver los datos del carrito en detalle</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="btn btn-custom" onclick="previousSlide()" id="prev-btn">
+            <i class="fas fa-arrow-left"></i> Anterior
+        </button>
+        <button class="btn btn-custom" onclick="nextSlide()" id="next-btn">
+            Siguiente <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="btn btn-primary btn-custom" onclick="showResults()" id="results-btn" style="display: none;">
+            <i class="fas fa-trophy"></i> Ver Resultados
+        </button>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.20/sweetalert2.min.js"></script>
+    
+    <script>
+        let currentSlide = 1;
+        let totalSlides = 13;
+        let score = 0;
+        let answeredQuestions = new Set();
+        
+        // Carrito para el ejercicio práctico
+        let carrito = JSON.parse(localStorage.getItem('carrito-curso')) || [];
+        
+        function showSlide(slideNumber) {
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            document.getElementById(`slide-${slideNumber}`).classList.add('active');
+            
+            // Actualizar botones de navegación
+            document.getElementById('prev-btn').style.display = slideNumber === 1 ? 'none' : 'inline-block';
+            document.getElementById('next-btn').style.display = slideNumber === totalSlides ? 'none' : 'inline-block';
+            document.getElementById('results-btn').style.display = slideNumber === totalSlides ? 'inline-block' : 'none';
+            
+            // Si estamos en la última diapositiva, actualizar el carrito
+            if (slideNumber === 13) {
+                actualizarVistaCarrito();
+            }
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+        
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+        
+        // Manejar clics en opciones de respuesta
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('question-option') || e.target.parentElement.classList.contains('question-option')) {
+                let option = e.target.classList.contains('question-option') ? e.target : e.target.parentElement;
+                let questionContainer = option.closest('.question-options');
+                let questionNum = questionContainer.dataset.question;
+                
+                // Limpiar selecciones anteriores
+                questionContainer.querySelectorAll('.question-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Marcar la nueva selección
+                option.classList.add('selected');
+                
+                // Habilitar botón de verificar
+                document.getElementById(`check-${questionNum}`).disabled = false;
+            }
+        });
+        
+        function checkAnswer(questionNum) {
+            let questionContainer = document.querySelector(`[data-question="${questionNum}"]`);
+            let selectedOption = questionContainer.querySelector('.question-option.selected');
+            let correctAnswer = parseInt(questionContainer.dataset.correct);
+            let userAnswer = parseInt(selectedOption.dataset.value);
+            
+            if (!answeredQuestions.has(questionNum)) {
+                if (userAnswer === correctAnswer) {
+                    score++;
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Correcto!',
+                        text: 'Excelente respuesta',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'rgba(255,255,255,0.95)',
+                        backdrop: 'rgba(0,0,0,0.8)'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Incorrecto',
+                        text: 'No te preocupes, sigue aprendiendo',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'rgba(255,255,255,0.95)',
+                        backdrop: 'rgba(0,0,0,0.8)'
+                    });
+                }
+                answeredQuestions.add(questionNum);
+                updateScore();
+            }
+            
+            // Deshabilitar botón después de responder
+            document.getElementById(`check-${questionNum}`).disabled = true;
+            
+            // Auto-avanzar después de 2 segundos
+            setTimeout(() => {
+                nextSlide();
+            }, 2000);
+        }
+        
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+        
+        function showResults() {
+            let percentage = (score / 6) * 100;
+            let message = '';
+            let icon = '';
+            
+            if (percentage >= 80) {
+                message = '¡Excelente! Dominas muy bien los conceptos.';
+                icon = 'success';
+            } else if (percentage >= 60) {
+                message = '¡Bien! Tienes una buena comprensión.';
+                icon = 'success';
+            } else {
+                message = 'Necesitas repasar algunos conceptos.';
+                icon = 'warning';
+            }
+            
+            Swal.fire({
+                icon: icon,
+                title: 'Resultados del Quiz',
+                html: `
+                    <p><strong>Puntuación: ${score} / 6</strong></p>
+                    <p><strong>Porcentaje: ${percentage.toFixed(1)}%</strong></p>
+                    <p>${message}</p>
+                `,
+                background: 'rgba(255,255,255,0.95)',
+                backdrop: 'rgba(0,0,0,0.8)',
+                confirmButtonText: '¡Genial!',
+                confirmButtonColor: '#28a745'
+            });
+        }
+        
+        // Funciones del carrito
+        function agregarAlCarrito(nombre, precio) {
+            let producto = {
+                id: Date.now(),
+                nombre: nombre,
+                precio: precio,
+                cantidad: 1
+            };
+            
+            // Verificar si el producto ya existe
+            let existente = carrito.find(item => item.nombre === nombre);
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                carrito.push(producto);
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem('carrito-curso', JSON.stringify(carrito));
+            
+            // Actualizar vista
+            actualizarVistaCarrito();
+            
+            // Mostrar en consola
+            console.log('Producto agregado:', producto);
+            console.log('Carrito actual:', carrito);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Producto agregado',
+                text: `${nombre} agregado al carrito`,
+                timer: 1000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+        
+        function eliminarDelCarrito(id) {
+            carrito = carrito.filter(item => item.id !== id);
+            localStorage.setItem('carrito-curso', JSON.stringify(carrito));
+            actualizarVistaCarrito();
+            
+            console.log('Carrito después de eliminar:', carrito);
+        }
+        
+        function limpiarCarrito() {
+            carrito = [];
+            localStorage.removeItem('carrito-curso');
+            actualizarVistaCarrito();
+            
+            console.log('Carrito limpiado');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Carrito limpiado',
+                timer: 1000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+        
+        function actualizarVistaCarrito() {
+            let container = document.getElementById('carrito-contenido');
+            let countElement = document.getElementById('carrito-count');
+            let totalElement = document.getElementById('total-precio');
+            
+            if (carrito.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted mt-5">
+                        <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                        <p>Tu carrito está vacío</p>
+                    </div>
+                `;
+                countElement.textContent = '0';
+                totalElement.textContent = '0';
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            let cantidadTotal = 0;
+            
+            carrito.forEach(item => {
+                cantidadTotal += item.cantidad;
+                total += item.precio * item.cantidad;
+                html += `
+                    <div class="card mb-2" style="background: rgba(255,255,255,0.1); border: none;">
+                        <div class="card-body text-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6>${item.nombre}</h6>
+                                <small>$${item.precio} x ${item.cantidad}</small>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            countElement.textContent = cantidadTotal;
+            totalElement.textContent = total;
+        }
+        
+        function mostrarEstadisticas() {
+            if (carrito.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin estadísticas',
+                    text: 'Agrega productos al carrito para ver estadísticas'
+                });
+                return;
+            }
+            
+            // Usar métodos de arrays para calcular estadísticas
+            let precios = carrito.map(item => item.precio);
+            let precioMedio = precios.reduce((sum, precio) => sum + precio, 0) / precios.length;
+            let productoMasCaro = carrito.reduce((max, item) => item.precio > max.precio ? item : max);
+            let productoMasBarato = carrito.reduce((min, item) => item.precio < min.precio ? item : min);
+            
+            console.group('📊 Estadísticas del Carrito');
+            console.log('Array de precios:', precios);
+            console.log('Precio medio:', precioMedio.toFixed(2));
+            console.log('Producto más caro:', productoMasCaro);
+            console.log('Producto más barato:', productoMasBarato);
+            console.log('Carrito ordenado por precio (mayor a menor):', 
+                      [...carrito].sort((a, b) => b.precio - a.precio));
+            console.groupEnd();
+            
+            Swal.fire({
+                icon: 'info',
+                title: 'Estadísticas calculadas',
+                html: `
+                    <p><strong>Precio promedio:</strong> $${precioMedio.toFixed(2)}</p>
+                    <p><strong>Más caro:</strong> ${productoMasCaro.nombre} ($${productoMasCaro.precio})</p>
+                    <p><strong>Más barato:</strong> ${productoMasBarato.nombre} ($${productoMasBarato.precio})</p>
+                    <p><em>Ver detalles completos en la consola del navegador (F12)</em></p>
+                `,
+                background: 'rgba(255,255,255,0.95)'
+            });
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar carrito del localStorage
+            carrito = JSON.parse(localStorage.getItem('carrito-curso')) || [];
+            showSlide(1);
+            updateScore();
+        });
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+    </script>
+</body>
+</html>

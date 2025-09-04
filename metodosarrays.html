@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operaciones con Arreglos JavaScript</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .product-card {
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        .code-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .result-counter {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h1 class="display-4 text-primary">
+                    <i class="fas fa-code"></i> Operaciones con Arreglos JavaScript
+                </h1>
+                <p class="lead">Ejemplos prácticos de map(), filter() y sort()</p>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-sliders-h"></i> Controles</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label"><i class="fas fa-filter"></i> Filtrar por categoría:</label>
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="">Todas las categorías</option>
+                                    <option value="Electrónicos">Electrónicos</option>
+                                    <option value="Ropa">Ropa</option>
+                                    <option value="Libros">Libros</option>
+                                    <option value="Hogar">Hogar</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label"><i class="fas fa-dollar-sign"></i> Precio máximo:</label>
+                                <input type="range" class="form-range" id="priceFilter" min="0" max="1000" value="1000">
+                                <small class="text-muted">$<span id="priceValue">1000</span></small>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label"><i class="fas fa-sort"></i> Ordenar por:</label>
+                                <select class="form-select" id="sortBy">
+                                    <option value="nombre">Nombre</option>
+                                    <option value="precio">Precio</option>
+                                    <option value="rating">Rating</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Orden:</label>
+                                <select class="form-select" id="sortOrder">
+                                    <option value="asc">Ascendente</option>
+                                    <option value="desc">Descendente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-success me-2" onclick="aplicarTransformaciones()">
+                                <i class="fas fa-play"></i> Aplicar Operaciones
+                            </button>
+                            <button class="btn btn-secondary" onclick="resetear()">
+                                <i class="fas fa-undo"></i> Resetear
+                            </button>
+                            <span class="ms-3 result-counter">
+                                Productos mostrados: <span id="productCount">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Código JavaScript -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-code"></i> Código JavaScript Ejecutándose</h5>
+                    </div>
+                    <div class="card-body code-section">
+                        <pre id="codeDisplay" class="text-dark"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="row" id="productResults">
+            <!-- Los productos se mostrarán aquí -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Arreglo de datos inicial
+        const productosOriginales = [
+            {
+                id: 1,
+                nombre: "iPhone 14 Pro",
+                categoria: "Electrónicos",
+                precio: 999,
+                rating: 4.8,
+                descripcion: "El último smartphone de Apple",
+                icono: "fas fa-mobile-alt"
+            },
+            {
+                id: 2,
+                nombre: "Camiseta Nike",
+                categoria: "Ropa",
+                precio: 45,
+                rating: 4.2,
+                descripcion: "Camiseta deportiva de alta calidad",
+                icono: "fas fa-tshirt"
+            },
+            {
+                id: 3,
+                nombre: "El Quijote",
+                categoria: "Libros",
+                precio: 25,
+                rating: 4.9,
+                descripcion: "Clásico de la literatura española",
+                icono: "fas fa-book"
+            },
+            {
+                id: 4,
+                nombre: "MacBook Air M2",
+                categoria: "Electrónicos",
+                precio: 1199,
+                rating: 4.7,
+                descripcion: "Laptop ultraligera y potente",
+                icono: "fas fa-laptop"
+            },
+            {
+                id: 5,
+                nombre: "Jeans Levi's",
+                categoria: "Ropa",
+                precio: 89,
+                rating: 4.4,
+                descripcion: "Jeans clásicos de mezclilla",
+                icono: "fas fa-tshirt"
+            },
+            {
+                id: 6,
+                nombre: "Aspiradora Dyson",
+                categoria: "Hogar",
+                precio: 399,
+                rating: 4.6,
+                descripcion: "Aspiradora sin cable de alta potencia",
+                icono: "fas fa-home"
+            },
+            {
+                id: 7,
+                nombre: "JavaScript: The Good Parts",
+                categoria: "Libros",
+                precio: 35,
+                rating: 4.3,
+                descripcion: "Guía esencial de JavaScript",
+                icono: "fas fa-book"
+            },
+            {
+                id: 8,
+                nombre: "Auriculares Sony",
+                categoria: "Electrónicos",
+                precio: 299,
+                rating: 4.5,
+                descripcion: "Auriculares con cancelación de ruido",
+                icono: "fas fa-headphones"
+            }
+        ];
+
+        let productosActuales = [...productosOriginales];
+
+        // Función para mostrar el código que se está ejecutando
+        function mostrarCodigo(operacion, codigo) {
+            const codeDisplay = document.getElementById('codeDisplay');
+            codeDisplay.innerHTML = `// ${operacion}\n${codigo}`;
+        }
+
+        // Función para aplicar todas las transformaciones
+        function aplicarTransformaciones() {
+            let productos = [...productosOriginales];
+            let codigoCompleto = `// Datos originales: ${productos.length} productos\nlet productos = [...productosOriginales];\n\n`;
+
+            // 1. FILTER - Filtrar por categoría
+            const categoria = document.getElementById('categoryFilter').value;
+            if (categoria) {
+                productos = productos.filter(producto => producto.categoria === categoria);
+                codigoCompleto += `// FILTER: Filtrar por categoría "${categoria}"\n`;
+                codigoCompleto += `productos = productos.filter(producto => producto.categoria === "${categoria}");\n`;
+                codigoCompleto += `// Resultado: ${productos.length} productos\n\n`;
+            }
+
+            // 2. FILTER - Filtrar por precio
+            const precioMax = parseInt(document.getElementById('priceFilter').value);
+            if (precioMax < 1000) {
+                productos = productos.filter(producto => producto.precio <= precioMax);
+                codigoCompleto += `// FILTER: Filtrar por precio máximo $${precioMax}\n`;
+                codigoCompleto += `productos = productos.filter(producto => producto.precio <= ${precioMax});\n`;
+                codigoCompleto += `// Resultado: ${productos.length} productos\n\n`;
+            }
+
+            // 3. SORT - Ordenar
+            const sortBy = document.getElementById('sortBy').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            productos = productos.sort((a, b) => {
+                let valorA = a[sortBy];
+                let valorB = b[sortBy];
+                
+                if (typeof valorA === 'string') {
+                    valorA = valorA.toLowerCase();
+                    valorB = valorB.toLowerCase();
+                }
+                
+                if (sortOrder === 'asc') {
+                    return valorA > valorB ? 1 : -1;
+                } else {
+                    return valorA < valorB ? 1 : -1;
+                }
+            });
+
+            codigoCompleto += `// SORT: Ordenar por ${sortBy} (${sortOrder === 'asc' ? 'ascendente' : 'descendente'})\n`;
+            codigoCompleto += `productos = productos.sort((a, b) => {\n`;
+            codigoCompleto += `    let valorA = a.${sortBy};\n`;
+            codigoCompleto += `    let valorB = b.${sortBy};\n`;
+            codigoCompleto += `    ${sortOrder === 'asc' ? 'return valorA > valorB ? 1 : -1;' : 'return valorA < valorB ? 1 : -1;'}\n`;
+            codigoCompleto += `});\n\n`;
+
+            // 4. MAP - Crear las tarjetas HTML
+            const tarjetasHTML = productos.map(producto => crearTarjetaProducto(producto));
+            codigoCompleto += `// MAP: Convertir productos a elementos HTML\n`;
+            codigoCompleto += `const tarjetasHTML = productos.map(producto => crearTarjetaProducto(producto));\n`;
+            codigoCompleto += `// Resultado final: ${productos.length} tarjetas HTML generadas`;
+
+            mostrarCodigo("Operaciones Completas", codigoCompleto);
+            mostrarProductos(tarjetasHTML);
+            document.getElementById('productCount').textContent = productos.length;
+        }
+
+        // Función MAP para crear tarjeta de producto
+        function crearTarjetaProducto(producto) {
+            const estrellas = '★'.repeat(Math.floor(producto.rating)) + '☆'.repeat(5 - Math.floor(producto.rating));
+            
+            return `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card product-card h-100 shadow-sm">
+                        <div class="card-header bg-gradient" style="background: linear-gradient(45deg, #007bff, #6c757d);">
+                            <h5 class="card-title text-white mb-0">
+                                <i class="${producto.icono} me-2"></i>${producto.nombre}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">${producto.descripcion}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">${producto.categoria}</span>
+                                <span class="text-warning">${estrellas} ${producto.rating}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="text-success mb-0">$${producto.precio}</h4>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-shopping-cart"></i> Comprar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para mostrar productos
+        function mostrarProductos(tarjetasHTML) {
+            const container = document.getElementById('productResults');
+            container.innerHTML = tarjetasHTML.join('');
+        }
+
+        // Función para resetear
+        function resetear() {
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('priceFilter').value = 1000;
+            document.getElementById('priceValue').textContent = 1000;
+            document.getElementById('sortBy').value = 'nombre';
+            document.getElementById('sortOrder').value = 'asc';
+            
+            mostrarCodigo("Estado Inicial", "// Datos originales sin transformaciones\nlet productos = [...productosOriginales];");
+            
+            const tarjetasOriginales = productosOriginales.map(producto => crearTarjetaProducto(producto));
+            mostrarProductos(tarjetasOriginales);
+            document.getElementById('productCount').textContent = productosOriginales.length;
+        }
+
+        // Event listener para el slider de precio
+        document.getElementById('priceFilter').addEventListener('input', function() {
+            document.getElementById('priceValue').textContent = this.value;
+        });
+
+        // Inicializar la página
+        window.addEventListener('DOMContentLoaded', function() {
+            resetear();
+        });
+    </script>
+</body>
+</html>

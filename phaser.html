@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación: Phaser.js - Framework de Juegos Web</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.12/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Phaser.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .slide {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .slide-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 90%;
+            width: 100%;
+            max-width: 1000px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .slide h1 {
+            color: #4a5568;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .slide h2 {
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        
+        .slide h3 {
+            color: #4a5568;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        
+        .nav-button {
+            margin: 0 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            background: #667eea;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .slide-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            color: #4a5568;
+            z-index: 1000;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .question-button {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+        
+        .question-button:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(72, 187, 120, 0.4);
+        }
+        
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .demo-controls {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .demo-button {
+            background: #ed8936;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-button:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #667eea;
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+        
+        ul li {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="slide-indicator" id="slideIndicator">1 / 11</div>
+
+    <!-- Slide 1: Título -->
+    <div class="slide active">
+        <div class="slide-content text-center">
+            <h1><i class="fas fa-gamepad feature-icon"></i></h1>
+            <h1>Phaser.js</h1>
+            <h2>Framework de Juegos Web en JavaScript</h2>
+            <p class="lead">Una introducción completa al desarrollo de videojuegos para navegadores</p>
+            <div class="mt-4">
+                <i class="fas fa-html5 text-danger me-3" style="font-size: 2rem;"></i>
+                <i class="fab fa-js-square text-warning me-3" style="font-size: 2rem;"></i>
+                <i class="fas fa-gamepad text-primary me-3" style="font-size: 2rem;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: ¿Qué es Phaser? -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-question-circle text-primary me-3"></i>¿Qué es Phaser?</h1>
+            
+            <p class="lead">Phaser es un <span class="highlight">framework JavaScript</span> gratuito y de código abierto diseñado específicamente para crear videojuegos que se ejecutan en navegadores web.</p>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h3><i class="fas fa-star text-warning me-2"></i>Características principales:</h3>
+                    <ul>
+                        <li><strong>Multiplataforma:</strong> Funciona en cualquier dispositivo con navegador</li>
+                        <li><strong>Fácil de usar:</strong> API intuitiva y bien documentada</li>
+                        <li><strong>Potente:</strong> Soporte para gráficos 2D avanzados</li>
+                        <li><strong>Gratuito:</strong> Licencia MIT completamente libre</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3><i class="fas fa-code text-info me-2"></i>Tecnologías que utiliza:</h3>
+                    <ul>
+                        <li><strong>WebGL:</strong> Para renderizado de gráficos</li>
+                        <li><strong>Canvas:</strong> Como alternativa de renderizado</li>
+                        <li><strong>Web Audio API:</strong> Para sonidos y música</li>
+                        <li><strong>JavaScript ES6+:</strong> Lenguaje moderno</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion1()">
+                    <i class="fas fa-brain me-2"></i>¿Entendiste qué es Phaser?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Historia y versiones -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-history text-success me-3"></i>Historia de Phaser</h1>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="lead">Phaser fue creado por <strong>Richard Davey</strong> en 2013 como una alternativa moderna para el desarrollo de juegos web.</p>
+                    
+                    <h3><i class="fas fa-timeline text-primary me-2"></i>Evolución:</h3>
+                    <ul>
+                        <li><strong>2013:</strong> Phaser 1.0 - Primera versión basada en Pixi.js</li>
+                        <li><strong>2014:</strong> Phaser 2.0 - Mayor estabilidad y características</li>
+                        <li><strong>2018:</strong> Phaser 3.0 - Reescrito completamente, más modular</li>
+                        <li><strong>2023:</strong> Phaser 3.70+ - Versión actual con mejoras continuas</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <i class="fas fa-rocket feature-icon"></i>
+                        <h4>¿Por qué fue creado?</h4>
+                        <p>Para simplificar el desarrollo de juegos web y aprovechar las capacidades modernas de los navegadores.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion2()">
+                    <i class="fas fa-calendar-alt me-2"></i>Pregunta sobre la historia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Conceptos básicos -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-cubes text-info me-3"></i>Conceptos Básicos de Phaser</h1>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-desktop feature-icon"></i>
+                    <h4>Game</h4>
+                    <p>El objeto principal que controla todo el juego. Es el contenedor principal de todas las funcionalidades.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-film feature-icon"></i>
+                    <h4>Scene (Escena)</h4>
+                    <p>Representa diferentes pantallas del juego: menú, gameplay, game over, etc. Cada escena es independiente.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-user feature-icon"></i>
+                    <h4>Sprite</h4>
+                    <p>Objetos gráficos 2D que pueden tener texturas, animaciones y propiedades físicas.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-running feature-icon"></i>
+                    <h4>Physics (Física)</h4>
+                    <p>Sistema que simula fuerzas, colisiones y movimiento realista de los objetos del juego.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-keyboard feature-icon"></i>
+                    <h4>Input</h4>
+                    <p>Sistema para manejar entradas del usuario: teclado, mouse, touch, gamepad.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-volume-up feature-icon"></i>
+                    <h4>Audio</h4>
+                    <p>Gestión de sonidos y música del juego con soporte para múltiples formatos.</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion3()">
+                    <i class="fas fa-puzzle-piece me-2"></i>¿Qué concepto te resulta más interesante?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Estructura básica -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-code text-warning me-3"></i>Estructura Básica de un Juego</h1>
+            
+            <p class="lead">Todo juego en Phaser sigue una estructura básica con tres funciones principales:</p>
+            
+            <div class="code-block">
+<pre>// Configuración del juego
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    scene: {
+        preload: preload,    // Cargar recursos
+        create: create,      // Crear objetos del juego
+        update: update       // Actualizar cada frame
+    }
+};
+
+// Inicializar el juego
+const game = new Phaser.Game(config);</pre>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-download text-primary" style="font-size: 2rem;"></i>
+                        <h4>preload()</h4>
+                        <p>Se ejecuta una vez al inicio. Aquí cargamos todas las imágenes, sonidos y otros recursos que necesitará nuestro juego.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-plus-circle text-success" style="font-size: 2rem;"></i>
+                        <h4>create()</h4>
+                        <p>Se ejecuta después de preload(). Aquí creamos todos los objetos del juego: sprites, texto, sistemas de física, etc.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-sync text-warning" style="font-size: 2rem;"></i>
+                        <h4>update()</h4>
+                        <p>Se ejecuta continuamente (60 veces por segundo). Aquí manejamos la lógica del juego y las actualizaciones.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion4()">
+                    <i class="fas fa-cogs me-2"></i>Pregunta sobre las funciones
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Ejemplo de código simple -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-file-code text-success me-3"></i>Ejemplo: "Hola Mundo" en Phaser</h1>
+            
+            <p class="lead">Veamos un ejemplo completo y simple de un juego en Phaser:</p>
+            
+            <div class="code-block">
+<pre>function preload() {
+    // Crear un rectángulo como "sprite"
+    this.load.image('player', 'data:image/png;base64,iVBORw0KGgoA...');
+}
+
+function create() {
+    // Crear un sprite del jugador en el centro
+    this.player = this.add.sprite(400, 300, 'player');
+    
+    // Hacer que el sprite sea interactivo
+    this.player.setInteractive();
+    
+    // Agregar texto
+    this.add.text(50, 50, 'Hola Mundo con Phaser!', {
+        fontSize: '32px',
+        fontFamily: 'Arial',
+        color: '#ffffff'
+    });
+    
+    // Configurar controles del teclado
+    this.cursors = this.input.keyboard.createCursorKeys();
+}
+
+function update() {
+    // Mover el jugador con las flechas del teclado
+    if (this.cursors.left.isDown) {
+        this.player.x -= 5;
+    } else if (this.cursors.right.isDown) {
+        this.player.x += 5;
+    }
+    
+    if (this.cursors.up.isDown) {
+        this.player.y -= 5;
+    } else if (this.cursors.down.isDown) {
+        this.player.y += 5;
+    }
+}</pre>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-lightbulb me-2"></i>
+                <strong>¡Importante!</strong> Este código muestra cómo un sprite puede moverse en pantalla usando las flechas del teclado. Es la base de muchos juegos.
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion5()">
+                    <i class="fas fa-keyboard me-2"></i>¿Cómo funciona el movimiento?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Sistemas de física -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-atom text-danger me-3"></i>Sistemas de Física</h1>
+            
+            <p class="lead">Phaser incluye potentes sistemas de física para crear juegos más realistas:</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <i class="fas fa-feather text-info" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <h4>Arcade Physics</h4>
+                        <ul style="text-align: left;">
+                            <li>Más simple y rápido</li>
+                            <li>Perfecto para juegos arcade</li>
+                            <li>Colisiones básicas</li>
+                            <li>Gravedad y velocidad</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <i class="fas fa-weight text-warning" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <h4>Matter.js Physics</h4>
+                        <ul style="text-align: left;">
+                            <li>Física más realista</li>
+                            <li>Formas complejas</li>
+                            <li>Articulaciones y restricciones</li>
+                            <li>Simulación avanzada</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="mt-4"><i class="fas fa-code me-2"></i>Ejemplo con Arcade Physics:</h3>
+            <div class="code-block">
+<pre>const config = {
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },    // Gravedad hacia abajo
+            debug: false            // Mostrar líneas de debug
+        }
+    }
+};
+
+function create() {
+    // Crear un sprite con física
+    this.player = this.physics.add.sprite(400, 300, 'player');
+    
+    // Hacer que el jugador rebote al tocar los límites
+    this.player.setCollideWorldBounds(true);
+    
+    // Añadir rebote
+    this.player.setBounce(0.2);
+}</pre>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion6()">
+                    <i class="fas fa-question me-2"></i>¿Cuál es la diferencia entre ambos sistemas?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Tipos de juegos -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-gamepad text-purple me-3"></i>Tipos de Juegos que puedes crear</h1>
+            
+            <p class="lead">Con Phaser puedes desarrollar una gran variedad de géneros de juegos:</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-running text-primary feature-icon"></i>
+                    <h4>Plataformas</h4>
+                    <p>Juegos como Mario Bros, Sonic, Celeste. Con saltos, gravedad y colecciones de objetos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-crosshairs text-danger feature-icon"></i>
+                    <h4>Shooters</h4>
+                    <p>Juegos de disparos 2D, bullet hell, naves espaciales que disparan proyectiles.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-puzzle-piece text-warning feature-icon"></i>
+                    <h4>Puzzle</h4>
+                    <p>Rompecabezas, match-3, Tetris, juegos de lógica y estrategia por turnos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-car text-success feature-icon"></i>
+                    <h4>Racing</h4>
+                    <p>Juegos de carreras top-down, side-scrolling o con vista isométrica.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-dice text-info feature-icon"></i>
+                    <h4>Arcade Clásicos</h4>
+                    <p>Versiones de Pac-Man, Space Invaders, Asteroids, Pong y otros clásicos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-mobile text-secondary feature-icon"></i>
+                    <h4>Mobile Games</h4>
+                    <p>Juegos optimizados para móviles con controles táctiles y mecánicas simples.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-success mt-4">
+                <i class="fas fa-star me-2"></i>
+                <strong>¡Lo mejor de todo!</strong> Todos estos juegos funcionan en cualquier navegador web moderno, sin necesidad de instalación.
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion7()">
+                    <i class="fas fa-heart me-2"></i>¿Qué tipo de juego te gustaría crear?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Ventajas y desventajas -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-balance-scale text-info me-3"></i>Ventajas y Desventajas</h1>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card h-100" style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border: none;">
+                        <div class="card-header text-center" style="background: #28a745; color: white;">
+                            <h3><i class="fas fa-thumbs-up me-2"></i>Ventajas</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>Multiplataforma:</strong> Un código, múltiples dispositivos</li>
+                                <li><strong>Fácil distribución:</strong> Solo necesitas un navegador</li>
+                                <li><strong>Documentación excelente:</strong> Tutoriales y ejemplos abundantes</li>
+                                <li><strong>Comunidad activa:</strong> Mucho soporte online</li>
+                                <li><strong>Gratuito:</strong> No hay costos de licencia</li>
+                                <li><strong>Rápido desarrollo:</strong> Prototipado veloz</li>
+                                <li><strong>JavaScript:</strong> Lenguaje muy popular</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100" style="background: linear-gradient(135deg, #f8d7da, #f5c6cb); border: none;">
+                        <div class="card-header text-center" style="background: #dc3545; color: white;">
+                            <h3><i class="fas fa-thumbs-down me-2"></i>Desventajas</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>Solo 2D:</strong> No hay soporte nativo para 3D</li>
+                                <li><strong>Rendimiento:</strong> Limitado por el navegador</li>
+                                <li><strong>Dependiente del navegador:</strong> Diferencias entre browsers</li>
+                                <li><strong>Tamaño de archivos:</strong> Puede ser pesado para móviles</li>
+                                <li><strong>Monetización:</strong> Más difícil que apps nativas</li>
+                                <li><strong>Funciones avanzadas:</strong> Limitaciones vs. engines nativos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askQuestion8()">
+                    <i class="fas fa-thinking me-2"></i>¿Las ventajas superan las desventajas?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Demo preparación -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-rocket text-warning me-3"></i>¡Vamos a ver Phaser en Acción!</h1>
+            
+            <p class="lead text-center">Ahora veremos una demo funcional de un juego simple hecho con Phaser</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-square text-primary feature-icon"></i>
+                    <h4>Jugador</h4>
+                    <p>Un cuadrado azul que se mueve con las flechas del teclado</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-circle text-warning feature-icon"></i>
+                    <h4>Objetivo</h4>
+                    <p>Círculos amarillos que aparecen aleatoriamente para recoger</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-tachometer-alt text-success feature-icon"></i>
+                    <h4>Puntuación</h4>
+                    <p>Sistema de puntos que aumenta al recoger objetivos</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-atom text-info feature-icon"></i>
+                    <h4>Física</h4>
+                    <p>Colisiones y detección de contacto entre objetos</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Controles:</strong> Usa las flechas del teclado para mover el cuadrado azul y recoge los círculos amarillos para obtener puntos.
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="lead">¿Listo para ver el poder de Phaser?</p>
+                <i class="fas fa-gamepad text-primary" style="font-size: 3rem;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Demo funcionando -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1><i class="fas fa-play-circle text-success me-3"></i>Demo: Juego Simple con Phaser</h1>
+            
+            <div class="demo-controls">
+                <button class="demo-button" onclick="restartDemo()">
+                    <i class="fas fa-redo me-2"></i>Reiniciar Juego
+                </button>
+                <button class="demo-button" onclick="togglePause()">
+                    <i class="fas fa-pause me-2"></i>Pausar/Reanudar
+                </button>
+            </div>
+            
+            <div id="game-container"></div>
+            
+            <div class="alert alert-primary mt-3">
+                <i class="fas fa-keyboard me-2"></i>
+                <strong>Controles:</strong> Usa las flechas ← ↑ ↓ → del teclado para mover el cuadrado azul y recoge los círculos amarillos.
+            </div>
+            
+            <div class="mt-4">
+                <h3><i class="fas fa-code me-2"></i>¿Cómo funciona este juego?</h3>
+                <ul>
+                    <li><strong>Player:</strong> Sprite azul con física Arcade que responde al teclado</li>
+                    <li><strong>Collectibles:</strong> Círculos amarillos que aparecen cada 2 segundos</li>
+                    <li><strong>Collision:</strong> Detecta cuando el jugador toca un círculo</li>
+                    <li><strong>Score:</strong> Sistema de puntuación que se actualiza en tiempo real</li>
+                    <li><strong>Physics:</strong> Colisión con los bordes de la pantalla</li>
+                </ul>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="question-button" onclick="askFinalQuestion()">
+                    <i class="fas fa-graduation-cap me-2"></i>Pregunta Final
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn" onclick="changeSlide(-1)">
+            <i class="fas fa-chevron-left me-2"></i>Anterior
+        </button>
+        <button class="nav-button" id="nextBtn" onclick="changeSlide(1)">
+            Siguiente<i class="fas fa-chevron-right ms-2"></i>
+        </button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.12/sweetalert2.all.min.js"></script>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 11;
+        let demoGame = null;
+        let gameConfig = null;
+
+        // Navegación entre slides
+        function changeSlide(direction) {
+            const slides = document.querySelectorAll('.slide');
+            slides[currentSlide].classList.remove('active');
+            
+            currentSlide += direction;
+            
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            
+            slides[currentSlide].classList.add('active');
+            updateNavigation();
+            updateProgress();
+            
+            // Inicializar demo si llegamos a la slide de demo
+            if (currentSlide === 10 && !demoGame) {
+                setTimeout(initDemo, 500);
+            }
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            document.getElementById('slideIndicator').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Funciones de preguntas interactivas
+        function askQuestion1() {
+            Swal.fire({
+                title: '¿Qué es Phaser?',
+                text: '¿Podrías explicar con tus propias palabras qué es Phaser?',
+                icon: 'question',
+                input: 'textarea',
+                inputPlaceholder: 'Escribe tu respuesta aquí...',
+                showCancelButton: true,
+                confirmButtonText: 'Enviar respuesta',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire({
+                        title: '¡Excelente!',
+                        text: 'Phaser es un framework JavaScript para crear videojuegos web. ¡Sigamos aprendiendo!',
+                        icon: 'success'
+                    });
+                }
+            });
+        }
+
+        function askQuestion2() {
+            Swal.fire({
+                title: 'Historia de Phaser',
+                text: '¿En qué año fue creado Phaser y quién lo creó?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Richard Davey en 2013',
+                cancelButtonText: 'No lo recuerdo',
+                showDenyButton: true,
+                denyButtonText: 'Otra respuesta'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('¡Correcto!', 'Phaser fue creado por Richard Davey en 2013', 'success');
+                } else {
+                    Swal.fire('Respuesta', 'Phaser fue creado por Richard Davey en 2013. ¡No te preocupes, es normal no recordar todos los detalles!', 'info');
+                }
+            });
+        }
+
+        function askQuestion3() {
+            Swal.fire({
+                title: 'Conceptos de Phaser',
+                text: '¿Cuál de estos conceptos encuentras más interesante?',
+                icon: 'question',
+                showCancelButton: true,
+                input: 'select',
+                inputOptions: {
+                    'game': 'Game (Objeto principal)',
+                    'scene': 'Scene (Escenas)',
+                    'sprite': 'Sprite (Objetos gráficos)',
+                    'physics': 'Physics (Física)',
+                    'input': 'Input (Controles)',
+                    'audio': 'Audio (Sonidos)'
+                },
+                inputPlaceholder: 'Selecciona una opción'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const concepts = {
+                        'game': 'El Game es el corazón de todo juego en Phaser',
+                        'scene': 'Las escenas te permiten organizar tu juego en diferentes pantallas',
+                        'sprite': 'Los sprites son la base visual de cualquier juego 2D',
+                        'physics': 'La física hace que los juegos se sientan realistas y divertidos',
+                        'input': 'Sin input, no habría interacción con el jugador',
+                        'audio': 'El audio da vida y atmósfera a los juegos'
+                    };
+                    Swal.fire('¡Buena elección!', concepts[result.value], 'success');
+                }
+            });
+        }
+
+        function askQuestion4() {
+            Swal.fire({
+                title: 'Funciones principales',
+                text: '¿Cuál es la función que se ejecuta continuamente durante el juego?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'update()',
+                showDenyButton: true,
+                denyButtonText: 'create()',
+                showCloseButton: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('¡Perfecto!', 'update() se ejecuta aproximadamente 60 veces por segundo', 'success');
+                } else if (result.isDenied) {
+                    Swal.fire('No exactamente', 'create() se ejecuta solo una vez. La función que se ejecuta continuamente es update()', 'info');
+                }
+            });
+        }
+
+        function askQuestion5() {
+            Swal.fire({
+                title: 'Control de movimiento',
+                html: '¿Qué hace este código?<br><code>if (this.cursors.left.isDown) { this.player.x -= 5; }</code>',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Mueve el jugador a la izquierda',
+                showDenyButton: true,
+                denyButtonText: 'Mueve el jugador a la derecha'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('¡Correcto!', 'Cuando se presiona la flecha izquierda, el jugador se mueve 5 píxeles hacia la izquierda', 'success');
+                } else if (result.isDenied) {
+                    Swal.fire('Intenta de nuevo', 'El signo -= resta 5 píxeles, lo que mueve el objeto hacia la izquierda', 'info');
+                }
+            });
+        }
+
+        function askQuestion6() {
+            Swal.fire({
+                title: 'Sistemas de Física',
+                text: '¿Cuál es la principal diferencia entre Arcade Physics y Matter.js?',
+                icon: 'question',
+                input: 'textarea',
+                inputPlaceholder: 'Explica la diferencia...',
+                showCancelButton: true
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire({
+                        title: 'Respuesta:',
+                        html: '<strong>Arcade Physics:</strong> Más simple y rápido, ideal para juegos arcade<br><br><strong>Matter.js:</strong> Más realista y complejo, mejor para simulaciones avanzadas',
+                        icon: 'info'
+                    });
+                }
+            });
+        }
+
+        function askQuestion7() {
+            Swal.fire({
+                title: '¿Qué tipo de juego crearías?',
+                text: 'De todos los tipos de juegos que mencionamos, ¿cuál te gustaría desarrollar?',
+                icon: 'question',
+                input: 'select',
+                inputOptions: {
+                    'plataformas': 'Juego de plataformas (como Mario)',
+                    'shooter': 'Shooter / Disparos',
+                    'puzzle': 'Juego de puzzles',
+                    'racing': 'Juego de carreras',
+                    'arcade': 'Arcade clásico',
+                    'mobile': 'Juego para móviles'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('¡Excelente elección!', 'Todos estos tipos de juegos son posibles con Phaser. ¡Sigue aprendiendo para hacerlo realidad!', 'success');
+                }
+            });
+        }
+
+        function askQuestion8() {
+            Swal.fire({
+                title: 'Evaluación personal',
+                text: 'Considerando las ventajas y desventajas, ¿crees que Phaser es una buena opción para aprender desarrollo de videojuegos?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, las ventajas son mayores',
+                cancelButtonText: 'No, prefiero otra tecnología'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('¡Genial!', 'Phaser es una excelente puerta de entrada al desarrollo de videojuegos por su facilidad de uso y resultados inmediatos', 'success');
+                } else if (result.isDismissed) {
+                    Swal.fire('Es válido', 'Cada tecnología tiene su lugar. Lo importante es elegir la herramienta adecuada para cada proyecto', 'info');
+                }
+            });
+        }
+
+        function askFinalQuestion() {
+            Swal.fire({
+                title: '¡Evaluación Final!',
+                html: `
+                    <p>Después de toda la presentación, ¿podrías crear un juego simple en Phaser?</p>
+                    <p>¿Qué necesitarías incluir mínimamente?</p>
+                `,
+                icon: 'question',
+                input: 'textarea',
+                inputPlaceholder: 'Lista los elementos básicos que necesitarías...',
+                showCancelButton: true,
+                confirmButtonText: 'Enviar respuesta'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire({
+                        title: '¡Excelente!',
+                        html: `
+                            <p>Para crear un juego básico necesitarías:</p>
+                            <ul style="text-align: left;">
+                                <li>Configuración del juego (config)</li>
+                                <li>Función preload() para cargar recursos</li>
+                                <li>Función create() para crear objetos</li>
+                                <li>Función update() para la lógica del juego</li>
+                                <li>Al menos un sprite o gráfico</li>
+                                <li>Sistema de input para controles</li>
+                            </ul>
+                            <p><strong>¡Felicitaciones por completar la presentación!</strong></p>
+                        `,
+                        icon: 'success'
+                    });
+                }
+            });
+        }
+
+        // Inicialización del demo
+        function initDemo() {
+            gameConfig = {
+                type: Phaser.AUTO,
+                width: 800,
+                height: 400,
+                parent: 'game-container',
+                backgroundColor: '#2c3e50',
+                physics: {
+                    default: 'arcade',
+                    arcade: {
+                        debug: false
+                    }
+                },
+                scene: {
+                    preload: preload,
+                    create: create,
+                    update: update
+                }
+            };
+            
+            demoGame = new Phaser.Game(gameConfig);
+        }
+
+        // Funciones del demo game
+        let player, collectibles, score = 0, scoreText, cursors;
+
+        function preload() {
+            // Crear gráficos simples usando el API de Phaser
+            this.add.graphics()
+                .fillStyle(0x3498db)
+                .fillRect(0, 0, 32, 32)
+                .generateTexture('player', 32, 32);
+                
+            this.add.graphics()
+                .fillStyle(0xf1c40f)
+                .fillCircle(16, 16, 16)
+                .generateTexture('collectible', 32, 32);
+        }
+
+        function create() {
+            // Crear jugador
+            player = this.physics.add.sprite(400, 200, 'player');
+            player.setCollideWorldBounds(true);
+            
+            // Crear grupo de coleccionables
+            collectibles = this.physics.add.group();
+            
+            // Crear controles
+            cursors = this.input.keyboard.createCursorKeys();
+            
+            // Crear texto de puntuación
+            scoreText = this.add.text(16, 16, 'Puntos: 0', {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            });
+            
+            // Colisión entre jugador y coleccionables
+            this.physics.add.overlap(player, collectibles, collectItem, null, this);
+            
+            // Crear coleccionables cada 2 segundos
+            this.time.addEvent({
+                delay: 2000,
+                callback: createCollectible,
+                callbackScope: this,
+                loop: true
+            });
+            
+            // Crear primer coleccionable
+            createCollectible.call(this);
+        }
+
+        function update() {
+            // Controles del jugador
+            if (cursors.left.isDown) {
+                player.setVelocityX(-200);
+            } else if (cursors.right.isDown) {
+                player.setVelocityX(200);
+            } else {
+                player.setVelocityX(0);
+            }
+            
+            if (cursors.up.isDown) {
+                player.setVelocityY(-200);
+            } else if (cursors.down.isDown) {
+                player.setVelocityY(200);
+            } else {
+                player.setVelocityY(0);
+            }
+        }
+
+        function createCollectible() {
+            const x = Phaser.Math.Between(50, 750);
+            const y = Phaser.Math.Between(50, 350);
+            collectibles.create(x, y, 'collectible');
+        }
+
+        function collectItem(player, collectible) {
+            collectible.destroy();
+            score += 10;
+            scoreText.setText('Puntos: ' + score);
+        }
+
+        function restartDemo() {
+            if (demoGame) {
+                score = 0;
+                demoGame.scene.restart('default');
+            }
+        }
+
+        function togglePause() {
+            if (demoGame) {
+                if (demoGame.scene.isPaused('default')) {
+                    demoGame.scene.resume('default');
+                } else {
+                    demoGame.scene.pause('default');
+                }
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+            updateProgress();
+            
+            // Controles de teclado para navegación
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft' && currentSlide !== 10) {
+                    changeSlide(-1);
+                } else if (e.key === 'ArrowRight' && currentSlide !== 10) {
+                    changeSlide(1);
+                }
+            });
+        });
+
+        // Mensaje de bienvenida
+        Swal.fire({
+            title: '¡Bienvenido!',
+            text: 'Esta es una presentación interactiva sobre Phaser.js. Usa los botones de navegación o las flechas del teclado para avanzar.',
+            icon: 'info',
+            confirmButtonText: '¡Empecemos!'
+        });
+    </script>
+</body>
+</html>

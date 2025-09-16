@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Interactiva: Bootstrap</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.all.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .presentation-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .slide {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 1000px;
+            width: 100%;
+            min-height: 600px;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .slide.active {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .slide h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .navigation button {
+            padding: 12px 24px;
+            font-weight: 600;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .navigation button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.8);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            color: white;
+        }
+
+        .navigation button:disabled {
+            cursor: not-allowed;
+            background: rgba(128,128,128,0.2);
+            border-color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Botón anterior con toque azul */
+        #prevBtn:not(:disabled) {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: rgba(52, 152, 219, 0.6);
+        }
+
+        #prevBtn:not(:disabled):hover {
+            background: rgba(52, 152, 219, 0.35);
+            border-color: rgba(52, 152, 219, 0.8);
+        }
+
+        /* Botón siguiente con toque verde */
+        #nextBtn:not(.btn-outline-success) {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: rgba(46, 204, 113, 0.6);
+        }
+
+        #nextBtn:not(.btn-outline-success):hover {
+            background: rgba(46, 204, 113, 0.35);
+            border-color: rgba(46, 204, 113, 0.8);
+        }
+
+        /* Botón reiniciar con color más intenso */
+        #nextBtn.btn-outline-success {
+            background: rgba(39, 174, 96, 0.3);
+            border-color: rgba(39, 174, 96, 0.7);
+            color: white;
+        }
+
+        #nextBtn.btn-outline-success:hover {
+            background: rgba(39, 174, 96, 0.5);
+            border-color: rgba(39, 174, 96, 0.9);
+            color: white;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 25px;
+            z-index: 1000;
+            text-align: center;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .slide-counter .progress {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .slide-counter .progress-bar {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            transition: width 0.3s ease;
+        }
+
+        .code-exercise {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .code-input {
+            font-family: 'Courier New', monospace;
+            background: #2d3748;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            width: 100%;
+            min-height: 120px;
+        }
+
+        .quiz-option {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid #e9ecef;
+        }
+
+        .quiz-option:hover {
+            border-color: #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .quiz-option.selected {
+            border-color: #3498db;
+            background-color: #e3f2fd;
+        }
+
+        .quiz-option.correct {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .demo-area {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px dashed #dee2e6;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .icon-showcase {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .icon-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: transform 0.3s ease;
+        }
+
+        .icon-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .star-rating {
+            color: #ffc107;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">16</span>
+        <div class="progress mt-2" style="height: 4px; width: 60px;">
+            <div class="progress-bar bg-light" id="progressBar" role="progressbar" style="width: 6.25%"></div>
+        </div>
+    </div>
+
+    <!-- Slide 1: Introducción -->
+    <div class="presentation-container">
+        <div class="slide active" id="slide1">
+            <h1><i class="fab fa-bootstrap text-primary"></i> Presentación Interactiva</h1>
+            <div class="text-center">
+                <h2 class="text-primary">Bootstrap Framework</h2>
+                <p class="lead">Una guía completa e interactiva para dominar Bootstrap</p>
+                <div class="mt-4">
+                    <i class="fas fa-code fa-3x text-info me-4"></i>
+                    <i class="fas fa-mobile-alt fa-3x text-success me-4"></i>
+                    <i class="fas fa-palette fa-3x text-warning me-4"></i>
+                    <i class="fas fa-images fa-3x text-primary"></i>
+                </div>
+                <p class="mt-4 text-muted">Aprenderás qué es Bootstrap, sus componentes principales (Cards, Buttons, Modals, Dropdowns, Offcanvas, Carousel) y cómo usar Font Awesome</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: ¿Qué es Bootstrap? -->
+        <div class="slide" id="slide2">
+            <h1>¿Qué es Bootstrap? <i class="fab fa-bootstrap text-primary"></i></h1>
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="fs-5">Bootstrap es un <span class="highlight">framework de CSS</span> desarrollado originalmente por Twitter que proporciona:</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Componentes predefinidos listos para usar</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Sistema de grillas responsivo</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Clases utilitarias para estilizado rápido</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>JavaScript interactivo integrado</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Compatibilidad cross-browser</li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="card">
+                        <div class="card-body">
+                            <i class="fab fa-bootstrap fa-5x text-primary mb-3"></i>
+                            <h5 class="card-title">Bootstrap 5</h5>
+                            <p class="card-text">La versión más reciente y potente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: ¿Qué resuelve Bootstrap? -->
+        <div class="slide" id="slide3">
+            <h1>¿Qué problemas resuelve? <i class="fas fa-wrench text-warning"></i></h1>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5><i class="fas fa-times me-2"></i>Problemas Antes</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-clock text-danger me-2"></i>Desarrollo lento</li>
+                                <li><i class="fas fa-bug text-danger me-2"></i>Inconsistencias de diseño</li>
+                                <li><i class="fas fa-mobile-alt text-danger me-2"></i>Problemas de responsividad</li>
+                                <li><i class="fas fa-browser text-danger me-2"></i>Incompatibilidad entre navegadores</li>
+                                <li><i class="fas fa-code text-danger me-2"></i>CSS repetitivo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-check me-2"></i>Soluciones Con Bootstrap</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-rocket text-success me-2"></i>Desarrollo rápido</li>
+                                <li><i class="fas fa-paint-brush text-success me-2"></i>Diseño consistente</li>
+                                <li><i class="fas fa-expand-arrows-alt text-success me-2"></i>Responsivo por defecto</li>
+                                <li><i class="fas fa-globe text-success me-2"></i>Compatible con todos los navegadores</li>
+                                <li><i class="fas fa-layer-group text-success me-2"></i>Componentes reutilizables</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Componente Cards -->
+        <div class="slide" id="slide4">
+            <h1>Componente: Cards <i class="fas fa-id-card text-info"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>¿Qué son las Cards?</h3>
+                    <p>Las cards son contenedores flexibles que pueden contener una variedad de contenido y opciones.</p>
+                    <h4>Estructura básica:</h4>
+                    <pre class="bg-dark text-light p-3 rounded"><code>&lt;div class="card"&gt;
+  &lt;div class="card-header"&gt;Header&lt;/div&gt;
+  &lt;div class="card-body"&gt;
+    &lt;h5 class="card-title"&gt;Título&lt;/h5&gt;
+    &lt;p class="card-text"&gt;Contenido&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="card-footer"&gt;Footer&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+                <div class="col-md-6">
+                    <div class="demo-area">
+                        <h4>Demo en vivo:</h4>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-star text-warning"></i> Card de Ejemplo
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">Título de la Card</h5>
+                                <p class="card-text">Este es un ejemplo de contenido dentro de una card de Bootstrap. ¡Muy útil para organizar información!</p>
+                                <a href="#" class="btn btn-primary"><i class="fas fa-arrow-right me-1"></i>Acción</a>
+                            </div>
+                            <div class="card-footer text-muted">
+                                Footer opcional
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Componente Buttons -->
+        <div class="slide" id="slide5">
+            <h1>Componente: Buttons <i class="fas fa-hand-pointer text-primary"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Variantes de Botones:</h3>
+                    <p>Bootstrap ofrece múltiples estilos y tamaños de botones:</p>
+                    <div class="demo-area">
+                        <button type="button" class="btn btn-primary me-2 mb-2">Primary</button>
+                        <button type="button" class="btn btn-secondary me-2 mb-2">Secondary</button>
+                        <button type="button" class="btn btn-success me-2 mb-2"><i class="fas fa-check me-1"></i>Success</button>
+                        <button type="button" class="btn btn-warning me-2 mb-2"><i class="fas fa-exclamation me-1"></i>Warning</button>
+                        <button type="button" class="btn btn-danger me-2 mb-2"><i class="fas fa-times me-1"></i>Danger</button>
+                        <br>
+                        <button type="button" class="btn btn-outline-primary me-2 mb-2">Outline Primary</button>
+                        <button type="button" class="btn btn-lg btn-info me-2 mb-2">Grande</button>
+                        <button type="button" class="btn btn-sm btn-dark me-2 mb-2">Pequeño</button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>Código de ejemplo:</h3>
+                    <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Botón básico --&gt;
+&lt;button class="btn btn-primary"&gt;
+  &lt;i class="fas fa-save"&gt;&lt;/i&gt; Guardar
+&lt;/button&gt;
+
+&lt;!-- Botón outline --&gt;
+&lt;button class="btn btn-outline-success"&gt;
+  Outline
+&lt;/button&gt;
+
+&lt;!-- Diferentes tamaños --&gt;
+&lt;button class="btn btn-lg btn-warning"&gt;
+  Grande
+&lt;/button&gt;
+&lt;button class="btn btn-sm btn-info"&gt;
+  Pequeño
+&lt;/button&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Componente Modal -->
+        <div class="slide" id="slide6">
+            <h1>Componente: Modal <i class="fas fa-window-restore text-info"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>¿Qué es un Modal?</h3>
+                    <p>Los modales son ventanas emergentes que se superponen al contenido principal.</p>
+                    <h4>Usos comunes:</h4>
+                    <ul>
+                        <li><i class="fas fa-info-circle text-info me-2"></i>Mostrar información adicional</li>
+                        <li><i class="fas fa-edit text-warning me-2"></i>Formularios de edición</li>
+                        <li><i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirmaciones</li>
+                        <li><i class="fas fa-image text-success me-2"></i>Galerías de imágenes</li>
+                    </ul>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#demoModal">
+                        <i class="fas fa-external-link-alt me-1"></i>Ver Modal Demo
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <h3>Estructura básica:</h3>
+                    <pre class="bg-dark text-light p-3 rounded small"><code>&lt;div class="modal fade" id="myModal"&gt;
+  &lt;div class="modal-dialog"&gt;
+    &lt;div class="modal-content"&gt;
+      &lt;div class="modal-header"&gt;
+        &lt;h5 class="modal-title"&gt;Título&lt;/h5&gt;
+        &lt;button type="button" 
+                class="btn-close" 
+                data-bs-dismiss="modal"&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class="modal-body"&gt;
+        Contenido del modal...
+      &lt;/div&gt;
+      &lt;div class="modal-footer"&gt;
+        &lt;button class="btn btn-primary"&gt;
+          Guardar
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Componente Dropdown -->
+        <div class="slide" id="slide7">
+            <h1>Componente: Dropdown <i class="fas fa-chevron-down text-success"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Demo de Dropdown:</h3>
+                    <div class="demo-area">
+                        <div class="dropdown me-3 d-inline-block">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>Usuario
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Perfil</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-star me-1"></i>Acciones
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Editar</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Duplicar</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-trash me-2"></i>Eliminar</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>Código:</h3>
+                    <pre class="bg-dark text-light p-3 rounded small"><code>&lt;div class="dropdown"&gt;
+  &lt;button class="btn btn-secondary dropdown-toggle" 
+          type="button" 
+          data-bs-toggle="dropdown"&gt;
+    &lt;i class="fas fa-user"&gt;&lt;/i&gt; Usuario
+  &lt;/button&gt;
+  &lt;ul class="dropdown-menu"&gt;
+    &lt;li&gt;
+      &lt;a class="dropdown-item" href="#"&gt;
+        &lt;i class="fas fa-user"&gt;&lt;/i&gt; Perfil
+      &lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+      &lt;a class="dropdown-item" href="#"&gt;
+        &lt;i class="fas fa-cog"&gt;&lt;/i&gt; Config
+      &lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;hr class="dropdown-divider"&gt;&lt;/li&gt;
+    &lt;li&gt;
+      &lt;a class="dropdown-item" href="#"&gt;
+        Cerrar sesión
+      &lt;/a&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Componente Offcanvas -->
+        <div class="slide" id="slide8">
+            <h1>Componente: Offcanvas <i class="fas fa-bars text-warning"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>¿Qué es Offcanvas?</h3>
+                    <p>Un componente que permite mostrar contenido oculto desde los bordes de la pantalla.</p>
+                    <h4>Ideal para:</h4>
+                    <ul>
+                        <li><i class="fas fa-bars text-primary me-2"></i>Menús de navegación</li>
+                        <li><i class="fas fa-shopping-cart text-success me-2"></i>Carritos de compra</li>
+                        <li><i class="fas fa-filter text-info me-2"></i>Paneles de filtros</li>
+                        <li><i class="fas fa-cog text-warning me-2"></i>Configuraciones</li>
+                    </ul>
+                    
+                    <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#demoOffcanvas">
+                        <i class="fas fa-bars me-1"></i>Abrir Offcanvas
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <h3>Código básico:</h3>
+                    <pre class="bg-dark text-light p-3 rounded small"><code>&lt;!-- Botón trigger --&gt;
+&lt;button class="btn btn-primary" 
+        type="button" 
+        data-bs-toggle="offcanvas" 
+        data-bs-target="#offcanvasExample"&gt;
+  Abrir Offcanvas
+&lt;/button&gt;
+
+&lt;!-- Offcanvas --&gt;
+&lt;div class="offcanvas offcanvas-start" 
+     id="offcanvasExample"&gt;
+  &lt;div class="offcanvas-header"&gt;
+    &lt;h5 class="offcanvas-title"&gt;
+      Título
+    &lt;/h5&gt;
+    &lt;button type="button" 
+            class="btn-close" 
+            data-bs-dismiss="offcanvas"&gt;
+    &lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="offcanvas-body"&gt;
+    Contenido aquí...
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Componente Carousel -->
+        <div class="slide" id="slide9">
+            <h1>Componente: Carousel <i class="fas fa-images text-success"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>¿Qué es un Carousel?</h3>
+                    <p>Un carrusel permite mostrar múltiples contenidos (imágenes, texto, etc.) en un espacio rotativo.</p>
+                    <h4>Ideal para:</h4>
+                    <ul>
+                        <li><i class="fas fa-image text-primary me-2"></i>Galerías de imágenes</li>
+                        <li><i class="fas fa-bullhorn text-warning me-2"></i>Banners promocionales</li>
+                        <li><i class="fas fa-star text-success me-2"></i>Testimonios de clientes</li>
+                        <li><i class="fas fa-newspaper text-info me-2"></i>Noticias destacadas</li>
+                    </ul>
+                    
+                    <h4>Partes principales:</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-circle text-primary me-2"></i><strong>Indicadores:</strong> Puntos para navegación directa</li>
+                        <li class="list-group-item"><i class="fas fa-layer-group text-success me-2"></i><strong>Slides:</strong> Contenido de cada diapositiva</li>
+                        <li class="list-group-item"><i class="fas fa-chevron-left text-info me-2"></i><strong>Controles:</strong> Flechas anterior/siguiente</li>
+                    </ul>
+                    
+                    <h4>Características:</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-play text-success me-2"></i>Rotación automática</li>
+                        <li class="list-group-item"><i class="fas fa-hand-pointer text-primary me-2"></i>Navegación manual</li>
+                        <li class="list-group-item"><i class="fas fa-circle text-info me-2"></i>Indicadores de posición</li>
+                        <li class="list-group-item"><i class="fas fa-mobile-alt text-secondary me-2"></i>Responsive por defecto</li>
+                        <li class="list-group-item"><i class="fas fa-cog text-warning me-2"></i>Altamente personalizable</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3>Demo en vivo:</h3>
+                    <div class="demo-area">
+                        <div id="demoCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                            <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#demoCarousel" data-bs-slide-to="0" class="active"></button>
+                                <button type="button" data-bs-target="#demoCarousel" data-bs-slide-to="1"></button>
+                                <button type="button" data-bs-target="#demoCarousel" data-bs-slide-to="2"></button>
+                            </div>
+                            <div class="carousel-inner" style="border-radius: 10px; overflow: hidden;">
+                                <div class="carousel-item active">
+                                    <div class="d-flex align-items-center justify-content-center text-white position-relative" style="height: 250px; background: linear-gradient(45deg, #3498db, #2980b9);">
+                                        <div class="text-center">
+                                            <i class="fas fa-rocket fa-4x mb-3"></i>
+                                            <h4 class="fw-bold">¡Bootstrap es Increíble!</h4>
+                                            <p class="mb-0">Desarrollo rápido y eficiente</p>
+                                        </div>
+                                        <div class="position-absolute top-0 start-0 m-3">
+                                            <span class="badge bg-light text-primary">Slide 1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <div class="d-flex align-items-center justify-content-center text-white position-relative" style="height: 250px; background: linear-gradient(45deg, #2ecc71, #27ae60);">
+                                        <div class="text-center">
+                                            <i class="fas fa-heart fa-4x mb-3"></i>
+                                            <h4 class="fw-bold">Componentes Reutilizables</h4>
+                                            <p class="mb-0">Cards, modals, carousels y más</p>
+                                        </div>
+                                        <div class="position-absolute top-0 start-0 m-3">
+                                            <span class="badge bg-light text-success">Slide 2</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <div class="d-flex align-items-center justify-content-center text-dark position-relative" style="height: 250px; background: linear-gradient(45deg, #f39c12, #e67e22);">
+                                        <div class="text-center">
+                                            <i class="fas fa-star fa-4x mb-3"></i>
+                                            <h4 class="fw-bold">Diseño Responsivo</h4>
+                                            <p class="mb-0">Funciona en todos los dispositivos</p>
+                                        </div>
+                                        <div class="position-absolute top-0 start-0 m-3">
+                                            <span class="badge bg-light text-warning">Slide 3</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#demoCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Anterior</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#demoCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Siguiente</span>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                El carousel se mueve automáticamente cada 3 segundos
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <h4 class="mt-3">Código completo:</h4>
+                    <pre class="bg-dark text-light p-2 rounded small"><code>&lt;div id="myCarousel" class="carousel slide" 
+     data-bs-ride="carousel" 
+     data-bs-interval="2000"&gt;
+  
+  &lt;!-- Indicadores --&gt;
+  &lt;div class="carousel-indicators"&gt;
+    &lt;button data-bs-target="#myCarousel" 
+            data-bs-slide-to="0" class="active"&gt;&lt;/button&gt;
+    &lt;button data-bs-target="#myCarousel" 
+            data-bs-slide-to="1"&gt;&lt;/button&gt;
+    &lt;button data-bs-target="#myCarousel" 
+            data-bs-slide-to="2"&gt;&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Slides --&gt;
+  &lt;div class="carousel-inner"&gt;
+    &lt;div class="carousel-item active"&gt;
+      &lt;!-- Contenido slide 1 --&gt;
+    &lt;/div&gt;
+    &lt;div class="carousel-item"&gt;
+      &lt;!-- Contenido slide 2 --&gt;
+    &lt;/div&gt;
+    &lt;div class="carousel-item"&gt;
+      &lt;!-- Contenido slide 3 --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- Controles --&gt;
+  &lt;button class="carousel-control-prev" 
+          data-bs-target="#myCarousel" 
+          data-bs-slide="prev"&gt;
+    &lt;span class="carousel-control-prev-icon"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;button class="carousel-control-next" 
+          data-bs-target="#myCarousel" 
+          data-bs-slide="next"&gt;
+    &lt;span class="carousel-control-next-icon"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Opciones importantes --&gt;
+&lt;!-- data-bs-interval="5000" (velocidad) --&gt;
+&lt;!-- data-bs-pause="hover" (pausar al hover) --&gt;
+&lt;!-- data-bs-wrap="false" (no repetir) --&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Introducción Font Awesome -->
+        <div class="slide" id="slide10">
+            <h1>Font Awesome <i class="fas fa-font-awesome-flag text-primary"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>¿Qué es Font Awesome?</h2>
+                    <p class="lead">Es la biblioteca de iconos más popular del mundo, con más de <span class="highlight">7,000 iconos gratuitos</span>.</p>
+                    
+                    <h3>Ventajas:</h3>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-vector-square text-success me-2"></i>Iconos vectoriales escalables</li>
+                        <li class="list-group-item"><i class="fas fa-palette text-info me-2"></i>Fácil personalización con CSS</li>
+                        <li class="list-group-item"><i class="fas fa-mobile-alt text-warning me-2"></i>Completamente responsive</li>
+                        <li class="list-group-item"><i class="fas fa-bolt text-danger me-2"></i>Carga rápida y eficiente</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h2>Instalación:</h2>
+                    <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- CDN --&gt;
+&lt;link rel="stylesheet" 
+      href="https://cdnjs.cloudflare.com/
+           ajax/libs/font-awesome/6.4.0/
+           css/all.min.css"&gt;
+
+&lt;!-- Uso básico --&gt;
+&lt;i class="fas fa-star"&gt;&lt;/i&gt;
+&lt;i class="far fa-heart"&gt;&lt;/i&gt;
+&lt;i class="fab fa-github"&gt;&lt;/i&gt;</code></pre>
+                    
+                    <h3>Categorías:</h3>
+                    <div class="mt-3">
+                        <span class="badge bg-primary me-2 mb-2"><i class="fas fa-cube me-1"></i>fas - Solid</span>
+                        <span class="badge bg-secondary me-2 mb-2"><i class="far fa-heart me-1"></i>far - Regular</span>
+                        <span class="badge bg-success me-2 mb-2"><i class="fab fa-bootstrap me-1"></i>fab - Brands</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Ejemplos Font Awesome -->
+        <div class="slide" id="slide11">
+            <h1>Ejemplos con Font Awesome <i class="fas fa-star text-warning"></i></h1>
+            
+            <h2>Sistema de Calificación con Estrellas:</h2>
+            <div class="demo-area">
+                <div class="star-rating mb-3">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <span class="ms-2 text-muted">(4.0/5.0)</span>
+                </div>
+                <p><strong>Código:</strong> <code>&lt;i class="fas fa-star"&gt;&lt;/i&gt; &lt;i class="far fa-star"&gt;&lt;/i&gt;</code></p>
+            </div>
+
+            <h2>Otros Iconos Útiles:</h2>
+            <div class="icon-showcase">
+                <div class="icon-item">
+                    <i class="fas fa-user fa-3x text-primary mb-2"></i>
+                    <p><strong>Usuario</strong><br><code>fa-user</code></p>
+                </div>
+                <div class="icon-item">
+                    <i class="fas fa-shopping-cart fa-3x text-success mb-2"></i>
+                    <p><strong>Carrito</strong><br><code>fa-shopping-cart</code></p>
+                </div>
+                <div class="icon-item">
+                    <i class="fas fa-heart fa-3x text-danger mb-2"></i>
+                    <p><strong>Corazón</strong><br><code>fa-heart</code></p>
+                </div>
+                <div class="icon-item">
+                    <i class="fas fa-cog fa-3x text-warning mb-2"></i>
+                    <p><strong>Configuración</strong><br><code>fa-cog</code></p>
+                </div>
+                <div class="icon-item">
+                    <i class="fas fa-envelope fa-3x text-info mb-2"></i>
+                    <p><strong>Email</strong><br><code>fa-envelope</code></p>
+                </div>
+                <div class="icon-item">
+                    <i class="fas fa-phone fa-3x text-success mb-2"></i>
+                    <p><strong>Teléfono</strong><br><code>fa-phone</code></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Primera pregunta -->
+        <div class="slide" id="slide12">
+            <h1>Pregunta 1 <i class="fas fa-question-circle text-primary"></i></h1>
+            <div class="card">
+                <div class="card-body">
+                    <h3>¿Cuál es la principal ventaja de usar Bootstrap?</h3>
+                    <div class="mt-4">
+                        <div class="quiz-option card mb-2 p-3" data-answer="a">
+                            <strong>A)</strong> Solo mejora el rendimiento del sitio web
+                        </div>
+                        <div class="quiz-option card mb-2 p-3" data-answer="b">
+                            <strong>B)</strong> Proporciona desarrollo rápido y diseño consistente con componentes responsivos
+                        </div>
+                        <div class="quiz-option card mb-2 p-3" data-answer="c">
+                            <strong>C)</strong> Solo funciona con JavaScript
+                        </div>
+                        <div class="quiz-option card mb-2 p-3" data-answer="d">
+                            <strong>D)</strong> Reemplaza completamente a HTML y CSS
+                        </div>
+                    </div>
+                    <button class="btn btn-success mt-3" onclick="checkAnswer1()">
+                        <i class="fas fa-check me-1"></i>Verificar Respuesta
+                    </button>
+                    <div id="answer1Result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Primer ejercicio -->
+        <div class="slide" id="slide13">
+            <h1>Ejercicio 1: Crear una Card <i class="fas fa-code text-info"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Instrucciones:</h3>
+                    <p>Crea una card con Bootstrap que contenga:</p>
+                    <ul>
+                        <li>Un header con el texto "Mi Primera Card"</li>
+                        <li>Un título "Ejercicio Práctico"</li>
+                        <li>Un párrafo de texto</li>
+                        <li>Un botón primario con un icono de estrella</li>
+                    </ul>
+                    
+                    <div class="code-exercise">
+                        <h4>Escribe tu código aquí:</h4>
+                        <textarea class="code-input" id="exercise1Code" placeholder="Escribe tu código HTML aquí...">
+&lt;div class="card"&gt;
+  &lt;!-- Completa el código aquí --&gt;
+&lt;/div&gt;</textarea>
+                        <button class="btn btn-primary mt-2" onclick="checkExercise1()">
+                            <i class="fas fa-check me-1"></i>Corregir Ejercicio
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>Resultado esperado:</h3>
+                    <div class="demo-area">
+                        <div class="card">
+                            <div class="card-header">Mi Primera Card</div>
+                            <div class="card-body">
+                                <h5 class="card-title">Ejercicio Práctico</h5>
+                                <p class="card-text">Este es el resultado que debes obtener con tu código.</p>
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-star me-1"></i>Botón
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="exercise1Result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Segunda pregunta -->
+        <div class="slide" id="slide14">
+            <h1>Pregunta 2 <i class="fas fa-question-circle text-primary"></i></h1>
+            <div class="card">
+                <div class="card-body">
+                    <h3>¿Cuál es el prefijo correcto para iconos sólidos de Font Awesome?</h3>
+                    <div class="mt-4">
+                        <div class="quiz-option card mb-2 p-3" data-answer="a">
+                            <strong>A)</strong> <code>far</code> - Font Awesome Regular
+                        </div>
+                        <div class="quiz-option card mb-2 p-3" data-answer="b">
+                            <strong>B)</strong> <code>fab</code> - Font Awesome Brands  
+                        </div>
+                        <div class="quiz-option card mb-2 p-3" data-answer="c">
+                            <strong>C)</strong> <code>fas</code> - Font Awesome Solid
+                        </div>
+                        <div class="quiz-option card mb-2 p-3" data-answer="d">
+                            <strong>D)</strong> <code>fal</code> - Font Awesome Light
+                        </div>
+                    </div>
+                    <button class="btn btn-success mt-3" onclick="checkAnswer2()">
+                        <i class="fas fa-check me-1"></i>Verificar Respuesta
+                    </button>
+                    <div id="answer2Result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Segundo ejercicio -->
+        <div class="slide" id="slide15">
+            <h1>Ejercicio 2: Crear un Carousel <i class="fas fa-code text-info"></i></h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Instrucciones:</h3>
+                    <p>Crea un carousel que contenga:</p>
+                    <ul>
+                        <li>ID "miCarousel" con clases "carousel slide"</li>
+                        <li>Atributo data-bs-ride="carousel"</li>
+                        <li>Indicadores (carousel-indicators) para 3 slides</li>
+                        <li>Tres slides con diferentes colores de fondo</li>
+                        <li>Controles de navegación (prev/next)</li>
+                        <li>Al menos un icono de Font Awesome en cada slide</li>
+                    </ul>
+                    
+                    <div class="code-exercise">
+                        <h4>Escribe tu código aquí:</h4>
+                        <textarea class="code-input" id="exercise2Code" placeholder="Escribe tu código HTML aquí...">
+&lt;div id="miCarousel" class="carousel slide" data-bs-ride="carousel"&gt;
+  &lt;!-- Completa el código aquí --&gt;
+&lt;/div&gt;</textarea>
+                        <button class="btn btn-primary mt-2" onclick="checkExercise2()">
+                            <i class="fas fa-check me-1"></i>Corregir Ejercicio
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>Resultado esperado:</h3>
+                    <div class="demo-area">
+                        <div id="exerciseCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#exerciseCarousel" data-bs-slide-to="0" class="active"></button>
+                                <button type="button" data-bs-target="#exerciseCarousel" data-bs-slide-to="1"></button>
+                                <button type="button" data-bs-target="#exerciseCarousel" data-bs-slide-to="2"></button>
+                            </div>
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <div class="d-flex align-items-center justify-content-center bg-info text-white" style="height: 150px;">
+                                        <div class="text-center">
+                                            <i class="fas fa-thumbs-up fa-2x mb-2"></i>
+                                            <p>Slide 1</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <div class="d-flex align-items-center justify-content-center bg-danger text-white" style="height: 150px;">
+                                        <div class="text-center">
+                                            <i class="fas fa-fire fa-2x mb-2"></i>
+                                            <p>Slide 2</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <div class="d-flex align-items-center justify-content-center bg-success text-white" style="height: 150px;">
+                                        <div class="text-center">
+                                            <i class="fas fa-check fa-2x mb-2"></i>
+                                            <p>Slide 3</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#exerciseCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                                <span class="visually-hidden">Anterior</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#exerciseCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                                <span class="visually-hidden">Siguiente</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="exercise2Result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Conclusión -->
+        <div class="slide" id="slide16">
+            <h1>¡Felicitaciones! <i class="fas fa-trophy text-warning"></i></h1>
+            <div class="text-center">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fab fa-bootstrap fa-3x text-primary mb-3"></i>
+                                <h5>Bootstrap</h5>
+                                <p>Aprendiste los componentes esenciales</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-font-awesome-flag fa-3x text-success mb-3"></i>
+                                <h5>Font Awesome</h5>
+                                <p>Dominas el uso de iconos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-code fa-3x text-info mb-3"></i>
+                                <h5>Práctica</h5>
+                                <p>Completaste ejercicios hands-on</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <h3>Próximos pasos:</h3>
+                    <div class="star-rating mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="lead">¡Ahora estás listo para crear interfaces increíbles con Bootstrap y Font Awesome!</p>
+                    <button class="btn btn-success btn-lg" onclick="restartPresentation()">
+                        <i class="fas fa-redo me-2"></i>Comenzar de Nuevo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Demo -->
+    <div class="modal fade" id="demoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-info-circle text-primary me-2"></i>Modal de Demostración</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¡Este es un modal de Bootstrap en acción! Los modales son perfectos para:</p>
+                    <ul>
+                        <li><i class="fas fa-check text-success me-2"></i>Mostrar información importante</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Formularios de edición</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Confirmaciones de acciones</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offcanvas Demo -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="demoOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title"><i class="fas fa-bars text-warning me-2"></i>Menú Demo</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <p>¡Este es un offcanvas de Bootstrap!</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><i class="fas fa-home me-2"></i>Inicio</li>
+                <li class="list-group-item"><i class="fas fa-user me-2"></i>Perfil</li>
+                <li class="list-group-item"><i class="fas fa-cog me-2"></i>Configuración</li>
+                <li class="list-group-item"><i class="fas fa-envelope me-2"></i>Mensajes</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="navigation">
+        <button class="btn btn-outline-light me-2" onclick="previousSlide()" id="prevBtn" 
+                title="Ir a la diapositiva anterior (Flecha izquierda)">
+            <i class="fas fa-chevron-left me-1"></i>Anterior
+        </button>
+        <button class="btn btn-outline-light" onclick="nextSlide()" id="nextBtn"
+                title="Ir a la siguiente diapositiva (Flecha derecha o Espacio)">
+            Siguiente<i class="fas fa-chevron-right ms-1"></i>
+        </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentSlideNum = 1;
+        const totalSlides = 16;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide${n}`).classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = n;
+            currentSlideNum = n;
+            
+            // Update button states
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressBar = document.getElementById('progressBar');
+            
+            // Update progress bar
+            const progress = (currentSlideNum / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+            
+            // Disable/enable previous button
+            if (currentSlideNum === 1) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('opacity-50');
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.classList.remove('opacity-50');
+            }
+            
+            // Disable/enable next button
+            if (currentSlideNum === totalSlides) {
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('opacity-50');
+                nextBtn.classList.add('btn-outline-success');
+                nextBtn.classList.remove('btn-outline-light');
+                nextBtn.innerHTML = '<i class="fas fa-redo me-1"></i>Reiniciar';
+                nextBtn.onclick = restartPresentation;
+                nextBtn.title = 'Volver al inicio de la presentación';
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('opacity-50');
+                nextBtn.classList.remove('btn-outline-success');
+                nextBtn.classList.add('btn-outline-light');
+                nextBtn.onclick = nextSlide;
+                nextBtn.title = 'Ir a la siguiente diapositiva (Flecha derecha o Espacio)';
+                nextBtn.innerHTML = 'Siguiente<i class="fas fa-chevron-right ms-1"></i>';
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlideNum < totalSlides) {
+                showSlide(currentSlideNum + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlideNum > 1) {
+                showSlide(currentSlideNum - 1);
+            }
+        }
+
+        function restartPresentation() {
+            showSlide(1);
+            // Reset quiz answers
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
+            document.getElementById('answer1Result').innerHTML = '';
+            document.getElementById('answer2Result').innerHTML = '';
+            document.getElementById('exercise1Result').innerHTML = '';
+            document.getElementById('exercise2Result').innerHTML = '';
+            
+            // Reset navigation buttons
+            updateNavigationButtons();
+        }
+
+        // Quiz 1 functionality
+        document.querySelectorAll('#slide12 .quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove previous selections
+                document.querySelectorAll('#slide12 .quiz-option').forEach(opt => opt.classList.remove('selected'));
+                // Add selection to clicked option
+                this.classList.add('selected');
+            });
+        });
+
+        function checkAnswer1() {
+            const selectedOption = document.querySelector('#slide12 .quiz-option.selected');
+            const resultDiv = document.getElementById('answer1Result');
+            
+            if (!selectedOption) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¡Atención!',
+                    text: 'Por favor selecciona una respuesta'
+                });
+                return;
+            }
+
+            const answer = selectedOption.getAttribute('data-answer');
+            
+            // Reset all options
+            document.querySelectorAll('#slide12 .quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+
+            if (answer === 'b') {
+                selectedOption.classList.add('correct');
+                resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check me-2"></i><strong>¡Correcto!</strong> Bootstrap proporciona desarrollo rápido y diseño consistente.</div>';
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Excelente!',
+                    text: 'Respuesta correcta. Bootstrap acelera el desarrollo y mantiene la consistencia.',
+                    timer: 2000
+                });
+            } else {
+                selectedOption.classList.add('incorrect');
+                document.querySelector('#slide12 .quiz-option[data-answer="b"]').classList.add('correct');
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times me-2"></i><strong>Incorrecto.</strong> La respuesta correcta es la opción B.</div>';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Respuesta incorrecta',
+                    text: 'La respuesta correcta es: "Proporciona desarrollo rápido y diseño consistente con componentes responsivos"'
+                });
+            }
+        }
+
+        // Quiz 2 functionality
+        document.querySelectorAll('#slide14 .quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('#slide14 .quiz-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        function checkAnswer2() {
+            const selectedOption = document.querySelector('#slide14 .quiz-option.selected');
+            const resultDiv = document.getElementById('answer2Result');
+            
+            if (!selectedOption) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¡Atención!',
+                    text: 'Por favor selecciona una respuesta'
+                });
+                return;
+            }
+
+            const answer = selectedOption.getAttribute('data-answer');
+            
+            document.querySelectorAll('#slide14 .quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+
+            if (answer === 'c') {
+                selectedOption.classList.add('correct');
+                resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check me-2"></i><strong>¡Correcto!</strong> "fas" es para Font Awesome Solid.</div>';
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Perfecto!',
+                    text: 'fas significa Font Awesome Solid y es para iconos sólidos.',
+                    timer: 2000
+                });
+            } else {
+                selectedOption.classList.add('incorrect');
+                document.querySelector('#slide14 .quiz-option[data-answer="c"]').classList.add('correct');
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times me-2"></i><strong>Incorrecto.</strong> La respuesta correcta es "fas" para Font Awesome Solid.</div>';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Respuesta incorrecta',
+                    text: 'La respuesta correcta es: "fas - Font Awesome Solid"'
+                });
+            }
+        }
+
+        // Exercise 1
+        function checkExercise1() {
+            const code = document.getElementById('exercise1Code').value.trim();
+            const resultDiv = document.getElementById('exercise1Result');
+            
+            const requiredElements = [
+                { element: 'card-header', text: 'Mi Primera Card' },
+                { element: 'card-title', text: 'Ejercicio Práctico' },
+                { element: 'btn btn-primary', text: 'botón primario' },
+                { element: 'fas fa-star', text: 'icono de estrella' }
+            ];
+
+            let errors = [];
+            let correct = true;
+
+            requiredElements.forEach(req => {
+                if (!code.includes(req.element)) {
+                    errors.push(`Falta: ${req.text} (${req.element})`);
+                    correct = false;
+                }
+            });
+
+            if (correct) {
+                resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check me-2"></i><strong>¡Excelente!</strong> Tu código es correcto.</div>';
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Código correcto!',
+                    text: 'Has completado exitosamente el ejercicio.',
+                    timer: 2000
+                });
+            } else {
+                let errorList = errors.map(error => `<li>${error}</li>`).join('');
+                resultDiv.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i><strong>Revisa tu código:</strong><ul>${errorList}</ul></div>`;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Código incompleto',
+                    html: 'Faltan algunos elementos:<br>' + errors.join('<br>'),
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        }
+
+        // Exercise 2
+        function checkExercise2() {
+            const code = document.getElementById('exercise2Code').value.trim();
+            const resultDiv = document.getElementById('exercise2Result');
+            
+            const requiredElements = [
+                { element: 'id="miCarousel"', text: 'ID "miCarousel"' },
+                { element: 'carousel slide', text: 'clases "carousel slide"' },
+                { element: 'data-bs-ride="carousel"', text: 'atributo data-bs-ride' },
+                { element: 'carousel-indicators', text: 'indicadores del carousel' },
+                { element: 'carousel-inner', text: 'contenedor carousel-inner' },
+                { element: 'carousel-item', text: 'elementos carousel-item' },
+                { element: 'carousel-control-prev', text: 'control anterior' },
+                { element: 'carousel-control-next', text: 'control siguiente' },
+                { element: 'fas fa-', text: 'al menos un icono Font Awesome' }
+            ];
+
+            let errors = [];
+            let correct = true;
+
+            requiredElements.forEach(req => {
+                if (!code.includes(req.element)) {
+                    errors.push(`Falta: ${req.text}`);
+                    correct = false;
+                }
+            });
+
+            // Check for multiple carousel items (at least 2)
+            const itemMatches = code.match(/carousel-item/g);
+            if (!itemMatches || itemMatches.length < 3) {
+                errors.push('Debe tener al menos 3 carousel-items');
+                correct = false;
+            }
+
+            if (correct) {
+                resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check me-2"></i><strong>¡Perfecto!</strong> Tu carousel está completo.</div>';
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Excelente trabajo!',
+                    text: 'Has creado correctamente el componente carousel.',
+                    timer: 2000
+                });
+            } else {
+                let errorList = errors.map(error => `<li>${error}</li>`).join('');
+                resultDiv.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i><strong>Revisa tu código:</strong><ul>${errorList}</ul></div>`;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Código incompleto',
+                    html: 'Faltan algunos elementos:<br>' + errors.join('<br>'),
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+
+        // Initialize
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        // Initialize navigation buttons on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigationButtons();
+        });
+        
+        // Update buttons immediately (fallback)
+        updateNavigationButtons();
+    </script>
+</body>
+</html>

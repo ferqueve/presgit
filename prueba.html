@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preparación para prueba</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { background-color: #f8f9fa; }
+    .question-container { display: none; }
+    .question-container.active { display: block; }
+    .code-block { background: #2d2d2d; color: #f8f8f2; padding: 1rem; border-radius: 0.5rem; font-family: 'Courier New', monospace; margin: 1rem 0; }
+  </style>
+</head>
+<body class="py-4">
+
+<div class="container">
+  <h1 class="text-center mb-4"><i class="fas fa-graduation-cap"></i> Preparación para prueba. Grupos 310 y 316</h1>
+  <p class="text-center text-muted">Responde las preguntas y ejercicios sobre GIT, JavaScript, HTTP, Bootstrap y más.</p>
+
+  <div id="quiz-container">
+    <!-- Las preguntas se cargarán aquí dinámicamente -->
+  </div>
+
+  <div class="text-center mt-4">
+    <button id="btn-submit" class="btn btn-success d-none">Enviar Respuesta</button>
+    <button id="btn-next" class="btn btn-primary d-none">Siguiente</button>
+  </div>
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Bootstrap JS (opcional, para componentes interactivos) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Base de datos de preguntas
+const questions = [
+  {
+    type: "multiple",
+    question: "¿Cuál de los siguientes comandos de GIT se usa para subir cambios al repositorio remoto?",
+    options: ["git push", "git pull", "git clone", "git add"],
+    correct: 0,
+    topic: "GIT"
+  },
+  {
+    type: "code",
+    question: "Dado el siguiente arreglo de películas, ¿qué devuelve <code>peliculas.filter(p => p.disponible)</code>?",
+    code: `const peliculas = [
+  { titulo: "Interestelar", estreno: 2014, disponible: true },
+  { titulo: "Matrix", estreno: 1999, disponible: false },
+  { titulo: "Dune", estreno: 2021, disponible: true }
+];`,
+    options: [
+      "Un arreglo con todas las películas",
+      "Un arreglo con solo 'Interestelar' y 'Dune'",
+      "Un arreglo con solo 'Matrix'",
+      "undefined"
+    ],
+    correct: 1,
+    topic: "Arreglos - filter"
+  },
+  {
+    type: "multiple",
+    question: "¿Qué método HTTP se utiliza para enviar datos al servidor (por ejemplo, al registrar un usuario)?",
+    options: ["GET", "POST", "PUT", "DELETE"],
+    correct: 1,
+    topic: "HTTP"
+  },
+  {
+    type: "exercise",
+    question: "Ordena las siguientes películas por año de estreno (de más antigua a más reciente). Arrastra o selecciona el orden correcto.",
+    data: [
+      { titulo: "El Padrino", estreno: 1972 },
+      { titulo: "Parásitos", estreno: 2019 },
+      { titulo: "Titanic", estreno: 1997 }
+    ],
+    correctOrder: [0, 2, 1], // índices ordenados por estreno
+    topic: "Arreglos - sort"
+  },
+  {
+    type: "multiple",
+    question: "¿Cuál es la clase de Bootstrap que define una columna que ocupa 6 de 12 en pantallas medianas?",
+    options: ["col-md-6", "col-6", "col-sm-6", "col-lg-6"],
+    correct: 0,
+    topic: "Bootstrap - Grilla"
+  },
+  {
+    type: "code",
+    question: "¿Qué hace el siguiente fragmento de código?",
+    code: `fetch('/api/usuarios/123', {
+  method: 'DELETE'
+})
+.then(res => res.json())
+.then(data => console.log(data));`,
+    options: [
+      "Obtiene los datos del usuario 123",
+      "Actualiza los datos del usuario 123",
+      "Elimina al usuario 123",
+      "Crea un nuevo usuario"
+    ],
+    correct: 2,
+    topic: "Fetch + HTTP"
+  }
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+
+// Renderiza la pregunta actual
+function renderQuestion() {
+  const container = document.getElementById("quiz-container");
+  const q = questions[currentQuestionIndex];
+
+  let html = `
+    <div class="card p-4 shadow-sm question-container active">
+      <div class="badge bg-primary mb-3">${q.topic}</div>
+      <h4 class="mb-3">${q.question}</h4>
+  `;
+
+  if (q.code) {
+    html += `<div class="code-block">${q.code}</div>`;
+  }
+
+  if (q.type === "multiple" || q.type === "code") {
+    html += `<div class="form-check mb-2">`;
+    q.options.forEach((opt, i) => {
+      html += `
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="answer" id="opt${i}" value="${i}">
+          <label class="form-check-label" for="opt${i}">${opt}</label>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  } else if (q.type === "exercise") {
+    // Ejercicio de ordenamiento
+    const shuffled = [...q.data].sort(() => 0.5 - Math.random());
+    html += `<div class="alert alert-info">Ordena las películas arrastrando o haciendo clic en el orden correcto:</div>`;
+    html += `<div id="exercise-options" class="list-group">`;
+    shuffled.forEach((item, i) => {
+      html += `<button class="list-group-item list-group-item-action" data-index="${q.data.findIndex(x => x.titulo === item.titulo)}">${item.titulo} (${item.estreno})</button>`;
+    });
+    html += `</div>`;
+    html += `<input type="hidden" id="user-order" value="">`;
+  }
+
+  html += `</div>`;
+  container.innerHTML = html;
+
+  // Mostrar/ocultar botones
+  document.getElementById("btn-submit").classList.toggle("d-none", q.type === "exercise");
+  document.getElementById("btn-next").classList.add("d-none");
+
+  // Si es ejercicio, activar interacción
+  if (q.type === "exercise") {
+    setupExerciseInteraction();
+  }
+}
+
+function setupExerciseInteraction() {
+  const buttons = document.querySelectorAll("#exercise-options .list-group-item");
+  const selectedOrder = [];
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.index);
+      if (!selectedOrder.includes(idx)) {
+        selectedOrder.push(idx);
+        btn.classList.add("bg-success", "text-white");
+        btn.disabled = true;
+
+        // Si ya seleccionó todos
+        if (selectedOrder.length === buttons.length) {
+          document.getElementById("user-order").value = JSON.stringify(selectedOrder);
+          document.getElementById("btn-submit").classList.remove("d-none");
+        }
+      }
+    });
+  });
+}
+
+// Validar respuesta
+function checkAnswer() {
+  const q = questions[currentQuestionIndex];
+  let userAnswer;
+
+  if (q.type === "multiple" || q.type === "code") {
+    const selected = document.querySelector('input[name="answer"]:checked');
+    if (!selected) {
+      Swal.fire("⚠️", "Por favor selecciona una opción.", "warning");
+      return false;
+    }
+    userAnswer = parseInt(selected.value);
+    return userAnswer === q.correct;
+  } else if (q.type === "exercise") {
+    const userOrder = JSON.parse(document.getElementById("user-order").value);
+    const isCorrect = JSON.stringify(userOrder) === JSON.stringify(q.correctOrder);
+    return isCorrect;
+  }
+}
+
+// Eventos de botones
+document.getElementById("btn-submit").addEventListener("click", () => {
+  if (checkAnswer()) {
+    score++;
+    Swal.fire("✅ ¡Correcto!", "¡Muy bien!", "success");
+  } else {
+    Swal.fire("❌ Incorrecto", "Revisa el tema y vuelve a intentarlo.", "error");
+  }
+  document.getElementById("btn-next").classList.remove("d-none");
+});
+
+document.getElementById("btn-next").addEventListener("click", () => {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < questions.length) {
+    renderQuestion();
+    document.getElementById("btn-submit").classList.toggle("d-none", questions[currentQuestionIndex].type === "exercise");
+    document.getElementById("btn-next").classList.add("d-none");
+  } else {
+    // Fin del cuestionario
+    const percentage = Math.round((score / questions.length) * 100);
+    Swal.fire({
+      title: "🎉 ¡Cuestionario completado!",
+      html: `Tu puntuación: <strong>${score} de ${questions.length}</strong> (${percentage}%)`,
+      icon: percentage >= 70 ? "success" : "info",
+      confirmButtonText: "Reiniciar"
+    }).then(() => {
+      currentQuestionIndex = 0;
+      score = 0;
+      renderQuestion();
+    });
+  }
+});
+
+// Iniciar
+renderQuestion();
+</script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Preparación para prueba</title>
+  <title>Cuestionario Interactivo - Temas Web</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
@@ -12,105 +12,306 @@
     body { background-color: #f8f9fa; }
     .question-container { display: none; }
     .question-container.active { display: block; }
-    .code-block { background: #2d2d2d; color: #f8f8f2; padding: 1rem; border-radius: 0.5rem; font-family: 'Courier New', monospace; margin: 1rem 0; }
+    .code-block { 
+      background: #2d2d2d; 
+      color: #f8f8f2; 
+      padding: 1rem; 
+      border-radius: 0.5rem; 
+      font-family: 'Courier New', monospace; 
+      margin: 1rem 0; 
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body class="py-4">
 
 <div class="container">
-  <h1 class="text-center mb-4"><i class="fas fa-graduation-cap"></i> Preparación para prueba. Grupos 310 y 316</h1>
-  <p class="text-center text-muted">Responde las preguntas y ejercicios sobre GIT, JavaScript, HTTP, Bootstrap y más.</p>
+  <h1 class="text-center mb-4"><i class="fas fa-graduation-cap"></i> Cuestionario Interactivo</h1>
+  <p class="text-center text-muted">Evalúa tus conocimientos sobre GIT, JavaScript, HTTP, Bootstrap y manejo de arreglos.</p>
 
   <div id="quiz-container">
     <!-- Las preguntas se cargarán aquí dinámicamente -->
   </div>
 
   <div class="text-center mt-4">
-    <button id="btn-submit" class="btn btn-success d-none">Enviar Respuesta</button>
+    <button id="btn-submit" class="btn btn-success">Enviar Respuesta</button>
     <button id="btn-next" class="btn btn-primary d-none">Siguiente</button>
   </div>
 </div>
 
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Bootstrap JS (opcional, para componentes interactivos) -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// Base de datos de preguntas
+// Base de datos de 20 preguntas
 const questions = [
   {
     type: "multiple",
-    question: "¿Cuál de los siguientes comandos de GIT se usa para subir cambios al repositorio remoto?",
-    options: ["git push", "git pull", "git clone", "git add"],
-    correct: 0,
+    question: "¿Qué comando de GIT se utiliza para crear una nueva rama llamada 'feature-login'?",
+    options: [
+      "git branch feature-login",
+      "git checkout -b feature-login",
+      "git create branch feature-login",
+      "Ambas A y B"
+    ],
+    correct: 3,
     topic: "GIT"
   },
   {
     type: "code",
-    question: "Dado el siguiente arreglo de películas, ¿qué devuelve <code>peliculas.filter(p => p.disponible)</code>?",
-    code: `const peliculas = [
-  { titulo: "Interestelar", estreno: 2014, disponible: true },
-  { titulo: "Matrix", estreno: 1999, disponible: false },
-  { titulo: "Dune", estreno: 2021, disponible: true }
+    question: "Dado el siguiente código, ¿qué se imprime en consola?",
+    code: `const libros = [
+  { titulo: "1984", autor: "Orwell", año: 1949 },
+  { titulo: "Fahrenheit 451", autor: "Bradbury", año: 1953 }
+];
+console.log(libros.find(libro => libro.autor === "Orwell").titulo);`,
+    options: [
+      "1984",
+      "Orwell",
+      "Fahrenheit 451",
+      "undefined"
+    ],
+    correct: 0,
+    topic: "Arreglos - find"
+  },
+  {
+    type: "multiple",
+    question: "¿Cuál es la diferencia principal entre los métodos HTTP PUT y PATCH?",
+    options: [
+      "PUT actualiza parcialmente un recurso; PATCH lo reemplaza completamente.",
+      "PUT reemplaza completamente un recurso; PATCH actualiza parcialmente.",
+      "No hay diferencia, son sinónimos.",
+      "PUT se usa solo para crear; PATCH para actualizar."
+    ],
+    correct: 1,
+    topic: "HTTP"
+  },
+  {
+    type: "code",
+    question: "¿Qué devuelve el siguiente código?",
+    code: `const numeros = [3, 1, 4, 1, 5];
+const ordenado = numeros.sort((a, b) => a - b);
+console.log(ordenado);`,
+    options: [
+      "[1, 1, 3, 4, 5]",
+      "[5, 4, 3, 1, 1]",
+      "[3, 1, 4, 1, 5]",
+      "Error"
+    ],
+    correct: 0,
+    topic: "Arreglos - sort"
+  },
+  {
+    type: "multiple",
+    question: "En Bootstrap 5, ¿cuál clase se usa para centrar horizontalmente un elemento en la grilla?",
+    options: [
+      "text-center",
+      "mx-auto",
+      "justify-content-center",
+      "align-self-center"
+    ],
+    correct: 1,
+    topic: "Bootstrap - Grilla"
+  },
+  {
+    type: "code",
+    question: "¿Qué hace este fragmento de código?",
+    code: `fetch('/api/peliculas', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ titulo: 'Nueva Película' })
+});`,
+    options: [
+      "Obtiene todas las películas",
+      "Actualiza una película existente",
+      "Crea una nueva película",
+      "Elimina una película"
+    ],
+    correct: 2,
+    topic: "Fetch + HTTP"
+  },
+  {
+    type: "code",
+    question: "Dado el arreglo, ¿qué devuelve <code>autores.filter(a => a.libros.length > 2)</code>?",
+    code: `const autores = [
+  { nombre: "García Márquez", libros: ["Cien años...", "El amor..."] },
+  { nombre: "Asimov", libros: ["Fundación", "Yo, robot", "El sol desnudo"] }
 ];`,
     options: [
-      "Un arreglo con todas las películas",
-      "Un arreglo con solo 'Interestelar' y 'Dune'",
-      "Un arreglo con solo 'Matrix'",
-      "undefined"
+      "Un arreglo vacío",
+      "Solo el autor Asimov",
+      "Ambos autores",
+      "Solo García Márquez"
     ],
     correct: 1,
     topic: "Arreglos - filter"
   },
   {
     type: "multiple",
-    question: "¿Qué método HTTP se utiliza para enviar datos al servidor (por ejemplo, al registrar un usuario)?",
-    options: ["GET", "POST", "PUT", "DELETE"],
-    correct: 1,
+    question: "¿Qué comando de GIT se usa para ver el historial de commits?",
+    options: [
+      "git log",
+      "git status",
+      "git show",
+      "git history"
+    ],
+    correct: 0,
+    topic: "GIT"
+  },
+  {
+    type: "code",
+    question: "¿Qué se imprime al ejecutar este código?",
+    code: `const peliculas = [
+  { titulo: "Avatar", estreno: 2009, recaudacion: 2847 },
+  { titulo: "Endgame", estreno: 2019, recaudacion: 2797 }
+];
+const titulos = peliculas.map(p => p.titulo);
+console.log(titulos);`,
+    options: [
+      '["Avatar", "Endgame"]',
+      "[2009, 2019]",
+      "[2847, 2797]",
+      "undefined"
+    ],
+    correct: 0,
+    topic: "Arreglos - map"
+  },
+  {
+    type: "multiple",
+    question: "¿Cuál método HTTP es idempotente y no debe modificar el estado del servidor?",
+    options: ["POST", "PUT", "GET", "DELETE"],
+    correct: 2,
     topic: "HTTP"
   },
   {
-    type: "exercise",
-    question: "Ordena las siguientes películas por año de estreno (de más antigua a más reciente). Arrastra o selecciona el orden correcto.",
-    data: [
-      { titulo: "El Padrino", estreno: 1972 },
-      { titulo: "Parásitos", estreno: 2019 },
-      { titulo: "Titanic", estreno: 1997 }
+    type: "code",
+    question: "¿Qué devuelve este código?",
+    code: `const arr = ['c', 'a', 'b'];
+console.log(arr.sort());`,
+    options: [
+      "['a', 'b', 'c']",
+      "['c', 'a', 'b']",
+      "['b', 'a', 'c']",
+      "Error"
     ],
-    correctOrder: [0, 2, 1], // índices ordenados por estreno
+    correct: 0,
     topic: "Arreglos - sort"
   },
   {
     type: "multiple",
-    question: "¿Cuál es la clase de Bootstrap que define una columna que ocupa 6 de 12 en pantallas medianas?",
-    options: ["col-md-6", "col-6", "col-sm-6", "col-lg-6"],
+    question: "En Bootstrap, ¿qué clase define una fila dentro del sistema de grilla?",
+    options: ["container", "row", "col", "grid"],
+    correct: 1,
+    topic: "Bootstrap - Grilla"
+  },
+  {
+    type: "code",
+    question: "¿Qué hace este código?",
+    code: `fetch('/api/usuarios/5')
+  .then(res => res.json())
+  .then(data => console.log(data));`,
+    options: [
+      "Envía datos para crear un usuario",
+      "Actualiza el usuario con ID 5",
+      "Obtiene los datos del usuario con ID 5",
+      "Elimina al usuario con ID 5"
+    ],
+    correct: 2,
+    topic: "Fetch + HTTP"
+  },
+  {
+    type: "multiple",
+    question: "¿Qué comando de GIT fusiona los cambios de la rama 'develop' en la rama actual?",
+    options: [
+      "git merge develop",
+      "git pull develop",
+      "git rebase develop",
+      "git join develop"
+    ],
+    correct: 0,
+    topic: "GIT"
+  },
+  {
+    type: "code",
+    question: "¿Qué devuelve este fragmento?",
+    code: `const productos = [
+  { nombre: "Laptop", precio: 1200, enStock: true },
+  { nombre: "Mouse", precio: 25, enStock: false }
+];
+const baratos = productos.filter(p => p.precio < 100 && p.enStock);
+console.log(baratos.length);`,
+    options: ["0", "1", "2", "undefined"],
+    correct: 0,
+    topic: "Arreglos - filter"
+  },
+  {
+    type: "multiple",
+    question: "¿Cuál es el propósito del método HTTP DELETE?",
+    options: [
+      "Solicitar la eliminación de un recurso",
+      "Desactivar temporalmente un recurso",
+      "Marcar un recurso como obsoleto",
+      "Cancelar una operación POST"
+    ],
+    correct: 0,
+    topic: "HTTP"
+  },
+  {
+    type: "code",
+    question: "¿Qué se imprime?",
+    code: `const nombres = ["Ana", "Carlos", "ana"];
+const orden = nombres.sort((a, b) => a.localeCompare(b));
+console.log(orden);`,
+    options: [
+      '["Ana", "ana", "Carlos"]',
+      '["ana", "Ana", "Carlos"]',
+      '["Ana", "Carlos", "ana"]',
+      '["Carlos", "Ana", "ana"]'
+    ],
+    correct: 1,
+    topic: "Arreglos - sort"
+  },
+  {
+    type: "multiple",
+    question: "En Bootstrap, ¿qué clase haría que una columna ocupe todo el ancho en móviles y la mitad en desktops grandes?",
+    options: [
+      "col-12 col-lg-6",
+      "col-sm-12 col-md-6",
+      "col-6 col-lg-12",
+      "col-md-12 col-lg-6"
+    ],
     correct: 0,
     topic: "Bootstrap - Grilla"
   },
   {
     type: "code",
-    question: "¿Qué hace el siguiente fragmento de código?",
-    code: `fetch('/api/usuarios/123', {
-  method: 'DELETE'
-})
-.then(res => res.json())
-.then(data => console.log(data));`,
+    question: "¿Qué devuelve este código?",
+    code: `const edades = [25, 18, 35, 16];
+const mayores = edades.filter(e => e >= 18).length;
+console.log(mayores);`,
+    options: ["2", "3", "4", "1"],
+    correct: 1,
+    topic: "Arreglos - filter"
+  },
+  {
+    type: "multiple",
+    question: "¿Qué hace el comando <code>git stash</code>?",
     options: [
-      "Obtiene los datos del usuario 123",
-      "Actualiza los datos del usuario 123",
-      "Elimina al usuario 123",
-      "Crea un nuevo usuario"
+      "Guarda cambios temporales sin hacer commit",
+      "Elimina commits recientes",
+      "Crea una nueva rama",
+      "Descarga cambios del repositorio remoto"
     ],
-    correct: 2,
-    topic: "Fetch + HTTP"
+    correct: 0,
+    topic: "GIT"
   }
 ];
 
 let currentQuestionIndex = 0;
 let score = 0;
 
-// Renderiza la pregunta actual
 function renderQuestion() {
   const container = document.getElementById("quiz-container");
   const q = questions[currentQuestionIndex];
@@ -125,91 +326,37 @@ function renderQuestion() {
     html += `<div class="code-block">${q.code}</div>`;
   }
 
-  if (q.type === "multiple" || q.type === "code") {
-    html += `<div class="form-check mb-2">`;
-    q.options.forEach((opt, i) => {
-      html += `
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="answer" id="opt${i}" value="${i}">
-          <label class="form-check-label" for="opt${i}">${opt}</label>
-        </div>
-      `;
-    });
-    html += `</div>`;
-  } else if (q.type === "exercise") {
-    // Ejercicio de ordenamiento
-    const shuffled = [...q.data].sort(() => 0.5 - Math.random());
-    html += `<div class="alert alert-info">Ordena las películas arrastrando o haciendo clic en el orden correcto:</div>`;
-    html += `<div id="exercise-options" class="list-group">`;
-    shuffled.forEach((item, i) => {
-      html += `<button class="list-group-item list-group-item-action" data-index="${q.data.findIndex(x => x.titulo === item.titulo)}">${item.titulo} (${item.estreno})</button>`;
-    });
-    html += `</div>`;
-    html += `<input type="hidden" id="user-order" value="">`;
-  }
-
-  html += `</div>`;
-  container.innerHTML = html;
-
-  // Mostrar/ocultar botones
-  document.getElementById("btn-submit").classList.toggle("d-none", q.type === "exercise");
-  document.getElementById("btn-next").classList.add("d-none");
-
-  // Si es ejercicio, activar interacción
-  if (q.type === "exercise") {
-    setupExerciseInteraction();
-  }
-}
-
-function setupExerciseInteraction() {
-  const buttons = document.querySelectorAll("#exercise-options .list-group-item");
-  const selectedOrder = [];
-
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const idx = parseInt(btn.dataset.index);
-      if (!selectedOrder.includes(idx)) {
-        selectedOrder.push(idx);
-        btn.classList.add("bg-success", "text-white");
-        btn.disabled = true;
-
-        // Si ya seleccionó todos
-        if (selectedOrder.length === buttons.length) {
-          document.getElementById("user-order").value = JSON.stringify(selectedOrder);
-          document.getElementById("btn-submit").classList.remove("d-none");
-        }
-      }
-    });
+  html += `<div class="form-check mb-2">`;
+  q.options.forEach((opt, i) => {
+    html += `
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="answer" id="opt${i}" value="${i}">
+        <label class="form-check-label" for="opt${i}">${opt}</label>
+      </div>
+    `;
   });
+  html += `</div></div>`;
+
+  container.innerHTML = html;
+  document.getElementById("btn-next").classList.add("d-none");
 }
 
-// Validar respuesta
 function checkAnswer() {
-  const q = questions[currentQuestionIndex];
-  let userAnswer;
-
-  if (q.type === "multiple" || q.type === "code") {
-    const selected = document.querySelector('input[name="answer"]:checked');
-    if (!selected) {
-      Swal.fire("⚠️", "Por favor selecciona una opción.", "warning");
-      return false;
-    }
-    userAnswer = parseInt(selected.value);
-    return userAnswer === q.correct;
-  } else if (q.type === "exercise") {
-    const userOrder = JSON.parse(document.getElementById("user-order").value);
-    const isCorrect = JSON.stringify(userOrder) === JSON.stringify(q.correctOrder);
-    return isCorrect;
+  const selected = document.querySelector('input[name="answer"]:checked');
+  if (!selected) {
+    Swal.fire("⚠️", "Por favor selecciona una opción.", "warning");
+    return false;
   }
+  const userAnswer = parseInt(selected.value);
+  return userAnswer === questions[currentQuestionIndex].correct;
 }
 
-// Eventos de botones
 document.getElementById("btn-submit").addEventListener("click", () => {
   if (checkAnswer()) {
     score++;
-    Swal.fire("✅ ¡Correcto!", "¡Muy bien!", "success");
+    Swal.fire("✅ ¡Correcto!", "¡Excelente trabajo!", "success");
   } else {
-    Swal.fire("❌ Incorrecto", "Revisa el tema y vuelve a intentarlo.", "error");
+    Swal.fire("❌ Incorrecto", "¡Sigue practicando!", "error");
   }
   document.getElementById("btn-next").classList.remove("d-none");
 });
@@ -218,14 +365,13 @@ document.getElementById("btn-next").addEventListener("click", () => {
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
     renderQuestion();
-    document.getElementById("btn-submit").classList.toggle("d-none", questions[currentQuestionIndex].type === "exercise");
-    document.getElementById("btn-next").classList.add("d-none");
   } else {
-    // Fin del cuestionario
     const percentage = Math.round((score / questions.length) * 100);
+    let message = percentage >= 80 ? "¡Eres un experto!" : 
+                  percentage >= 60 ? "¡Buen trabajo!" : "¡Sigue estudiando!";
     Swal.fire({
       title: "🎉 ¡Cuestionario completado!",
-      html: `Tu puntuación: <strong>${score} de ${questions.length}</strong> (${percentage}%)`,
+      html: `Tu puntuación: <strong>${score} de ${questions.length}</strong> (${percentage}%)<br>${message}`,
       icon: percentage >= 70 ? "success" : "info",
       confirmButtonText: "Reiniciar"
     }).then(() => {

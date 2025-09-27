@@ -466,6 +466,8 @@ console.log(resultado.length);`,
         }
 
         function showTabWarning() {
+            console.log('Cambio de pestaña detectado. Contador:', tabSwitchCount);
+            
             if (tabSwitchCount >= 3) {
                 // Tercera vez cambiando de pestaña - penalización
                 clearInterval(timer);
@@ -477,8 +479,23 @@ console.log(resultado.length);`,
                     confirmButtonColor: '#ef4444',
                     allowOutsideClick: false,
                     allowEscapeKey: false
-                }).then(() => {
-                    restartQuiz();
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Resetear completamente el cuestionario
+                        currentQuestionIndex = 0;
+                        score = 0;
+                        timeLeft = 3600;
+                        userAnswers = [];
+                        tabSwitchCount = 0;
+                        
+                        // Ocultar pantalla actual y mostrar inicio
+                        document.getElementById('quizScreen').classList.add('d-none');
+                        document.getElementById('resultsScreen').classList.add('d-none');
+                        document.getElementById('startScreen').classList.remove('d-none');
+                        
+                        // Limpiar formulario
+                        document.getElementById('studentName').value = '';
+                    }
                 });
             } else {
                 // Primera o segunda vez - solo advertencia
@@ -486,9 +503,12 @@ console.log(resultado.length);`,
                 warning.classList.remove('d-none');
                 
                 // Actualizar el mensaje según el número de advertencias
-                const warningText = tabSwitchCount === 1 
-                    ? '¡Atención! Has cambiado de pestaña. Evita consultar recursos externos.' 
-                    : '¡Segunda advertencia! Una más y tendrás que empezar de nuevo.';
+                let warningText = '';
+                if (tabSwitchCount === 1) {
+                    warningText = 'Has cambiado de pestaña. Evita consultar recursos externos.';
+                } else if (tabSwitchCount === 2) {
+                    warningText = '¡Segunda advertencia! Una más y tendrás que empezar de nuevo.';
+                }
                 
                 warning.innerHTML = `
                     <div class="alert alert-warning-custom">

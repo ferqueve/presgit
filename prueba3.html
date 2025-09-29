@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preparación para evaluación. Grupos 310 y 316</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.18/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #7dd3fc;
+            --light-color: #f8fafc;
+            --white: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-color) 0%, var(--secondary-color) 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.1);
+        }
+
+        .question-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 1.5rem;
+        }
+
+        .code-snippet {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .option-btn {
+            background: var(--white);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.selected {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .timer {
+            background: linear-gradient(135deg, #fbbf24, #fcd34d);
+            color: #92400e;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .progress-custom {
+            height: 10px;
+            border-radius: 10px;
+            background: var(--light-color);
+        }
+
+        .progress-bar-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fbbf24, #fcd34d);
+            border: none;
+            border-radius: 10px;
+            color: #92400e;
+        }
+
+        #chartContainer {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Pantalla de inicio -->
+        <div id="startScreen" class="quiz-container mx-auto" style="max-width: 600px;">
+            <div class="question-header text-center">
+                <h1><i class="fas fa-code"></i> Preparación para evaluación. Grupos 310 y 316</h1>
+                <p class="mb-0">Evaluación sobre GIT, HTTP, Bootstrap y JavaScript</p>
+                <small class="text-light"><i class="fas fa-random"></i> Preguntas aleatorias para cada intento</small>
+            </div>
+            <div class="p-4">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>Instrucciones:</strong>
+                    <ul class="mt-2 mb-0">
+                        <li>20 preguntas aleatorias sobre desarrollo web</li>
+                        <li>Tiempo límite: 45 minutos</li>
+                        <li>Tu nombre no será almacenado</li>
+                        <li>Evita cambiar de pestaña durante el examen</li>
+                        <li>Cada intento tiene preguntas diferentes</li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <label for="studentName" class="form-label"><i class="fas fa-user"></i> Tu nombre:</label>
+                    <input type="text" class="form-control" id="studentName" placeholder="Ingresa tu nombre" required>
+                </div>
+                <button class="btn btn-primary-custom w-100" onclick="startQuiz()">
+                    <i class="fas fa-play"></i> Comenzar Cuestionario
+                </button>
+            </div>
+        </div>
+
+        <!-- Pantalla del cuestionario -->
+        <div id="quizScreen" class="d-none">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <!-- Timer y progreso -->
+                    <div class="quiz-container mb-4 fade-in">
+                        <div class="p-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="timer">
+                                        <i class="fas fa-clock"></i> Tiempo: <span id="timer">45:00</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="progress-custom">
+                                        <div class="progress-bar-custom" id="progressBar" style="width: 5%"></div>
+                                    </div>
+                                    <small class="text-muted">Pregunta <span id="currentQuestion">1</span> de 20</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pregunta -->
+                    <div class="quiz-container fade-in" id="questionContainer">
+                        <div class="question-header">
+                            <h4 id="questionTitle">Pregunta 1</h4>
+                        </div>
+                        <div class="p-4">
+                            <div id="questionText"></div>
+                            <div id="codeSnippet"></div>
+                            <div id="optionsContainer"></div>
+                            <div class="text-end mt-4">
+                                <button class="btn btn-primary-custom" onclick="nextQuestion()" id="nextBtn" disabled>
+                                    <i class="fas fa-arrow-right"></i> Siguiente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de resultados -->
+        <div id="resultsScreen" class="d-none">
+            <div class="quiz-container mx-auto" style="max-width: 800px;">
+                <div class="question-header text-center">
+                    <h2><i class="fas fa-chart-pie"></i> Resultados - Grupos 310 y 316</h2>
+                    <p class="mb-0" id="studentNameResult"></p>
+                </div>
+                <div class="p-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="chartContainer">
+                                <canvas id="resultChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h3 id="scoreText"></h3>
+                                <div id="performanceMessage"></div>
+                                <div class="mt-4">
+                                    <button class="btn btn-primary-custom" onclick="restartQuiz()">
+                                        <i class="fas fa-redo"></i> Intentar de Nuevo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h5>Resumen de respuestas:</h5>
+                        <div id="answersReview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert de cambio de pestaña -->
+    <div id="tabWarning" class="position-fixed top-0 start-50 translate-middle-x mt-3 d-none" style="z-index: 9999;">
+        <div class="alert alert-warning-custom">
+            <i class="fas fa-exclamation-triangle"></i> 
+            <strong>¡Atención!</strong> Has cambiado de pestaña. Evita consultar recursos externos.
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 2700; // 45 minutos en segundos
+        let timer;
+        let studentName = '';
+        let userAnswers = [];
+        let tabSwitchCount = 0;
+        let selectedQuestions = [];
+
+        // Pool completo de preguntas (40 preguntas, se seleccionan 20 aleatoriamente)
+        const questionPool = [
+            {
+                question: "¿Cuál es el comando de GIT para crear una nueva rama?",
+                code: null,
+                options: ["git branch nueva-rama", "git create branch nueva-rama", "git new-branch nueva-rama", "git make branch nueva-rama"],
+                correct: 0
+            },
+            {
+                question: "¿Qué hace el siguiente código JavaScript?",
+                code: `const numeros = [1, 2, 3, 4, 5];
+const resultado = numeros.filter(num => num % 2 === 0);
+console.log(resultado);`,
+                options: ["Suma todos los números", "Filtra los números pares", "Filtra los números impares", "Multiplica por 2 cada número"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el método HTTP correcto para actualizar completamente un recurso?",
+                code: null,
+                options: ["GET", "POST", "PUT", "PATCH"],
+                correct: 2
+            },
+            {
+                question: "En Bootstrap, ¿qué clase se usa para crear una columna que ocupe 6 espacios en pantallas medianas?",
+                code: null,
+                options: ["col-6", "col-md-6", "col-medium-6", "md-col-6"],
+                correct: 1
+            },
+            {
+                question: "¿Qué resultado produce el siguiente código?",
+                code: `const frutas = ['manzana', 'banana', 'cereza'];
+const resultado = frutas.sort();
+console.log(resultado[0]);`,
+                options: ["manzana", "banana", "cereza", "undefined"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el comando para hacer commit de los cambios en GIT?",
+                code: null,
+                options: ["git commit", "git commit -m 'mensaje'", "git push", "git add commit"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace este código fetch?",
+                code: `fetch('/api/usuarios', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({nombre: 'Juan', edad: 25})
+})`,
+                options: ["Obtiene usuarios", "Crea un nuevo usuario", "Actualiza un usuario", "Elimina un usuario"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el breakpoint de Bootstrap para pantallas extra grandes?",
+                code: null,
+                options: ["lg", "xl", "xxl", "xs"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve el siguiente código?",
+                code: `const edades = [25, 30, 18, 35, 22];
+const resultado = edades.filter(edad => edad >= 25).length;
+console.log(resultado);`,
+                options: ["3", "2", "5", "25"],
+                correct: 0
+            },
+            {
+                question: "¿Cuál es la diferencia principal entre PUT y POST?",
+                code: null,
+                options: ["PUT es más rápido", "PUT es idempotente, POST no", "POST es más seguro", "No hay diferencia"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace este código de Bootstrap?",
+                code: `<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            Contenido
+        </div>
+    </div>
+</div>`,
+                options: ["Crea una columna fija", "Crea una columna responsiva", "Crea un contenedor centrado", "Crea una fila vertical"],
+                correct: 1
+            },
+            {
+                question: "En GIT, ¿qué comando se usa para combinar ramas?",
+                code: null,
+                options: ["git combine", "git merge", "git join", "git unite"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el resultado de este array sort?",
+                code: `const numeros = [10, 5, 20, 1];
+numeros.sort();
+console.log(numeros);`,
+                options: ["[1, 5, 10, 20]", "[10, 20, 5, 1]", "[1, 10, 20, 5]", "[10, 5, 20, 1]"],
+                correct: 2
+            },
+            {
+                question: "¿Qué método HTTP se usa para eliminar un recurso?",
+                code: null,
+                options: ["REMOVE", "DELETE", "DROP", "DESTROY"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace este código fetch con async/await?",
+                code: `async function obtenerDatos() {
+    try {
+        const response = await fetch('/api/datos');
+        const datos = await response.json();
+        return datos;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}`,
+                options: ["Envía datos al servidor", "Obtiene datos del servidor de forma asíncrona", "Actualiza datos", "Elimina datos"],
+                correct: 1
+            },
+            {
+                question: "En Bootstrap, ¿cuántas columnas tiene el sistema de grilla por defecto?",
+                code: null,
+                options: ["10", "12", "16", "24"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve este filter encadenado?",
+                code: `const palabras = ['hola', 'mundo', 'javascript', 'es', 'genial'];
+const resultado = palabras
+    .filter(palabra => palabra.length > 4)
+    .filter(palabra => palabra.includes('a'));
+console.log(resultado.length);`,
+                options: ["1", "2", "3", "0"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el comando de GIT para ver el historial de commits?",
+                code: null,
+                options: ["git history", "git log", "git commits", "git show"],
+                correct: 1
+            },
+            {
+                question: "¿Qué estado HTTP indica éxito en la creación de un recurso?",
+                code: null,
+                options: ["200", "201", "204", "400"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace esta clase de Bootstrap?",
+                code: `<div class="d-none d-md-block">
+    Este contenido está oculto
+</div>`,
+                options: ["Siempre visible", "Oculto en móviles, visible en tablets+", "Siempre oculto", "Visible solo en móviles"],
+                correct: 1
+            },
+            // Nuevas preguntas adicionales
+            {
+                question: "¿Cuál es el comando de GIT para cambiar de rama?",
+                code: null,
+                options: ["git change", "git checkout", "git switch", "git goto"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace este código JavaScript?",
+                code: `const precios = [10, 25, 5, 30, 15];
+const ofertas = precios.sort((a, b) => a - b);
+console.log(ofertas);`,
+                options: ["Ordena de mayor a menor", "Ordena de menor a mayor", "Suma los precios", "Filtra precios menores a 20"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el código de estado HTTP para 'No encontrado'?",
+                code: null,
+                options: ["400", "404", "500", "401"],
+                correct: 1
+            },
+            {
+                question: "En Bootstrap, ¿qué clase oculta elementos solo en pantallas pequeñas?",
+                code: null,
+                options: ["d-none", "d-sm-none", "hidden-sm", "invisible-sm"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve el siguiente filter?",
+                code: `const nombres = ['Ana', 'Carlos', 'Beatriz', 'David'];
+const resultado = nombres.filter(nombre => nombre.length === 5);
+console.log(resultado);`,
+                options: ["['Ana']", "['Carlos', 'David']", "['Beatriz']", "['Carlos']"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es el comando de GIT para descartar cambios locales?",
+                code: null,
+                options: ["git reset", "git revert", "git checkout .", "git discard"],
+                correct: 2
+            },
+            {
+                question: "¿Qué tipo de petición HTTP hace este fetch?",
+                code: `fetch('/api/producto/123', {
+    method: 'PUT',
+    body: JSON.stringify({precio: 50}),
+    headers: {'Content-Type': 'application/json'}
+})`,
+                options: ["Crea un producto", "Actualiza el producto 123", "Elimina el producto 123", "Obtiene el producto 123"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el breakpoint más pequeño en Bootstrap?",
+                code: null,
+                options: ["xs", "sm", "md", "No tiene nombre específico"],
+                correct: 3
+            },
+            {
+                question: "¿Qué hace este sort con función comparadora?",
+                code: `const estudiantes = [{nombre: 'Juan', edad: 20}, {nombre: 'Ana', edad: 18}];
+estudiantes.sort((a, b) => b.edad - a.edad);
+console.log(estudiantes[0].nombre);`,
+                options: ["Ana", "Juan", "undefined", "Error"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el código de estado HTTP para petición exitosa?",
+                code: null,
+                options: ["100", "200", "300", "400"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace esta estructura de Bootstrap?",
+                code: `<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6">Contenido</div>
+    </div>
+</div>`,
+                options: ["Centra el contenido horizontalmente", "Centra el contenido verticalmente", "Justifica el texto", "Crea dos columnas"],
+                correct: 0
+            },
+            {
+                question: "¿Cuál es el comando de GIT para ver el estado actual?",
+                code: null,
+                options: ["git state", "git status", "git check", "git info"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve este encadenamiento de métodos?",
+                code: `const numeros = [1, 2, 3, 4, 5, 6];
+const resultado = numeros
+    .filter(n => n % 2 === 0)
+    .sort((a, b) => b - a);
+console.log(resultado[0]);`,
+                options: ["2", "4", "6", "undefined"],
+                correct: 2
+            },
+            {
+                question: "¿Qué método HTTP es seguro e idempotente?",
+                code: null,
+                options: ["POST", "PUT", "GET", "DELETE"],
+                correct: 2
+            },
+            {
+                question: "En Bootstrap, ¿qué clase permite que las columnas se apilen en móviles?",
+                code: null,
+                options: ["col-12", "col-sm-12", "col-stack", "No necesita clase especial"],
+                correct: 3
+            },
+            {
+                question: "¿Qué resultado produce este código?",
+                code: `const animales = ['gato', 'perro', 'ave'];
+const mascotas = animales.filter(animal => animal.includes('e'));
+console.log(mascotas.length);`,
+                options: ["0", "1", "2", "3"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es el comando de GIT para añadir archivos al staging?",
+                code: null,
+                options: ["git stage", "git add", "git include", "git prepare"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace este fetch con método DELETE?",
+                code: `fetch('/api/usuario/456', {
+    method: 'DELETE',
+    headers: {
+        'Authorization': 'Bearer token123'
+    }
+})`,
+                options: ["Obtiene el usuario 456", "Actualiza el usuario 456", "Elimina el usuario 456", "Crea un nuevo usuario"],
+                correct: 2
+            },
+            {
+                question: "¿Cuántos breakpoints principales tiene Bootstrap 5?",
+                code: null,
+                options: ["4", "5", "6", "7"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace este sort sin función comparadora en strings?",
+                code: `const palabras = ['zebra', 'ana', 'Zebra', 'Ana'];
+palabras.sort();
+console.log(palabras);`,
+                options: ["Ordena alfabéticamente", "Ordena por mayúsculas primero", "Da error", "No cambia el orden"],
+                correct: 1
+            }
+        ];
+
+        // Funciones para selección aleatoria de preguntas
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function selectRandomQuestions() {
+            const shuffled = shuffleArray(questionPool);
+            selectedQuestions = shuffled.slice(0, 20);
+        }
+
+        // Funciones principales
+        function startQuiz() {
+            const name = document.getElementById('studentName').value.trim();
+            if (!name) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nombre requerido',
+                    text: 'Por favor ingresa tu nombre para continuar'
+                });
+                return;
+            }
+
+            studentName = name;
+            selectRandomQuestions(); // Seleccionar preguntas aleatorias
+            
+            document.getElementById('startScreen').classList.add('d-none');
+            document.getElementById('quizScreen').classList.remove('d-none');
+            
+            startTimer();
+            displayQuestion();
+            setupTabDetection();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function setupTabDetection() {
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    tabSwitchCount++;
+                    showTabWarning();
+                }
+            });
+
+            window.addEventListener('blur', function() {
+                tabSwitchCount++;
+                showTabWarning();
+            });
+        }
+
+        function showTabWarning() {
+            console.log('Cambio de pestaña detectado. Contador:', tabSwitchCount);
+            
+            if (tabSwitchCount >= 3) {
+                // Tercera vez cambiando de pestaña - penalización
+                clearInterval(timer);
+                Swal.fire({
+                    icon: 'error',
+                    title: '🪙 ¡Atrapado haciendo trampas! 🪙',
+                    html: '<i class="fas fa-coins text-warning fa-2x mb-3"></i><br><strong>Si esto fuera una prueba real, te quedarías sin fernanditos</strong><br><br>¡Has cambiado de pestaña 3 veces! El cuestionario se reiniciará.',
+                    confirmButtonText: 'Entendido, empezar de nuevo',
+                    confirmButtonColor: '#ef4444',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Resetear completamente el cuestionario
+                        currentQuestionIndex = 0;
+                        score = 0;
+                        timeLeft = 2700;
+                        userAnswers = [];
+                        tabSwitchCount = 0;
+                        selectedQuestions = [];
+                        
+                        // Ocultar pantalla actual y mostrar inicio
+                        document.getElementById('quizScreen').classList.add('d-none');
+                        document.getElementById('resultsScreen').classList.add('d-none');
+                        document.getElementById('startScreen').classList.remove('d-none');
+                        
+                        // Limpiar formulario
+                        document.getElementById('studentName').value = '';
+                    }
+                });
+            } else {
+                // Primera o segunda vez - solo advertencia
+                const warning = document.getElementById('tabWarning');
+                warning.classList.remove('d-none');
+                
+                // Actualizar el mensaje según el número de advertencias
+                let warningText = '';
+                if (tabSwitchCount === 1) {
+                    warningText = 'Has cambiado de pestaña. Evita consultar recursos externos.';
+                } else if (tabSwitchCount === 2) {
+                    warningText = '¡Segunda advertencia! Una más y tendrás que empezar de nuevo.';
+                }
+                
+                warning.innerHTML = `
+                    <div class="alert alert-warning-custom">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>¡Atención!</strong> ${warningText}
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    warning.classList.add('d-none');
+                }, 4000);
+            }
+        }
+
+        function displayQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            
+            document.getElementById('questionTitle').textContent = `Pregunta ${currentQuestionIndex + 1}`;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionText').innerHTML = `<h5>${question.question}</h5>`;
+            
+            // Mostrar código si existe
+            const codeContainer = document.getElementById('codeSnippet');
+            if (question.code) {
+                codeContainer.innerHTML = `<div class="code-snippet">${question.code}</div>`;
+            } else {
+                codeContainer.innerHTML = '';
+            }
+            
+            // Crear opciones
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn option-btn w-100';
+                button.innerHTML = `<strong>${String.fromCharCode(65 + index)})</strong> ${option}`;
+                button.onclick = () => selectOption(index, button);
+                optionsContainer.appendChild(button);
+            });
+            
+            // Actualizar barra de progreso
+            const progress = ((currentQuestionIndex + 1) / 20) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // Deshabilitar botón siguiente
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        function selectOption(optionIndex, button) {
+            // Remover selección previa
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Seleccionar nueva opción
+            button.classList.add('selected');
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Habilitar botón siguiente
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < 20) {
+                // Actualizar texto del botón para la última pregunta
+                if (currentQuestionIndex === 19) {
+                    document.getElementById('nextBtn').innerHTML = '<i class="fas fa-flag-checkered"></i> Finalizar';
+                }
+                displayQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            clearInterval(timer);
+            calculateScore();
+            showResults();
+        }
+
+        function calculateScore() {
+            score = 0;
+            for (let i = 0; i < 20; i++) {
+                if (userAnswers[i] === selectedQuestions[i].correct) {
+                    score++;
+                }
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').classList.add('d-none');
+            document.getElementById('resultsScreen').classList.remove('d-none');
+            
+            // Mostrar nombre y puntuación
+            document.getElementById('studentNameResult').textContent = `Estudiante: ${studentName}`;
+            document.getElementById('scoreText').textContent = `${score} / 20`;
+            
+            // Mensaje de rendimiento
+            const percentage = (score / 20) * 100;
+            let message = '';
+            let messageClass = '';
+            
+            if (percentage >= 90) {
+                message = '¡Excelente trabajo! 🎉';
+                messageClass = 'text-success';
+            } else if (percentage >= 70) {
+                message = '¡Buen trabajo! 👍';
+                messageClass = 'text-primary';
+            } else if (percentage >= 50) {
+                message = 'Puedes mejorar 📚';
+                messageClass = 'text-warning';
+            } else {
+                message = 'Necesitas estudiar más 📖';
+                messageClass = 'text-danger';
+            }
+            
+            document.getElementById('performanceMessage').innerHTML = 
+                `<h4 class="${messageClass}">${message}</h4><p>Porcentaje: ${percentage.toFixed(1)}%</p>`;
+            
+            // Crear gráfica de torta
+            createChart();
+            
+            // Mostrar resumen de respuestas
+            showAnswersReview();
+        }
+
+        function createChart() {
+            const ctx = document.getElementById('resultChart').getContext('2d');
+            const correctAnswers = score;
+            const incorrectAnswers = 20 - score;
+            
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Correctas', 'Incorrectas'],
+                    datasets: [{
+                        data: [correctAnswers, incorrectAnswers],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderColor: ['#059669', '#dc2626'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Resultados del Cuestionario'
+                        }
+                    }
+                }
+            });
+        }
+
+        function showAnswersReview() {
+            const reviewContainer = document.getElementById('answersReview');
+            let reviewHTML = '';
+            
+            selectedQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                const icon = isCorrect ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+                
+                reviewHTML += `
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-1">${icon}</div>
+                                <div class="col-11">
+                                    <strong>Pregunta ${index + 1}:</strong> ${question.question.substring(0, 60)}...
+                                    <br>
+                                    <small class="text-muted">
+                                        Tu respuesta: ${userAnswer !== undefined ? question.options[userAnswer] : 'Sin respuesta'} |
+                                        Correcta: ${question.options[question.correct]}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reviewContainer.innerHTML = reviewHTML;
+        }
+
+        function restartQuiz() {
+            // Resetear variables
+            currentQuestionIndex = 0;
+            score = 0;
+            timeLeft = 2700;
+            userAnswers = [];
+            tabSwitchCount = 0;
+            selectedQuestions = [];
+            
+            // Mostrar pantalla de inicio
+            document.getElementById('resultsScreen').classList.add('d-none');
+            document.getElementById('startScreen').classList.remove('d-none');
+            
+            // Limpiar nombre
+            document.getElementById('studentName').value = '';
+        }
+
+        // Prevenir copiar/pegar y clic derecho
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+        document.addEventListener('cut', e => e.preventDefault());
+    </script>
+</body>
+</html>

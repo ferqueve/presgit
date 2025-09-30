@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Clase de Hoy - Grupos 310 y 316</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.18/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #7dd3fc;
+            --light-color: #f8fafc;
+            --white: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #fbbf24;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-color) 0%, var(--secondary-color) 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.1);
+        }
+
+        .question-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 1.5rem;
+        }
+
+        .code-snippet {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .option-btn {
+            background: var(--white);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.selected {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .timer {
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.5s ease;
+        }
+
+        .timer.green {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+
+        .timer.yellow {
+            background: linear-gradient(135deg, #fbbf24, #fcd34d);
+            color: #92400e;
+        }
+
+        .timer.red {
+            background: linear-gradient(135deg, #ef4444, #fca5a5);
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .progress-custom {
+            height: 10px;
+            border-radius: 10px;
+            background: var(--light-color);
+        }
+
+        .progress-bar-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fbbf24, #fcd34d);
+            border: none;
+            border-radius: 10px;
+            color: #92400e;
+        }
+
+        #chartContainer {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .trophy-animation {
+            font-size: 100px;
+            text-align: center;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Pantalla de inicio -->
+        <div id="startScreen" class="quiz-container mx-auto" style="max-width: 600px;">
+            <div class="question-header text-center">
+                <h1 class="animate__animated animate__fadeInDown"><i class="fas fa-laptop-code"></i> Quiz - Clase de Hoy</h1>
+                <p class="mb-0">Grupos 310 y 316</p>
+                <small class="text-light"><i class="fas fa-random"></i> Preguntas aleatorias</small>
+            </div>
+            <div class="p-4">
+                <div class="alert alert-info animate__animated animate__fadeInUp">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>Instrucciones:</strong>
+                    <ul class="mt-2 mb-0">
+                        <li>20 preguntas sobre desarrollo web</li>
+                        <li>Tiempo límite: 30 minutos</li>
+                        <li>Tus resultados serán enviados al finalizar</li>
+                        <li>No cambies de pestaña durante el examen</li>
+                        <li>¡Buena suerte!</li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <label for="studentName" class="form-label"><i class="fas fa-user"></i> Tu nombre completo:</label>
+                    <input type="text" class="form-control" id="studentName" placeholder="Ingresa tu nombre completo" required>
+                </div>
+                <button class="btn btn-primary-custom w-100 animate__animated animate__pulse animate__infinite" onclick="startQuiz()">
+                    <i class="fas fa-play"></i> Comenzar Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- Pantalla del cuestionario -->
+        <div id="quizScreen" class="d-none">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <!-- Timer y progreso -->
+                    <div class="quiz-container mb-4 fade-in">
+                        <div class="p-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="timer green" id="timerBox">
+                                        <i class="fas fa-clock"></i> Tiempo: <span id="timer">30:00</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="progress-custom">
+                                        <div class="progress-bar-custom" id="progressBar" style="width: 5%"></div>
+                                    </div>
+                                    <small class="text-muted">Pregunta <span id="currentQuestion">1</span> de 20</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pregunta -->
+                    <div class="quiz-container fade-in" id="questionContainer">
+                        <div class="question-header">
+                            <h4 id="questionTitle">Pregunta 1</h4>
+                        </div>
+                        <div class="p-4">
+                            <div id="questionText"></div>
+                            <div id="codeSnippet"></div>
+                            <div id="optionsContainer"></div>
+                            <div class="text-end mt-4">
+                                <button class="btn btn-primary-custom" onclick="nextQuestion()" id="nextBtn" disabled>
+                                    <i class="fas fa-arrow-right"></i> Siguiente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de resultados -->
+        <div id="resultsScreen" class="d-none">
+            <div class="quiz-container mx-auto" style="max-width: 800px;">
+                <div class="question-header text-center">
+                    <h2><i class="fas fa-chart-pie"></i> Resultados - Grupos 310 y 316</h2>
+                    <p class="mb-0" id="studentNameResult"></p>
+                </div>
+                <div class="p-4">
+                    <div id="trophyAnimation" class="trophy-animation d-none"></div>
+                    
+                    <div id="sendingMessage" class="alert alert-info text-center">
+                        <i class="fas fa-spinner fa-spin"></i> Enviando resultados...
+                    </div>
+                    
+                    <div id="sentMessage" class="alert alert-success text-center d-none">
+                        <i class="fas fa-check-circle"></i> ¡Resultados enviados correctamente!
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="chartContainer">
+                                <canvas id="resultChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h3 id="scoreText"></h3>
+                                <div id="performanceMessage"></div>
+                                <div class="mt-4">
+                                    <button class="btn btn-primary-custom" onclick="restartQuiz()">
+                                        <i class="fas fa-redo"></i> Intentar de Nuevo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h5>Resumen de respuestas:</h5>
+                        <div id="answersReview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert de cambio de pestaña -->
+    <div id="tabWarning" class="position-fixed top-0 start-50 translate-middle-x mt-3 d-none" style="z-index: 9999;">
+        <div class="alert alert-warning-custom">
+            <i class="fas fa-exclamation-triangle"></i> 
+            <strong>¡Atención!</strong> Has cambiado de pestaña.
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 1800; // 30 minutos
+        let timer;
+        let studentName = '';
+        let userAnswers = [];
+        let tabSwitchCount = 0;
+        let selectedQuestions = [];
+        const API_URL = 'https://crudcrud.com/api/57c70eb2ae5342628b362c15a9dd1e26/310';
+
+        // Pool de preguntas (45 preguntas, se seleccionan 20)
+        const questionPool = [
+            // GIT
+            {
+                question: "¿Cuál es el comando de Git para crear y cambiar a una nueva rama?",
+                code: null,
+                options: ["git branch -b nueva-rama", "git checkout -b nueva-rama", "git new-branch nueva-rama", "git create nueva-rama"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace 'git stash'?",
+                code: null,
+                options: ["Elimina cambios", "Guarda cambios temporalmente", "Sube al servidor", "Crea una rama"],
+                correct: 1
+            },
+            {
+                question: "¿Cómo se actualiza tu repositorio local con cambios remotos?",
+                code: null,
+                options: ["git update", "git pull", "git download", "git sync"],
+                correct: 1
+            },
+            {
+                question: "¿Qué comando muestra el historial de commits?",
+                code: null,
+                options: ["git history", "git log", "git commits", "git list"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace 'git fetch'?",
+                code: null,
+                options: ["Descarga cambios sin integrarlos", "Descarga e integra cambios", "Sube cambios", "Elimina cambios"],
+                correct: 0
+            },
+
+            // BOOTSTRAP
+            {
+                question: "¿Cuántas columnas tiene el sistema de grilla de Bootstrap?",
+                code: null,
+                options: ["10", "12", "16", "24"],
+                correct: 1
+            },
+            {
+                question: "¿Qué clase oculta un elemento en pantallas pequeñas?",
+                code: null,
+                options: ["d-none", "d-sm-none", "hidden-sm", "invisible"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace este código de Bootstrap?",
+                code: `&lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-6"&gt;Contenido&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;`,
+                options: ["Crea 6 columnas", "Crea una columna de 6 espacios en pantallas medianas", "Crea 6 filas", "No hace nada"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el breakpoint para pantallas grandes (lg) en Bootstrap?",
+                code: null,
+                options: ["768px", "992px", "1200px", "1400px"],
+                correct: 1
+            },
+            {
+                question: "¿Qué clase de Bootstrap crea un botón con solo borde?",
+                code: null,
+                options: ["btn-border-primary", "btn-outline-primary", "btn-line-primary", "btn-ghost-primary"],
+                correct: 1
+            },
+
+            // ARRAYS: FILTER, SORT, MAP
+            {
+                question: "¿Qué devuelve este código?",
+                code: `const nums = [1, 2, 3, 4];
+const result = nums.map(n => n * 2);
+console.log(result);`,
+                options: ["[1, 2, 3, 4]", "[2, 4, 6, 8]", "10", "20"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace el método filter?",
+                code: null,
+                options: ["Modifica el array", "Crea un nuevo array con elementos que cumplen condición", "Ordena el array", "Elimina elementos"],
+                correct: 1
+            },
+            {
+                question: "¿Qué resultado produce este código?",
+                code: `const edades = [15, 20, 18, 25];
+const mayores = edades.filter(e => e >= 18);
+console.log(mayores.length);`,
+                options: ["2", "3", "4", "1"],
+                correct: 1
+            },
+            {
+                question: "¿Cómo se ordena un array de números de menor a mayor?",
+                code: null,
+                options: ["array.sort()", "array.sort((a, b) => a - b)", "array.order()", "array.ascending()"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve este código?",
+                code: `const palabras = ['hola', 'mundo'];
+const result = palabras.map(p => p.length);
+console.log(result);`,
+                options: ["['hola', 'mundo']", "[4, 5]", "9", "['4', '5']"],
+                correct: 1
+            },
+
+            // LOCALSTORAGE
+            {
+                question: "¿Cómo se guarda un dato en localStorage?",
+                code: null,
+                options: ["localStorage.save('key', 'value')", "localStorage.setItem('key', 'value')", "localStorage.put('key', 'value')", "localStorage.add('key', 'value')"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve localStorage.getItem() si la clave no existe?",
+                code: null,
+                options: ["undefined", "null", "''", "false"],
+                correct: 1
+            },
+            {
+                question: "¿Cómo se guarda un objeto en localStorage?",
+                code: null,
+                options: ["localStorage.setItem('key', objeto)", "localStorage.setItem('key', JSON.stringify(objeto))", "localStorage.saveObject('key', objeto)", "No se pueden guardar objetos"],
+                correct: 1
+            },
+            {
+                question: "¿Cómo se elimina todo de localStorage?",
+                code: null,
+                options: ["localStorage.delete()", "localStorage.removeAll()", "localStorage.clear()", "localStorage.empty()"],
+                correct: 2
+            },
+            {
+                question: "¿Qué hace este código?",
+                code: `const user = {name: 'Ana', age: 25};
+localStorage.setItem('user', JSON.stringify(user));
+const saved = JSON.parse(localStorage.getItem('user'));
+console.log(saved.name);`,
+                options: ["Error", "undefined", "Ana", "[object Object]"],
+                correct: 2
+            },
+
+            // VALIDACIÓN DE FORMULARIOS
+            {
+                question: "¿Qué clase marca un campo como inválido en Bootstrap?",
+                code: null,
+                options: ["invalid", "is-invalid", "form-invalid", "error"],
+                correct: 1
+            },
+            {
+                question: "¿Qué atributo hace obligatorio un campo?",
+                code: null,
+                options: ["mandatory", "required", "must-fill", "obligatory"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace el atributo 'novalidate' en un form?",
+                code: null,
+                options: ["Elimina el form", "Deshabilita validación nativa del navegador", "Valida automáticamente", "No existe"],
+                correct: 1
+            },
+            {
+                question: "¿Qué elemento muestra mensajes de error en Bootstrap?",
+                code: null,
+                options: ["error-message", "invalid-feedback", "form-error", "validation-message"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace form.checkValidity()?",
+                code: null,
+                options: ["Valida y envía el form", "Verifica si el form es válido", "Marca campos como inválidos", "Elimina la validación"],
+                correct: 1
+            },
+
+            // PREGUNTAS MIXTAS ADICIONALES
+            {
+                question: "¿Qué comando de Git descarta cambios no guardados?",
+                code: null,
+                options: ["git reset", "git discard", "git checkout .", "git clean"],
+                correct: 2
+            },
+            {
+                question: "¿Qué clase de Bootstrap centra contenido horizontalmente?",
+                code: null,
+                options: ["text-center", "mx-auto", "center-content", "align-center"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve este código?",
+                code: `const nums = [5, 2, 8, 1];
+const sorted = nums.sort((a, b) => b - a);
+console.log(sorted[0]);`,
+                options: ["1", "2", "5", "8"],
+                correct: 3
+            },
+            {
+                question: "¿Cómo se lee un dato de localStorage?",
+                code: null,
+                options: ["localStorage.read('key')", "localStorage.get('key')", "localStorage.getItem('key')", "localStorage.fetch('key')"],
+                correct: 2
+            },
+            {
+                question: "¿Qué hace este código de validación?",
+                code: `if (!form.checkValidity()) {
+    event.preventDefault();
+}`,
+                options: ["Siempre previene envío", "Previene envío si hay errores", "Valida y envía", "Elimina errores"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace 'git merge'?",
+                code: null,
+                options: ["Elimina ramas", "Combina ramas", "Crea ramas", "Lista ramas"],
+                correct: 1
+            },
+            {
+                question: "¿Qué breakpoint es 'md' en Bootstrap?",
+                code: null,
+                options: ["480px", "768px", "992px", "1200px"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace array.map()?",
+                code: null,
+                options: ["Filtra elementos", "Transforma cada elemento", "Ordena elementos", "Suma elementos"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la capacidad típica de localStorage?",
+                code: null,
+                options: ["1 MB", "5-10 MB", "50 MB", "Ilimitado"],
+                correct: 1
+            },
+            {
+                question: "¿Qué atributo valida con expresión regular?",
+                code: null,
+                options: ["regex", "pattern", "validation", "regexp"],
+                correct: 1
+            },
+            {
+                question: "¿Qué comando muestra el estado actual en Git?",
+                code: null,
+                options: ["git state", "git status", "git info", "git check"],
+                correct: 1
+            },
+            {
+                question: "¿Qué clase hace un elemento responsive en Bootstrap?",
+                code: null,
+                options: ["responsive", "img-fluid", "auto-size", "flex-responsive"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve este código?",
+                code: `const nums = [1, 2, 3];
+const doubled = nums.map(n => n * 2);
+const filtered = doubled.filter(n => n > 4);
+console.log(filtered);`,
+                options: ["[2, 4, 6]", "[6]", "[4, 6]", "[1, 2, 3]"],
+                correct: 1
+            },
+            {
+                question: "¿Cómo se elimina un item de localStorage?",
+                code: null,
+                options: ["localStorage.delete('key')", "localStorage.remove('key')", "localStorage.removeItem('key')", "localStorage.clear('key')"],
+                correct: 2
+            },
+            {
+                question: "¿Qué clase de Bootstrap marca un campo como válido?",
+                code: null,
+                options: ["valid", "is-valid", "form-valid", "correct"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace 'git clone'?",
+                code: null,
+                options: ["Copia un archivo", "Descarga un repositorio completo", "Crea una rama", "Hace backup"],
+                correct: 1
+            },
+            {
+                question: "¿Qué componente de Bootstrap es este?",
+                code: `&lt;button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal"&gt;
+    Abrir Modal
+&lt;/button&gt;`,
+                options: ["Alert", "Modal", "Tooltip", "Popover"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace array.sort() sin comparador en números?",
+                code: null,
+                options: ["Ordena numéricamente", "Ordena alfabéticamente (como strings)", "Da error", "No cambia nada"],
+                correct: 1
+            },
+            {
+                question: "¿localStorage persiste después de cerrar el navegador?",
+                code: null,
+                options: ["No, se borra", "Sí, persiste", "Solo en modo incógnito", "Depende del navegador"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace la clase 'was-validated' en Bootstrap?",
+                code: null,
+                options: ["Elimina validación", "Activa estilos de validación", "Envía el form", "Resetea el form"],
+                correct: 1
+            }
+        ];
+
+        // Funciones para selección aleatoria
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function selectRandomQuestions() {
+            const shuffled = shuffleArray(questionPool);
+            selectedQuestions = shuffled.slice(0, 20);
+        }
+
+        // Funciones principales
+        function startQuiz() {
+            const name = document.getElementById('studentName').value.trim();
+            if (!name) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nombre requerido',
+                    text: 'Por favor ingresa tu nombre completo'
+                });
+                return;
+            }
+
+            studentName = name;
+            selectRandomQuestions();
+            
+            document.getElementById('startScreen').classList.add('d-none');
+            document.getElementById('quizScreen').classList.remove('d-none');
+            
+            startTimer();
+            displayQuestion();
+            setupTabDetection();
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            updateTimerColor();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                updateTimerColor();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerColor() {
+            const timerBox = document.getElementById('timerBox');
+            const totalTime = 1800;
+            const percentage = (timeLeft / totalTime) * 100;
+
+            timerBox.classList.remove('green', 'yellow', 'red');
+
+            if (percentage > 50) {
+                timerBox.classList.add('green');
+            } else if (percentage > 20) {
+                timerBox.classList.add('yellow');
+            } else {
+                timerBox.classList.add('red');
+            }
+        }
+
+        function setupTabDetection() {
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    tabSwitchCount++;
+                    showTabWarning();
+                }
+            });
+
+            window.addEventListener('blur', function() {
+                tabSwitchCount++;
+                showTabWarning();
+            });
+        }
+
+        function showTabWarning() {
+            if (tabSwitchCount >= 3) {
+                clearInterval(timer);
+                Swal.fire({
+                    icon: 'error',
+                    title: '🪙 ¡Atrapado haciendo trampas! 🪙',
+                    html: '<i class="fas fa-coins text-warning fa-2x mb-3"></i><br><strong>Si esto fuera una prueba real, te quedarías sin fernanditos</strong><br><br>¡Has cambiado de pestaña 3 veces! El cuestionario se reiniciará.',
+                    confirmButtonText: 'Entendido, empezar de nuevo',
+                    confirmButtonColor: '#ef4444',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then(() => {
+                    currentQuestionIndex = 0;
+                    score = 0;
+                    timeLeft = 1800;
+                    userAnswers = [];
+                    tabSwitchCount = 0;
+                    selectedQuestions = [];
+                    
+                    document.getElementById('quizScreen').classList.add('d-none');
+                    document.getElementById('resultsScreen').classList.add('d-none');
+                    document.getElementById('startScreen').classList.remove('d-none');
+                    document.getElementById('studentName').value = '';
+                });
+            } else {
+                const warning = document.getElementById('tabWarning');
+                warning.classList.remove('d-none');
+                
+                let warningText = '';
+                if (tabSwitchCount === 1) {
+                    warningText = 'Has cambiado de pestaña. Evita consultar recursos externos.';
+                } else if (tabSwitchCount === 2) {
+                    warningText = '¡Segunda advertencia! Una más y tendrás que empezar de nuevo.';
+                }
+                
+                warning.innerHTML = `
+                    <div class="alert alert-warning-custom animate__animated animate__shakeX">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>¡Atención!</strong> ${warningText}
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    warning.classList.add('d-none');
+                }, 4000);
+            }
+        }
+
+        function displayQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            
+            document.getElementById('questionTitle').textContent = `Pregunta ${currentQuestionIndex + 1}`;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionText').innerHTML = `<h5>${question.question}</h5>`;
+            
+            const codeContainer = document.getElementById('codeSnippet');
+            if (question.code) {
+                codeContainer.innerHTML = `<div class="code-snippet">${question.code}</div>`;
+            } else {
+                codeContainer.innerHTML = '';
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn option-btn w-100';
+                button.innerHTML = `<strong>${String.fromCharCode(65 + index)})</strong> ${option}`;
+                button.onclick = () => selectOption(index, button);
+                optionsContainer.appendChild(button);
+            });
+            
+            const progress = ((currentQuestionIndex + 1) / 20) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        function selectOption(optionIndex, button) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            button.classList.add('selected', 'animate__animated', 'animate__pulse');
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < 20) {
+                if (currentQuestionIndex === 19) {
+                    document.getElementById('nextBtn').innerHTML = '<i class="fas fa-flag-checkered"></i> Finalizar';
+                }
+                displayQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            clearInterval(timer);
+            calculateScore();
+            showResults();
+            sendResultsToAPI();
+            triggerCelebration();
+        }
+
+        function calculateScore() {
+            score = 0;
+            for (let i = 0; i < 20; i++) {
+                if (userAnswers[i] === selectedQuestions[i].correct) {
+                    score++;
+                }
+            }
+        }
+
+        async function sendResultsToAPI() {
+            const incorrectas = 20 - score;
+            
+            const data = {
+                nombre: studentName,
+                puntaje: score,
+                incorrectas: incorrectas,
+                fecha: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    document.getElementById('sendingMessage').classList.add('d-none');
+                    document.getElementById('sentMessage').classList.remove('d-none');
+                } else {
+                    throw new Error('Error al enviar');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('sendingMessage').innerHTML = 
+                    '<i class="fas fa-exclamation-triangle"></i> Error al enviar resultados. Verifica tu conexión.';
+                document.getElementById('sendingMessage').classList.remove('alert-info');
+                document.getElementById('sendingMessage').classList.add('alert-warning');
+            }
+        }
+
+        function triggerCelebration() {
+            const percentage = (score / 20) * 100;
+            
+            if (percentage >= 70) {
+                const count = 200;
+                const defaults = { origin: { y: 0.7 } };
+
+                function fire(particleRatio, opts) {
+                    confetti(Object.assign({}, defaults, opts, {
+                        particleCount: Math.floor(count * particleRatio)
+                    }));
+                }
+
+                fire(0.25, { spread: 26, startVelocity: 55 });
+                fire(0.2, { spread: 60 });
+                fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+                fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+                fire(0.1, { spread: 120, startVelocity: 45 });
+
+                const trophy = document.getElementById('trophyAnimation');
+                trophy.classList.remove('d-none');
+                if (percentage >= 90) {
+                    trophy.innerHTML = '<i class="fas fa-trophy text-warning animate__animated animate__bounceIn"></i>';
+                } else {
+                    trophy.innerHTML = '<i class="fas fa-medal text-success animate__animated animate__bounceIn"></i>';
+                }
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').classList.add('d-none');
+            document.getElementById('resultsScreen').classList.remove('d-none');
+            
+            document.getElementById('studentNameResult').textContent = `Estudiante: ${studentName}`;
+            document.getElementById('scoreText').textContent = `${score} / 20`;
+            
+            const percentage = (score / 20) * 100;
+            let message = '';
+            let messageClass = '';
+            
+            if (percentage >= 90) {
+                message = '¡Excelente trabajo! 🎉';
+                messageClass = 'text-success';
+            } else if (percentage >= 70) {
+                message = '¡Buen trabajo! 👍';
+                messageClass = 'text-primary';
+            } else if (percentage >= 50) {
+                message = 'Puedes mejorar 📚';
+                messageClass = 'text-warning';
+            } else {
+                message = 'Necesitas estudiar más 📖';
+                messageClass = 'text-danger';
+            }
+            
+            document.getElementById('performanceMessage').innerHTML = 
+                `<h4 class="${messageClass} animate__animated animate__fadeIn">${message}</h4><p>Porcentaje: ${percentage.toFixed(1)}%</p><p class="text-muted">Incorrectas: ${20 - score}</p>`;
+            
+            createChart();
+            showAnswersReview();
+        }
+
+        function createChart() {
+            const ctx = document.getElementById('resultChart').getContext('2d');
+            const correctAnswers = score;
+            const incorrectAnswers = 20 - score;
+            
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Correctas', 'Incorrectas'],
+                    datasets: [{
+                        data: [correctAnswers, incorrectAnswers],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderColor: ['#059669', '#dc2626'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Resultados del Quiz'
+                        }
+                    }
+                }
+            });
+        }
+
+        function showAnswersReview() {
+            const reviewContainer = document.getElementById('answersReview');
+            let reviewHTML = '';
+            
+            selectedQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                const icon = isCorrect ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+                
+                reviewHTML += `
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-1">${icon}</div>
+                                <div class="col-11">
+                                    <strong>Pregunta ${index + 1}:</strong> ${question.question.substring(0, 60)}...
+                                    <br>
+                                    <small class="text-muted">
+                                        Tu respuesta: ${userAnswer !== undefined ? question.options[userAnswer] : 'Sin respuesta'} |
+                                        Correcta: ${question.options[question.correct]}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reviewContainer.innerHTML = reviewHTML;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            timeLeft = 1800;
+            userAnswers = [];
+            tabSwitchCount = 0;
+            selectedQuestions = [];
+            
+            document.getElementById('resultsScreen').classList.add('d-none');
+            document.getElementById('startScreen').classList.remove('d-none');
+            document.getElementById('studentName').value = '';
+        }
+
+        // Prevenir copiar/pegar
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+        document.addEventListener('cut', e => e.preventDefault());
+    </script>
+</body>
+</html>

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación de Formularios en Bootstrap</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --secondary: #6c757d;
+            --success: #198754;
+            --danger: #dc3545;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, var(--primary), #0a58ca);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            color: #f8f8f2;
+            font-family: 'Courier New', monospace;
+        }
+
+        .example-box {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f8f9fa;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #ffd60a 0%, #ffd60a 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 40%;
+            background-position: 0 85%;
+            padding: 0 5px;
+        }
+
+        .tip-box {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+
+        .interactive-demo {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            border: 3px solid var(--primary);
+            margin: 20px 0;
+        }
+
+        .section-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .comparison-table {
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Slide 1: Portada -->
+        <div class="slide">
+            <div class="text-center">
+                <h1 class="display-3 mb-4"><i class="fas fa-check-circle text-primary"></i> Validación de Formularios</h1>
+                <h2 class="text-muted">en Bootstrap 5</h2>
+                <p class="lead mt-4">Aprende a crear formularios con validación robusta y elegante</p>
+                <div class="mt-4 mb-4">
+                    <span class="badge bg-primary fs-5 px-4 py-2">Grupos 310 y 316</span>
+                </div>
+                <div class="mt-5">
+                    <i class="fas fa-code fa-3x text-primary"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Introducción -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">1</span> ¿Qué es la Validación de Formularios?</h2>
+            </div>
+            
+            <p class="lead">La validación de formularios es el proceso de verificar que los datos ingresados por el usuario cumplan con ciertos criterios antes de ser procesados.</p>
+
+            <h3 class="mt-4"><i class="fas fa-list-check"></i> Tipos de Validación</h3>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h4 class="card-title text-primary"><i class="fas fa-browser"></i> Validación del Cliente</h4>
+                            <ul>
+                                <li>Se ejecuta en el navegador</li>
+                                <li>Respuesta inmediata</li>
+                                <li>Mejora la experiencia del usuario</li>
+                                <li><strong>No es suficiente por sí sola</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h4 class="card-title text-success"><i class="fas fa-server"></i> Validación del Servidor</h4>
+                            <ul>
+                                <li>Se ejecuta en el backend</li>
+                                <li>Es imprescindible para seguridad</li>
+                                <li>Valida datos antes de guardar</li>
+                                <li><strong>Última línea de defensa</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box mt-4">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Importante:</strong> 
+                Nunca confíes solo en la validación del cliente. Siempre valida en el servidor.
+            </div>
+        </div>
+
+        <!-- Slide 3: Validación HTML5 Nativa -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">2</span> Validación HTML5 Nativa</h2>
+            </div>
+
+            <p class="lead">HTML5 proporciona atributos de validación integrados que los navegadores entienden automáticamente.</p>
+
+            <h3 class="mt-4">Atributos de Validación Principales</h3>
+
+            <table class="table table-striped comparison-table">
+                <thead>
+                    <tr>
+                        <th>Atributo</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>required</code></td>
+                        <td>Campo obligatorio</td>
+                        <td><code>&lt;input required&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>type</code></td>
+                        <td>Define el tipo de dato esperado</td>
+                        <td><code>&lt;input type="email"&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>minlength / maxlength</code></td>
+                        <td>Longitud mínima/máxima</td>
+                        <td><code>&lt;input minlength="3"&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>min / max</code></td>
+                        <td>Valor mínimo/máximo (números)</td>
+                        <td><code>&lt;input type="number" min="1"&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>pattern</code></td>
+                        <td>Expresión regular personalizada</td>
+                        <td><code>&lt;input pattern="[0-9]{3}"&gt;</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="code-block">
+                <pre><code class="language-markup">&lt;!-- Ejemplo de validación HTML5 básica --&gt;
+&lt;form&gt;
+    &lt;input type="text" required minlength="3" placeholder="Nombre"&gt;
+    &lt;input type="email" required placeholder="Email"&gt;
+    &lt;input type="number" min="18" max="100" placeholder="Edad"&gt;
+    &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 4: Clases de Bootstrap para Validación -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">3</span> Clases de Bootstrap para Validación</h2>
+            </div>
+
+            <p class="lead">Bootstrap proporciona clases CSS para mostrar estados de validación de forma visual y atractiva.</p>
+
+            <h3 class="mt-4">Clases Principales</h3>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-success"><i class="fas fa-check-circle"></i> Estados Válidos</h4>
+                    <ul>
+                        <li><code>.is-valid</code> - Campo válido</li>
+                        <li><code>.valid-feedback</code> - Mensaje de éxito</li>
+                        <li><code>.valid-tooltip</code> - Tooltip de éxito</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4 class="text-danger"><i class="fas fa-times-circle"></i> Estados Inválidos</h4>
+                    <ul>
+                        <li><code>.is-invalid</code> - Campo inválido</li>
+                        <li><code>.invalid-feedback</code> - Mensaje de error</li>
+                        <li><code>.invalid-tooltip</code> - Tooltip de error</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block mt-4">
+                <pre><code class="language-markup">&lt;!-- Campo válido --&gt;
+&lt;input type="text" class="form-control is-valid" value="Juan Pérez"&gt;
+&lt;div class="valid-feedback"&gt;
+    ¡Se ve bien!
+&lt;/div&gt;
+
+&lt;!-- Campo inválido --&gt;
+&lt;input type="email" class="form-control is-invalid" value="correo"&gt;
+&lt;div class="invalid-feedback"&gt;
+    Por favor ingresa un email válido.
+&lt;/div&gt;</code></pre>
+            </div>
+
+            <div class="example-box">
+                <h5>Vista previa:</h5>
+                <div class="mb-3">
+                    <input type="text" class="form-control is-valid" value="Juan Pérez">
+                    <div class="valid-feedback" style="display: block;">
+                        ¡Se ve bien!
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <input type="email" class="form-control is-invalid" value="correo">
+                    <div class="invalid-feedback" style="display: block;">
+                        Por favor ingresa un email válido.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Validación con JavaScript -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">4</span> Validación con JavaScript</h2>
+            </div>
+
+            <p class="lead">Bootstrap recomienda usar JavaScript para aplicar validación personalizada y deshabilitar la validación nativa del navegador.</p>
+
+            <h3 class="mt-4">Método Recomendado por Bootstrap</h3>
+
+            <div class="code-block">
+                <pre><code class="language-markup">&lt;form class="needs-validation" novalidate&gt;
+    &lt;div class="mb-3"&gt;
+        &lt;label for="nombre" class="form-label"&gt;Nombre&lt;/label&gt;
+        &lt;input type="text" class="form-control" id="nombre" required&gt;
+        &lt;div class="invalid-feedback"&gt;
+            Por favor ingresa tu nombre.
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;button class="btn btn-primary" type="submit"&gt;Enviar&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+            </div>
+
+            <div class="code-block">
+                <pre><code class="language-javascript">// JavaScript para validación personalizada
+const forms = document.querySelectorAll('.needs-validation');
+
+Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    }, false);
+});</code></pre>
+            </div>
+
+            <div class="tip-box">
+                <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> 
+                El atributo <code>novalidate</code> deshabilita la validación nativa del navegador para que podamos usar los estilos de Bootstrap.
+            </div>
+        </div>
+
+        <!-- Slide 6: Ejemplo Completo Interactivo -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">5</span> Ejemplo Completo Interactivo</h2>
+            </div>
+
+            <p class="lead">Prueba este formulario completo con validación de Bootstrap en acción:</p>
+
+            <div class="interactive-demo">
+                <h4 class="mb-4 text-center">Formulario de Registro</h4>
+                <form id="demoForm" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">Nombre <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="firstName" required minlength="2">
+                            <div class="valid-feedback">¡Perfecto!</div>
+                            <div class="invalid-feedback">El nombre debe tener al menos 2 caracteres.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label">Apellido <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="lastName" required minlength="2">
+                            <div class="valid-feedback">¡Perfecto!</div>
+                            <div class="invalid-feedback">El apellido debe tener al menos 2 caracteres.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" required>
+                        <div class="valid-feedback">Email válido.</div>
+                        <div class="invalid-feedback">Por favor ingresa un email válido.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password" required minlength="6">
+                        <div class="valid-feedback">Contraseña segura.</div>
+                        <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Edad <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="age" required min="18" max="100">
+                        <div class="valid-feedback">Edad válida.</div>
+                        <div class="invalid-feedback">Debes tener entre 18 y 100 años.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Teléfono <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="phone" pattern="[0-9]{8,10}" required>
+                        <div class="valid-feedback">Teléfono válido.</div>
+                        <div class="invalid-feedback">Ingresa un teléfono de 8-10 dígitos.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="country" class="form-label">País <span class="text-danger">*</span></label>
+                        <select class="form-select" id="country" required>
+                            <option value="">Selecciona un país...</option>
+                            <option value="uy">Uruguay</option>
+                            <option value="ar">Argentina</option>
+                            <option value="br">Brasil</option>
+                            <option value="cl">Chile</option>
+                        </select>
+                        <div class="valid-feedback">País seleccionado.</div>
+                        <div class="invalid-feedback">Por favor selecciona un país.</div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="terms" required>
+                        <label class="form-check-label" for="terms">
+                            Acepto los términos y condiciones <span class="text-danger">*</span>
+                        </label>
+                        <div class="invalid-feedback">Debes aceptar los términos.</div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            <i class="fas fa-paper-plane"></i> Enviar Formulario
+                        </button>
+                    </div>
+                </form>
+
+                <div id="successMessage" class="alert alert-success mt-4 d-none">
+                    <i class="fas fa-check-circle"></i> ¡Formulario enviado correctamente!
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Validación Personalizada con JavaScript -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">6</span> Validación Personalizada Avanzada</h2>
+            </div>
+
+            <p class="lead">Puedes crear validaciones personalizadas más complejas usando JavaScript.</p>
+
+            <h3 class="mt-4">Ejemplo: Validar que dos campos coincidan</h3>
+
+            <div class="code-block">
+                <pre><code class="language-markup">&lt;div class="mb-3"&gt;
+    &lt;label for="password1"&gt;Contraseña&lt;/label&gt;
+    &lt;input type="password" class="form-control" id="password1" required&gt;
+&lt;/div&gt;
+
+&lt;div class="mb-3"&gt;
+    &lt;label for="password2"&gt;Confirmar Contraseña&lt;/label&gt;
+    &lt;input type="password" class="form-control" id="password2" required&gt;
+    &lt;div class="invalid-feedback"&gt;Las contraseñas no coinciden.&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+
+            <div class="code-block">
+                <pre><code class="language-javascript">// Validación personalizada
+const password1 = document.getElementById('password1');
+const password2 = document.getElementById('password2');
+
+password2.addEventListener('input', function() {
+    if (password1.value !== password2.value) {
+        password2.setCustomValidity('Las contraseñas no coinciden');
+        password2.classList.add('is-invalid');
+    } else {
+        password2.setCustomValidity('');
+        password2.classList.remove('is-invalid');
+        password2.classList.add('is-valid');
+    }
+});</code></pre>
+            </div>
+
+            <h3 class="mt-5">Ejemplo Interactivo:</h3>
+            <div class="example-box">
+                <form id="passwordForm">
+                    <div class="mb-3">
+                        <label for="pwd1" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="pwd1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pwd2" class="form-label">Confirmar Contraseña</label>
+                        <input type="password" class="form-control" id="pwd2" required>
+                        <div class="valid-feedback" style="display: none;">Las contraseñas coinciden.</div>
+                        <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Slide 8: Tooltips vs Feedback -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">7</span> Tooltips vs Feedback Messages</h2>
+            </div>
+
+            <p class="lead">Bootstrap ofrece dos formas de mostrar mensajes de validación:</p>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-comment-dots"></i> Feedback (por defecto)</h4>
+                    <div class="code-block">
+                        <pre><code class="language-markup">&lt;input class="form-control is-invalid"&gt;
+&lt;div class="invalid-feedback"&gt;
+    Mensaje de error
+&lt;/div&gt;</code></pre>
+                    </div>
+                    <p><strong>Ventajas:</strong> Siempre visible, más espacio</p>
+                    <div class="example-box">
+                        <input type="text" class="form-control is-invalid">
+                        <div class="invalid-feedback" style="display: block;">Este es un mensaje de feedback normal.</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h4><i class="fas fa-info-circle"></i> Tooltip</h4>
+                    <div class="code-block">
+                        <pre><code class="language-markup">&lt;div class="position-relative"&gt;
+    &lt;input class="form-control is-invalid"&gt;
+    &lt;div class="invalid-tooltip"&gt;
+        Mensaje de error
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                    </div>
+                    <p><strong>Ventajas:</strong> Ahorra espacio, elegante</p>
+                    <div class="example-box">
+                        <div class="position-relative">
+                            <input type="text" class="form-control is-invalid">
+                            <div class="invalid-tooltip" style="display: block; position: absolute;">Este es un tooltip de error.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tip-box mt-4">
+                <i class="fas fa-lightbulb"></i> <strong>Recomendación:</strong> 
+                Usa feedback para formularios importantes y tooltips cuando necesites ahorrar espacio vertical.
+            </div>
+        </div>
+
+        <!-- Slide 9: Mejores Prácticas -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">8</span> Mejores Prácticas</h2>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-success"><i class="fas fa-check"></i> Sí hacer:</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Validar tanto en cliente como en servidor</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Mostrar mensajes claros y específicos</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Validar en tiempo real (después del primer intento)</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Usar íconos para reforzar el estado</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Marcar campos obligatorios con <code>*</code></li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success"></i> Deshabilitar el botón mientras se procesa</li>
+                    </ul>
+                </div>
+
+                <div class="col-md-6">
+                    <h4 class="text-danger"><i class="fas fa-times"></i> No hacer:</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Confiar solo en validación del cliente</li>
+                        <li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Mensajes genéricos como "Error"</li>
+                        <li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Validar cada tecla presionada (molesto)</li>
+                        <li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Ocultar qué campos fallan</li>
+                        <li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Pedir información innecesaria</li>
+                        <li class="list-group-item"><i class="fas fa-times-circle text-danger"></i> Borrar el formulario tras un error</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="warning-box mt-4">
+                <i class="fas fa-shield-alt"></i> <strong>Seguridad:</strong> 
+                La validación del cliente es para UX, no para seguridad. Siempre valida y sanitiza en el servidor.
+            </div>
+        </div>
+
+        <!-- Slide 10: Resumen y Recursos -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2><span class="section-number">9</span> Resumen y Recursos</h2>
+            </div>
+
+            <h3 class="mt-4">Puntos Clave</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <i class="fas fa-code fa-3x text-primary mb-3"></i>
+                            <h5>HTML5 + Bootstrap</h5>
+                            <p>Usa atributos HTML5 nativos combinados con clases de Bootstrap</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <i class="fas fa-js fa-3x text-warning mb-3"></i>
+                            <h5>JavaScript</h5>
+                            <p>Implementa lógica personalizada con <code>checkValidity()</code></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <i class="fas fa-palette fa-3x text-success mb-3"></i>
+                            <h5>Clases CSS</h5>
+                            <p>Aplica <code>.is-valid</code> y <code>.is-invalid</code> dinámicamente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mt-5">Estructura Básica Completa</h3>
+            <div class="code-block">
+                <pre><code class="language-markup">&lt;form class="needs-validation" novalidate&gt;
+    &lt;div class="mb-3"&gt;
+        &lt;label for="input" class="form-label"&gt;Campo&lt;/label&gt;
+        &lt;input type="text" class="form-control" id="input" required&gt;
+        &lt;div class="valid-feedback"&gt;¡Correcto!&lt;/div&gt;
+        &lt;div class="invalid-feedback"&gt;Error específico aquí.&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;button type="submit" class="btn btn-primary"&gt;Enviar&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+const form = document.querySelector('.needs-validation');
+form.addEventListener('submit', event => {
+    if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+}, false);
+&lt;/script&gt;</code></pre>
+            </div>
+
+            <h3 class="mt-5">Recursos Adicionales</h3>
+            <ul class="list-unstyled">
+                <li><i class="fas fa-book text-primary"></i> <a href="https://getbootstrap.com/docs/5.3/forms/validation/" target="_blank">Documentación Oficial de Bootstrap</a></li>
+                <li><i class="fas fa-globe text-primary"></i> <a href="https://developer.mozilla.org/es/docs/Learn/Forms/Form_validation" target="_blank">MDN - Validación de Formularios</a></li>
+                <li><i class="fas fa-code text-primary"></i> <a href="https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#the-constraint-validation-api" target="_blank">API de Validación HTML5</a></li>
+            </ul>
+
+            <div class="text-center mt-5">
+                <h2 class="text-primary">¡Gracias!</h2>
+                <p class="lead">¿Preguntas?</p>
+                <i class="fas fa-comments fa-3x text-primary"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Validación del formulario demo principal
+        const demoForm = document.getElementById('demoForm');
+        demoForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (demoForm.checkValidity()) {
+                document.getElementById('successMessage').classList.remove('d-none');
+                setTimeout(() => {
+                    document.getElementById('successMessage').classList.add('d-none');
+                    demoForm.reset();
+                    demoForm.classList.remove('was-validated');
+                }, 3000);
+            }
+            
+            demoForm.classList.add('was-validated');
+        }, false);
+
+        // Validación de contraseñas coincidentes
+        const pwd1 = document.getElementById('pwd1');
+        const pwd2 = document.getElementById('pwd2');
+
+        pwd2.addEventListener('input', function() {
+            const validFeedback = pwd2.nextElementSibling;
+            const invalidFeedback = validFeedback.nextElementSibling;
+            
+            if (pwd1.value !== pwd2.value) {
+                pwd2.setCustomValidity('Las contraseñas no coinciden');
+                pwd2.classList.add('is-invalid');
+                pwd2.classList.remove('is-valid');
+                invalidFeedback.style.display = 'block';
+                validFeedback.style.display = 'none';
+            } else if (pwd2.value.length > 0) {
+                pwd2.setCustomValidity('');
+                pwd2.classList.remove('is-invalid');
+                pwd2.classList.add('is-valid');
+                invalidFeedback.style.display = 'none';
+                validFeedback.style.display = 'block';
+            } else {
+                pwd2.setCustomValidity('');
+                pwd2.classList.remove('is-invalid');
+                pwd2.classList.remove('is-valid');
+                invalidFeedback.style.display = 'none';
+                validFeedback.style.display = 'none';
+            }
+        });
+
+        pwd1.addEventListener('input', function() {
+            if (pwd2.value.length > 0) {
+                pwd2.dispatchEvent(new Event('input'));
+            }
+        });
+    </script>
+</body>
+</html>

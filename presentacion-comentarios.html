@@ -5,16 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comentarios y Calificaciones - Tutorial Interactivo</title>
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    
-    <!-- Animate.css -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    
-    <!-- SweetAlert2 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.css" rel="stylesheet">
     
     <style>
@@ -26,7 +19,6 @@
         
         .slide {
             display: none;
-            min-height: 80vh;
         }
         
         .slide.active {
@@ -49,7 +41,24 @@
             border-radius: 8px;
             margin: 20px 0;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        
+        .code-html {
+            border-left-color: #e74c3c;
+        }
+        
+        .code-css {
+            border-left-color: #3498db;
+        }
+        
+        .code-js {
+            border-left-color: #f39c12;
+        }
+        
+        .code-json {
+            border-left-color: #2ecc71;
         }
         
         .demo-box {
@@ -58,24 +67,28 @@
             border-radius: 10px;
             padding: 30px;
             margin: 20px 0;
-            text-align: center;
         }
         
         .star {
             font-size: 30px;
             color: #ddd;
             cursor: pointer;
-            transition: color 0.3s;
+            transition: color 0.2s;
         }
         
-        .star.active {
+        .star.active, .star:hover {
             color: #ffd700;
+        }
+        
+        .star-rating .star:hover ~ .star {
+            color: #ddd;
         }
         
         .like-btn {
             font-size: 40px;
             cursor: pointer;
             transition: all 0.3s;
+            color: #ddd;
         }
         
         .like-btn:hover {
@@ -86,18 +99,12 @@
             color: #e74c3c;
         }
         
-        .comment-item {
+        .comment-card {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 10px;
             margin: 10px 0;
             border-left: 4px solid #667eea;
-        }
-        
-        .nav-buttons {
-            margin-top: 30px;
-            display: flex;
-            justify-content: space-between;
         }
         
         .progress-bar-custom {
@@ -138,10 +145,31 @@
             border-color: #dc3545;
             background: #f8d7da;
         }
+
+        .user-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .code-label {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .label-html { background: #e74c3c; }
+        .label-css { background: #3498db; }
+        .label-js { background: #f39c12; }
+        .label-json { background: #2ecc71; }
     </style>
 </head>
 <body>
-    <!-- Barra de progreso -->
     <div class="container mt-3">
         <div class="progress-bar-custom">
             <div class="progress-fill" id="progressBar"></div>
@@ -149,288 +177,694 @@
     </div>
 
     <!-- SLIDE 1: Bienvenida -->
-    <div class="slide active animate__animated animate__fadeIn" id="slide1">
+    <div class="slide active" id="slide1">
         <div class="slide-container text-center">
+            <div class="alert alert-primary mb-4">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Grupos 310 y 316</h5>
+            </div>
+            
             <h1 class="display-4 mb-4">
                 <i class="fas fa-star text-warning"></i>
-                Sistema de Comentarios y Calificaciones
+                Sistemas de Comentarios y Calificaciones
             </h1>
             <p class="lead mb-4">Tutorial Interactivo para Desarrollo Web</p>
             <div class="mb-4">
                 <i class="fas fa-code fa-3x text-primary"></i>
             </div>
-            <p class="mb-4">¡Bienvenido! En esta presentación aprenderás a crear sistemas de likes, calificaciones con estrellas y comentarios.</p>
+            <p class="mb-4">Aprenderás a crear sistemas de likes, calificaciones con estrellas y comentarios dinámicos.</p>
             <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Responde las preguntas al final para ver tu progreso
+                <i class="fas fa-info-circle"></i> Cada tema incluye código y resultado práctico
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 2: Likes Simples -->
+    <!-- SLIDE 2: Like ON/OFF - HTML -->
     <div class="slide" id="slide2">
         <div class="slide-container">
-            <h2 class="mb-4"><i class="fas fa-thumbs-up"></i> 1. Sistema de Likes Simple</h2>
+            <h2 class="mb-4"><i class="fas fa-heart"></i> Like ON/OFF - Parte 1: HTML</h2>
             
-            <p>El sistema más básico: un botón que cambia de estado al hacer clic.</p>
+            <p>Primero, el código HTML básico:</p>
             
-            <div class="code-example">
-                <strong>HTML:</strong><br>
-                &lt;button id="likeBtn" onclick="toggleLike()"&gt;<br>
-                &nbsp;&nbsp;&lt;i class="fas fa-heart"&gt;&lt;/i&gt; <span id="likeCount">0</span><br>
-                &lt;/button&gt;<br><br>
-                
-                <strong>JavaScript:</strong><br>
-                let likes = 0;<br>
-                let isLiked = false;<br><br>
-                
-                function toggleLike() {<br>
-                &nbsp;&nbsp;if (isLiked) {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;likes--;<br>
-                &nbsp;&nbsp;} else {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;likes++;<br>
-                &nbsp;&nbsp;}<br>
-                &nbsp;&nbsp;isLiked = !isLiked;<br>
-                &nbsp;&nbsp;document.getElementById('likeCount').textContent = likes;<br>
-                }
+            <div class="code-example code-html">
+                <span class="code-label label-html">HTML</span>
+<pre style="margin: 0;">
+&lt;!-- Contenedor del like --&gt;
+&lt;div class="like-container"&gt;
+    &lt;i class="fas fa-heart" id="likeBtn" onclick="toggleLike()"&gt;&lt;/i&gt;
+    &lt;span id="likeCount"&gt;0&lt;/span&gt; Likes
+&lt;/div&gt;
+</pre>
             </div>
-            
-            <div class="demo-box">
-                <h5>¡Pruébalo!</h5>
-                <i class="fas fa-heart like-btn" id="demoLike1" onclick="demo1()"></i>
-                <p class="mt-3">Likes: <strong id="likeDemo1">0</strong></p>
+
+            <div class="alert alert-info">
+                <strong>Explicación:</strong> Usamos un ícono de Font Awesome y un span para el contador
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 3: Quiz 1 -->
+    <!-- SLIDE 3: Like ON/OFF - CSS y JS -->
     <div class="slide" id="slide3">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-heart"></i> Like ON/OFF - Parte 2: CSS y JavaScript</h2>
+            
+            <div class="code-example code-css">
+                <span class="code-label label-css">CSS</span>
+<pre style="margin: 0;">
+.like-btn {
+    font-size: 40px;
+    cursor: pointer;
+    color: #ddd;
+    transition: all 0.3s;
+}
+
+.like-btn.liked {
+    color: #e74c3c;  /* Rojo cuando está activo */
+}
+
+.like-btn:hover {
+    transform: scale(1.2);
+}
+</pre>
+            </div>
+            
+            <div class="code-example code-js">
+                <span class="code-label label-js">JavaScript</span>
+<pre style="margin: 0;">
+let likes = 0;
+let isLiked = false;
+
+function toggleLike() {
+    const btn = document.getElementById('likeBtn');
+    
+    if (isLiked) {
+        likes--;  // Quitar like
+        btn.classList.remove('liked');
+    } else {
+        likes++;  // Agregar like
+        btn.classList.add('liked');
+    }
+    
+    isLiked = !isLiked;  // Cambiar estado
+    document.getElementById('likeCount').textContent = likes;
+}
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: Like ON/OFF - Resultado -->
+    <div class="slide" id="slide4">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-heart"></i> Like ON/OFF - Resultado</h2>
+            
+            <p>¡Ahora pruébalo! Haz clic en el corazón:</p>
+            
+            <div class="demo-box text-center">
+                <i class="fas fa-heart like-btn" id="demo1Like" onclick="demo1()"></i>
+                <p class="mt-3" style="font-size: 20px;">Likes: <strong id="demo1Count">0</strong></p>
+                <small class="text-muted">Haz clic varias veces para activar y desactivar</small>
+            </div>
+
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <strong>¿Cómo funciona?</strong> Al hacer clic, JavaScript alterna entre agregar y quitar el like.
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: Likes Acumulativos - Código -->
+    <div class="slide" id="slide5">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-fire"></i> Likes Acumulativos - Código</h2>
+            
+            <p>Sistema donde cada clic suma un like (como aplausos):</p>
+            
+            <div class="code-example code-html">
+                <span class="code-label label-html">HTML</span>
+<pre style="margin: 0;">
+&lt;button onclick="addLike()"&gt;
+    &lt;i class="fas fa-heart"&gt;&lt;/i&gt; +1 Like
+&lt;/button&gt;
+&lt;p&gt;Total: &lt;span id="totalLikes"&gt;0&lt;/span&gt;&lt;/p&gt;
+</pre>
+            </div>
+            
+            <div class="code-example code-js">
+                <span class="code-label label-js">JavaScript</span>
+<pre style="margin: 0;">
+let totalLikes = 0;
+
+function addLike() {
+    totalLikes++;  // Siempre suma
+    document.getElementById('totalLikes').textContent = totalLikes;
+}
+</pre>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Diferencia clave:</strong> No hay toggle, cada clic siempre suma
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: Likes Acumulativos - Resultado -->
+    <div class="slide" id="slide6">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-fire"></i> Likes Acumulativos - Resultado</h2>
+            
+            <div class="demo-box text-center">
+                <button class="btn btn-lg btn-danger" onclick="demo2()">
+                    <i class="fas fa-heart"></i> +1 Like
+                </button>
+                <p class="mt-3" style="font-size: 24px;">Total: <strong id="demo2Count" style="color: #e74c3c;">0</strong></p>
+                <small class="text-muted">¡Puedes dar tantos likes como quieras!</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: Quiz 1 -->
+    <div class="slide" id="slide7">
         <div class="slide-container">
             <h2 class="mb-4"><i class="fas fa-question-circle"></i> Pregunta 1</h2>
             
-            <p class="lead">¿Qué hace el operador ! en JavaScript?</p>
+            <p class="lead">¿Cuál es la diferencia entre un like ON/OFF y uno acumulativo?</p>
             
-            <div class="quiz-option" onclick="checkAnswer(1, 'a', false)">
-                <strong>A)</strong> Suma un número
+            <div class="quiz-option" onclick="checkAnswer(1, true)">
+                <strong>A)</strong> El ON/OFF solo permite 1 like, el acumulativo suma cada clic
             </div>
-            <div class="quiz-option" onclick="checkAnswer(1, 'b', true)">
-                <strong>B)</strong> Invierte un valor booleano (true a false o viceversa)
+            <div class="quiz-option" onclick="checkAnswer(1, false)">
+                <strong>B)</strong> El acumulativo es más lento
             </div>
-            <div class="quiz-option" onclick="checkAnswer(1, 'c', false)">
-                <strong>C)</strong> Multiplica dos valores
-            </div>
-            <div class="quiz-option" onclick="checkAnswer(1, 'd', false)">
-                <strong>D)</strong> Compara dos valores
+            <div class="quiz-option" onclick="checkAnswer(1, false)">
+                <strong>C)</strong> No hay diferencia
             </div>
             
             <div id="feedback1" class="mt-4"></div>
         </div>
     </div>
 
-    <!-- SLIDE 4: Sistema de Estrellas -->
-    <div class="slide" id="slide4">
+    <!-- SLIDE 8: Estrellas - HTML y CSS -->
+    <div class="slide" id="slide8">
         <div class="slide-container">
-            <h2 class="mb-4"><i class="fas fa-star"></i> 2. Sistema de Calificación por Estrellas</h2>
+            <h2 class="mb-4"><i class="fas fa-star"></i> Calificación con Estrellas - Parte 1</h2>
             
-            <p>Permite calificar de 1 a 5 estrellas.</p>
-            
-            <div class="code-example">
-                <strong>HTML:</strong><br>
-                &lt;div id="stars"&gt;<br>
-                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(1)"&gt;&lt;/i&gt;<br>
-                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(2)"&gt;&lt;/i&gt;<br>
-                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(3)"&gt;&lt;/i&gt;<br>
-                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(4)"&gt;&lt;/i&gt;<br>
-                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(5)"&gt;&lt;/i&gt;<br>
-                &lt;/div&gt;<br><br>
-                
-                <strong>JavaScript:</strong><br>
-                function rate(stars) {<br>
-                &nbsp;&nbsp;const allStars = document.querySelectorAll('#stars i');<br>
-                &nbsp;&nbsp;allStars.forEach((star, index) => {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;if (index < stars) {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star.classList.add('active');<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;} else {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star.classList.remove('active');<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;}<br>
-                &nbsp;&nbsp;});<br>
-                }
+            <div class="code-example code-html">
+                <span class="code-label label-html">HTML</span>
+<pre style="margin: 0;">
+&lt;div id="stars"&gt;
+  &lt;i class="fas fa-star star" onclick="rate(1)"&gt;&lt;/i&gt;
+  &lt;i class="fas fa-star star" onclick="rate(2)"&gt;&lt;/i&gt;
+  &lt;i class="fas fa-star star" onclick="rate(3)"&gt;&lt;/i&gt;
+  &lt;i class="fas fa-star star" onclick="rate(4)"&gt;&lt;/i&gt;
+  &lt;i class="fas fa-star star" onclick="rate(5)"&gt;&lt;/i&gt;
+&lt;/div&gt;
+</pre>
             </div>
             
-            <div class="demo-box">
+            <div class="code-example code-css">
+                <span class="code-label label-css">CSS</span>
+<pre style="margin: 0;">
+.star {
+    font-size: 30px;
+    color: #ddd;           /* Gris por defecto */
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star.active {
+    color: #ffd700;        /* Dorado cuando está activo */
+}
+
+.star:hover {
+    color: #ffd700;        /* Dorado al pasar el mouse */
+}
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: Estrellas - JavaScript -->
+    <div class="slide" id="slide9">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-star"></i> Calificación con Estrellas - Parte 2</h2>
+            
+            <div class="code-example code-js">
+                <span class="code-label label-js">JavaScript</span>
+<pre style="margin: 0;">
+function rate(stars) {
+    // Seleccionar todas las estrellas
+    const allStars = document.querySelectorAll('#stars .star');
+    
+    // Recorrer cada estrella
+    allStars.forEach((star, index) => {
+        if (index < stars) {
+            // Agregar clase 'active' a las primeras N estrellas
+            star.classList.add('active');
+        } else {
+            // Quitar clase 'active' del resto
+            star.classList.remove('active');
+        }
+    });
+    
+    console.log('Calificación:', stars);
+}
+</pre>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Truco:</strong> Usa <code>index &lt; stars</code> para activar solo las primeras N estrellas
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Estrellas - Resultado -->
+    <div class="slide" id="slide10">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-star"></i> Calificación con Estrellas - Resultado</h2>
+            
+            <div class="demo-box text-center">
                 <h5>¡Califícanos!</h5>
-                <div id="demoStars">
-                    <i class="fas fa-star star" onclick="rateDemo(1)"></i>
-                    <i class="fas fa-star star" onclick="rateDemo(2)"></i>
-                    <i class="fas fa-star star" onclick="rateDemo(3)"></i>
-                    <i class="fas fa-star star" onclick="rateDemo(4)"></i>
-                    <i class="fas fa-star star" onclick="rateDemo(5)"></i>
+                <div id="demo3Stars">
+                    <i class="fas fa-star star" onclick="rateDemo3(1)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo3(2)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo3(3)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo3(4)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo3(5)"></i>
                 </div>
-                <p class="mt-3">Tu calificación: <strong id="ratingValue">0</strong> estrellas</p>
+                <p class="mt-3" style="font-size: 20px;">Tu calificación: <strong id="demo3Rating">0</strong> estrellas</p>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 5: Sistema de Corazones -->
-    <div class="slide" id="slide5">
+    <!-- SLIDE 11: Estrellas con Hover - CSS -->
+    <div class="slide" id="slide11">
         <div class="slide-container">
-            <h2 class="mb-4"><i class="fas fa-heart"></i> 3. Sistema de Corazones (Like Animado)</h2>
+            <h2 class="mb-4"><i class="fas fa-star"></i> Estrellas con Hover - CSS Avanzado</h2>
             
-            <p>Un like con animación y cambio de color.</p>
+            <p>Para iluminar estrellas al pasar el mouse:</p>
             
-            <div class="code-example">
-                <strong>CSS:</strong><br>
-                .heart { color: #ddd; }<br>
-                .heart.liked { color: #e74c3c; }<br>
-                .heart:hover { transform: scale(1.2); }<br><br>
-                
-                <strong>JavaScript:</strong><br>
-                function toggleHeart(element) {<br>
-                &nbsp;&nbsp;element.classList.toggle('liked');<br>
-                &nbsp;&nbsp;element.classList.add('animate__animated');<br>
-                &nbsp;&nbsp;element.classList.add('animate__heartBeat');<br>
-                &nbsp;&nbsp;setTimeout(() => {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;element.classList.remove('animate__heartBeat');<br>
-                &nbsp;&nbsp;}, 1000);<br>
-                }
+            <div class="code-example code-css">
+                <span class="code-label label-css">CSS con selector ~</span>
+<pre style="margin: 0;">
+/* El selector ~ selecciona TODOS los hermanos siguientes */
+
+.star:hover {
+    color: #ffd700;  /* Estrella donde está el mouse */
+}
+
+.star:hover ~ .star {
+    color: #ddd;     /* Estrellas DESPUÉS del mouse */
+}
+</pre>
             </div>
-            
-            <div class="demo-box">
-                <h5>¡Dale amor!</h5>
-                <i class="fas fa-heart like-btn" id="demoHeart" onclick="toggleHeartDemo()" style="color: #ddd;"></i>
-                <p class="mt-3">Estado: <strong id="heartStatus">Sin like</strong></p>
+
+            <div class="alert alert-warning">
+                <strong>¿Cómo funciona?</strong><br>
+                Si pasas el mouse sobre la estrella 3:<br>
+                - Estrella 1, 2, 3 → doradas<br>
+                - Estrella 4, 5 → grises (hermanos siguientes)
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 6: Quiz 2 -->
-    <div class="slide" id="slide6">
+    <!-- SLIDE 12: Estrellas con Hover - Resultado -->
+    <div class="slide" id="slide12">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-star"></i> Estrellas con Hover - Resultado</h2>
+            
+            <div class="demo-box text-center">
+                <h5>¡Pasa el mouse sobre las estrellas!</h5>
+                <div class="star-rating" id="demo4Stars">
+                    <i class="fas fa-star star"></i>
+                    <i class="fas fa-star star"></i>
+                    <i class="fas fa-star star"></i>
+                    <i class="fas fa-star star"></i>
+                    <i class="fas fa-star star"></i>
+                </div>
+                <p class="mt-3" style="font-size: 20px;">Calificación: <strong id="demo4Rating">0</strong> estrellas</p>
+                <small class="text-muted">Haz clic para guardar tu calificación</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: Quiz 2 -->
+    <div class="slide" id="slide13">
         <div class="slide-container">
             <h2 class="mb-4"><i class="fas fa-question-circle"></i> Pregunta 2</h2>
             
-            <p class="lead">¿Qué método usamos para seleccionar TODOS los elementos con una clase?</p>
+            <p class="lead">¿Qué hace el selector CSS ~ (virgulilla)?</p>
             
-            <div class="quiz-option" onclick="checkAnswer(2, 'a', false)">
-                <strong>A)</strong> getElementById()
+            <div class="quiz-option" onclick="checkAnswer(2, false)">
+                <strong>A)</strong> Selecciona solo el primer hijo
             </div>
-            <div class="quiz-option" onclick="checkAnswer(2, 'b', false)">
-                <strong>B)</strong> querySelector()
+            <div class="quiz-option" onclick="checkAnswer(2, false)">
+                <strong>B)</strong> Selecciona el elemento padre
             </div>
-            <div class="quiz-option" onclick="checkAnswer(2, 'c', true)">
-                <strong>C)</strong> querySelectorAll()
-            </div>
-            <div class="quiz-option" onclick="checkAnswer(2, 'd', false)">
-                <strong>D)</strong> getElement()
+            <div class="quiz-option" onclick="checkAnswer(2, true)">
+                <strong>C)</strong> Selecciona todos los hermanos siguientes
             </div>
             
             <div id="feedback2" class="mt-4"></div>
         </div>
     </div>
 
-    <!-- SLIDE 7: Comentarios Simples -->
-    <div class="slide" id="slide7">
+    <!-- SLIDE 14: JSON de Comentarios -->
+    <div class="slide" id="slide14">
         <div class="slide-container">
-            <h2 class="mb-4"><i class="fas fa-comment"></i> 4. Sistema de Comentarios</h2>
+            <h2 class="mb-4"><i class="fas fa-database"></i> Comentarios desde JSON - Parte 1</h2>
             
-            <p>Permite agregar comentarios a una lista.</p>
+            <p>Los datos de comentarios vienen en formato JSON:</p>
             
-            <div class="code-example">
-                <strong>HTML:</strong><br>
-                &lt;input id="commentInput" placeholder="Escribe un comentario"&gt;<br>
-                &lt;button onclick="addComment()"&gt;Enviar&lt;/button&gt;<br>
-                &lt;div id="commentsList"&gt;&lt;/div&gt;<br><br>
-                
-                <strong>JavaScript:</strong><br>
-                function addComment() {<br>
-                &nbsp;&nbsp;const input = document.getElementById('commentInput');<br>
-                &nbsp;&nbsp;const text = input.value;<br>
-                &nbsp;&nbsp;if (text === '') return;<br><br>
-                
-                &nbsp;&nbsp;const list = document.getElementById('commentsList');<br>
-                &nbsp;&nbsp;const comment = document.createElement('div');<br>
-                &nbsp;&nbsp;comment.className = 'comment-item';<br>
-                &nbsp;&nbsp;comment.textContent = text;<br>
-                &nbsp;&nbsp;list.appendChild(comment);<br>
-                &nbsp;&nbsp;input.value = '';<br>
-                }
+            <div class="code-example code-json">
+                <span class="code-label label-json">JSON (datos del servidor)</span>
+<pre style="margin: 0;">
+[
+    {
+        "product": 50741,
+        "score": 5,
+        "description": "Precioso, a mi nena le encantó",
+        "user": "silvia_fagundez",
+        "dateTime": "2021-02-20 14:00:42"
+    },
+    {
+        "product": 50741,
+        "score": 4,
+        "description": "Esperaba que fuera más grande, pero es muy lindo.",
+        "user": "majo_sanchez",
+        "dateTime": "2021-01-11 16:26:10"
+    },
+    {
+        "product": 50741,
+        "score": 1,
+        "description": "Se lo regalé a mi novia para que me perdone, pero no funcionó",
+        "user": "flynn_rider",
+        "dateTime": "2020-02-14 23:19:09"
+    }
+]
+</pre>
             </div>
-            
-            <div class="demo-box">
-                <h5>Deja tu comentario</h5>
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="commentInput" placeholder="Escribe algo...">
-                    <button class="btn btn-primary" onclick="addCommentDemo()">
-                        <i class="fas fa-paper-plane"></i> Enviar
-                    </button>
-                </div>
-                <div id="commentsList"></div>
+
+            <div class="alert alert-info">
+                <strong>Nota:</strong> En producción usarías <code>fetch()</code> para obtener estos datos
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 8: Comentarios con Fecha -->
-    <div class="slide" id="slide8">
+    <!-- SLIDE 15: Mostrar Comentarios - JavaScript Parte 1 -->
+    <div class="slide" id="slide15">
         <div class="slide-container">
-            <h2 class="mb-4"><i class="fas fa-comments"></i> 5. Comentarios con Usuario y Fecha</h2>
+            <h2 class="mb-4"><i class="fas fa-code"></i> Mostrar Comentarios - JavaScript Parte 1</h2>
             
-            <p>Comentarios más completos con información adicional.</p>
+            <p>Función para mostrar los comentarios con innerHTML:</p>
             
-            <div class="code-example">
-                <strong>JavaScript:</strong><br>
-                function addCommentFull() {<br>
-                &nbsp;&nbsp;const text = document.getElementById('input').value;<br>
-                &nbsp;&nbsp;const user = document.getElementById('user').value;<br>
-                &nbsp;&nbsp;const date = new Date().toLocaleString();<br><br>
-                
-                &nbsp;&nbsp;const comment = `<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="comment-item"&gt;<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;strong&gt;${user}&lt;/strong&gt; - ${date}<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;${text}&lt;/p&gt;<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
-                &nbsp;&nbsp;`;<br>
-                &nbsp;&nbsp;list.innerHTML += comment;<br>
-                }
-            </div>
-            
-            <div class="demo-box">
-                <h5>Comentario completo</h5>
-                <input type="text" class="form-control mb-2" id="userName" placeholder="Tu nombre">
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="fullCommentInput" placeholder="Tu comentario...">
-                    <button class="btn btn-success" onclick="addFullCommentDemo()">
-                        <i class="fas fa-plus"></i> Agregar
-                    </button>
-                </div>
-                <div id="fullCommentsList"></div>
+            <div class="code-example code-js">
+                <span class="code-label label-js">JavaScript</span>
+<pre style="margin: 0;">
+function showComments(comments) {
+    const container = document.getElementById('commentsList');
+    let html = '';  // String vacío para acumular HTML
+    
+    // Recorrer cada comentario
+    comments.forEach(comment => {
+        
+        // Generar estrellas según el score
+        let stars = '';
+        for (let i = 0; i < 5; i++) {
+            if (i < comment.score) {
+                stars += '&lt;i class="fas fa-star" style="color: #ffd700;"&gt;&lt;/i&gt;';
+            } else {
+                stars += '&lt;i class="far fa-star" style="color: #ddd;"&gt;&lt;/i&gt;';
+            }
+        }
+        
+        // Continúa en siguiente diapositiva...
+</pre>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 9: Quiz 3 -->
-    <div class="slide" id="slide9">
+    <!-- SLIDE 16: Mostrar Comentarios - JavaScript Parte 2 -->
+    <div class="slide" id="slide16">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-code"></i> Mostrar Comentarios - JavaScript Parte 2</h2>
+            
+            <div class="code-example code-js">
+                <span class="code-label label-js">JavaScript (continuación)</span>
+<pre style="margin: 0;">
+        // Agregar el HTML del comentario
+        html += `
+            &lt;div class="comment-card"&gt;
+                &lt;div class="d-flex justify-content-between"&gt;
+                    &lt;strong&gt;${comment.user}&lt;/strong&gt;
+                    &lt;small&gt;${comment.dateTime}&lt;/small&gt;
+                &lt;/div&gt;
+                &lt;div class="my-2"&gt;${stars}&lt;/div&gt;
+                &lt;p&gt;${comment.description}&lt;/p&gt;
+            &lt;/div&gt;
+        `;
+    });
+    
+    // Insertar todo el HTML de una vez
+    container.innerHTML = html;
+}
+</pre>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>Ventaja de innerHTML:</strong> Construyes todo el HTML como string y lo insertas de una vez
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 17: Resultado Mostrar Comentarios -->
+    <div class="slide" id="slide17">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-comments"></i> Resultado - Lista de Comentarios</h2>
+            
+            <div class="demo-box">
+                <h5>Comentarios del Producto:</h5>
+                <div id="demoCommentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 18: Agregar Comentario - HTML -->
+    <div class="slide" id="slide18">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-plus-circle"></i> Agregar Comentario - HTML</h2>
+            
+            <p>Formulario para agregar un nuevo comentario:</p>
+            
+            <div class="code-example code-html">
+                <span class="code-label label-html">HTML</span>
+<pre style="margin: 0;">
+&lt;!-- Mostrar usuario actual --&gt;
+&lt;p&gt;Usuario: &lt;span id="currentUser"&gt;juan_perez&lt;/span&gt;&lt;/p&gt;
+
+&lt;!-- Calificación con estrellas --&gt;
+&lt;label&gt;Tu calificación:&lt;/label&gt;
+&lt;div id="ratingStars"&gt;
+    &lt;i class="fas fa-star star"&gt;&lt;/i&gt;
+    &lt;i class="fas fa-star star"&gt;&lt;/i&gt;
+    &lt;i class="fas fa-star star"&gt;&lt;/i&gt;
+    &lt;i class="fas fa-star star"&gt;&lt;/i&gt;
+    &lt;i class="fas fa-star star"&gt;&lt;/i&gt;
+&lt;/div&gt;
+
+&lt;!-- Textarea para el comentario --&gt;
+&lt;textarea id="commentText" placeholder="Escribe tu comentario..."&gt;&lt;/textarea&gt;
+
+&lt;!-- Botón para enviar --&gt;
+&lt;button onclick="addComment()"&gt;Enviar Comentario&lt;/button&gt;
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 19: Agregar Comentario - JavaScript -->
+    <div class="slide" id="slide19">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-plus-circle"></i> Agregar Comentario - JavaScript</h2>
+            
+            <div class="code-example code-js">
+                <span class="code-label label-js">JavaScript</span>
+<pre style="margin: 0;">
+let selectedRating = 0;  // Calificación seleccionada
+let comments = [];       // Array de comentarios
+
+function addComment() {
+    // Obtener valores
+    const text = document.getElementById('commentText').value;
+    const user = document.getElementById('currentUser').textContent;
+    
+    // Validar
+    if (!text || selectedRating === 0) {
+        alert('Completa todos los campos');
+        return;
+    }
+    
+    // Crear nuevo comentario
+    const newComment = {
+        product: 50741,
+        score: selectedRating,
+        description: text,
+        user: user,
+        dateTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+    };
+    
+    // Agregar al inicio del array
+    comments.unshift(newComment);
+    
+    // Actualizar vista
+    showComments(comments);
+    
+    // Limpiar formulario
+    document.getElementById('commentText').value = '';
+    selectedRating = 0;
+}
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 20: Resultado Sistema Completo -->
+    <div class="slide" id="slide20">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-star"></i> Sistema Completo - Resultado</h2>
+            
+            <div class="demo-box">
+                <div class="alert alert-info">
+                    <i class="fas fa-user"></i> Usuario actual: <span class="user-badge">juan_perez</span>
+                </div>
+                
+                <h5>Agregar tu comentario:</h5>
+                <div class="mb-3">
+                    <label>Tu calificación:</label>
+                    <div class="star-rating" id="demo5Stars">
+                        <i class="fas fa-star star"></i>
+                        <i class="fas fa-star star"></i>
+                        <i class="fas fa-star star"></i>
+                        <i class="fas fa-star star"></i>
+                        <i class="fas fa-star star"></i>
+                    </div>
+                    <small id="demo5Rating">Selecciona tu calificación</small>
+                </div>
+                
+                <textarea class="form-control mb-3" id="demo5Comment" rows="3" placeholder="Escribe tu comentario..."></textarea>
+                <button class="btn btn-primary" onclick="addCommentDemo()">
+                    <i class="fas fa-paper-plane"></i> Enviar Comentario
+                </button>
+                
+                <hr>
+                <h5>Comentarios del producto:</h5>
+                <div id="demo5List"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 21: Quiz 3 -->
+    <div class="slide" id="slide21">
         <div class="slide-container">
             <h2 class="mb-4"><i class="fas fa-question-circle"></i> Pregunta 3</h2>
             
-            <p class="lead">¿Qué hace el método appendChild()?</p>
+            <p class="lead">¿Qué hace el método unshift() en un array?</p>
             
-            <div class="quiz-option" onclick="checkAnswer(3, 'a', false)">
-                <strong>A)</strong> Elimina un elemento del DOM
+            <div class="quiz-option" onclick="checkAnswer(3, false)">
+                <strong>A)</strong> Elimina el primer elemento
             </div>
-            <div class="quiz-option" onclick="checkAnswer(3, 'b', true)">
-                <strong>B)</strong> Agrega un elemento hijo a otro elemento
+            <div class="quiz-option" onclick="checkAnswer(3, true)">
+                <strong>B)</strong> Agrega un elemento al inicio del array
             </div>
-            <div class="quiz-option" onclick="checkAnswer(3, 'c', false)">
-                <strong>C)</strong> Cambia el color de un elemento
-            </div>
-            <div class="quiz-option" onclick="checkAnswer(3, 'd', false)">
-                <strong>D)</strong> Crea un nuevo elemento HTML
+            <div class="quiz-option" onclick="checkAnswer(3, false)">
+                <strong>C)</strong> Agrega un elemento al final del array
             </div>
             
             <div id="feedback3" class="mt-4"></div>
         </div>
     </div>
 
-    <!-- SLIDE 10: Resultados -->
-    <div class="slide" id="slide10">
+    <!-- SLIDE 22: Otros Controles -->
+    <div class="slide" id="slide22">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-sliders-h"></i> Otros Controles de Calificación</h2>
+            
+            <p>Alternativas a las estrellas:</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="code-example code-html">
+                        <span class="code-label label-html">SELECT</span>
+<pre style="margin: 0;">
+&lt;select id="rating"&gt;
+  &lt;option value="1"&gt;⭐ 1&lt;/option&gt;
+  &lt;option value="2"&gt;⭐⭐ 2&lt;/option&gt;
+  &lt;option value="3"&gt;⭐⭐⭐ 3&lt;/option&gt;
+  &lt;option value="4"&gt;⭐⭐⭐⭐ 4&lt;/option&gt;
+  &lt;option value="5"&gt;⭐⭐⭐⭐⭐ 5&lt;/option&gt;
+&lt;/select&gt;
+</pre>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="code-example code-html">
+                        <span class="code-label label-html">RANGE</span>
+<pre style="margin: 0;">
+&lt;input type="range" 
+       id="rating"
+       min="1" 
+       max="5" 
+       value="3"&gt;
+&lt;span id="value"&gt;3&lt;/span&gt;
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-box mt-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Select:</h6>
+                        <select class="form-select" id="demo6Select" onchange="handleDemo6Select()">
+                            <option value="1">⭐ 1</option>
+                            <option value="2">⭐⭐ 2</option>
+                            <option value="3">⭐⭐⭐ 3</option>
+                            <option value="4">⭐⭐⭐⭐ 4</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5</option>
+                        </select>
+                        <p class="mt-2">Valor: <strong id="demo6SelectValue">1</strong></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Range:</h6>
+                        <input type="range" class="form-range" id="demo6Range" min="1" max="5" value="3" oninput="handleDemo6Range()">
+                        <p class="mt-2">Valor: <strong id="demo6RangeValue">3</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 23: Quiz 4 -->
+    <div class="slide" id="slide23">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-question-circle"></i> Pregunta 4</h2>
+            
+            <p class="lead">¿Qué ventaja tiene usar innerHTML para mostrar listas?</p>
+            
+            <div class="quiz-option" onclick="checkAnswer(4, false)">
+                <strong>A)</strong> Es más lento que appendChild
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(4, true)">
+                <strong>B)</strong> Permite escribir HTML completo como string de forma simple
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(4, false)">
+                <strong>C)</strong> No funciona en todos los navegadores
+            </div>
+            
+            <div id="feedback4" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 24: Resultados -->
+    <div class="slide" id="slide24">
         <div class="slide-container text-center">
             <h2 class="mb-4"><i class="fas fa-chart-bar"></i> ¡Resultados!</h2>
             
@@ -442,22 +876,26 @@
                 <h5 class="mb-4">Tu Progreso</h5>
                 <div style="max-width: 500px; margin: 0 auto;">
                     <div class="mb-4">
-                        <h3><span id="finalScore">0</span>/3</h3>
+                        <h3><span id="finalScore">0</span>/4</h3>
                         <p class="text-muted">Respuestas correctas</p>
                     </div>
                     
-                    <div style="height: 300px; display: flex; align-items: flex-end; justify-content: space-around; border-bottom: 3px solid #333;">
-                        <div style="display: flex; flex-direction: column; align-items: center;">
-                            <div id="bar1" style="width: 80px; background: #667eea; transition: height 1s; height: 0;"></div>
-                            <p class="mt-2">Pregunta 1</p>
+                    <div style="height: 250px; display: flex; align-items: flex-end; justify-content: space-around; border-bottom: 3px solid #333;">
+                        <div style="text-align: center;">
+                            <div id="bar1" style="width: 60px; background: #667eea; transition: height 1s; height: 0;"></div>
+                            <p class="mt-2" style="font-size: 11px;">Pregunta 1</p>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center;">
-                            <div id="bar2" style="width: 80px; background: #764ba2; transition: height 1s; height: 0;"></div>
-                            <p class="mt-2">Pregunta 2</p>
+                        <div style="text-align: center;">
+                            <div id="bar2" style="width: 60px; background: #764ba2; transition: height 1s; height: 0;"></div>
+                            <p class="mt-2" style="font-size: 11px;">Pregunta 2</p>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center;">
-                            <div id="bar3" style="width: 80px; background: #f093fb; transition: height 1s; height: 0;"></div>
-                            <p class="mt-2">Pregunta 3</p>
+                        <div style="text-align: center;">
+                            <div id="bar3" style="width: 60px; background: #f093fb; transition: height 1s; height: 0;"></div>
+                            <p class="mt-2" style="font-size: 11px;">Pregunta 3</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="bar4" style="width: 60px; background: #4facfe; transition: height 1s; height: 0;"></div>
+                            <p class="mt-2" style="font-size: 11px;">Pregunta 4</p>
                         </div>
                     </div>
                 </div>
@@ -476,11 +914,11 @@
     <!-- Navegación -->
     <div class="container">
         <div class="slide-container">
-            <div class="nav-buttons">
+            <div class="d-flex justify-content-between align-items-center">
                 <button class="btn btn-secondary" id="prevBtn" onclick="previousSlide()">
                     <i class="fas fa-arrow-left"></i> Anterior
                 </button>
-                <span class="badge bg-primary fs-5" id="slideCounter">1 / 10</span>
+                <span class="badge bg-primary fs-5" id="slideCounter">1 / 24</span>
                 <button class="btn btn-primary" id="nextBtn" onclick="nextSlide()">
                     Siguiente <i class="fas fa-arrow-right"></i>
                 </button>
@@ -488,20 +926,56 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- SweetAlert2 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.all.min.js"></script>
 
     <script>
         let currentSlide = 1;
-        const totalSlides = 10;
+        const totalSlides = 24;
         let studentName = '';
-        let quizAnswers = [false, false, false];
+        let quizAnswers = [false, false, false, false];
         let correctAnswers = 0;
         
-        // Pedir nombre al inicio
+        // Variables para demos
+        let demo1Likes = 0;
+        let demo1IsLiked = false;
+        let demo2Count = 0;
+        let demo5Rating = 0;
+        
+        // Datos de comentarios
+        let commentsData = [
+            {
+                product: 50741,
+                score: 5,
+                description: "Precioso, a mi nena le encantó",
+                user: "silvia_fagundez",
+                dateTime: "2021-02-20 14:00:42"
+            },
+            {
+                product: 50741,
+                score: 4,
+                description: "Esperaba que fuera más grande, pero es muy lindo.",
+                user: "majo_sanchez",
+                dateTime: "2021-01-11 16:26:10"
+            },
+            {
+                product: 50741,
+                score: 5,
+                description: "Hermoso el oso. Quedamos encantados, lo recomiendo.",
+                user: "raul_añez",
+                dateTime: "2020-12-16 19:55:19"
+            },
+            {
+                product: 50741,
+                score: 1,
+                description: "Se lo regalé a mi novia para que me perdone, pero no funcionó",
+                user: "flynn_rider",
+                dateTime: "2020-02-14 23:19:09"
+            }
+        ];
+        
+        const currentUser = "juan_perez";
+        
         window.onload = function() {
             Swal.fire({
                 title: '¡Bienvenido!',
@@ -511,9 +985,7 @@
                 confirmButtonText: 'Comenzar',
                 allowOutsideClick: false,
                 inputValidator: (value) => {
-                    if (!value) {
-                        return '¡Necesitas escribir tu nombre!';
-                    }
+                    if (!value) return '¡Necesitas escribir tu nombre!';
                 }
             }).then((result) => {
                 studentName = result.value;
@@ -525,12 +997,16 @@
                     showConfirmButton: false
                 });
             });
+            
+            setupDemo4();
+            setupDemo5();
+            showDemoComments();
+            showDemo5Comments();
         };
         
         function updateSlideCounter() {
             document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
             document.getElementById('prevBtn').disabled = currentSlide === 1;
-            
             const progress = (currentSlide / totalSlides) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
         }
@@ -538,9 +1014,9 @@
         function showSlide(n) {
             const slides = document.getElementsByClassName('slide');
             for (let i = 0; i < slides.length; i++) {
-                slides[i].classList.remove('active', 'animate__fadeIn');
+                slides[i].classList.remove('active');
             }
-            slides[n - 1].classList.add('active', 'animate__animated', 'animate__fadeIn');
+            slides[n - 1].classList.add('active');
             updateSlideCounter();
         }
         
@@ -548,10 +1024,7 @@
             if (currentSlide < totalSlides) {
                 currentSlide++;
                 showSlide(currentSlide);
-                
-                if (currentSlide === totalSlides) {
-                    showResults();
-                }
+                if (currentSlide === totalSlides) showResults();
             }
         }
         
@@ -562,27 +1035,29 @@
             }
         }
         
-        // Demo 1: Like simple
-        let likeDemoCount = 0;
-        let isLikedDemo = false;
+        // Demo 1: Like ON/OFF
         function demo1() {
-            const btn = document.getElementById('demoLike1');
-            if (isLikedDemo) {
-                likeDemoCount--;
+            const btn = document.getElementById('demo1Like');
+            if (demo1IsLiked) {
+                demo1Likes--;
                 btn.classList.remove('liked');
             } else {
-                likeDemoCount++;
+                demo1Likes++;
                 btn.classList.add('liked');
             }
-            isLikedDemo = !isLikedDemo;
-            document.getElementById('likeDemo1').textContent = likeDemoCount;
+            demo1IsLiked = !demo1IsLiked;
+            document.getElementById('demo1Count').textContent = demo1Likes;
         }
         
-        // Demo 2: Estrellas
-        let currentRating = 0;
-        function rateDemo(stars) {
-            currentRating = stars;
-            const allStars = document.querySelectorAll('#demoStars .star');
+        // Demo 2: Likes acumulativos
+        function demo2() {
+            demo2Count++;
+            document.getElementById('demo2Count').textContent = demo2Count;
+        }
+        
+        // Demo 3: Estrellas básicas
+        function rateDemo3(stars) {
+            const allStars = document.querySelectorAll('#demo3Stars .star');
             allStars.forEach((star, index) => {
                 if (index < stars) {
                     star.classList.add('active');
@@ -590,150 +1065,230 @@
                     star.classList.remove('active');
                 }
             });
-            document.getElementById('ratingValue').textContent = stars;
+            document.getElementById('demo3Rating').textContent = stars;
+        }
+        
+        // Demo 4: Estrellas con hover
+        function setupDemo4() {
+            const stars = document.querySelectorAll('#demo4Stars .star');
+            let selectedRating = 0;
             
-            Swal.fire({
-                icon: 'success',
-                title: `¡${stars} estrellas!`,
-                showConfirmButton: false,
-                timer: 1500
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseenter', () => {
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseleave', () => {
+                    stars.forEach((s, i) => {
+                        if (i < selectedRating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+                
+                star.addEventListener('click', () => {
+                    selectedRating = index + 1;
+                    document.getElementById('demo4Rating').textContent = selectedRating;
+                });
             });
         }
         
-        // Demo 3: Corazón
-        let heartLiked = false;
-        function toggleHeartDemo() {
-            const heart = document.getElementById('demoHeart');
-            heartLiked = !heartLiked;
+        // Mostrar comentarios demo
+        function showDemoComments() {
+            const container = document.getElementById('demoCommentsList');
+            let html = '';
             
-            if (heartLiked) {
-                heart.style.color = '#e74c3c';
-                heart.classList.add('animate__animated', 'animate__heartBeat');
-                document.getElementById('heartStatus').textContent = '¡Con like!';
-            } else {
-                heart.style.color = '#ddd';
-                document.getElementById('heartStatus').textContent = 'Sin like';
-            }
+            commentsData.forEach(comment => {
+                let stars = '';
+                for (let i = 0; i < 5; i++) {
+                    if (i < comment.score) {
+                        stars += '<i class="fas fa-star" style="color: #ffd700;"></i>';
+                    } else {
+                        stars += '<i class="far fa-star" style="color: #ddd;"></i>';
+                    }
+                }
+                
+                html += `
+                    <div class="comment-card">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong><i class="fas fa-user"></i> ${comment.user}</strong>
+                            <small class="text-muted"><i class="fas fa-clock"></i> ${comment.dateTime}</small>
+                        </div>
+                        <div class="mb-2">${stars}</div>
+                        <p class="mb-0">${comment.description}</p>
+                    </div>
+                `;
+            });
             
-            setTimeout(() => {
-                heart.classList.remove('animate__heartBeat');
-            }, 1000);
+            container.innerHTML = html;
         }
         
-        // Demo 4: Comentarios simples
-        function addCommentDemo() {
-            const input = document.getElementById('commentInput');
-            const text = input.value.trim();
+        // Demo 5: Sistema completo
+        function setupDemo5() {
+            const stars = document.querySelectorAll('#demo5Stars .star');
             
-            if (text === '') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '¡Escribe algo!',
-                    text: 'El comentario no puede estar vacío'
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseenter', () => {
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
                 });
-                return;
-            }
-            
-            const list = document.getElementById('commentsList');
-            const comment = document.createElement('div');
-            comment.className = 'comment-item animate__animated animate__fadeIn';
-            comment.innerHTML = `<i class="fas fa-comment"></i> ${text}`;
-            list.appendChild(comment);
-            input.value = '';
+                
+                star.addEventListener('mouseleave', () => {
+                    stars.forEach((s, i) => {
+                        if (i < demo5Rating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+                
+                star.addEventListener('click', () => {
+                    demo5Rating = index + 1;
+                    document.getElementById('demo5Rating').textContent = `${demo5Rating} estrellas seleccionadas`;
+                });
+            });
         }
         
-        // Demo 5: Comentarios completos
-        function addFullCommentDemo() {
-            const userName = document.getElementById('userName').value.trim();
-            const commentText = document.getElementById('fullCommentInput').value.trim();
+        function showDemo5Comments() {
+            const container = document.getElementById('demo5List');
+            let html = '';
             
-            if (userName === '' || commentText === '') {
+            commentsData.forEach(comment => {
+                let stars = '';
+                for (let i = 0; i < 5; i++) {
+                    if (i < comment.score) {
+                        stars += '<i class="fas fa-star" style="color: #ffd700;"></i>';
+                    } else {
+                        stars += '<i class="far fa-star" style="color: #ddd;"></i>';
+                    }
+                }
+                
+                html += `
+                    <div class="comment-card">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong><i class="fas fa-user"></i> ${comment.user}</strong>
+                            <small class="text-muted"><i class="fas fa-clock"></i> ${comment.dateTime}</small>
+                        </div>
+                        <div class="mb-2">${stars}</div>
+                        <p class="mb-0">${comment.description}</p>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function addCommentDemo() {
+            const description = document.getElementById('demo5Comment').value;
+            
+            if (!description || demo5Rating === 0) {
                 Swal.fire({
                     icon: 'warning',
                     title: '¡Completa todos los campos!',
-                    text: 'Necesitamos tu nombre y comentario'
+                    text: 'Debes calificar y escribir un comentario'
                 });
                 return;
             }
             
-            const date = new Date().toLocaleString('es-ES');
-            const list = document.getElementById('fullCommentsList');
+            const newComment = {
+                product: 50741,
+                score: demo5Rating,
+                description: description,
+                user: currentUser,
+                dateTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+            };
             
-            const comment = document.createElement('div');
-            comment.className = 'comment-item animate__animated animate__fadeIn';
-            comment.innerHTML = `
-                <div class="d-flex justify-content-between">
-                    <strong><i class="fas fa-user"></i> ${userName}</strong>
-                    <small class="text-muted"><i class="fas fa-clock"></i> ${date}</small>
-                </div>
-                <p class="mb-0 mt-2">${commentText}</p>
-            `;
+            commentsData.unshift(newComment);
+            showDemo5Comments();
             
-            list.appendChild(comment);
-            document.getElementById('fullCommentInput').value = '';
+            document.getElementById('demo5Comment').value = '';
+            demo5Rating = 0;
+            const stars = document.querySelectorAll('#demo5Stars .star');
+            stars.forEach(s => s.classList.remove('active'));
+            document.getElementById('demo5Rating').textContent = 'Selecciona tu calificación';
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Comentario agregado!',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+        
+        // Demo 6
+        function handleDemo6Select() {
+            const select = document.getElementById('demo6Select');
+            document.getElementById('demo6SelectValue').textContent = select.value;
+        }
+        
+        function handleDemo6Range() {
+            const range = document.getElementById('demo6Range');
+            document.getElementById('demo6RangeValue').textContent = range.value;
         }
         
         // Sistema de Quiz
-        function checkAnswer(questionNum, option, isCorrect) {
+        function checkAnswer(questionNum, isCorrect) {
             const feedback = document.getElementById('feedback' + questionNum);
-            const options = document.querySelectorAll(`#slide${questionNum + 2} .quiz-option`);
+            const slideNum = questionNum === 1 ? 7 : (questionNum === 2 ? 13 : (questionNum === 3 ? 21 : 23));
+            const options = document.querySelectorAll(`#slide${slideNum} .quiz-option`);
             
-            options.forEach(opt => {
-                opt.style.pointerEvents = 'none';
-            });
+            options.forEach(opt => opt.style.pointerEvents = 'none');
             
             if (isCorrect) {
                 quizAnswers[questionNum - 1] = true;
                 correctAnswers++;
                 event.target.classList.add('correct');
                 feedback.innerHTML = `
-                    <div class="alert alert-success animate__animated animate__fadeIn">
-                        <i class="fas fa-check-circle"></i> ¡Correcto! Excelente trabajo, ${studentName}.
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> ¡Correcto! Excelente, ${studentName}.
                     </div>
                 `;
             } else {
                 event.target.classList.add('incorrect');
                 feedback.innerHTML = `
-                    <div class="alert alert-danger animate__animated animate__fadeIn">
-                        <i class="fas fa-times-circle"></i> Incorrecto. ¡Sigue intentando!
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle"></i> Incorrecto. ¡Sigue aprendiendo!
                     </div>
                 `;
             }
-            
-            setTimeout(() => {
-                Swal.fire({
-                    icon: isCorrect ? 'success' : 'error',
-                    title: isCorrect ? '¡Correcto!' : 'Incorrecto',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            }, 500);
         }
         
-        // Mostrar resultados
         function showResults() {
             document.getElementById('studentNameResult').textContent = studentName;
             document.getElementById('finalScore').textContent = correctAnswers;
             
-            // Animar barras
             setTimeout(() => {
-                document.getElementById('bar1').style.height = quizAnswers[0] ? '250px' : '50px';
-                document.getElementById('bar2').style.height = quizAnswers[1] ? '250px' : '50px';
-                document.getElementById('bar3').style.height = quizAnswers[2] ? '250px' : '50px';
+                document.getElementById('bar1').style.height = quizAnswers[0] ? '200px' : '50px';
+                document.getElementById('bar2').style.height = quizAnswers[1] ? '200px' : '50px';
+                document.getElementById('bar3').style.height = quizAnswers[2] ? '200px' : '50px';
+                document.getElementById('bar4').style.height = quizAnswers[3] ? '200px' : '50px';
             }, 500);
             
-            // Mensaje de rendimiento
             const messageDiv = document.getElementById('performanceMessage');
             let message = '';
             let alertClass = '';
             
-            if (correctAnswers === 3) {
+            if (correctAnswers === 4) {
                 message = '🎉 ¡Perfecto! Dominaste todos los conceptos.';
                 alertClass = 'alert-success';
-            } else if (correctAnswers === 2) {
+            } else if (correctAnswers === 3) {
                 message = '👍 ¡Muy bien! Solo falta un poco más de práctica.';
                 alertClass = 'alert-info';
-            } else if (correctAnswers === 1) {
+            } else if (correctAnswers === 2) {
                 message = '📚 Buen intento. Te recomiendo revisar el material nuevamente.';
                 alertClass = 'alert-warning';
             } else {
@@ -743,51 +1298,12 @@
             
             messageDiv.className = `alert ${alertClass}`;
             messageDiv.textContent = message;
-            
-            Swal.fire({
-                icon: 'info',
-                title: `${studentName}, obtuviste ${correctAnswers}/3`,
-                text: message,
-                confirmButtonText: '¡Entendido!'
-            });
         }
         
         function restartPresentation() {
-            currentSlide = 1;
-            correctAnswers = 0;
-            quizAnswers = [false, false, false];
-            showSlide(1);
-            
-            // Resetear demos
-            likeDemoCount = 0;
-            isLikedDemo = false;
-            document.getElementById('likeDemo1').textContent = '0';
-            document.getElementById('demoLike1').classList.remove('liked');
-            
-            currentRating = 0;
-            document.querySelectorAll('#demoStars .star').forEach(star => star.classList.remove('active'));
-            
-            document.getElementById('commentsList').innerHTML = '';
-            document.getElementById('fullCommentsList').innerHTML = '';
-            
-            // Resetear opciones de quiz
-            document.querySelectorAll('.quiz-option').forEach(opt => {
-                opt.classList.remove('correct', 'incorrect');
-                opt.style.pointerEvents = 'auto';
-            });
-            
-            document.querySelectorAll('[id^="feedback"]').forEach(f => f.innerHTML = '');
-            
-            Swal.fire({
-                icon: 'info',
-                title: '¡Volvamos a empezar!',
-                text: 'La presentación se ha reiniciado',
-                timer: 2000,
-                showConfirmButton: false
-            });
+            location.reload();
         }
         
-        // Inicializar
         updateSlideCounter();
     </script>
 </body>

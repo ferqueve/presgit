@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentarios y Calificaciones - Tutorial Interactivo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    
+    <!-- Animate.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .slide {
+            display: none;
+            min-height: 80vh;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .code-example {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .demo-box {
+            background: #fff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .star {
+            font-size: 30px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .star.active {
+            color: #ffd700;
+        }
+        
+        .like-btn {
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .like-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .like-btn.liked {
+            color: #e74c3c;
+        }
+        
+        .comment-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .nav-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .progress-bar-custom {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        
+        .quiz-option {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #e9ecef;
+        }
+        
+        .quiz-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .quiz-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de progreso -->
+    <div class="container mt-3">
+        <div class="progress-bar-custom">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 1: Bienvenida -->
+    <div class="slide active animate__animated animate__fadeIn" id="slide1">
+        <div class="slide-container text-center">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-star text-warning"></i>
+                Sistema de Comentarios y Calificaciones
+            </h1>
+            <p class="lead mb-4">Tutorial Interactivo para Desarrollo Web</p>
+            <div class="mb-4">
+                <i class="fas fa-code fa-3x text-primary"></i>
+            </div>
+            <p class="mb-4">¡Bienvenido! En esta presentación aprenderás a crear sistemas de likes, calificaciones con estrellas y comentarios.</p>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Responde las preguntas al final para ver tu progreso
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: Likes Simples -->
+    <div class="slide" id="slide2">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-thumbs-up"></i> 1. Sistema de Likes Simple</h2>
+            
+            <p>El sistema más básico: un botón que cambia de estado al hacer clic.</p>
+            
+            <div class="code-example">
+                <strong>HTML:</strong><br>
+                &lt;button id="likeBtn" onclick="toggleLike()"&gt;<br>
+                &nbsp;&nbsp;&lt;i class="fas fa-heart"&gt;&lt;/i&gt; <span id="likeCount">0</span><br>
+                &lt;/button&gt;<br><br>
+                
+                <strong>JavaScript:</strong><br>
+                let likes = 0;<br>
+                let isLiked = false;<br><br>
+                
+                function toggleLike() {<br>
+                &nbsp;&nbsp;if (isLiked) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;likes--;<br>
+                &nbsp;&nbsp;} else {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;likes++;<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;isLiked = !isLiked;<br>
+                &nbsp;&nbsp;document.getElementById('likeCount').textContent = likes;<br>
+                }
+            </div>
+            
+            <div class="demo-box">
+                <h5>¡Pruébalo!</h5>
+                <i class="fas fa-heart like-btn" id="demoLike1" onclick="demo1()"></i>
+                <p class="mt-3">Likes: <strong id="likeDemo1">0</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: Quiz 1 -->
+    <div class="slide" id="slide3">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-question-circle"></i> Pregunta 1</h2>
+            
+            <p class="lead">¿Qué hace el operador ! en JavaScript?</p>
+            
+            <div class="quiz-option" onclick="checkAnswer(1, 'a', false)">
+                <strong>A)</strong> Suma un número
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'b', true)">
+                <strong>B)</strong> Invierte un valor booleano (true a false o viceversa)
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'c', false)">
+                <strong>C)</strong> Multiplica dos valores
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'd', false)">
+                <strong>D)</strong> Compara dos valores
+            </div>
+            
+            <div id="feedback1" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: Sistema de Estrellas -->
+    <div class="slide" id="slide4">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-star"></i> 2. Sistema de Calificación por Estrellas</h2>
+            
+            <p>Permite calificar de 1 a 5 estrellas.</p>
+            
+            <div class="code-example">
+                <strong>HTML:</strong><br>
+                &lt;div id="stars"&gt;<br>
+                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(1)"&gt;&lt;/i&gt;<br>
+                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(2)"&gt;&lt;/i&gt;<br>
+                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(3)"&gt;&lt;/i&gt;<br>
+                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(4)"&gt;&lt;/i&gt;<br>
+                &nbsp;&nbsp;&lt;i class="fas fa-star" onclick="rate(5)"&gt;&lt;/i&gt;<br>
+                &lt;/div&gt;<br><br>
+                
+                <strong>JavaScript:</strong><br>
+                function rate(stars) {<br>
+                &nbsp;&nbsp;const allStars = document.querySelectorAll('#stars i');<br>
+                &nbsp;&nbsp;allStars.forEach((star, index) => {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;if (index < stars) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star.classList.add('active');<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;} else {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star.classList.remove('active');<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;});<br>
+                }
+            </div>
+            
+            <div class="demo-box">
+                <h5>¡Califícanos!</h5>
+                <div id="demoStars">
+                    <i class="fas fa-star star" onclick="rateDemo(1)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo(2)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo(3)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo(4)"></i>
+                    <i class="fas fa-star star" onclick="rateDemo(5)"></i>
+                </div>
+                <p class="mt-3">Tu calificación: <strong id="ratingValue">0</strong> estrellas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: Sistema de Corazones -->
+    <div class="slide" id="slide5">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-heart"></i> 3. Sistema de Corazones (Like Animado)</h2>
+            
+            <p>Un like con animación y cambio de color.</p>
+            
+            <div class="code-example">
+                <strong>CSS:</strong><br>
+                .heart { color: #ddd; }<br>
+                .heart.liked { color: #e74c3c; }<br>
+                .heart:hover { transform: scale(1.2); }<br><br>
+                
+                <strong>JavaScript:</strong><br>
+                function toggleHeart(element) {<br>
+                &nbsp;&nbsp;element.classList.toggle('liked');<br>
+                &nbsp;&nbsp;element.classList.add('animate__animated');<br>
+                &nbsp;&nbsp;element.classList.add('animate__heartBeat');<br>
+                &nbsp;&nbsp;setTimeout(() => {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;element.classList.remove('animate__heartBeat');<br>
+                &nbsp;&nbsp;}, 1000);<br>
+                }
+            </div>
+            
+            <div class="demo-box">
+                <h5>¡Dale amor!</h5>
+                <i class="fas fa-heart like-btn" id="demoHeart" onclick="toggleHeartDemo()" style="color: #ddd;"></i>
+                <p class="mt-3">Estado: <strong id="heartStatus">Sin like</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: Quiz 2 -->
+    <div class="slide" id="slide6">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-question-circle"></i> Pregunta 2</h2>
+            
+            <p class="lead">¿Qué método usamos para seleccionar TODOS los elementos con una clase?</p>
+            
+            <div class="quiz-option" onclick="checkAnswer(2, 'a', false)">
+                <strong>A)</strong> getElementById()
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'b', false)">
+                <strong>B)</strong> querySelector()
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'c', true)">
+                <strong>C)</strong> querySelectorAll()
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'd', false)">
+                <strong>D)</strong> getElement()
+            </div>
+            
+            <div id="feedback2" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: Comentarios Simples -->
+    <div class="slide" id="slide7">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-comment"></i> 4. Sistema de Comentarios</h2>
+            
+            <p>Permite agregar comentarios a una lista.</p>
+            
+            <div class="code-example">
+                <strong>HTML:</strong><br>
+                &lt;input id="commentInput" placeholder="Escribe un comentario"&gt;<br>
+                &lt;button onclick="addComment()"&gt;Enviar&lt;/button&gt;<br>
+                &lt;div id="commentsList"&gt;&lt;/div&gt;<br><br>
+                
+                <strong>JavaScript:</strong><br>
+                function addComment() {<br>
+                &nbsp;&nbsp;const input = document.getElementById('commentInput');<br>
+                &nbsp;&nbsp;const text = input.value;<br>
+                &nbsp;&nbsp;if (text === '') return;<br><br>
+                
+                &nbsp;&nbsp;const list = document.getElementById('commentsList');<br>
+                &nbsp;&nbsp;const comment = document.createElement('div');<br>
+                &nbsp;&nbsp;comment.className = 'comment-item';<br>
+                &nbsp;&nbsp;comment.textContent = text;<br>
+                &nbsp;&nbsp;list.appendChild(comment);<br>
+                &nbsp;&nbsp;input.value = '';<br>
+                }
+            </div>
+            
+            <div class="demo-box">
+                <h5>Deja tu comentario</h5>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="commentInput" placeholder="Escribe algo...">
+                    <button class="btn btn-primary" onclick="addCommentDemo()">
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
+                </div>
+                <div id="commentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: Comentarios con Fecha -->
+    <div class="slide" id="slide8">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-comments"></i> 5. Comentarios con Usuario y Fecha</h2>
+            
+            <p>Comentarios más completos con información adicional.</p>
+            
+            <div class="code-example">
+                <strong>JavaScript:</strong><br>
+                function addCommentFull() {<br>
+                &nbsp;&nbsp;const text = document.getElementById('input').value;<br>
+                &nbsp;&nbsp;const user = document.getElementById('user').value;<br>
+                &nbsp;&nbsp;const date = new Date().toLocaleString();<br><br>
+                
+                &nbsp;&nbsp;const comment = `<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="comment-item"&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;strong&gt;${user}&lt;/strong&gt; - ${date}<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;${text}&lt;/p&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
+                &nbsp;&nbsp;`;<br>
+                &nbsp;&nbsp;list.innerHTML += comment;<br>
+                }
+            </div>
+            
+            <div class="demo-box">
+                <h5>Comentario completo</h5>
+                <input type="text" class="form-control mb-2" id="userName" placeholder="Tu nombre">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="fullCommentInput" placeholder="Tu comentario...">
+                    <button class="btn btn-success" onclick="addFullCommentDemo()">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+                <div id="fullCommentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: Quiz 3 -->
+    <div class="slide" id="slide9">
+        <div class="slide-container">
+            <h2 class="mb-4"><i class="fas fa-question-circle"></i> Pregunta 3</h2>
+            
+            <p class="lead">¿Qué hace el método appendChild()?</p>
+            
+            <div class="quiz-option" onclick="checkAnswer(3, 'a', false)">
+                <strong>A)</strong> Elimina un elemento del DOM
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'b', true)">
+                <strong>B)</strong> Agrega un elemento hijo a otro elemento
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'c', false)">
+                <strong>C)</strong> Cambia el color de un elemento
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'd', false)">
+                <strong>D)</strong> Crea un nuevo elemento HTML
+            </div>
+            
+            <div id="feedback3" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Resultados -->
+    <div class="slide" id="slide10">
+        <div class="slide-container text-center">
+            <h2 class="mb-4"><i class="fas fa-chart-bar"></i> ¡Resultados!</h2>
+            
+            <div class="alert alert-info">
+                <h4>Alumno: <span id="studentNameResult"></span></h4>
+            </div>
+            
+            <div class="demo-box">
+                <h5 class="mb-4">Tu Progreso</h5>
+                <div style="max-width: 500px; margin: 0 auto;">
+                    <div class="mb-4">
+                        <h3><span id="finalScore">0</span>/3</h3>
+                        <p class="text-muted">Respuestas correctas</p>
+                    </div>
+                    
+                    <div style="height: 300px; display: flex; align-items: flex-end; justify-content: space-around; border-bottom: 3px solid #333;">
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div id="bar1" style="width: 80px; background: #667eea; transition: height 1s; height: 0;"></div>
+                            <p class="mt-2">Pregunta 1</p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div id="bar2" style="width: 80px; background: #764ba2; transition: height 1s; height: 0;"></div>
+                            <p class="mt-2">Pregunta 2</p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div id="bar3" style="width: 80px; background: #f093fb; transition: height 1s; height: 0;"></div>
+                            <p class="mt-2">Pregunta 3</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div id="performanceMessage" class="alert"></div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary btn-lg mt-4" onclick="restartPresentation()">
+                <i class="fas fa-redo"></i> Reiniciar Presentación
+            </button>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="container">
+        <div class="slide-container">
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <span class="badge bg-primary fs-5" id="slideCounter">1 / 10</span>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.32/sweetalert2.all.min.js"></script>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+        let studentName = '';
+        let quizAnswers = [false, false, false];
+        let correctAnswers = 0;
+        
+        // Pedir nombre al inicio
+        window.onload = function() {
+            Swal.fire({
+                title: '¡Bienvenido!',
+                text: 'Por favor, ingresa tu nombre:',
+                input: 'text',
+                inputPlaceholder: 'Tu nombre',
+                confirmButtonText: 'Comenzar',
+                allowOutsideClick: false,
+                inputValidator: (value) => {
+                    if (!value) {
+                        return '¡Necesitas escribir tu nombre!';
+                    }
+                }
+            }).then((result) => {
+                studentName = result.value;
+                Swal.fire({
+                    icon: 'success',
+                    title: `¡Hola ${studentName}!`,
+                    text: 'Empecemos el tutorial',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        };
+        
+        function updateSlideCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        function showSlide(n) {
+            const slides = document.getElementsByClassName('slide');
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].classList.remove('active', 'animate__fadeIn');
+            }
+            slides[n - 1].classList.add('active', 'animate__animated', 'animate__fadeIn');
+            updateSlideCounter();
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+                
+                if (currentSlide === totalSlides) {
+                    showResults();
+                }
+            }
+        }
+        
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+        
+        // Demo 1: Like simple
+        let likeDemoCount = 0;
+        let isLikedDemo = false;
+        function demo1() {
+            const btn = document.getElementById('demoLike1');
+            if (isLikedDemo) {
+                likeDemoCount--;
+                btn.classList.remove('liked');
+            } else {
+                likeDemoCount++;
+                btn.classList.add('liked');
+            }
+            isLikedDemo = !isLikedDemo;
+            document.getElementById('likeDemo1').textContent = likeDemoCount;
+        }
+        
+        // Demo 2: Estrellas
+        let currentRating = 0;
+        function rateDemo(stars) {
+            currentRating = stars;
+            const allStars = document.querySelectorAll('#demoStars .star');
+            allStars.forEach((star, index) => {
+                if (index < stars) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            document.getElementById('ratingValue').textContent = stars;
+            
+            Swal.fire({
+                icon: 'success',
+                title: `¡${stars} estrellas!`,
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+        
+        // Demo 3: Corazón
+        let heartLiked = false;
+        function toggleHeartDemo() {
+            const heart = document.getElementById('demoHeart');
+            heartLiked = !heartLiked;
+            
+            if (heartLiked) {
+                heart.style.color = '#e74c3c';
+                heart.classList.add('animate__animated', 'animate__heartBeat');
+                document.getElementById('heartStatus').textContent = '¡Con like!';
+            } else {
+                heart.style.color = '#ddd';
+                document.getElementById('heartStatus').textContent = 'Sin like';
+            }
+            
+            setTimeout(() => {
+                heart.classList.remove('animate__heartBeat');
+            }, 1000);
+        }
+        
+        // Demo 4: Comentarios simples
+        function addCommentDemo() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            
+            if (text === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¡Escribe algo!',
+                    text: 'El comentario no puede estar vacío'
+                });
+                return;
+            }
+            
+            const list = document.getElementById('commentsList');
+            const comment = document.createElement('div');
+            comment.className = 'comment-item animate__animated animate__fadeIn';
+            comment.innerHTML = `<i class="fas fa-comment"></i> ${text}`;
+            list.appendChild(comment);
+            input.value = '';
+        }
+        
+        // Demo 5: Comentarios completos
+        function addFullCommentDemo() {
+            const userName = document.getElementById('userName').value.trim();
+            const commentText = document.getElementById('fullCommentInput').value.trim();
+            
+            if (userName === '' || commentText === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¡Completa todos los campos!',
+                    text: 'Necesitamos tu nombre y comentario'
+                });
+                return;
+            }
+            
+            const date = new Date().toLocaleString('es-ES');
+            const list = document.getElementById('fullCommentsList');
+            
+            const comment = document.createElement('div');
+            comment.className = 'comment-item animate__animated animate__fadeIn';
+            comment.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <strong><i class="fas fa-user"></i> ${userName}</strong>
+                    <small class="text-muted"><i class="fas fa-clock"></i> ${date}</small>
+                </div>
+                <p class="mb-0 mt-2">${commentText}</p>
+            `;
+            
+            list.appendChild(comment);
+            document.getElementById('fullCommentInput').value = '';
+        }
+        
+        // Sistema de Quiz
+        function checkAnswer(questionNum, option, isCorrect) {
+            const feedback = document.getElementById('feedback' + questionNum);
+            const options = document.querySelectorAll(`#slide${questionNum + 2} .quiz-option`);
+            
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+            
+            if (isCorrect) {
+                quizAnswers[questionNum - 1] = true;
+                correctAnswers++;
+                event.target.classList.add('correct');
+                feedback.innerHTML = `
+                    <div class="alert alert-success animate__animated animate__fadeIn">
+                        <i class="fas fa-check-circle"></i> ¡Correcto! Excelente trabajo, ${studentName}.
+                    </div>
+                `;
+            } else {
+                event.target.classList.add('incorrect');
+                feedback.innerHTML = `
+                    <div class="alert alert-danger animate__animated animate__fadeIn">
+                        <i class="fas fa-times-circle"></i> Incorrecto. ¡Sigue intentando!
+                    </div>
+                `;
+            }
+            
+            setTimeout(() => {
+                Swal.fire({
+                    icon: isCorrect ? 'success' : 'error',
+                    title: isCorrect ? '¡Correcto!' : 'Incorrecto',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }, 500);
+        }
+        
+        // Mostrar resultados
+        function showResults() {
+            document.getElementById('studentNameResult').textContent = studentName;
+            document.getElementById('finalScore').textContent = correctAnswers;
+            
+            // Animar barras
+            setTimeout(() => {
+                document.getElementById('bar1').style.height = quizAnswers[0] ? '250px' : '50px';
+                document.getElementById('bar2').style.height = quizAnswers[1] ? '250px' : '50px';
+                document.getElementById('bar3').style.height = quizAnswers[2] ? '250px' : '50px';
+            }, 500);
+            
+            // Mensaje de rendimiento
+            const messageDiv = document.getElementById('performanceMessage');
+            let message = '';
+            let alertClass = '';
+            
+            if (correctAnswers === 3) {
+                message = '🎉 ¡Perfecto! Dominaste todos los conceptos.';
+                alertClass = 'alert-success';
+            } else if (correctAnswers === 2) {
+                message = '👍 ¡Muy bien! Solo falta un poco más de práctica.';
+                alertClass = 'alert-info';
+            } else if (correctAnswers === 1) {
+                message = '📚 Buen intento. Te recomiendo revisar el material nuevamente.';
+                alertClass = 'alert-warning';
+            } else {
+                message = '💪 ¡No te rindas! La práctica hace al maestro.';
+                alertClass = 'alert-secondary';
+            }
+            
+            messageDiv.className = `alert ${alertClass}`;
+            messageDiv.textContent = message;
+            
+            Swal.fire({
+                icon: 'info',
+                title: `${studentName}, obtuviste ${correctAnswers}/3`,
+                text: message,
+                confirmButtonText: '¡Entendido!'
+            });
+        }
+        
+        function restartPresentation() {
+            currentSlide = 1;
+            correctAnswers = 0;
+            quizAnswers = [false, false, false];
+            showSlide(1);
+            
+            // Resetear demos
+            likeDemoCount = 0;
+            isLikedDemo = false;
+            document.getElementById('likeDemo1').textContent = '0';
+            document.getElementById('demoLike1').classList.remove('liked');
+            
+            currentRating = 0;
+            document.querySelectorAll('#demoStars .star').forEach(star => star.classList.remove('active'));
+            
+            document.getElementById('commentsList').innerHTML = '';
+            document.getElementById('fullCommentsList').innerHTML = '';
+            
+            // Resetear opciones de quiz
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.style.pointerEvents = 'auto';
+            });
+            
+            document.querySelectorAll('[id^="feedback"]').forEach(f => f.innerHTML = '');
+            
+            Swal.fire({
+                icon: 'info',
+                title: '¡Volvamos a empezar!',
+                text: 'La presentación se ha reiniciado',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+        
+        // Inicializar
+        updateSlideCounter();
+    </script>
+</body>
+</html>

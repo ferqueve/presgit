@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario con localStorage - Grupos 310 y 316</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.18/sweetalert2.all.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --code-bg: #f1f3f5;
+            --accent: #0d6efd;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1d23;
+            --bg-secondary: #25282e;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --border-color: #495057;
+            --code-bg: #2d3139;
+            --accent: #4dabf7;
+        }
+
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px 0;
+        }
+
+        .slide {
+            background: var(--bg-primary);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 30px;
+            min-height: 600px;
+            border: 1px solid var(--border-color);
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            color: var(--text-primary);
+        }
+
+        .demo-box {
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .highlight {
+            background: #ffd60a;
+            color: #212529;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .note-box {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #055160;
+        }
+
+        [data-theme="dark"] .note-box {
+            background: #1a4551;
+            color: #8dd6ec;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #664d03;
+        }
+
+        [data-theme="dark"] .warning-box {
+            background: #4a3c0f;
+            color: #ffe69c;
+        }
+
+        .success-box {
+            background: #d1e7dd;
+            border-left: 4px solid #198754;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #0f5132;
+        }
+
+        [data-theme="dark"] .success-box {
+            background: #1a3d2e;
+            color: #a3cfbb;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .quiz-question {
+            background: var(--bg-secondary);
+            border: 3px solid var(--accent);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .quiz-option {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent);
+            transform: translateX(10px);
+        }
+
+        .quiz-option.correct {
+            background: #d1e7dd;
+            border-color: #198754;
+        }
+
+        [data-theme="dark"] .quiz-option.correct {
+            background: #1a3d2e;
+            border-color: #4caf50;
+        }
+
+        .quiz-option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        [data-theme="dark"] .quiz-option.incorrect {
+            background: #4a1f23;
+            border-color: #f44336;
+        }
+
+        table {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        table th {
+            background: var(--accent);
+            color: white;
+        }
+
+        .profile-preview {
+            max-width: 300px;
+            margin: 20px auto;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--accent);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .key-point {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 15px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+
+    <div class="container">
+        <!-- Slide 1: Portada -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="text-center">
+                <h1 class="display-3 mb-4"><i class="fas fa-user-circle"></i> Perfil de Usuario</h1>
+                <h2 class="text-muted">con localStorage y Modo Claro/Oscuro</h2>
+                <p class="lead mt-4">Grupos 310 y 316</p>
+                <div class="mt-5">
+                    <span class="badge bg-primary fs-5 me-2"><i class="fas fa-database"></i> localStorage</span>
+                    <span class="badge bg-success fs-5 me-2"><i class="fas fa-image"></i> Base64</span>
+                    <span class="badge bg-warning fs-5"><i class="fas fa-moon"></i> Dark Mode</span>
+                </div>
+            </div>
+            <div class="slide-number">1/32</div>
+        </div>
+
+        <!-- Slide 2: Objetivos -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-bullseye"></i> Objetivos de la Presentación</h2>
+            </div>
+            
+            <h3 class="mt-4">Al finalizar esta presentación, sabrás:</h3>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0" style="background: var(--bg-secondary);">
+                        <div class="card-body">
+                            <h4><i class="fas fa-check-circle text-success"></i> Conocimientos</h4>
+                            <ul>
+                                <li>Qué es localStorage y cómo funciona</li>
+                                <li>Métodos principales de localStorage</li>
+                                <li>Cómo implementar modo claro/oscuro</li>
+                                <li>Qué es Base64 y para qué sirve</li>
+                                <li>Cómo persistir datos del usuario</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-0" style="background: var(--bg-secondary);">
+                        <div class="card-body">
+                            <h4><i class="fas fa-code text-primary"></i> Habilidades Prácticas</h4>
+                            <ul>
+                                <li>Crear formularios de perfil</li>
+                                <li>Guardar y cargar imágenes en Base64</li>
+                                <li>Implementar persistencia de datos</li>
+                                <li>Crear un sistema de temas</li>
+                                <li>Validar y manejar datos de usuario</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">2/32</div>
+        </div>
+
+        <!-- Slide 3: ¿Qué es localStorage? -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-database"></i> ¿Qué es localStorage?</h2>
+            </div>
+
+            <p class="lead">localStorage es una <span class="highlight">API del navegador</span> que permite almacenar datos de forma permanente en el navegador del usuario.</p>
+
+            <h3 class="mt-4">Características Principales</h3>
+            
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="text-center p-3">
+                        <i class="fas fa-infinity fa-3x text-primary mb-3"></i>
+                        <h5>Persistente</h5>
+                        <p>Los datos NO se borran al cerrar el navegador</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3">
+                        <i class="fas fa-hdd fa-3x text-success mb-3"></i>
+                        <h5>Capacidad: ~5-10 MB</h5>
+                        <p>Suficiente para datos de usuario y configuraciones</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3">
+                        <i class="fas fa-lock fa-3x text-warning mb-3"></i>
+                        <h5>Por Dominio</h5>
+                        <p>Cada sitio tiene su propio localStorage aislado</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note-box mt-4">
+                <i class="fas fa-info-circle"></i> <strong>Importante:</strong> 
+                localStorage solo puede almacenar strings (cadenas de texto). Para guardar objetos o arrays, debemos usar JSON.stringify()
+            </div>
+            <div class="slide-number">3/32</div>
+        </div>
+
+        <!-- Slide 4: Métodos de localStorage -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-tools"></i> Métodos de localStorage</h2>
+            </div>
+
+            <h3>Operaciones CRUD</h3>
+
+            <table class="table table-striped mt-4">
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>setItem()</code></td>
+                        <td>Guardar un valor</td>
+                        <td><code>localStorage.setItem('nombre', 'Juan')</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>getItem()</code></td>
+                        <td>Obtener un valor</td>
+                        <td><code>localStorage.getItem('nombre')</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>removeItem()</code></td>
+                        <td>Eliminar un item</td>
+                        <td><code>localStorage.removeItem('nombre')</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>clear()</code></td>
+                        <td>Eliminar todo</td>
+                        <td><code>localStorage.clear()</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4 class="mt-4">Ejemplo Práctico:</h4>
+            <div class="code-block">
+// Guardar un dato simple
+localStorage.setItem('usuario', 'María');
+
+// Leer el dato
+const usuario = localStorage.getItem('usuario');
+console.log(usuario); // "María"
+
+// Guardar un objeto (convertir a JSON)
+const perfil = { nombre: 'María', edad: 25 };
+localStorage.setItem('perfil', JSON.stringify(perfil));
+
+// Leer el objeto (convertir de JSON)
+const perfilGuardado = JSON.parse(localStorage.getItem('perfil'));
+console.log(perfilGuardado.nombre); // "María"
+            </div>
+            <div class="slide-number">4/32</div>
+        </div>
+
+        <!-- Slide 5: Demo localStorage Básico -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-play-circle"></i> Demo Interactiva: localStorage Básico</h2>
+            </div>
+
+            <div class="demo-box">
+                <h4>Prueba localStorage en vivo</h4>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Clave:</label>
+                        <input type="text" class="form-control" id="demoKey" value="miDato">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Valor:</label>
+                        <input type="text" class="form-control" id="demoValue" placeholder="Escribe algo...">
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary-custom me-2" onclick="demoSave()">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                    <button class="btn btn-success me-2" onclick="demoLoad()">
+                        <i class="fas fa-download"></i> Cargar
+                    </button>
+                    <button class="btn btn-danger" onclick="demoDelete()">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </div>
+                <div id="demoResult" class="mt-3"></div>
+            </div>
+
+            <div class="note-box">
+                <i class="fas fa-lightbulb"></i> <strong>Pruébalo:</strong> 
+                Guarda un dato, recarga la página, y verás que el dato sigue ahí. ¡Esa es la magia de localStorage!
+            </div>
+            <div class="slide-number">5/32</div>
+        </div>
+
+        <!-- Slide 6: Pregunta 1 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación #1</h2>
+            </div>
+
+            <div class="quiz-question">
+                <h4>¿Cuál es la forma correcta de guardar un objeto en localStorage?</h4>
+                
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>A)</strong> localStorage.setItem('user', usuario)
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>B)</strong> localStorage.save('user', usuario)
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, true)">
+                    <strong>C)</strong> localStorage.setItem('user', JSON.stringify(usuario))
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>D)</strong> localStorage.put('user', usuario)
+                </div>
+            </div>
+
+            <div id="answer1" class="d-none success-box">
+                <i class="fas fa-check-circle"></i> <strong>¡Correcto!</strong> 
+                localStorage solo puede almacenar strings, por eso debemos convertir objetos con JSON.stringify()
+            </div>
+            <div class="slide-number">6/32</div>
+        </div>
+
+        <!-- Slide 7: Modo Claro/Oscuro - Concepto -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-adjust"></i> Modo Claro/Oscuro</h2>
+            </div>
+
+            <p class="lead">El <span class="highlight">modo oscuro</span> es una característica que permite cambiar la apariencia de una aplicación para reducir la fatiga visual.</p>
+
+            <h3 class="mt-4">¿Por qué es importante?</h3>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card border-0" style="background: var(--bg-secondary); padding: 20px;">
+                        <h5><i class="fas fa-eye text-primary"></i> Beneficios</h5>
+                        <ul>
+                            <li>Reduce fatiga visual</li>
+                            <li>Ahorra batería (pantallas OLED)</li>
+                            <li>Mejor para ambientes oscuros</li>
+                            <li>Preferencia personal del usuario</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0" style="background: var(--bg-secondary); padding: 20px;">
+                        <h5><i class="fas fa-cog text-success"></i> Implementación</h5>
+                        <ul>
+                            <li>Variables CSS personalizadas</li>
+                            <li>Atributo data-theme en HTML</li>
+                            <li>localStorage para persistencia</li>
+                            <li>Toggle button para cambiar</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box mt-4">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Nota:</strong> 
+                ¡Esta misma presentación tiene modo claro/oscuro! Prueba el botón en la esquina superior derecha.
+            </div>
+            <div class="slide-number">7/32</div>
+        </div>
+
+        <!-- Slide 8: Implementación del Tema -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-code"></i> Implementación del Modo Claro/Oscuro</h2>
+            </div>
+
+            <h3>Paso 1: Variables CSS</h3>
+            <div class="code-block">
+:root {
+    --bg-primary: #ffffff;
+    --text-primary: #212529;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a1d23;
+    --text-primary: #e9ecef;
+}
+
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+            </div>
+
+            <h3 class="mt-4">Paso 2: JavaScript para cambiar tema</h3>
+            <div class="code-block">
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Aplicar el nuevo tema
+    document.documentElement.setAttribute('data-theme', newTheme);
+    
+    // Guardar en localStorage
+    localStorage.setItem('theme', newTheme);
+}
+            </div>
+            <div class="slide-number">8/32</div>
+        </div>
+
+        <!-- Slide 9: Cargar Tema al Inicio -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-sync-alt"></i> Cargar Tema al Iniciar</h2>
+            </div>
+
+            <p class="key-point">¿Cómo hacer que el tema persista al recargar la página?</p>
+
+            <h3 class="mt-4">Solución: Cargar al inicio</h3>
+            <div class="code-block">
+// Ejecutar cuando carga la página
+window.addEventListener('DOMContentLoaded', () => {
+    // Leer tema guardado
+    const savedTheme = localStorage.getItem('theme');
+    
+    // Si existe un tema guardado, aplicarlo
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+    
+    // Actualizar ícono del botón
+    updateThemeIcon();
+});
+
+function updateThemeIcon() {
+    const theme = document.documentElement.getAttribute('data-theme');
+    const icon = document.getElementById('themeIcon');
+    
+    if (theme === 'dark') {
+        icon.className = 'fas fa-sun'; // Sol para modo oscuro
+    } else {
+        icon.className = 'fas fa-moon'; // Luna para modo claro
+    }
+}
+            </div>
+
+            <div class="success-box mt-4">
+                <i class="fas fa-check"></i> <strong>¡Listo!</strong> 
+                Ahora el tema se mantiene incluso después de cerrar y abrir el navegador.
+            </div>
+            <div class="slide-number">9/32</div>
+        </div>
+
+        <!-- Slide 10: Pregunta 2 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación #2</h2>
+            </div>
+
+            <div class="quiz-question">
+                <h4>Para que el tema persista al recargar la página, ¿qué debemos hacer?</h4>
+                
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>A)</strong> Nada, el navegador lo guarda automáticamente
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, true)">
+                    <strong>B)</strong> Guardar en localStorage y cargar al inicio
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>C)</strong> Usar sessionStorage
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>D)</strong> Guardar en una cookie
+                </div>
+            </div>
+            <div class="slide-number">10/32</div>
+        </div>
+
+        <!-- Slide 11: Formularios de Perfil -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-id-card"></i> Formulario de Perfil de Usuario</h2>
+            </div>
+
+            <p class="lead">Un perfil de usuario típicamente incluye información personal que queremos guardar.</p>
+
+            <h3 class="mt-4">Campos Comunes:</h3>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        <li class="list-group-item"><i class="fas fa-user text-primary"></i> Nombre</li>
+                        <li class="list-group-item"><i class="fas fa-user-tag text-primary"></i> Apellido</li>
+                        <li class="list-group-item"><i class="fas fa-envelope text-primary"></i> Email</li>
+                        <li class="list-group-item"><i class="fas fa-phone text-primary"></i> Teléfono</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        <li class="list-group-item"><i class="fas fa-image text-success"></i> Foto de perfil</li>
+                        <li class="list-group-item"><i class="fas fa-map-marker-alt text-success"></i> Ubicación</li>
+                        <li class="list-group-item"><i class="fas fa-birthday-cake text-success"></i> Fecha de nacimiento</li>
+                        <li class="list-group-item"><i class="fas fa-info-circle text-success"></i> Biografía</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note-box mt-4">
+                <i class="fas fa-lightbulb"></i> <strong>Buena práctica:</strong> 
+                Validar los datos antes de guardarlos y proporcionar feedback visual al usuario.
+            </div>
+            <div class="slide-number">11/32</div>
+        </div>
+
+        <!-- Slide 12: Capturar Datos del Formulario -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-keyboard"></i> Capturar Datos del Formulario</h2>
+            </div>
+
+            <h3>HTML del Formulario</h3>
+            <div class="code-block">
+&lt;form id="profileForm"&gt;
+    &lt;input type="text" id="nombre" placeholder="Nombre" required&gt;
+    &lt;input type="text" id="apellido" placeholder="Apellido" required&gt;
+    &lt;input type="email" id="email" placeholder="Email" required&gt;
+    &lt;input type="tel" id="telefono" placeholder="Teléfono"&gt;
+    
+    &lt;button type="submit"&gt;Guardar Perfil&lt;/button&gt;
+&lt;/form&gt;
+            </div>
+
+            <h3 class="mt-4">JavaScript para capturar</h3>
+            <div class="code-block">
+document.getElementById('profileForm').addEventListener('submit', (e) => {
+    e.preventDefault(); // Evitar recarga de página
+    
+    // Capturar valores
+    const perfil = {
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value
+    };
+    
+    console.log(perfil);
+});
+            </div>
+            <div class="slide-number">12/32</div>
+        </div>
+
+        <!-- Slide 13: Guardar Perfil en localStorage -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-save"></i> Guardar Perfil en localStorage</h2>
+            </div>
+
+            <p class="key-point"><span class="step-number">1</span> Capturar datos del formulario</p>
+            <p class="key-point"><span class="step-number">2</span> Convertir a JSON</p>
+            <p class="key-point"><span class="step-number">3</span> Guardar en localStorage</p>
+            <p class="key-point"><span class="step-number">4</span> Mostrar confirmación</p>
+
+            <h3 class="mt-4">Código Completo:</h3>
+            <div class="code-block">
+function guardarPerfil() {
+    // 1. Capturar datos
+    const perfil = {
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value
+    };
+    
+    // 2 y 3. Convertir a JSON y guardar
+    localStorage.setItem('userProfile', JSON.stringify(perfil));
+    
+    // 4. Mostrar confirmación
+    Swal.fire({
+        icon: 'success',
+        title: '¡Perfil guardado!',
+        text: 'Tus datos se guardaron correctamente',
+        timer: 2000
+    });
+}
+            </div>
+            <div class="slide-number">13/32</div>
+        </div>
+
+        <!-- Slide 14: Cargar Perfil Guardado -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-download"></i> Cargar Perfil Guardado</h2>
+            </div>
+
+            <p class="lead">Al abrir la página, debemos cargar los datos guardados en el formulario.</p>
+
+            <h3 class="mt-4">Función para cargar:</h3>
+            <div class="code-block">
+function cargarPerfil() {
+    // 1. Obtener datos de localStorage
+    const perfilJSON = localStorage.getItem('userProfile');
+    
+    // 2. Verificar si existe
+    if (!perfilJSON) {
+        console.log('No hay perfil guardado');
+        return;
+    }
+    
+    // 3. Convertir de JSON a objeto
+    const perfil = JSON.parse(perfilJSON);
+    
+    // 4. Llenar los campos del formulario
+    document.getElementById('nombre').value = perfil.nombre;
+    document.getElementById('apellido').value = perfil.apellido;
+    document.getElementById('email').value = perfil.email;
+    document.getElementById('telefono').value = perfil.telefono;
+}
+
+// Llamar al cargar la página
+window.addEventListener('DOMContentLoaded', cargarPerfil);
+            </div>
+
+            <div class="success-box mt-4">
+                <i class="fas fa-magic"></i> ¡Ahora el formulario se llena automáticamente con los datos guardados!
+            </div>
+            <div class="slide-number">14/32</div>
+        </div>
+
+        <!-- Slide 15: Pregunta 3 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación #3</h2>
+            </div>
+
+            <div class="quiz-question">
+                <h4>¿Qué devuelve localStorage.getItem() si la clave no existe?</h4>
+                
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>A)</strong> undefined
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, true)">
+                    <strong>B)</strong> null
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>C)</strong> '' (string vacío)
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>D)</strong> Lanza un error
+                </div>
+            </div>
+
+            <div class="note-box mt-4">
+                <i class="fas fa-info-circle"></i> Por eso es importante verificar si el valor es null antes de usar JSON.parse()
+            </div>
+            <div class="slide-number">15/32</div>
+        </div>
+
+        <!-- Slide 16: Imágenes y Base64 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-image"></i> Trabajando con Imágenes</h2>
+            </div>
+
+            <p class="lead">¿Cómo guardamos una imagen en localStorage?</p>
+
+            <h3 class="mt-4">El Desafío:</h3>
+            <div class="warning-box">
+                <i class="fas fa-exclamation-triangle"></i> 
+                localStorage solo acepta strings, pero las imágenes son archivos binarios.
+            </div>
+
+            <h3 class="mt-4">La Solución: Base64</h3>
+            <div class="success-box">
+                <i class="fas fa-lightbulb"></i> 
+                Base64 es un sistema que convierte datos binarios (como imágenes) en texto.
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-file-image text-primary"></i> Archivo de Imagen</h5>
+                    <p>Datos binarios que el navegador no puede guardar directamente en localStorage</p>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-font text-success"></i> Texto Base64</h5>
+                    <p>Representación en texto de la imagen que SÍ podemos guardar en localStorage</p>
+                </div>
+            </div>
+            <div class="slide-number">16/32</div>
+        </div>
+
+        <!-- Slide 17: ¿Qué es Base64? -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-code"></i> ¿Qué es Base64?</h2>
+            </div>
+
+            <p class="lead">Base64 es un sistema de codificación que representa datos binarios usando solo 64 caracteres ASCII.</p>
+
+            <h3 class="mt-4">Ejemplo de Base64:</h3>
+            <div class="code-block">
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA
+AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
+9TXL0Y4OHwAAAABJRU5ErkJggg==
+            </div>
+
+            <h3 class="mt-4">Ventajas:</h3>
+            <ul>
+                <li><i class="fas fa-check text-success"></i> Se puede guardar como string</li>
+                <li><i class="fas fa-check text-success"></i> Compatible con localStorage</li>
+                <li><i class="fas fa-check text-success"></i> Se puede usar directamente en src de img</li>
+                <li><i class="fas fa-check text-success"></i> No requiere servidor de archivos</li>
+            </ul>
+
+            <h3 class="mt-4">Desventajas:</h3>
+            <ul>
+                <li><i class="fas fa-times text-danger"></i> Aumenta el tamaño ~33%</li>
+                <li><i class="fas fa-times text-danger"></i> Ocupa espacio en localStorage</li>
+            </ul>
+            <div class="slide-number">17/32</div>
+        </div>
+
+        <!-- Slide 18: FileReader API -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-file-upload"></i> FileReader API</h2>
+            </div>
+
+            <p class="lead">FileReader es una API que nos permite leer archivos en JavaScript.</p>
+
+            <h3 class="mt-4">Métodos Principales:</h3>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>readAsDataURL()</code></td>
+                        <td>Lee el archivo como Base64 (para imágenes)</td>
+                    </tr>
+                    <tr>
+                        <td><code>readAsText()</code></td>
+                        <td>Lee el archivo como texto</td>
+                    </tr>
+                    <tr>
+                        <td><code>readAsArrayBuffer()</code></td>
+                        <td>Lee el archivo como buffer binario</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="mt-4">Eventos:</h3>
+            <ul>
+                <li><code>onload</code>: Se ejecuta cuando termina de leer</li>
+                <li><code>onerror</code>: Se ejecuta si hay un error</li>
+                <li><code>onprogress</code>: Se ejecuta mientras lee</li>
+            </ul>
+            <div class="slide-number">18/32</div>
+        </div>
+
+        <!-- Slide 19: Convertir Imagen a Base64 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-magic"></i> Convertir Imagen a Base64</h2>
+            </div>
+
+            <h3>HTML: Input de archivo</h3>
+            <div class="code-block">
+&lt;input type="file" id="profilePic" accept="image/*"&gt;
+&lt;img id="preview" style="display:none;"&gt;
+            </div>
+
+            <h3 class="mt-4">JavaScript: Leer y convertir</h3>
+            <div class="code-block">
+document.getElementById('profilePic').addEventListener('change', (e) => {
+    const file = e.target.files[0]; // Obtener el archivo
+    
+    if (!file) return; // Si no hay archivo, salir
+    
+    // Crear un FileReader
+    const reader = new FileReader();
+    
+    // Cuando termine de leer...
+    reader.onload = (event) => {
+        const base64 = event.target.result; // Imagen en Base64
+        
+        // Mostrar preview
+        document.getElementById('preview').src = base64;
+        document.getElementById('preview').style.display = 'block';
+        
+        // Guardar en localStorage
+        localStorage.setItem('profileImage', base64);
+    };
+    
+    // Iniciar la lectura
+    reader.readAsDataURL(file);
+});
+            </div>
+            <div class="slide-number">19/32</div>
+        </div>
+
+        <!-- Slide 20: Demo Imagen Base64 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-camera"></i> Demo: Guardar Imagen en localStorage</h2>
+            </div>
+
+            <div class="demo-box">
+                <h4>Prueba subir una imagen</h4>
+                <div class="text-center mt-4">
+                    <div class="profile-preview">
+                        <img id="demoProfileImg" src="https://via.placeholder.com/150" class="profile-img mb-3">
+                    </div>
+                    
+                    <input type="file" id="demoImageInput" accept="image/*" class="form-control mb-3" style="max-width: 400px; margin: 0 auto;">
+                    
+                    <button class="btn btn-primary-custom me-2" onclick="saveDemoImage()">
+                        <i class="fas fa-save"></i> Guardar Imagen
+                    </button>
+                    <button class="btn btn-success" onclick="loadDemoImage()">
+                        <i class="fas fa-download"></i> Cargar Imagen
+                    </button>
+                </div>
+                
+                <div id="imageSize" class="mt-3 text-center"></div>
+            </div>
+
+            <div class="warning-box mt-4">
+                <i class="fas fa-info-circle"></i> <strong>Limitación:</strong> 
+                Las imágenes muy grandes pueden exceder el límite de localStorage (~5MB). Se recomienda redimensionar.
+            </div>
+            <div class="slide-number">20/32</div>
+        </div>
+
+        <!-- Slide 21: Pregunta 4 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación #4</h2>
+            </div>
+
+            <div class="quiz-question">
+                <h4>¿Qué método de FileReader usamos para convertir una imagen a Base64?</h4>
+                
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>A)</strong> readAsText()
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, true)">
+                    <strong>B)</strong> readAsDataURL()
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>C)</strong> readAsBase64()
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>D)</strong> convertToBase64()
+                </div>
+            </div>
+            <div class="slide-number">21/32</div>
+        </div>
+
+        <!-- Slide 22: Proyecto Completo - HTML -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-project-diagram"></i> Proyecto Completo: Estructura HTML</h2>
+            </div>
+
+            <div class="code-block" style="font-size: 0.85rem;">
+&lt;div class="profile-container"&gt;
+    &lt;h1&gt;Mi Perfil&lt;/h1&gt;
+    
+    &lt;!-- Imagen de perfil --&gt;
+    &lt;div class="profile-image"&gt;
+        &lt;img id="profileImage" src="default-avatar.png"&gt;
+        &lt;input type="file" id="imageInput" accept="image/*"&gt;
+        &lt;label for="imageInput"&gt;Cambiar foto&lt;/label&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Formulario --&gt;
+    &lt;form id="profileForm"&gt;
+        &lt;input type="text" id="nombre" placeholder="Nombre" required&gt;
+        &lt;input type="text" id="apellido" placeholder="Apellido" required&gt;
+        &lt;input type="email" id="email" placeholder="Email" required&gt;
+        &lt;input type="tel" id="telefono" placeholder="Teléfono"&gt;
+        
+        &lt;button type="submit"&gt;Guardar Perfil&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+            </div>
+            <div class="slide-number">22/32</div>
+        </div>
+
+        <!-- Slide 23: Proyecto Completo - CSS -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-palette"></i> Proyecto Completo: Estilos CSS</h2>
+            </div>
+
+            <div class="code-block" style="font-size: 0.8rem;">
+:root {
+    --bg-color: #ffffff;
+    --text-color: #212529;
+    --input-bg: #f8f9fa;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1d23;
+    --text-color: #e9ecef;
+    --input-bg: #25282e;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.profile-image img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #667eea;
+}
+
+input {
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 8px;
+}
+            </div>
+            <div class="slide-number">23/32</div>
+        </div>
+
+        <!-- Slide 24: Proyecto Completo - JS Guardar -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-save"></i> Proyecto Completo: Guardar Datos</h2>
+            </div>
+
+            <div class="code-block" style="font-size: 0.8rem;">
+// Guardar perfil completo
+function guardarPerfil(e) {
+    e.preventDefault();
+    
+    // Capturar todos los datos
+    const perfil = {
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value,
+        imagen: localStorage.getItem('profileImage') || null
+    };
+    
+    // Guardar en localStorage
+    localStorage.setItem('userProfile', JSON.stringify(perfil));
+    
+    // Notificar al usuario
+    Swal.fire({
+        icon: 'success',
+        title: '¡Perfil actualizado!',
+        text: 'Tus cambios se guardaron correctamente',
+        timer: 2000,
+        showConfirmButton: false
+    });
+}
+
+// Asociar al formulario
+document.getElementById('profileForm')
+    .addEventListener('submit', guardarPerfil);
+            </div>
+            <div class="slide-number">24/32</div>
+        </div>
+
+        <!-- Slide 25: Proyecto Completo - JS Cargar -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-download"></i> Proyecto Completo: Cargar Datos</h2>
+            </div>
+
+            <div class="code-block" style="font-size: 0.8rem;">
+// Cargar perfil al iniciar
+function cargarPerfil() {
+    const perfilJSON = localStorage.getItem('userProfile');
+    
+    if (!perfilJSON) {
+        console.log('No hay perfil guardado');
+        return;
+    }
+    
+    const perfil = JSON.parse(perfilJSON);
+    
+    // Llenar campos
+    document.getElementById('nombre').value = perfil.nombre || '';
+    document.getElementById('apellido').value = perfil.apellido || '';
+    document.getElementById('email').value = perfil.email || '';
+    document.getElementById('telefono').value = perfil.telefono || '';
+    
+    // Cargar imagen si existe
+    if (perfil.imagen) {
+        document.getElementById('profileImage').src = perfil.imagen;
+    }
+}
+
+// Ejecutar al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    cargarPerfil();
+    cargarTema();
+});
+            </div>
+            <div class="slide-number">25/32</div>
+        </div>
+
+        <!-- Slide 26: Proyecto Completo - JS Imagen -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-image"></i> Proyecto Completo: Manejo de Imagen</h2>
+            </div>
+
+            <div class="code-block" style="font-size: 0.75rem;">
+// Manejar cambio de imagen
+document.getElementById('imageInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    
+    if (!file) return;
+    
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Archivo inválido',
+            text: 'Por favor selecciona una imagen'
+        });
+        return;
+    }
+    
+    // Validar tamaño (máximo 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Imagen muy grande',
+            text: 'La imagen debe ser menor a 2MB'
+        });
+        return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+        const base64 = event.target.result;
+        
+        // Mostrar preview
+        document.getElementById('profileImage').src = base64;
+        
+        // Guardar en localStorage
+        localStorage.setItem('profileImage', base64);
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Imagen actualizada',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    };
+    
+    reader.readAsDataURL(file);
+});
+            </div>
+            <div class="slide-number">26/32</div>
+        </div>
+
+        <!-- Slide 27: Demo Completa -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-laptop-code"></i> Demo Completa: Perfil Funcional</h2>
+            </div>
+
+            <div class="demo-box">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="profile-preview">
+                            <img id="fullDemoImage" src="https://via.placeholder.com/150" class="profile-img mb-3">
+                            <input type="file" id="fullDemoInput" accept="image/*" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <form id="fullDemoForm" onsubmit="saveFullProfile(event)">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="fullNombre" placeholder="Nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="fullApellido" placeholder="Apellido" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="email" class="form-control" id="fullEmail" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="tel" class="form-control" id="fullTelefono" placeholder="Teléfono">
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100">
+                                <i class="fas fa-save"></i> Guardar Perfil Completo
+                            </button>
+                        </form>
+                        <button class="btn btn-success w-100 mt-2" onclick="loadFullProfile()">
+                            <i class="fas fa-sync"></i> Cargar Perfil Guardado
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note-box mt-4">
+                <i class="fas fa-magic"></i> ¡Pruébalo! Guarda tu perfil, recarga la página, y verás que todo persiste.
+            </div>
+            <div class="slide-number">27/32</div>
+        </div>
+
+        <!-- Slide 28: Pregunta 5 -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-question-circle"></i> Pregunta de Evaluación #5</h2>
+            </div>
+
+            <div class="quiz-question">
+                <h4>¿Qué problema puede ocurrir al guardar imágenes grandes en localStorage?</h4>
+                
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>A)</strong> La imagen se corrompe
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, true)">
+                    <strong>B)</strong> Puede exceder el límite de ~5MB de localStorage
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>C)</strong> No se puede guardar en Base64
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, false)">
+                    <strong>D)</strong> La conversión es muy lenta
+                </div>
+            </div>
+            <div class="slide-number">28/32</div>
+        </div>
+
+        <!-- Slide 29: Mejores Prácticas -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-star"></i> Mejores Prácticas</h2>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-success"><i class="fas fa-check-circle"></i> Sí Hacer:</h4>
+                    <ul>
+                        <li>Validar datos antes de guardar</li>
+                        <li>Usar try-catch con JSON.parse()</li>
+                        <li>Comprimir/redimensionar imágenes</li>
+                        <li>Proporcionar feedback al usuario</li>
+                        <li>Verificar si localStorage está disponible</li>
+                        <li>Usar nombres de claves descriptivos</li>
+                        <li>Limpiar datos antiguos periódicamente</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4 class="text-danger"><i class="fas fa-times-circle"></i> No Hacer:</h4>
+                    <ul>
+                        <li>Guardar información sensible (contraseñas)</li>
+                        <li>Asumir que localStorage siempre está disponible</li>
+                        <li>Guardar archivos muy grandes</li>
+                        <li>Olvidar validar datos al cargar</li>
+                        <li>Usar localStorage para datos temporales</li>
+                        <li>Guardar sin comprimir imágenes grandes</li>
+                        <li>Depender solo del cliente sin backend</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="warning-box mt-4">
+                <i class="fas fa-shield-alt"></i> <strong>Seguridad:</strong> 
+                localStorage no es seguro. Nunca guardes contraseñas, tokens de autenticación o datos sensibles.
+            </div>
+            <div class="slide-number">29/32</div>
+        </div>
+
+        <!-- Slide 30: Limitaciones de localStorage -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Limitaciones de localStorage</h2>
+            </div>
+
+            <h3>Debes conocer estas limitaciones:</h3>
+
+            <table class="table table-striped mt-4">
+                <thead>
+                    <tr>
+                        <th>Limitación</th>
+                        <th>Descripción</th>
+                        <th>Alternativa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Capacidad</td>
+                        <td>~5-10 MB máximo</td>
+                        <td>IndexedDB para más espacio</td>
+                    </tr>
+                    <tr>
+                        <td>Sincronía</td>
+                        <td>Operaciones síncronas (bloquean UI)</td>
+                        <td>IndexedDB (asíncrono)</td>
+                    </tr>
+                    <tr>
+                        <td>Solo strings</td>
+                        <td>No puede guardar objetos directamente</td>
+                        <td>JSON.stringify/parse</td>
+                    </tr>
+                    <tr>
+                        <td>Seguridad</td>
+                        <td>Accesible por JavaScript (XSS)</td>
+                        <td>Cookies httpOnly para datos sensibles</td>
+                    </tr>
+                    <tr>
+                        <td>Navegación privada</td>
+                        <td>Se borra al cerrar</td>
+                        <td>Advertir al usuario</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="note-box mt-4">
+                <i class="fas fa-info-circle"></i> Para aplicaciones más complejas, considera usar IndexedDB o una base de datos en el backend.
+            </div>
+            <div class="slide-number">30/32</div>
+        </div>
+
+        <!-- Slide 31: Resumen -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="slide-header">
+                <h2><i class="fas fa-list-check"></i> Resumen de Conceptos</h2>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0" style="background: var(--bg-secondary); padding: 20px;">
+                        <h4><i class="fas fa-database text-primary"></i> localStorage</h4>
+                        <ul>
+                            <li>Almacenamiento persistente</li>
+                            <li>Métodos: setItem, getItem, removeItem</li>
+                            <li>Solo strings</li>
+                            <li>~5-10 MB</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0" style="background: var(--bg-secondary); padding: 20px;">
+                        <h4><i class="fas fa-moon text-warning"></i> Modo Oscuro</h4>
+                        <ul>
+                            <li>Variables CSS</li>
+                            <li>data-theme attribute</li>
+                            <li>Persistencia con localStorage</li>
+                            <li>Cargar al inicio</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0" style="background: var(--bg-secondary); padding: 20px;">
+                        <h4><i class="fas fa-image text-success"></i> Imágenes Base64</h4>
+                        <ul>
+                            <li>FileReader API</li>
+                            <li>readAsDataURL()</li>
+                            <li>Aumenta tamaño ~33%</li>
+                            <li>Validar tamaño</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mt-5 text-center">Flujo Completo:</h3>
+            <div class="text-center mt-4">
+                <span class="badge bg-primary fs-6 me-2">1. Capturar datos</span>
+                <i class="fas fa-arrow-right"></i>
+                <span class="badge bg-success fs-6 mx-2">2. Convertir a JSON/Base64</span>
+                <i class="fas fa-arrow-right"></i>
+                <span class="badge bg-warning fs-6 mx-2">3. Guardar en localStorage</span>
+                <i class="fas fa-arrow-right"></i>
+                <span class="badge bg-info fs-6 ms-2">4. Cargar al iniciar</span>
+            </div>
+            <div class="slide-number">31/32</div>
+        </div>
+
+        <!-- Slide 32: Fin -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="text-center">
+                <h1 class="display-3 mb-4">¡Gracias!</h1>
+                <h2 class="text-muted mb-5">Grupos 310 y 316</h2>
+                
+                <div class="row mt-5">
+                    <div class="col-md-4">
+                        <i class="fas fa-code fa-3x text-primary mb-3"></i>
+                        <h4>Practica</h4>
+                        <p>La mejor forma de aprender es construyendo proyectos reales</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-book fa-3x text-success mb-3"></i>
+                        <h4>Estudia</h4>
+                        <p>MDN Web Docs es tu mejor amigo para aprender más</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-users fa-3x text-warning mb-3"></i>
+                        <h4>Colabora</h4>
+                        <p>Comparte tus proyectos y aprende de otros</p>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <h3>Recursos:</h3>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-link text-primary"></i> <a href="https://developer.mozilla.org/es/docs/Web/API/Window/localStorage" target="_blank">MDN - localStorage</a></li>
+                        <li><i class="fas fa-link text-primary"></i> <a href="https://developer.mozilla.org/es/docs/Web/API/FileReader" target="_blank">MDN - FileReader</a></li>
+                        <li><i class="fas fa-link text-primary"></i> <a href="https://www.base64-image.de/" target="_blank">Base64 Image Encoder</a></li>
+                    </ul>
+                </div>
+
+                <div class="mt-5">
+                    <i class="fas fa-comments fa-3x text-info"></i>
+                    <h3 class="mt-3">¿Preguntas?</h3>
+                </div>
+            </div>
+            <div class="slide-number">32/32</div>
+        </div>
+    </div>
+
+    <script>
+        // Tema
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icon = document.getElementById('themeIcon');
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                const icon = document.getElementById('themeIcon');
+                icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        // Demo localStorage básico
+        function demoSave() {
+            const key = document.getElementById('demoKey').value;
+            const value = document.getElementById('demoValue').value;
+            localStorage.setItem(key, value);
+            document.getElementById('demoResult').innerHTML = 
+                `<div class="alert alert-success">✓ Guardado: "${key}" = "${value}"</div>`;
+        }
+
+        function demoLoad() {
+            const key = document.getElementById('demoKey').value;
+            const value = localStorage.getItem(key);
+            if (value) {
+                document.getElementById('demoValue').value = value;
+                document.getElementById('demoResult').innerHTML = 
+                    `<div class="alert alert-info">✓ Cargado: "${key}" = "${value}"</div>`;
+            } else {
+                document.getElementById('demoResult').innerHTML = 
+                    `<div class="alert alert-warning">⚠ No se encontró la clave "${key}"</div>`;
+            }
+        }
+
+        function demoDelete() {
+            const key = document.getElementById('demoKey').value;
+            localStorage.removeItem(key);
+            document.getElementById('demoResult').innerHTML = 
+                `<div class="alert alert-danger">✓ Eliminado: "${key}"</div>`;
+        }
+
+        // Preguntas
+        function checkAnswer(element, isCorrect) {
+            const allOptions = element.parentElement.querySelectorAll('.quiz-option');
+            allOptions.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+            
+            if (isCorrect) {
+                element.classList.add('correct');
+                const successBox = element.parentElement.nextElementSibling;
+                if (successBox) successBox.classList.remove('d-none');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Correcto!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                element.classList.add('incorrect');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Incorrecto',
+                    text: 'Intenta de nuevo',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        // Demo imagen
+        document.getElementById('demoImageInput')?.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64 = event.target.result;
+                document.getElementById('demoProfileImg').src = base64;
+                
+                const size = (base64.length * 0.75 / 1024).toFixed(2);
+                document.getElementById('imageSize').innerHTML = 
+                    `<span class="badge bg-info">Tamaño: ${size} KB</span>`;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function saveDemoImage() {
+            const img = document.getElementById('demoProfileImg').src;
+            if (img.includes('placeholder')) {
+                Swal.fire('Error', 'Primero sube una imagen', 'error');
+                return;
+            }
+            localStorage.setItem('demoProfileImage', img);
+            Swal.fire('¡Guardado!', 'Imagen guardada en localStorage', 'success');
+        }
+
+        function loadDemoImage() {
+            const img = localStorage.getItem('demoProfileImage');
+            if (img) {
+                document.getElementById('demoProfileImg').src = img;
+                Swal.fire('¡Cargado!', 'Imagen recuperada de localStorage', 'success');
+            } else {
+                Swal.fire('No encontrado', 'No hay imagen guardada', 'info');
+            }
+        }
+
+        // Demo perfil completo
+        document.getElementById('fullDemoInput')?.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('fullDemoImage').src = event.target.result;
+                localStorage.setItem('fullDemoImage', event.target.result);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function saveFullProfile(e) {
+            e.preventDefault();
+            
+            const perfil = {
+                nombre: document.getElementById('fullNombre').value,
+                apellido: document.getElementById('fullApellido').value,
+                email: document.getElementById('fullEmail').value,
+                telefono: document.getElementById('fullTelefono').value,
+                imagen: localStorage.getItem('fullDemoImage')
+            };
+            
+            localStorage.setItem('fullDemoProfile', JSON.stringify(perfil));
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Perfil guardado!',
+                text: 'Recarga la página para ver que persiste',
+                timer: 2000
+            });
+        }
+
+        function loadFullProfile() {
+            const perfilJSON = localStorage.getItem('fullDemoProfile');
+            if (!perfilJSON) {
+                Swal.fire('Sin datos', 'No hay perfil guardado', 'info');
+                return;
+            }
+            
+            const perfil = JSON.parse(perfilJSON);
+            document.getElementById('fullNombre').value = perfil.nombre || '';
+            document.getElementById('fullApellido').value = perfil.apellido || '';
+            document.getElementById('fullEmail').value = perfil.email || '';
+            document.getElementById('fullTelefono').value = perfil.telefono || '';
+            
+            if (perfil.imagen) {
+                document.getElementById('fullDemoImage').src = perfil.imagen;
+            }
+            
+            Swal.fire('¡Cargado!', 'Perfil recuperado', 'success');
+        }
+
+        // Cargar tema al inicio
+        window.addEventListener('DOMContentLoaded', loadTheme);
+    </script>
+</body>
+</html>

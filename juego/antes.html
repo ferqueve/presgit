@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalla del Conocimiento - Grupos 310 y 316</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.18/sweetalert2.all.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1d23 0%, #2d3139 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .quiz-section {
+            background: #25282e;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            min-height: 300px;
+        }
+
+        .game-section {
+            background: #1a1d23;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .option-btn {
+            background: #2d3139;
+            border: 2px solid #667eea;
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #667eea;
+            transform: translateX(10px);
+        }
+
+        .option-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .option-btn.correct {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .option-btn.incorrect {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .health-bar-container {
+            position: relative;
+            height: 30px;
+            background: #1a1d23;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #667eea;
+        }
+
+        .health-bar {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .health-bar.player {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+
+        .health-bar.enemy {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+
+        .score-display {
+            background: #2d3139;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .question-number {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        #game-canvas {
+            border-radius: 10px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .character-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .player-name {
+            color: #10b981;
+        }
+
+        .enemy-name {
+            color: #ef4444;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-gamepad"></i> Batalla del Conocimiento</h1>
+            <p class="mb-0">Grupos 310 y 316 - Derrota al Tutor Oscuro Fernando</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div style="flex: 1;">
+                <div class="character-name player-name">
+                    <i class="fas fa-user-graduate"></i> Estudiante
+                </div>
+                <div class="health-bar-container">
+                    <div class="health-bar player" id="playerHealthBar">
+                        <span id="playerHealthText">100 / 100</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="score-display mx-3">
+                <div style="font-size: 0.9rem; color: #adb5bd;">Pregunta</div>
+                <div style="font-size: 1.5rem; font-weight: bold;" id="questionCounter">1 / 20</div>
+            </div>
+            
+            <div style="flex: 1;">
+                <div class="character-name enemy-name text-end">
+                    Tutor Oscuro Fernando <i class="fas fa-skull"></i>
+                </div>
+                <div class="health-bar-container">
+                    <div class="health-bar enemy" id="enemyHealthBar">
+                        <span id="enemyHealthText">100 / 100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="quiz-section">
+            <div class="question-number" id="questionBadge">Pregunta 1</div>
+            <h4 id="questionText" style="margin-bottom: 20px;">Cargando pregunta...</h4>
+            <div id="optionsContainer"></div>
+            <div class="text-end mt-3">
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Section -->
+        <div class="game-section">
+            <div id="game-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentQuestion = 0;
+        let playerHealth = 100;
+        let enemyHealth = 100;
+        let correctAnswers = 0;
+        let game;
+        let player;
+        let enemy;
+        let playerSprite;
+        let enemySprite;
+
+        // Pool de preguntas
+        const questions = [
+            {
+                question: "¿Cuál es el comando de Git para crear una nueva rama?",
+                options: ["git branch nueva-rama", "git create nueva-rama", "git new nueva-rama", "git make nueva-rama"],
+                correct: 0
+            },
+            {
+                question: "¿Cómo se guarda un objeto en localStorage?",
+                options: ["localStorage.save(obj)", "localStorage.setItem('key', JSON.stringify(obj))", "localStorage.put('key', obj)", "localStorage.add(obj)"],
+                correct: 1
+            },
+            {
+                question: "¿Qué método de array filtra elementos según una condición?",
+                options: ["map()", "filter()", "reduce()", "find()"],
+                correct: 1
+            },
+            {
+                question: "¿Cuántas columnas tiene el sistema de grilla de Bootstrap?",
+                options: ["10", "12", "16", "8"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace el método map() en arrays?",
+                options: ["Filtra elementos", "Transforma cada elemento", "Ordena elementos", "Suma elementos"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el método HTTP para actualizar completamente un recurso?",
+                options: ["GET", "POST", "PUT", "PATCH"],
+                correct: 2
+            },
+            {
+                question: "¿Qué hace 'git stash'?",
+                options: ["Elimina cambios", "Guarda cambios temporalmente", "Sube cambios", "Crea una rama"],
+                correct: 1
+            },
+            {
+                question: "¿Qué devuelve localStorage.getItem() si la clave no existe?",
+                options: ["undefined", "null", "''", "false"],
+                correct: 1
+            },
+            {
+                question: "¿Qué clase de Bootstrap marca un campo como inválido?",
+                options: ["invalid", "is-invalid", "form-invalid", "error"],
+                correct: 1
+            },
+            {
+                question: "¿Qué método de FileReader convierte una imagen a Base64?",
+                options: ["readAsText()", "readAsDataURL()", "toBase64()", "convertImage()"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el breakpoint 'md' en Bootstrap?",
+                options: ["576px", "768px", "992px", "1200px"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace el método sort() sin comparador en números?",
+                options: ["Ordena numéricamente", "Ordena alfabéticamente", "Da error", "No hace nada"],
+                correct: 1
+            },
+            {
+                question: "¿Qué comando de Git muestra el historial de commits?",
+                options: ["git history", "git log", "git commits", "git show"],
+                correct: 1
+            },
+            {
+                question: "¿Qué atributo HTML5 hace un campo obligatorio?",
+                options: ["mandatory", "required", "must-fill", "obligatory"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es la capacidad típica de localStorage?",
+                options: ["1 MB", "5-10 MB", "50 MB", "Ilimitado"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace 'git merge'?",
+                options: ["Elimina ramas", "Combina ramas", "Crea ramas", "Lista ramas"],
+                correct: 1
+            },
+            {
+                question: "¿Qué clase de Bootstrap crea un botón con solo borde?",
+                options: ["btn-border-primary", "btn-outline-primary", "btn-line-primary", "btn-ghost-primary"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace array.reduce()?",
+                options: ["Filtra elementos", "Reduce a un solo valor", "Ordena elementos", "Multiplica elementos"],
+                correct: 1
+            },
+            {
+                question: "¿Qué estado HTTP indica éxito en la creación de un recurso?",
+                options: ["200", "201", "204", "301"],
+                correct: 1
+            },
+            {
+                question: "¿Qué hace el atributo 'novalidate' en un formulario?",
+                options: ["Elimina el form", "Deshabilita validación nativa", "Valida automáticamente", "No existe"],
+                correct: 1
+            }
+        ];
+
+        // Configuración de Phaser
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 400,
+            parent: 'game-container',
+            backgroundColor: '#1a1d23',
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    debug: false
+                }
+            }
+        };
+
+        // Inicializar juego
+        window.onload = function() {
+            game = new Phaser.Game(config);
+            displayQuestion();
+        };
+
+        function preload() {
+            // Intentar cargar imágenes
+            this.load.on('loaderror', function(file) {
+                console.log('No se pudo cargar:', file.key);
+            });
+
+            this.load.image('background', 'images/fondo.png');
+            this.load.image('player', 'images/estudiante.png');
+            this.load.image('enemy', 'images/tutor.png');
+        }
+
+        function create() {
+            // Fondo
+            if (this.textures.exists('background')) {
+                const bg = this.add.image(400, 200, 'background');
+                bg.setDisplaySize(800, 400);
+            } else {
+                // Fondo alternativo con patrón
+                const graphics = this.add.graphics();
+                graphics.fillGradientStyle(0x667eea, 0x667eea, 0x764ba2, 0x764ba2, 1);
+                graphics.fillRect(0, 0, 800, 400);
+            }
+
+            // Crear jugador (estudiante)
+            if (this.textures.exists('player')) {
+                playerSprite = this.add.sprite(150, 200, 'player');
+                playerSprite.setScale(0.5);
+            } else {
+                // Cuadrado verde para jugador
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0x10b981, 1);
+                graphics.fillRoundedRect(0, 0, 80, 80, 10);
+                graphics.generateTexture('playerShape', 80, 80);
+                playerSprite = this.add.sprite(150, 200, 'playerShape');
+                
+                // Agregar detalles
+                const face = this.add.graphics();
+                face.fillStyle(0xffffff, 1);
+                face.fillCircle(140, 190, 8);
+                face.fillCircle(160, 190, 8);
+                face.fillStyle(0x000000, 1);
+                face.fillCircle(140, 190, 4);
+                face.fillCircle(160, 190, 4);
+            }
+
+            // Crear enemigo (tutor)
+            if (this.textures.exists('enemy')) {
+                enemySprite = this.add.sprite(650, 200, 'enemy');
+                enemySprite.setScale(0.5);
+            } else {
+                // Cuadrado rojo para enemigo
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0xef4444, 1);
+                graphics.fillRoundedRect(0, 0, 80, 80, 10);
+                graphics.generateTexture('enemyShape', 80, 80);
+                enemySprite = this.add.sprite(650, 200, 'enemyShape');
+                
+                // Agregar detalles malvados
+                const face = this.add.graphics();
+                face.fillStyle(0xff0000, 1);
+                face.fillCircle(640, 190, 8);
+                face.fillCircle(660, 190, 8);
+            }
+
+            // Guardar referencia al juego
+            player = this;
+        }
+
+        function update() {
+            // Actualización del juego si es necesario
+        }
+
+        // Crear proyectil
+        function shootProjectile(fromX, fromY, toX, toY, color) {
+            const scene = player;
+            
+            // Crear gráfico para proyectil
+            const graphics = scene.add.graphics();
+            graphics.fillStyle(color, 1);
+            graphics.fillCircle(0, 0, 10);
+            graphics.generateTexture('projectile_' + Date.now(), 20, 20);
+            
+            const projectile = scene.add.sprite(fromX, fromY, 'projectile_' + Date.now());
+            
+            // Animar proyectil
+            scene.tweens.add({
+                targets: projectile,
+                x: toX,
+                y: toY,
+                duration: 500,
+                ease: 'Power2',
+                onComplete: () => {
+                    projectile.destroy();
+                    graphics.destroy();
+                }
+            });
+
+            // Efecto de disparo
+            scene.tweens.add({
+                targets: fromX < 400 ? playerSprite : enemySprite,
+                scaleX: fromX < 400 ? 0.6 : 0.4,
+                scaleY: fromX < 400 ? 0.6 : 0.4,
+                duration: 100,
+                yoyo: true
+            });
+        }
+
+        // Animación de daño
+        function showDamage(target) {
+            const scene = player;
+            
+            scene.tweens.add({
+                targets: target,
+                alpha: 0.3,
+                duration: 100,
+                yoyo: true,
+                repeat: 2
+            });
+
+            // Shake
+            scene.tweens.add({
+                targets: target,
+                x: target.x + 10,
+                duration: 50,
+                yoyo: true,
+                repeat: 3
+            });
+        }
+
+        // Mostrar pregunta
+        function displayQuestion() {
+            const q = questions[currentQuestion];
+            
+            document.getElementById('questionBadge').textContent = `Pregunta ${currentQuestion + 1}`;
+            document.getElementById('questionCounter').textContent = `${currentQuestion + 1} / 20`;
+            document.getElementById('questionText').textContent = q.question;
+            
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.innerHTML = `<strong>${String.fromCharCode(65 + index)})</strong> ${option}`;
+                button.onclick = () => selectAnswer(index, button);
+                container.appendChild(button);
+            });
+            
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        // Seleccionar respuesta
+        function selectAnswer(selectedIndex, button) {
+            const q = questions[currentQuestion];
+            const isCorrect = selectedIndex === q.correct;
+            
+            // Deshabilitar todos los botones
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // Marcar respuesta
+            button.classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            // Marcar la correcta si se equivocó
+            if (!isCorrect) {
+                document.querySelectorAll('.option-btn')[q.correct].classList.add('correct');
+            }
+            
+            // Ejecutar acción en el juego
+            setTimeout(() => {
+                if (isCorrect) {
+                    // Jugador ataca
+                    correctAnswers++;
+                    shootProjectile(150, 200, 650, 200, 0x10b981);
+                    setTimeout(() => {
+                        enemyHealth -= 5;
+                        updateHealth();
+                        showDamage(enemySprite);
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Correcto!',
+                            text: '¡Has dañado al Tutor Oscuro!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }, 500);
+                } else {
+                    // Enemigo ataca
+                    shootProjectile(650, 200, 150, 200, 0xef4444);
+                    setTimeout(() => {
+                        playerHealth -= 5;
+                        updateHealth();
+                        showDamage(playerSprite);
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Incorrecto',
+                            text: '¡El Tutor Oscuro te ha dañado!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }, 500);
+                }
+            }, 500);
+            
+            // Habilitar botón siguiente
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        // Actualizar barras de vida
+        function updateHealth() {
+            const playerBar = document.getElementById('playerHealthBar');
+            const enemyBar = document.getElementById('enemyHealthBar');
+            const playerText = document.getElementById('playerHealthText');
+            const enemyText = document.getElementById('enemyHealthText');
+            
+            playerBar.style.width = `${playerHealth}%`;
+            enemyBar.style.width = `${enemyHealth}%`;
+            
+            playerText.textContent = `${playerHealth} / 100`;
+            enemyText.textContent = `${enemyHealth} / 100`;
+            
+            // Verificar fin del juego
+            if (enemyHealth <= 0) {
+                setTimeout(endGame, 1000);
+            }
+        }
+
+        // Siguiente pregunta
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                displayQuestion();
+            } else {
+                endGame();
+            }
+        }
+
+        // Fin del juego
+        function endGame() {
+            const victory = enemyHealth <= 0;
+            const percentage = (correctAnswers / questions.length) * 100;
+            
+            // Efecto final
+            if (victory) {
+                const scene = player;
+                scene.tweens.add({
+                    targets: enemySprite,
+                    alpha: 0,
+                    angle: 360,
+                    scale: 0,
+                    duration: 1000
+                });
+            }
+            
+            setTimeout(() => {
+                Swal.fire({
+                    icon: victory ? 'success' : 'info',
+                    title: victory ? '¡Victoria!' : '¡Juego Terminado!',
+                    html: `
+                        <h3>${victory ? '¡Has derrotado al Tutor Oscuro Fernando!' : '¡El juego ha terminado!'}</h3>
+                        <p><strong>Puntaje:</strong> ${correctAnswers} / ${questions.length}</p>
+                        <p><strong>Porcentaje:</strong> ${percentage.toFixed(1)}%</p>
+                        <p><strong>Tu salud final:</strong> ${playerHealth}</p>
+                        <p><strong>Salud del enemigo:</strong> ${enemyHealth}</p>
+                        ${victory ? '<p class="text-success">🎉 ¡Excelente trabajo, estudiante valiente!</p>' : ''}
+                    `,
+                    confirmButtonText: 'Jugar de nuevo',
+                    confirmButtonColor: '#667eea'
+                }).then(() => {
+                    location.reload();
+                });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

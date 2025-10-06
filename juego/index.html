@@ -19,32 +19,42 @@
         }
 
         .game-container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
         }
 
         .header {
             background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             text-align: center;
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
         .quiz-section {
             background: #25282e;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            min-height: 300px;
+            min-height: 200px;
         }
 
         .game-section {
             background: #1a1d23;
-            border-radius: 15px;
+            border-radius: 10px;
             padding: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
@@ -53,14 +63,14 @@
             background: #2d3139;
             border: 2px solid #667eea;
             color: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
             text-align: left;
-            font-size: 1rem;
+            font-size: 0.85rem;
         }
 
         .option-btn:hover:not(:disabled) {
@@ -85,9 +95,9 @@
 
         .health-bar-container {
             position: relative;
-            height: 30px;
+            height: 25px;
             background: #1a1d23;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
             border: 2px solid #667eea;
         }
@@ -95,12 +105,12 @@
         .health-bar {
             height: 100%;
             transition: width 0.5s ease;
-            border-radius: 13px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .health-bar.player {
@@ -122,11 +132,12 @@
         .question-number {
             background: #667eea;
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
+            padding: 4px 12px;
+            border-radius: 15px;
             font-weight: bold;
+            font-size: 0.85rem;
             display: inline-block;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         #game-canvas {
@@ -139,11 +150,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .character-name {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -160,9 +171,10 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
             border: none;
             color: white;
-            padding: 12px 30px;
-            border-radius: 10px;
+            padding: 8px 20px;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -183,7 +195,7 @@
         <!-- Header -->
         <div class="header">
             <h1><i class="fas fa-gamepad"></i> Batalla del Conocimiento</h1>
-            <p class="mb-0">Grupos 310 y 316 - Derrota al Tutor Oscuro Fernando</p>
+            <p>Grupos 310 y 316 - Derrota al Tutor Oscuro Fernando</p>
         </div>
 
         <!-- Stats Row -->
@@ -219,7 +231,7 @@
         <!-- Quiz Section -->
         <div class="quiz-section">
             <div class="question-number" id="questionBadge">Pregunta 1</div>
-            <h4 id="questionText" style="margin-bottom: 20px;">Cargando pregunta...</h4>
+            <h5 id="questionText" style="margin-bottom: 12px; font-size: 1rem;">Cargando pregunta...</h5>
             <div id="optionsContainer"></div>
             <div class="text-end mt-3">
                 <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>
@@ -235,397 +247,284 @@
     </div>
 
     <script>
-        // Variables globales
         let currentQuestion = 0;
         let playerHealth = 100;
         let enemyHealth = 100;
         let correctAnswers = 0;
         let game;
         let player;
-        let enemy;
         let playerSprite;
         let enemySprite;
+        let selectedQuestions = [];
 
-        // Pool de preguntas
-        const questions = [
-            {
-                question: "¿Cuál es el comando de Git para crear una nueva rama?",
-                options: ["git branch nueva-rama", "git create nueva-rama", "git new nueva-rama", "git make nueva-rama"],
-                correct: 0
-            },
-            {
-                question: "¿Cómo se guarda un objeto en localStorage?",
-                options: ["localStorage.save(obj)", "localStorage.setItem('key', JSON.stringify(obj))", "localStorage.put('key', obj)", "localStorage.add(obj)"],
-                correct: 1
-            },
-            {
-                question: "¿Qué método de array filtra elementos según una condición?",
-                options: ["map()", "filter()", "reduce()", "find()"],
-                correct: 1
-            },
-            {
-                question: "¿Cuántas columnas tiene el sistema de grilla de Bootstrap?",
-                options: ["10", "12", "16", "8"],
-                correct: 1
-            },
-            {
-                question: "¿Qué hace el método map() en arrays?",
-                options: ["Filtra elementos", "Transforma cada elemento", "Ordena elementos", "Suma elementos"],
-                correct: 1
-            },
-            {
-                question: "¿Cuál es el método HTTP para actualizar completamente un recurso?",
-                options: ["GET", "POST", "PUT", "PATCH"],
-                correct: 2
-            },
-            {
-                question: "¿Qué hace 'git stash'?",
-                options: ["Elimina cambios", "Guarda cambios temporalmente", "Sube cambios", "Crea una rama"],
-                correct: 1
-            },
-            {
-                question: "¿Qué devuelve localStorage.getItem() si la clave no existe?",
-                options: ["undefined", "null", "''", "false"],
-                correct: 1
-            },
-            {
-                question: "¿Qué clase de Bootstrap marca un campo como inválido?",
-                options: ["invalid", "is-invalid", "form-invalid", "error"],
-                correct: 1
-            },
-            {
-                question: "¿Qué método de FileReader convierte una imagen a Base64?",
-                options: ["readAsText()", "readAsDataURL()", "toBase64()", "convertImage()"],
-                correct: 1
-            },
-            {
-                question: "¿Cuál es el breakpoint 'md' en Bootstrap?",
-                options: ["576px", "768px", "992px", "1200px"],
-                correct: 1
-            },
-            {
-                question: "¿Qué hace el método sort() sin comparador en números?",
-                options: ["Ordena numéricamente", "Ordena alfabéticamente", "Da error", "No hace nada"],
-                correct: 1
-            },
-            {
-                question: "¿Qué comando de Git muestra el historial de commits?",
-                options: ["git history", "git log", "git commits", "git show"],
-                correct: 1
-            },
-            {
-                question: "¿Qué atributo HTML5 hace un campo obligatorio?",
-                options: ["mandatory", "required", "must-fill", "obligatory"],
-                correct: 1
-            },
-            {
-                question: "¿Cuál es la capacidad típica de localStorage?",
-                options: ["1 MB", "5-10 MB", "50 MB", "Ilimitado"],
-                correct: 1
-            },
-            {
-                question: "¿Qué hace 'git merge'?",
-                options: ["Elimina ramas", "Combina ramas", "Crea ramas", "Lista ramas"],
-                correct: 1
-            },
-            {
-                question: "¿Qué clase de Bootstrap crea un botón con solo borde?",
-                options: ["btn-border-primary", "btn-outline-primary", "btn-line-primary", "btn-ghost-primary"],
-                correct: 1
-            },
-            {
-                question: "¿Qué hace array.reduce()?",
-                options: ["Filtra elementos", "Reduce a un solo valor", "Ordena elementos", "Multiplica elementos"],
-                correct: 1
-            },
-            {
-                question: "¿Qué estado HTTP indica éxito en la creación de un recurso?",
-                options: ["200", "201", "204", "301"],
-                correct: 1
-            },
-            {
-                question: "¿Qué hace el atributo 'novalidate' en un formulario?",
-                options: ["Elimina el form", "Deshabilita validación nativa", "Valida automáticamente", "No existe"],
-                correct: 1
-            }
+        const questionBank = [
+            {q: "¿Cuál es el comando de Git para crear una nueva rama?", o: ["git branch nueva-rama", "git create nueva-rama", "git new nueva-rama", "git make nueva-rama"], c: 0},
+            {q: "¿Cómo se guarda un objeto en localStorage?", o: ["localStorage.save(obj)", "localStorage.setItem('key', JSON.stringify(obj))", "localStorage.put('key', obj)", "localStorage.add(obj)"], c: 1},
+            {q: "¿Qué método filtra elementos de un array?", o: ["map()", "filter()", "reduce()", "find()"], c: 1},
+            {q: "¿Cuántas columnas tiene Bootstrap?", o: ["10", "12", "16", "8"], c: 1},
+            {q: "¿Qué hace map() en arrays?", o: ["Filtra", "Transforma cada elemento", "Ordena", "Suma"], c: 1},
+            {q: "¿Método HTTP para actualizar un recurso?", o: ["GET", "POST", "PUT", "PATCH"], c: 2},
+            {q: "¿Qué hace 'git stash'?", o: ["Elimina cambios", "Guarda cambios temporalmente", "Sube cambios", "Crea rama"], c: 1},
+            {q: "¿Qué devuelve getItem() si no existe?", o: ["undefined", "null", "''", "false"], c: 1},
+            {q: "¿Clase Bootstrap para campo inválido?", o: ["invalid", "is-invalid", "form-invalid", "error"], c: 1},
+            {q: "¿Método FileReader para Base64?", o: ["readAsText()", "readAsDataURL()", "toBase64()", "convert()"], c: 1},
+            {q: "¿Breakpoint 'md' en Bootstrap?", o: ["576px", "768px", "992px", "1200px"], c: 1},
+            {q: "¿sort() sin comparador en números?", o: ["Ordena numéricamente", "Ordena alfabéticamente", "Da error", "No hace nada"], c: 1},
+            {q: "¿Comando Git para ver commits?", o: ["git history", "git log", "git commits", "git show"], c: 1},
+            {q: "¿Atributo para campo obligatorio?", o: ["mandatory", "required", "must-fill", "obligatory"], c: 1},
+            {q: "¿Capacidad de localStorage?", o: ["1 MB", "5-10 MB", "50 MB", "Ilimitado"], c: 1},
+            {q: "¿Qué hace 'git merge'?", o: ["Elimina ramas", "Combina ramas", "Crea ramas", "Lista ramas"], c: 1},
+            {q: "¿Clase Bootstrap para botón outline?", o: ["btn-border", "btn-outline-primary", "btn-line", "btn-ghost"], c: 1},
+            {q: "¿Qué hace reduce()?", o: ["Filtra", "Reduce a un valor", "Ordena", "Multiplica"], c: 1},
+            {q: "¿HTTP para recurso creado?", o: ["200", "201", "204", "301"], c: 1},
+            {q: "¿Qué hace 'novalidate'?", o: ["Elimina form", "Deshabilita validación nativa", "Valida auto", "No existe"], c: 1},
+            {q: "¿Git para descartar cambios?", o: ["git reset", "git discard", "git checkout .", "git clean"], c: 2},
+            {q: "¿Eliminar item de localStorage?", o: ["delete()", "remove()", "removeItem()", "clear()"], c: 2},
+            {q: "¿Qué hace forEach()?", o: ["Devuelve array", "Itera sin devolver", "Filtra", "Suma"], c: 1},
+            {q: "¿Clase Bootstrap para centrar?", o: ["center", "mx-auto", "text-center", "h-center"], c: 1},
+            {q: "¿Método HTTP idempotente?", o: ["POST", "PUT", "PATCH", "Todos"], c: 1},
+            {q: "¿Qué hace 'git pull'?", o: ["Sube", "Descarga e integra", "Crea rama", "Elimina"], c: 1},
+            {q: "¿localStorage persiste?", o: ["No", "Sí", "Solo incógnito", "Depende"], c: 1},
+            {q: "¿Qué hace find()?", o: ["Devuelve todos", "Primer elemento que cumple", "Devuelve índice", "Filtra"], c: 1},
+            {q: "¿Imagen responsive Bootstrap?", o: ["responsive", "img-fluid", "img-responsive", "fluid"], c: 1},
+            {q: "¿HTTP para 'No encontrado'?", o: ["400", "404", "500", "403"], c: 1},
+            {q: "¿Qué hace 'git status'?", o: ["Sube", "Muestra estado", "Commit", "Lista ramas"], c: 1},
+            {q: "¿Qué hace JSON.parse()?", o: ["A string", "String a objeto", "Valida", "Crea JSON"], c: 1},
+            {q: "¿Qué hace some()?", o: ["Filtra", "Verifica si alguno cumple", "Cuenta", "Suma"], c: 1},
+            {q: "¿Clase ocultar en Bootstrap?", o: ["hide", "d-none", "invisible", "hidden"], c: 1},
+            {q: "¿Qué hace DELETE en HTTP?", o: ["Crea", "Actualiza", "Elimina recurso", "Lee"], c: 2},
+            {q: "¿Qué hace 'git clone'?", o: ["Crea rama", "Descarga repositorio", "Sube", "Backup"], c: 1},
+            {q: "¿Qué hace clear()?", o: ["Elimina item", "Elimina todo", "Limpia consola", "No existe"], c: 1},
+            {q: "¿Qué hace every()?", o: ["Devuelve array", "Verifica si todos cumplen", "Filtra", "Cuenta"], c: 1},
+            {q: "¿Breakpoints Bootstrap 5?", o: ["4", "5", "6", "7"], c: 1},
+            {q: "¿HTTP para éxito?", o: ["100", "200", "300", "400"], c: 1}
         ];
 
-        // Configuración de Phaser
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function shuffleQuestion(q) {
+            const indices = shuffle([0, 1, 2, 3]);
+            return {
+                question: q.q,
+                options: indices.map(i => q.o[i]),
+                correct: indices.indexOf(q.c)
+            };
+        }
+
+        function selectQuestions() {
+            selectedQuestions = shuffle(questionBank).slice(0, 20).map(shuffleQuestion);
+        }
+
         const config = {
             type: Phaser.AUTO,
-            width: 800,
-            height: 400,
+            width: 850,
+            height: 350,
             parent: 'game-container',
             backgroundColor: '#1a1d23',
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            },
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    debug: false
-                }
-            }
+            scene: {preload, create, update}
         };
 
-        // Inicializar juego
         window.onload = function() {
+            selectQuestions();
             game = new Phaser.Game(config);
             displayQuestion();
         };
 
         function preload() {
-            // Intentar cargar imágenes
-            this.load.on('loaderror', function(file) {
-                console.log('No se pudo cargar:', file.key);
-            });
-
+            this.load.on('loaderror', f => console.log('No cargó:', f.key));
             this.load.image('background', 'images/fondo.png');
             this.load.image('player', 'images/estudiante.png');
             this.load.image('enemy', 'images/tutor.png');
         }
 
         function create() {
-            // Fondo
             if (this.textures.exists('background')) {
-                const bg = this.add.image(400, 200, 'background');
-                bg.setDisplaySize(800, 400);
+                const bg = this.add.image(425, 175, 'background');
+                bg.setDisplaySize(850, 350);
             } else {
-                // Fondo alternativo con patrón
-                const graphics = this.add.graphics();
-                graphics.fillGradientStyle(0x667eea, 0x667eea, 0x764ba2, 0x764ba2, 1);
-                graphics.fillRect(0, 0, 800, 400);
+                const g = this.add.graphics();
+                g.fillGradientStyle(0x667eea, 0x667eea, 0x764ba2, 0x764ba2, 1);
+                g.fillRect(0, 0, 850, 350);
             }
 
-            // Crear jugador (estudiante)
             if (this.textures.exists('player')) {
-                playerSprite = this.add.sprite(150, 200, 'player');
+                playerSprite = this.add.sprite(150, 175, 'player');
                 playerSprite.setScale(0.5);
             } else {
-                // Cuadrado verde para jugador
-                const graphics = this.add.graphics();
-                graphics.fillStyle(0x10b981, 1);
-                graphics.fillRoundedRect(0, 0, 80, 80, 10);
-                graphics.generateTexture('playerShape', 80, 80);
-                playerSprite = this.add.sprite(150, 200, 'playerShape');
+                const g = this.add.graphics();
+                g.fillStyle(0x10b981, 1);
+                g.fillRoundedRect(0, 0, 70, 70, 10);
+                g.generateTexture('playerShape', 70, 70);
+                playerSprite = this.add.sprite(150, 175, 'playerShape');
                 
-                // Agregar detalles
-                const face = this.add.graphics();
-                face.fillStyle(0xffffff, 1);
-                face.fillCircle(140, 190, 8);
-                face.fillCircle(160, 190, 8);
-                face.fillStyle(0x000000, 1);
-                face.fillCircle(140, 190, 4);
-                face.fillCircle(160, 190, 4);
+                const f = this.add.graphics();
+                f.fillStyle(0xffffff, 1);
+                f.fillCircle(140, 168, 7);
+                f.fillCircle(160, 168, 7);
+                f.fillStyle(0x000000, 1);
+                f.fillCircle(140, 168, 3);
+                f.fillCircle(160, 168, 3);
             }
 
-            // Crear enemigo (tutor)
             if (this.textures.exists('enemy')) {
-                enemySprite = this.add.sprite(650, 200, 'enemy');
+                enemySprite = this.add.sprite(700, 175, 'enemy');
                 enemySprite.setScale(0.5);
             } else {
-                // Cuadrado rojo para enemigo
-                const graphics = this.add.graphics();
-                graphics.fillStyle(0xef4444, 1);
-                graphics.fillRoundedRect(0, 0, 80, 80, 10);
-                graphics.generateTexture('enemyShape', 80, 80);
-                enemySprite = this.add.sprite(650, 200, 'enemyShape');
+                const g = this.add.graphics();
+                g.fillStyle(0xef4444, 1);
+                g.fillRoundedRect(0, 0, 70, 70, 10);
+                g.generateTexture('enemyShape', 70, 70);
+                enemySprite = this.add.sprite(700, 175, 'enemyShape');
                 
-                // Agregar detalles malvados
-                const face = this.add.graphics();
-                face.fillStyle(0xff0000, 1);
-                face.fillCircle(640, 190, 8);
-                face.fillCircle(660, 190, 8);
+                const f = this.add.graphics();
+                f.fillStyle(0xff0000, 1);
+                f.fillCircle(690, 168, 7);
+                f.fillCircle(710, 168, 7);
             }
 
-            // Guardar referencia al juego
             player = this;
         }
 
-        function update() {
-            // Actualización del juego si es necesario
-        }
+        function update() {}
 
-        // Crear proyectil
-        function shootProjectile(fromX, fromY, toX, toY, color) {
-            const scene = player;
+        function shoot(fx, fy, tx, ty, col) {
+            const s = player;
+            const g = s.add.graphics();
+            g.fillStyle(col, 1);
+            g.fillCircle(0, 0, 10);
+            g.lineStyle(2, 0xffffff, 0.8);
+            g.strokeCircle(0, 0, 10);
+            g.generateTexture('proj' + Date.now(), 24, 24);
             
-            // Crear gráfico para proyectil
-            const graphics = scene.add.graphics();
-            graphics.fillStyle(color, 1);
-            graphics.fillCircle(0, 0, 10);
-            graphics.generateTexture('projectile_' + Date.now(), 20, 20);
+            const p = s.add.sprite(fx, fy, 'proj' + Date.now());
             
-            const projectile = scene.add.sprite(fromX, fromY, 'projectile_' + Date.now());
-            
-            // Animar proyectil
-            scene.tweens.add({
-                targets: projectile,
-                x: toX,
-                y: toY,
-                duration: 500,
+            s.tweens.add({
+                targets: p,
+                x: tx,
+                y: ty,
+                angle: 360,
+                duration: 400,
                 ease: 'Power2',
                 onComplete: () => {
-                    projectile.destroy();
-                    graphics.destroy();
+                    p.destroy();
+                    g.destroy();
                 }
             });
 
-            // Efecto de disparo
-            scene.tweens.add({
-                targets: fromX < 400 ? playerSprite : enemySprite,
-                scaleX: fromX < 400 ? 0.6 : 0.4,
-                scaleY: fromX < 400 ? 0.6 : 0.4,
+            s.tweens.add({
+                targets: fx < 425 ? playerSprite : enemySprite,
+                scaleX: fx < 425 ? 0.6 : 0.4,
+                scaleY: fx < 425 ? 0.6 : 0.4,
                 duration: 100,
                 yoyo: true
             });
         }
 
-        // Animación de daño
-        function showDamage(target) {
-            const scene = player;
-            
-            scene.tweens.add({
-                targets: target,
+        function damage(t) {
+            player.tweens.add({
+                targets: t,
                 alpha: 0.3,
                 duration: 100,
                 yoyo: true,
                 repeat: 2
             });
 
-            // Shake
-            scene.tweens.add({
-                targets: target,
-                x: target.x + 10,
+            player.tweens.add({
+                targets: t,
+                x: t.x + 10,
                 duration: 50,
                 yoyo: true,
                 repeat: 3
             });
         }
 
-        // Mostrar pregunta
         function displayQuestion() {
-            const q = questions[currentQuestion];
-            
+            const q = selectedQuestions[currentQuestion];
             document.getElementById('questionBadge').textContent = `Pregunta ${currentQuestion + 1}`;
             document.getElementById('questionCounter').textContent = `${currentQuestion + 1} / 20`;
             document.getElementById('questionText').textContent = q.question;
             
-            const container = document.getElementById('optionsContainer');
-            container.innerHTML = '';
+            const c = document.getElementById('optionsContainer');
+            c.innerHTML = '';
             
-            q.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.className = 'option-btn';
-                button.innerHTML = `<strong>${String.fromCharCode(65 + index)})</strong> ${option}`;
-                button.onclick = () => selectAnswer(index, button);
-                container.appendChild(button);
+            q.options.forEach((opt, i) => {
+                const b = document.createElement('button');
+                b.className = 'option-btn';
+                b.innerHTML = `<strong>${String.fromCharCode(65 + i)})</strong> ${opt}`;
+                b.onclick = () => selectAnswer(i, b);
+                c.appendChild(b);
             });
             
             document.getElementById('nextBtn').disabled = true;
         }
 
-        // Seleccionar respuesta
-        function selectAnswer(selectedIndex, button) {
-            const q = questions[currentQuestion];
-            const isCorrect = selectedIndex === q.correct;
+        function selectAnswer(idx, btn) {
+            const q = selectedQuestions[currentQuestion];
+            const ok = idx === q.correct;
             
-            // Deshabilitar todos los botones
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.disabled = true;
-            });
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             
-            // Marcar respuesta
-            button.classList.add(isCorrect ? 'correct' : 'incorrect');
+            btn.classList.add(ok ? 'correct' : 'incorrect');
             
-            // Marcar la correcta si se equivocó
-            if (!isCorrect) {
+            if (!ok) {
                 document.querySelectorAll('.option-btn')[q.correct].classList.add('correct');
             }
             
-            // Ejecutar acción en el juego
             setTimeout(() => {
-                if (isCorrect) {
-                    // Jugador ataca
+                if (ok) {
                     correctAnswers++;
-                    shootProjectile(150, 200, 650, 200, 0x10b981);
+                    shoot(150, 175, 700, 175, 0x10b981);
                     setTimeout(() => {
                         enemyHealth -= 5;
                         updateHealth();
-                        showDamage(enemySprite);
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Correcto!',
-                            text: '¡Has dañado al Tutor Oscuro!',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+                        damage(enemySprite);
+                        Swal.fire({icon: 'success', title: '¡Correcto!', text: 'Dañaste al tutor', timer: 1500, showConfirmButton: false});
                     }, 500);
                 } else {
-                    // Enemigo ataca
-                    shootProjectile(650, 200, 150, 200, 0xef4444);
+                    shoot(700, 175, 150, 175, 0xef4444);
                     setTimeout(() => {
                         playerHealth -= 5;
                         updateHealth();
-                        showDamage(playerSprite);
-                        
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Incorrecto',
-                            text: '¡El Tutor Oscuro te ha dañado!',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+                        damage(playerSprite);
+                        Swal.fire({icon: 'error', title: 'Incorrecto', text: 'El tutor te dañó', timer: 1500, showConfirmButton: false});
                     }, 500);
                 }
             }, 500);
             
-            // Habilitar botón siguiente
             document.getElementById('nextBtn').disabled = false;
         }
 
-        // Actualizar barras de vida
         function updateHealth() {
-            const playerBar = document.getElementById('playerHealthBar');
-            const enemyBar = document.getElementById('enemyHealthBar');
-            const playerText = document.getElementById('playerHealthText');
-            const enemyText = document.getElementById('enemyHealthText');
+            document.getElementById('playerHealthBar').style.width = `${playerHealth}%`;
+            document.getElementById('enemyHealthBar').style.width = `${enemyHealth}%`;
+            document.getElementById('playerHealthText').textContent = `${playerHealth} / 100`;
+            document.getElementById('enemyHealthText').textContent = `${enemyHealth} / 100`;
             
-            playerBar.style.width = `${playerHealth}%`;
-            enemyBar.style.width = `${enemyHealth}%`;
-            
-            playerText.textContent = `${playerHealth} / 100`;
-            enemyText.textContent = `${enemyHealth} / 100`;
-            
-            // Verificar fin del juego
-            if (enemyHealth <= 0) {
-                setTimeout(endGame, 1000);
-            }
+            if (enemyHealth <= 0) setTimeout(endGame, 1000);
         }
 
-        // Siguiente pregunta
         function nextQuestion() {
             currentQuestion++;
-            
-            if (currentQuestion < questions.length) {
+            if (currentQuestion < selectedQuestions.length) {
                 displayQuestion();
             } else {
                 endGame();
             }
         }
 
-        // Fin del juego
         function endGame() {
-            const victory = enemyHealth <= 0;
-            const percentage = (correctAnswers / questions.length) * 100;
+            const win = enemyHealth <= 0;
+            const pct = (correctAnswers / 20) * 100;
             
-            // Efecto final
-            if (victory) {
-                const scene = player;
-                scene.tweens.add({
+            if (win) {
+                player.tweens.add({
                     targets: enemySprite,
                     alpha: 0,
                     angle: 360,
@@ -636,21 +535,19 @@
             
             setTimeout(() => {
                 Swal.fire({
-                    icon: victory ? 'success' : 'info',
-                    title: victory ? '¡Victoria!' : '¡Juego Terminado!',
+                    icon: win ? 'success' : 'info',
+                    title: win ? '¡Victoria!' : 'Fin',
                     html: `
-                        <h3>${victory ? '¡Has derrotado al Tutor Oscuro Fernando!' : '¡El juego ha terminado!'}</h3>
-                        <p><strong>Puntaje:</strong> ${correctAnswers} / ${questions.length}</p>
-                        <p><strong>Porcentaje:</strong> ${percentage.toFixed(1)}%</p>
-                        <p><strong>Tu salud final:</strong> ${playerHealth}</p>
-                        <p><strong>Salud del enemigo:</strong> ${enemyHealth}</p>
-                        ${victory ? '<p class="text-success">🎉 ¡Excelente trabajo, estudiante valiente!</p>' : ''}
+                        <h3>${win ? '¡Derrotaste al Tutor Oscuro!' : 'Juego terminado'}</h3>
+                        <p><strong>Puntaje:</strong> ${correctAnswers} / 20</p>
+                        <p><strong>Porcentaje:</strong> ${pct.toFixed(1)}%</p>
+                        <p><strong>Tu salud:</strong> ${playerHealth}</p>
+                        <p><strong>Salud enemigo:</strong> ${enemyHealth}</p>
+                        ${win ? '<p class="text-success">🎉 ¡Excelente trabajo!</p>' : ''}
                     `,
                     confirmButtonText: 'Jugar de nuevo',
                     confirmButtonColor: '#667eea'
-                }).then(() => {
-                    location.reload();
-                });
+                }).then(() => location.reload());
             }, 1000);
         }
     </script>

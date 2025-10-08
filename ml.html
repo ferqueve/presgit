@@ -65,7 +65,7 @@
                 <h1 class="mb-3">Quiz de Machine Learning</h1>
                 <p class="lead mb-4">Pon a prueba tus conocimientos sobre fundamentos de ML, algoritmos, métricas y más.</p>
                 <p class="text-muted mb-4">
-                    <i class="fas fa-info-circle"></i> 20 preguntas aleatorias de un banco extenso
+                    <i class="fas fa-info-circle"></i> <span id="totalQuestions"></span> preguntas completas del banco
                 </p>
                 <button class="btn btn-primary btn-lg" onclick="startQuiz()">
                     <i class="fas fa-play"></i> Comenzar Quiz
@@ -76,7 +76,7 @@
         <div id="quizScreen" class="card p-4 animate__animated animate__fadeIn" style="display: none;">
             <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5>Pregunta <span id="currentQuestion">1</span> de 20</h5>
+                    <h5>Pregunta <span id="currentQuestion">1</span> de <span id="totalQuestionsQuiz"></span></h5>
                     <span class="badge bg-primary">Puntos: <span id="score">0</span></span>
                 </div>
                 <div class="progress">
@@ -113,6 +113,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <script>
+        // Mostrar total de preguntas al cargar
+        window.addEventListener('DOMContentLoaded', function() {
+            // Se actualizará después de definir questionBank
+        });
+
         // Banco extenso de preguntas
         const questionBank = [
             {
@@ -794,8 +799,455 @@
                 ],
                 correct: 0,
                 explanation: "Fine-tuning: 1) Tomar modelo pre-entrenado (ej: en ImageNet), 2) Congelar capas iniciales (características generales), 3) Reentrenar capas finales + nueva capa de clasificación en dataset específico con learning rate bajo. Aprovecha transfer learning efectivamente."
+            },
+            // REGRESIÓN LINEAL
+            {
+                question: "¿Cuál es el supuesto de homocedasticidad en regresión lineal?",
+                options: [
+                    "La varianza de los residuos es constante",
+                    "Los residuos siguen una distribución normal",
+                    "Las variables independientes no están correlacionadas",
+                    "La relación es lineal"
+                ],
+                correct: 0,
+                explanation: "Homocedasticidad significa que la varianza de los errores es constante para todos los valores de X. Si se viola (heterocedasticidad), los intervalos de confianza y tests de hipótesis no son confiables. Se detecta con gráficos de residuos vs predicciones o test de Breusch-Pagan."
+            },
+            {
+                question: "¿Qué mide el coeficiente R² (R cuadrado)?",
+                options: [
+                    "Proporción de varianza explicada por el modelo",
+                    "Error medio del modelo",
+                    "Correlación entre variables",
+                    "Número de outliers"
+                ],
+                correct: 0,
+                explanation: "R² = 1 - (SSR/SST) mide qué porcentaje de la variabilidad de Y es explicada por el modelo. R²=1 perfecto, R²=0 no explica nada. CUIDADO: R² siempre aumenta al agregar variables, usa R² ajustado para comparar modelos con diferente número de predictores."
+            },
+            {
+                question: "En regresión lineal múltiple, ¿qué es multicolinealidad?",
+                options: [
+                    "Alta correlación entre variables independientes",
+                    "Relación no lineal entre X e Y",
+                    "Presencia de outliers",
+                    "Variables con diferentes escalas"
+                ],
+                correct: 0,
+                explanation: "Multicolinealidad ocurre cuando predictores están altamente correlacionados, haciendo inestables los coeficientes (pequeños cambios en datos → grandes cambios en β). Detectar: VIF (Variance Inflation Factor) > 10. Soluciones: eliminar variables, PCA, regularización (Ridge)."
+            },
+            {
+                question: "¿Qué supuesto viola si los residuos muestran un patrón en forma de embudo?",
+                options: [
+                    "Homocedasticidad (heterocedasticidad presente)",
+                    "Normalidad",
+                    "Independencia",
+                    "Linealidad"
+                ],
+                correct: 0,
+                explanation: "Un patrón de embudo en residuos vs predicciones indica heterocedasticidad: la varianza de errores aumenta/disminuye con las predicciones. Soluciones: transformaciones (log, sqrt), WLS (Weighted Least Squares), modelos robustos."
+            },
+            {
+                question: "En regresión lineal, ¿cómo interpretas un coeficiente β₁ = 3.5?",
+                options: [
+                    "Por cada unidad de aumento en X₁, Y aumenta 3.5 (manteniendo otros constantes)",
+                    "X₁ explica 3.5% de la varianza",
+                    "El error del modelo es 3.5",
+                    "La correlación con Y es 3.5"
+                ],
+                correct: 0,
+                explanation: "Los coeficientes en regresión lineal se interpretan como el cambio en Y por cada unidad de cambio en Xi, manteniendo todas las demás variables constantes (ceteris paribus). La magnitud depende de las unidades de medición."
+            },
+            {
+                question: "¿Cuándo usarías regresión polinomial en lugar de lineal simple?",
+                options: [
+                    "Cuando la relación entre X e Y es curvilínea",
+                    "Cuando tienes muchas variables",
+                    "Cuando hay valores faltantes",
+                    "Cuando las clases están desbalanceadas"
+                ],
+                correct: 0,
+                explanation: "Regresión polinomial (Y = β₀ + β₁X + β₂X² + ... + βₙXⁿ) modela relaciones no lineales. Por ejemplo: rendimiento vs esfuerzo (curva U invertida). Cuidado: polinomios de alto grado pueden causar overfitting."
+            },
+            {
+                question: "¿Qué detecta un gráfico Q-Q (Quantile-Quantile) de residuos?",
+                options: [
+                    "Si los residuos siguen distribución normal",
+                    "Heterocedasticidad",
+                    "Multicolinealidad",
+                    "Outliers en variables independientes"
+                ],
+                correct: 0,
+                explanation: "El gráfico Q-Q compara los cuantiles de los residuos con los de una distribución normal teórica. Si los puntos se alinean en la diagonal, los residuos son aproximadamente normales. Desviaciones indican violación del supuesto de normalidad."
+            },
+            {
+                question: "El error estándar de los coeficientes en regresión mide:",
+                options: [
+                    "La incertidumbre/variabilidad en la estimación del coeficiente",
+                    "El error de predicción del modelo",
+                    "La correlación entre variables",
+                    "El número de outliers"
+                ],
+                correct: 0,
+                explanation: "El error estándar (SE) de β indica qué tan precisa es nuestra estimación. Se usa para construir intervalos de confianza (β ± t*SE) y realizar tests de hipótesis (t = β/SE). Menor SE = estimación más precisa."
+            },
+            {
+                question: "¿Qué indica un p-valor < 0.05 para un coeficiente en regresión?",
+                options: [
+                    "La variable es estadísticamente significativa al 95% de confianza",
+                    "El modelo explica 5% de la varianza",
+                    "Hay un error del 5% en los datos",
+                    "El R² es menor a 0.05"
+                ],
+                correct: 0,
+                explanation: "p-valor < 0.05 indica que rechazamos la hipótesis nula (β=0) con 95% de confianza, sugiriendo que la variable tiene un efecto estadísticamente significativo en Y. PERO significancia estadística ≠ significancia práctica. Considera también magnitud del efecto."
+            },
+            // REGRESIÓN LOGÍSTICA
+            {
+                question: "En regresión logística, ¿qué representa exp(β₁)?",
+                options: [
+                    "El odds ratio: cuánto cambian las odds al aumentar X₁ una unidad",
+                    "La probabilidad de la clase positiva",
+                    "El error del modelo",
+                    "La correlación con Y"
+                ],
+                correct: 0,
+                explanation: "exp(β) es el odds ratio (OR). Si β₁=0.5, OR=e^0.5≈1.65: las odds de éxito aumentan 65% por cada unidad de X₁. OR>1 efecto positivo, OR<1 negativo, OR=1 sin efecto. Muy útil para interpretación en medicina/ciencias sociales."
+            },
+            {
+                question: "La función de pérdida en regresión logística es:",
+                options: [
+                    "Log-loss (entropía cruzada binaria)",
+                    "Error cuadrático medio (MSE)",
+                    "Error absoluto medio (MAE)",
+                    "Hinge loss"
+                ],
+                correct: 0,
+                explanation: "Regresión logística usa log-loss: -[y*log(p) + (1-y)*log(1-p)]. Penaliza fuertemente predicciones confiadas e incorrectas. No usa MSE porque crearía superficie no convexa con múltiples mínimos locales, dificultando optimización."
+            },
+            {
+                question: "¿Cuál es la principal diferencia entre regresión lineal y logística?",
+                options: [
+                    "Lineal predice valores continuos, logística predice probabilidades/clases",
+                    "Logística es más rápida de entrenar",
+                    "Lineal requiere más datos",
+                    "Son el mismo algoritmo"
+                ],
+                correct: 0,
+                explanation: "Regresión lineal: Y continua, predice valores (ej: precio casas). Regresión logística: clasificación, predice P(Y=1) mediante función sigmoide, luego usa umbral para asignar clase. Aunque comparten 'regresión' en el nombre, resuelven problemas diferentes."
+            },
+            {
+                question: "Aplicación real de regresión logística:",
+                options: [
+                    "Predecir si un cliente cancelará su suscripción (churn)",
+                    "Predecir el precio exacto de una casa",
+                    "Agrupar clientes similares",
+                    "Reducir dimensiones de imágenes"
+                ],
+                correct: 0,
+                explanation: "Regresión logística es ideal para clasificación binaria: churn prediction, aprobación de créditos, diagnóstico médico (enfermo/sano), email spam, fraude en tarjetas, click-through rate. Es interpretable (puedes explicar el impacto de cada variable) y eficiente."
+            },
+            {
+                question: "¿Por qué normalizar características antes de regresión logística con regularización?",
+                options: [
+                    "Para que la penalización afecte igualmente a todos los coeficientes",
+                    "Para que el modelo converja",
+                    "No es necesario normalizar",
+                    "Para mejorar la precisión únicamente"
+                ],
+                correct: 0,
+                explanation: "Sin normalización, variables con rangos grandes dominan la penalización L1/L2, sesgando qué coeficientes se reducen. Normalizar (StandardScaler, MinMaxScaler) pone todas las variables en la misma escala, haciendo que la regularización trate a todas equitativamente."
+            },
+            {
+                question: "En regresión logística multiclase, ¿qué estrategia usa One-vs-Rest (OvR)?",
+                options: [
+                    "Entrena un clasificador binario para cada clase vs todas las demás",
+                    "Agrupa todas las clases en una sola",
+                    "Usa solo dos clases siempre",
+                    "Elimina clases minoritarias"
+                ],
+                correct: 0,
+                explanation: "One-vs-Rest (también llamado One-vs-All): para K clases, entrena K clasificadores binarios. Cada uno distingue una clase de todas las demás. Predicción: clase con mayor confianza/probabilidad. Alternativa: One-vs-One (K*(K-1)/2 clasificadores)."
+            },
+            {
+                question: "¿Qué significa que un modelo de regresión logística está 'calibrado'?",
+                options: [
+                    "Sus probabilidades predichas reflejan la verdadera probabilidad de ocurrencia",
+                    "Tiene alta precisión",
+                    "No tiene overfitting",
+                    "Usa regularización"
+                ],
+                correct: 0,
+                explanation: "Un modelo calibrado: si predice P=0.7 para 100 casos, aproximadamente 70 son positivos. Se evalúa con calibration plots o Brier score. Importante en medicina/finanzas donde las probabilidades exactas importan. Platt scaling o isotonic regression pueden calibrar modelos."
+            },
+            // K-NEAREST NEIGHBORS (KNN)
+            {
+                question: "En K-NN, ¿por qué es crítico normalizar las características?",
+                options: [
+                    "Evita que variables con rangos grandes dominen el cálculo de distancia",
+                    "Acelera el entrenamiento",
+                    "Reduce el número de vecinos necesarios",
+                    "Elimina la necesidad de elegir K"
+                ],
+                correct: 0,
+                explanation: "K-NN usa distancia (típicamente euclidiana). Sin normalización, una variable en escala 0-1000 dominará sobre otra en 0-1. Ejemplo: edad (0-100) vs ingreso ($0-$1M) → ingreso domina. Solución: StandardScaler o MinMaxScaler antes de KNN."
+            },
+            {
+                question: "¿Cuál es una DESVENTAJA principal de K-NN?",
+                options: [
+                    "Lento en predicción con datasets grandes (no lazy learning en training)",
+                    "No puede manejar datos categóricos",
+                    "Solo funciona para clasificación binaria",
+                    "Siempre hace overfitting"
+                ],
+                correct: 0,
+                explanation: "K-NN es 'lazy learner': no hay entrenamiento, pero predicción es O(n*d) donde n=muestras, d=dimensiones. Debe calcular distancia a TODOS los puntos. Soluciones: algoritmos rápidos (Ball Tree, KD-Tree), reducción de dimensiones, sampling del dataset."
+            },
+            {
+                question: "¿Qué métrica de distancia es más robusta a outliers en K-NN?",
+                options: [
+                    "Manhattan (L1)",
+                    "Euclidiana (L2)",
+                    "Distancia de Chebyshev",
+                    "Todas son igualmente sensibles"
+                ],
+                correct: 0,
+                explanation: "Manhattan (suma de diferencias absolutas) es más robusta que Euclidiana (que eleva al cuadrado las diferencias, amplificando outliers). Otras opciones: Minkowski (generalización), Hamming (categóricas), Cosine (text/documentos). Elegir según tipo de datos y problema."
+            },
+            {
+                question: "En K-NN para regresión, la predicción es:",
+                options: [
+                    "El promedio de los valores de los K vecinos más cercanos",
+                    "El valor del vecino más cercano únicamente",
+                    "La mediana de todos los datos",
+                    "Una combinación lineal de todas las características"
+                ],
+                correct: 0,
+                explanation: "K-NN regresión: predicción = promedio (o mediana) de los K vecinos. Variante: weighted K-NN (vecinos más cercanos tienen más peso, ej: 1/distancia). K-NN clasificación usa votación mayoritaria (o ponderada por distancia)."
+            },
+            {
+                question: "¿Cómo afecta la 'maldición de la dimensionalidad' a K-NN?",
+                options: [
+                    "En alta dimensión, todos los puntos están casi equidistantes",
+                    "Requiere más vecinos K",
+                    "Mejora la precisión automáticamente",
+                    "No afecta a K-NN"
+                ],
+                correct: 0,
+                explanation: "En espacios de alta dimensión, las distancias se vuelven similares, haciendo que 'vecinos cercanos' no sean realmente cercanos en sentido intuitivo. Solución: reducción de dimensionalidad (PCA, feature selection), usar algoritmos menos sensibles a dimensión."
+            },
+            {
+                question: "Aplicación real de K-NN:",
+                options: [
+                    "Sistemas de recomendación (encontrar usuarios/productos similares)",
+                    "Predicción de series temporales largas",
+                    "Generación de texto",
+                    "Compresión de imágenes"
+                ],
+                correct: 0,
+                explanation: "K-NN es excelente para: sistemas de recomendación (Netflix: usuarios similares), reconocimiento de patrones, clasificación de imágenes (simple baseline), detección de anomalías (puntos sin vecinos cercanos), imputación de datos faltantes (usar vecinos)."
+            },
+            {
+                question: "¿Por qué K debe ser impar en K-NN para clasificación binaria?",
+                options: [
+                    "Para evitar empates en la votación",
+                    "Porque el algoritmo solo acepta impares",
+                    "Para mejorar la precisión",
+                    "No hay razón, puede ser par"
+                ],
+                correct: 0,
+                explanation: "K impar evita empates en votación binaria (ej: K=4 → 2 vs 2). Sin embargo, en multiclase los empates pueden ocurrir igual. Solución a empates: usar distancias ponderadas, reducir a K-1, aleatorio. En práctica, elegir K por cross-validation."
+            },
+            {
+                question: "¿Cuál es el 'entrenamiento' en K-NN?",
+                options: [
+                    "Solo almacenar los datos (no hay entrenamiento real)",
+                    "Calcular centroides como K-Means",
+                    "Ajustar pesos mediante gradient descent",
+                    "Construir un árbol de decisión"
+                ],
+                correct: 0,
+                explanation: "K-NN es 'instance-based' o 'memory-based': el 'entrenamiento' es simplemente guardar los datos. Todo el trabajo ocurre en predicción (calcular distancias). Ventaja: adapta instantáneamente a nuevos datos. Desventaja: requiere almacenar todo el dataset."
+            },
+            // APLICACIONES REALES
+            {
+                question: "¿Qué algoritmo usarías para segmentar clientes en grupos de comportamiento similar?",
+                options: [
+                    "K-Means o clustering jerárquico",
+                    "Regresión lineal",
+                    "Regresión logística",
+                    "Decision Trees para clasificación"
+                ],
+                correct: 0,
+                explanation: "Segmentación de clientes es clustering no supervisado: agrupa clientes por características similares (RFM: recency, frequency, monetary) sin etiquetas predefinidas. K-Means es popular por eficiencia. Luego analiza cada segmento y crea estrategias de marketing personalizadas."
+            },
+            {
+                question: "Para detectar transacciones fraudulentas con tarjeta de crédito:",
+                options: [
+                    "Clasificación con clases desbalanceadas (muy pocos fraudes)",
+                    "Regresión para predecir monto",
+                    "Clustering sin supervisión",
+                    "Reducción de dimensionalidad únicamente"
+                ],
+                correct: 0,
+                explanation: "Detección de fraude: clasificación binaria MUY desbalanceada (<1% fraudes). Técnicas: 1) SMOTE/undersampling, 2) usar F1/Recall en lugar de Accuracy, 3) Isolation Forest/autoencoders para anomalías, 4) ensemble methods (XGBoost), 5) cost-sensitive learning (penalizar más FN)."
+            },
+            {
+                question: "Para un sistema de reconocimiento facial, ¿qué arquitectura es más apropiada?",
+                options: [
+                    "Redes Neuronales Convolucionales (CNN)",
+                    "Regresión logística simple",
+                    "K-Means clustering",
+                    "Árboles de decisión"
+                ],
+                correct: 0,
+                explanation: "Reconocimiento facial usa CNNs profundas (FaceNet, DeepFace, VGGFace): extraen características faciales (embeddings) invariantes a iluminación, pose, expresión. Típicamente: CNN pre-entrenada + triplet loss o clasificación multiclase. Transfer learning común con modelos pre-entrenados."
+            },
+            {
+                question: "Para predecir la demanda de productos en retail (forecasting):",
+                options: [
+                    "Modelos de series temporales (ARIMA, Prophet, LSTM)",
+                    "K-NN sin considerar el tiempo",
+                    "Clustering de productos",
+                    "PCA para reducir productos"
+                ],
+                correct: 0,
+                explanation: "Forecasting de demanda requiere modelos de series temporales que capturen: tendencias, estacionalidad, componentes cíclicos. Opciones: ARIMA (clásico), Prophet (Facebook, maneja estacionalidad/holidays), LSTM/GRU (deep learning para patrones complejos), XGBoost con features temporales."
+            },
+            {
+                question: "En diagnóstico médico automatizado, ¿qué métrica priorizar?",
+                options: [
+                    "Recall (Sensibilidad) para no perder casos positivos",
+                    "Precision únicamente",
+                    "Accuracy total",
+                    "Velocidad de predicción"
+                ],
+                correct: 0,
+                explanation: "En medicina, un Falso Negativo (no detectar enfermedad) es típicamente más costoso que Falso Positivo (más pruebas). Por ello, priorizar Recall alto asegura detectar la mayoría de casos. Luego, segunda etapa con más pruebas puede filtrar FP. Balance con Precision vía F1 o F2 (pondera más Recall)."
+            },
+            {
+                question: "Para análisis de sentimiento en redes sociales:",
+                options: [
+                    "Procesamiento de Lenguaje Natural (BERT, transformers, o Naive Bayes)",
+                    "K-Means en el texto directo",
+                    "Regresión lineal en palabras",
+                    "DBSCAN clustering"
+                ],
+                correct: 0,
+                explanation: "Análisis de sentimiento (positivo/negativo/neutral): 1) Clásico: TF-IDF + Naive Bayes/SVM, 2) Moderno: BERT, RoBERTa (transformers pre-entrenados), 3) Aspectos: detectar sobre qué tema es el sentimiento. Desafíos: sarcasmo, contexto, emojis, slang."
+            },
+            {
+                question: "Para un sistema de filtrado de spam de email:",
+                options: [
+                    "Naive Bayes (clásico) o modelos de texto modernos",
+                    "Regresión lineal en longitud del email",
+                    "K-Means para agrupar emails",
+                    "PCA en palabras"
+                ],
+                correct: 0,
+                explanation: "Filtros de spam: Naive Bayes Multinomial es clásico y efectivo (asume independencia de palabras dado spam/no-spam). Features: frecuencia de palabras, TF-IDF, metadatos (remitente, hora). Modernos: BERT, ensemble methods. Desafío: adversarial attacks (spammers evaden filtros)."
+            },
+            {
+                question: "En motores de búsqueda, para rankear resultados por relevancia:",
+                options: [
+                    "Learning to Rank (LambdaMART, RankNet) con múltiples features",
+                    "Ordenar alfabéticamente",
+                    "K-Means clustering",
+                    "Regresión lineal simple"
+                ],
+                correct: 0,
+                explanation: "Learning to Rank usa ML para ordenar resultados: combina señales (TF-IDF, PageRank, clickthrough rate, frescura, ubicación). Enfoques: pointwise (score individual), pairwise (comparaciones), listwise (optimiza lista completa). Métricas: NDCG, MAP. Ejemplos: Google, Bing."
+            },
+            {
+                question: "Para detección de objetos en tiempo real (ej: autos autónomos):",
+                options: [
+                    "YOLO, SSD, o Faster R-CNN (CNNs especializadas)",
+                    "Regresión logística en píxeles",
+                    "K-Means en colores",
+                    "Decision Trees simples"
+                ],
+                correct: 0,
+                explanation: "Detección de objetos en tiempo real: YOLO (You Only Look Once) divide imagen en grid y predice bounding boxes + clases simultáneamente. Alternativas: SSD, Faster R-CNN (más preciso, más lento). Requiere CNNs profundas, GPUs, y entrenamiento con datasets anotados (COCO, ImageNet)."
+            },
+            {
+                question: "Para predecir el precio de una vivienda:",
+                options: [
+                    "Regresión (lineal, Ridge, Lasso, Random Forest, XGBoost)",
+                    "Clasificación en categorías de precio",
+                    "Clustering de casas similares",
+                    "K-NN sin features numéricas"
+                ],
+                correct: 0,
+                explanation: "Predicción de precios es regresión: predice valor continuo. Features: m², ubicación, # habitaciones, año construcción, amenidades. Modelos: regresión lineal (baseline interpretable), Ridge/Lasso (regularización), Random Forest/XGBoost (capturan no-linealidades), ensembles. Métrica: RMSE, MAE."
+            },
+            {
+                question: "En sistemas de traducción automática modernos:",
+                options: [
+                    "Transformers (attention mechanisms) como Google Translate",
+                    "Regresión logística palabra por palabra",
+                    "K-Means en vocabulario",
+                    "Decision Trees para sintaxis"
+                ],
+                correct: 0,
+                explanation: "Traducción automática moderna usa Transformers (BERT, GPT, T5): arquitectura encoder-decoder con attention mechanisms que captura contexto largo y relaciones entre palabras. Supera RNNs/LSTMs previas. Se entrena en corpus paralelos masivos. Google Translate, DeepL usan variantes de transformers."
+            },
+            {
+                question: "Para optimizar rutas de entrega (ej: logística):",
+                options: [
+                    "Algoritmos de optimización (genéticos, simulated annealing) + ML para predecir tiempos",
+                    "Solo K-Means para agrupar",
+                    "Regresión lineal únicamente",
+                    "Clustering jerárquico"
+                ],
+                correct: 0,
+                explanation: "Optimización de rutas (Traveling Salesman Problem): algoritmos heurísticos (genéticos, ant colony, simulated annealing) + ML para predecir: tiempos de viaje (considerando tráfico), demanda, ventanas de tiempo. Reinforcement Learning también se usa (DeepMind para Google Maps)."
+            },
+            {
+                question: "En un chatbot conversacional inteligente:",
+                options: [
+                    "LLMs (GPT, BERT) + NLU para entender intención y contexto",
+                    "Reglas if-else únicamente",
+                    "K-Means para agrupar preguntas",
+                    "Regresión para predecir respuestas"
+                ],
+                correct: 0,
+                explanation: "Chatbots modernos: 1) NLU (Natural Language Understanding) para detectar intención y entidades, 2) Gestión de diálogo (context tracking), 3) Generación de respuesta (templates o LLMs como GPT). Frameworks: Rasa, Dialogflow, Azure Bot. Desafíos: ambigüedad, contexto multi-turno."
+            },
+            {
+                question: "Para predecir churn (abandono) de clientes en telecom:",
+                options: [
+                    "Clasificación binaria con features de uso, satisfacción, demografía",
+                    "Regresión del tiempo hasta abandono",
+                    "Clustering sin etiquetas",
+                    "Análisis de correlación únicamente"
+                ],
+                correct: 0,
+                explanation: "Churn prediction: clasificación binaria (se va / se queda). Features: uso de servicios, quejas, cambios de plan, competencia, satisfacción (NPS), demografía. Modelos: logística (interpretable), Random Forest, XGBoost. Acción: campaña de retención a clientes de alto riesgo. Métrica: Recall (detectar churners)."
+            },
+            {
+                question: "En procesamiento de imágenes médicas (radiografías, MRIs):",
+                options: [
+                    "CNNs profundas (ResNet, U-Net para segmentación)",
+                    "Regresión lineal en píxeles",
+                    "K-Means para clasificar imágenes",
+                    "Árboles de decisión en intensidades"
+                ],
+                correct: 0,
+                explanation: "Imágenes médicas: CNNs para clasificación (cáncer/no cáncer), segmentación (U-Net identifica tumores), detección. Desafíos: pocos datos etiquetados (transfer learning), alta dimensión, interpretabilidad crítica (saliency maps, GradCAM). Regulación estricta (FDA approval)."
+            },
+            {
+                question: "Para predecir fallas en maquinaria industrial (mantenimiento predictivo):",
+                options: [
+                    "Series temporales + clasificación en sensores IoT",
+                    "Clustering de máquinas similares",
+                    "Regresión simple sin considerar tiempo",
+                    "PCA para visualizar máquinas"
+                ],
+                correct: 0,
+                explanation: "Mantenimiento predictivo: sensores IoT (vibración, temperatura, presión) → modelos de series temporales detectan anomalías o predicen RUL (Remaining Useful Life). Técnicas: LSTM para secuencias, Isolation Forest para anomalías, clasificación (va a fallar sí/no). Ahorra costos vs mantenimiento preventivo programado."
             }
         ];
+
+        // Actualizar total de preguntas en pantalla de inicio
+        document.getElementById('totalQuestions').textContent = questionBank.length;
 
         let currentQuiz = [];
         let currentQuestionIndex = 0;
@@ -812,7 +1264,7 @@
         }
 
         function startQuiz() {
-            currentQuiz = shuffleArray(questionBank).slice(0, 20);
+            currentQuiz = shuffleArray(questionBank); // Usa TODAS las preguntas
             currentQuestionIndex = 0;
             score = 0;
             answered = false;
@@ -820,6 +1272,7 @@
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('quizScreen').style.display = 'block';
             document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('totalQuestionsQuiz').textContent = currentQuiz.length;
 
             loadQuestion();
         }

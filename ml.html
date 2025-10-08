@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Machine Learning</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .quiz-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .option-btn {
+            text-align: left;
+            margin: 10px 0;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        .option-btn:hover {
+            transform: translateX(5px);
+            border-color: #667eea;
+        }
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        .option-btn.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        .progress {
+            height: 25px;
+            border-radius: 10px;
+        }
+        .explanation-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+        .score-badge {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="startScreen" class="card p-4 animate__animated animate__fadeIn">
+            <div class="text-center">
+                <i class="fas fa-brain fa-5x text-primary mb-4"></i>
+                <h1 class="mb-3">Quiz de Machine Learning</h1>
+                <p class="lead mb-4">Pon a prueba tus conocimientos sobre fundamentos de ML, algoritmos, métricas y más.</p>
+                <p class="text-muted mb-4">
+                    <i class="fas fa-info-circle"></i> 20 preguntas aleatorias de un banco extenso
+                </p>
+                <button class="btn btn-primary btn-lg" onclick="startQuiz()">
+                    <i class="fas fa-play"></i> Comenzar Quiz
+                </button>
+            </div>
+        </div>
+
+        <div id="quizScreen" class="card p-4 animate__animated animate__fadeIn" style="display: none;">
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5>Pregunta <span id="currentQuestion">1</span> de 20</h5>
+                    <span class="badge bg-primary">Puntos: <span id="score">0</span></span>
+                </div>
+                <div class="progress">
+                    <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 5%"></div>
+                </div>
+            </div>
+
+            <div id="questionCard">
+                <h4 class="mb-4" id="questionText"></h4>
+                <div id="optionsContainer"></div>
+                <div id="explanationContainer" style="display: none;"></div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button id="nextBtn" class="btn btn-primary" onclick="nextQuestion()" style="display: none;">
+                    Siguiente Pregunta <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="resultScreen" class="card p-4 animate__animated animate__fadeIn" style="display: none;">
+            <div class="text-center">
+                <i class="fas fa-trophy fa-5x text-warning mb-4"></i>
+                <h2 class="mb-4">¡Quiz Completado!</h2>
+                <div class="score-badge mb-4" id="finalScore"></div>
+                <div id="performance" class="mb-4"></div>
+                <button class="btn btn-primary btn-lg" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> Intentar de Nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+    <script>
+        // Banco extenso de preguntas
+        const questionBank = [
+            {
+                question: "En una matriz de confusión, ¿qué representa un Verdadero Positivo (TP)?",
+                options: [
+                    "Casos positivos predichos correctamente como positivos",
+                    "Casos negativos predichos incorrectamente como positivos",
+                    "Casos positivos predichos incorrectamente como negativos",
+                    "Casos negativos predichos correctamente como negativos"
+                ],
+                correct: 0,
+                explanation: "Un Verdadero Positivo (TP) ocurre cuando el modelo predice la clase positiva y la instancia realmente pertenece a la clase positiva. Es un acierto en la predicción de casos positivos."
+            },
+            {
+                question: "¿Qué métrica es más apropiada cuando las clases están desbalanceadas?",
+                options: [
+                    "Accuracy (Exactitud)",
+                    "F1-Score",
+                    "Tiempo de entrenamiento",
+                    "Número de características"
+                ],
+                correct: 1,
+                explanation: "El F1-Score es la media armónica entre Precision y Recall, lo que lo hace ideal para datos desbalanceados. El Accuracy puede ser engañoso cuando una clase domina el dataset, ya que un modelo que siempre predice la clase mayoritaria tendría alta exactitud pero sería inútil."
+            },
+            {
+                question: "¿Qué es un Falso Positivo (FP)?",
+                options: [
+                    "Predecir positivo cuando es negativo",
+                    "Predecir negativo cuando es positivo",
+                    "Predecir positivo cuando es positivo",
+                    "Predecir negativo cuando es negativo"
+                ],
+                correct: 0,
+                explanation: "Un Falso Positivo (FP) es un error tipo I, donde el modelo predice que algo es positivo cuando en realidad es negativo. Por ejemplo, diagnosticar una enfermedad a una persona sana."
+            },
+            {
+                question: "La fórmula de Precision es:",
+                options: [
+                    "TP / (TP + FP)",
+                    "TP / (TP + FN)",
+                    "TP / (TN + FP)",
+                    "(TP + TN) / Total"
+                ],
+                correct: 0,
+                explanation: "Precision = TP / (TP + FP). Mide de todos los casos que predijimos como positivos, cuántos realmente lo son. Es crucial cuando los falsos positivos son costosos (ej: emails marcados como spam)."
+            },
+            {
+                question: "La fórmula de Recall (Sensibilidad) es:",
+                options: [
+                    "TP / (TP + FP)",
+                    "TP / (TP + FN)",
+                    "TN / (TN + FP)",
+                    "(TP + TN) / Total"
+                ],
+                correct: 1,
+                explanation: "Recall = TP / (TP + FN). Mide de todos los casos que realmente son positivos, cuántos detectamos. Es crítico cuando los falsos negativos son costosos (ej: no detectar un cáncer)."
+            },
+            {
+                question: "¿Qué representa la Especificidad?",
+                options: [
+                    "Proporción de negativos correctamente identificados",
+                    "Proporción de positivos correctamente identificados",
+                    "Promedio de precision y recall",
+                    "Tasa de error del modelo"
+                ],
+                correct: 0,
+                explanation: "Especificidad = TN / (TN + FP). Mide la capacidad del modelo para identificar correctamente los casos negativos. Es complementaria al Recall, que se enfoca en los positivos."
+            },
+            {
+                question: "En DBSCAN, ¿qué es un punto núcleo (core point)?",
+                options: [
+                    "Un punto con al menos MinPts vecinos dentro de epsilon",
+                    "Un punto en el borde de un cluster",
+                    "Un punto aislado considerado ruido",
+                    "El centroide del cluster"
+                ],
+                correct: 0,
+                explanation: "Un punto núcleo en DBSCAN tiene al menos MinPts puntos (incluyéndose a sí mismo) dentro de su vecindad epsilon. Estos puntos forman la base de los clusters y pueden expandir el cluster a sus vecinos."
+            },
+            {
+                question: "DBSCAN requiere especificar de antemano el número de clusters:",
+                options: [
+                    "Verdadero",
+                    "Falso"
+                ],
+                correct: 1,
+                explanation: "FALSO. A diferencia de K-Means, DBSCAN descubre automáticamente el número de clusters basándose en la densidad de los datos. Solo necesitas especificar epsilon (radio) y MinPts (mínimo de puntos)."
+            },
+            {
+                question: "¿Cuál es la principal ventaja de DBSCAN sobre K-Means?",
+                options: [
+                    "Puede encontrar clusters de formas arbitrarias",
+                    "Es más rápido",
+                    "Requiere menos parámetros",
+                    "Siempre converge a la solución óptima"
+                ],
+                correct: 0,
+                explanation: "DBSCAN puede detectar clusters de formas arbitrarias y no asume que los clusters son esféricos como K-Means. Además, puede identificar outliers como ruido, lo que K-Means no hace."
+            },
+            {
+                question: "En un Decision Tree, ¿qué mide la Ganancia de Información?",
+                options: [
+                    "La reducción de entropía al hacer una división",
+                    "El error de clasificación",
+                    "La profundidad del árbol",
+                    "El número de hojas"
+                ],
+                correct: 0,
+                explanation: "La Ganancia de Información mide cuánto reduce la entropía (incertidumbre) una división específica. Se calcula como: Entropía(padre) - Promedio ponderado de Entropía(hijos). Mayor ganancia = mejor división."
+            },
+            {
+                question: "¿Qué es el overfitting en un Decision Tree?",
+                options: [
+                    "Cuando el árbol memoriza los datos de entrenamiento",
+                    "Cuando el árbol es muy simple",
+                    "Cuando hay pocas características",
+                    "Cuando se usa poda"
+                ],
+                correct: 0,
+                explanation: "Overfitting ocurre cuando el árbol se vuelve demasiado complejo y aprende el ruido en los datos de entrenamiento, resultando en mal desempeño en datos nuevos. Se previene con poda, limitando la profundidad o el número mínimo de muestras por hoja."
+            },
+            {
+                question: "Random Forest funciona mediante:",
+                options: [
+                    "Combinación de múltiples árboles de decisión",
+                    "Un solo árbol muy profundo",
+                    "Clustering jerárquico",
+                    "Regresión lineal múltiple"
+                ],
+                correct: 0,
+                explanation: "Random Forest es un método de ensemble que entrena múltiples árboles de decisión en subconjuntos aleatorios de datos y características (bagging + feature sampling), y combina sus predicciones mediante votación (clasificación) o promedio (regresión)."
+            },
+            {
+                question: "¿Qué técnica usa Random Forest para reducir la correlación entre árboles?",
+                options: [
+                    "Usar solo un subconjunto aleatorio de características en cada división",
+                    "Podar todos los árboles igualmente",
+                    "Usar el mismo dataset para todos los árboles",
+                    "Entrenar árboles secuencialmente"
+                ],
+                correct: 0,
+                explanation: "Random Forest usa 'random feature selection' en cada división, considerando solo un subconjunto aleatorio de características (típicamente sqrt(n_features)). Esto reduce la correlación entre árboles, mejorando la diversidad del ensemble y reduciendo el overfitting."
+            },
+            {
+                question: "En regresión lineal, ¿qué minimizamos para encontrar los parámetros óptimos?",
+                options: [
+                    "La suma de errores cuadráticos (SSE/MSE)",
+                    "El número de características",
+                    "La entropía",
+                    "El número de iteraciones"
+                ],
+                correct: 0,
+                explanation: "En regresión lineal minimizamos la suma de errores cuadráticos (SSE) o su promedio (MSE - Mean Squared Error). Esto se conoce como método de mínimos cuadrados ordinarios (OLS), que encuentra la línea que minimiza las distancias verticales al cuadrado entre los puntos y la línea."
+            },
+            {
+                question: "La regresión Ridge (L2) añade una penalización de:",
+                options: [
+                    "La suma de los cuadrados de los coeficientes",
+                    "La suma de valores absolutos de los coeficientes",
+                    "El número de coeficientes no-cero",
+                    "La profundidad del modelo"
+                ],
+                correct: 0,
+                explanation: "Ridge regression añade λ * Σ(βi²) a la función de costo. Esta penalización L2 reduce la magnitud de los coeficientes pero rara vez los hace exactamente cero, ayudando a prevenir overfitting cuando hay multicolinealidad."
+            },
+            {
+                question: "La regresión Lasso (L1) puede:",
+                options: [
+                    "Hacer coeficientes exactamente cero (selección de características)",
+                    "Solo reducir coeficientes cerca de cero",
+                    "Incrementar todos los coeficientes",
+                    "No afecta los coeficientes"
+                ],
+                correct: 0,
+                explanation: "Lasso (Least Absolute Shrinkage and Selection Operator) usa penalización L1: λ * Σ|βi|. Esto puede forzar algunos coeficientes a ser exactamente cero, efectivamente realizando selección de características automática."
+            },
+            {
+                question: "En regresión logística, la función sigmoide convierte valores a:",
+                options: [
+                    "Probabilidades entre 0 y 1",
+                    "Valores entre -∞ y +∞",
+                    "Categorías discretas",
+                    "Vectores de características"
+                ],
+                correct: 0,
+                explanation: "La función sigmoide σ(z) = 1/(1+e^(-z)) transforma cualquier valor real en un valor entre 0 y 1, interpretable como probabilidad. Para clasificación binaria, usamos un umbral (típicamente 0.5) para decidir la clase."
+            },
+            {
+                question: "En Deep Learning, ¿qué es una neurona artificial?",
+                options: [
+                    "Una unidad que calcula suma ponderada + función de activación",
+                    "Un algoritmo de optimización",
+                    "Una técnica de regularización",
+                    "Un tipo de normalización"
+                ],
+                correct: 0,
+                explanation: "Una neurona artificial calcula: output = activación(Σ(wi*xi) + b), donde wi son pesos, xi son entradas, b es el bias, y la función de activación introduce no-linealidad (ReLU, sigmoid, tanh, etc.)."
+            },
+            {
+                question: "¿Qué función de activación es más común en capas ocultas de redes profundas?",
+                options: [
+                    "ReLU (Rectified Linear Unit)",
+                    "Sigmoid",
+                    "Linear",
+                    "Step function"
+                ],
+                correct: 0,
+                explanation: "ReLU (f(x) = max(0,x)) es preferida porque: 1) evita el problema de gradientes desvanecientes, 2) es computacionalmente eficiente, 3) introduce no-linealidad. Sigmoid/tanh sufren de gradientes que desaparecen en redes profundas."
+            },
+            {
+                question: "El problema del gradiente desvaneciente ocurre cuando:",
+                options: [
+                    "Los gradientes se vuelven muy pequeños en capas profundas",
+                    "Los gradientes explotan a infinito",
+                    "No hay suficientes datos",
+                    "El learning rate es muy alto"
+                ],
+                correct: 0,
+                explanation: "En redes muy profundas con activaciones como sigmoid/tanh, los gradientes se multiplican durante backpropagation y pueden volverse extremadamente pequeños, haciendo que las capas iniciales aprendan muy lentamente o no aprendan nada."
+            },
+            {
+                question: "Dropout es una técnica que:",
+                options: [
+                    "Desactiva aleatoriamente neuronas durante entrenamiento",
+                    "Elimina capas de la red",
+                    "Reduce el learning rate",
+                    "Aumenta el batch size"
+                ],
+                correct: 0,
+                explanation: "Dropout desactiva aleatoriamente un porcentaje de neuronas en cada iteración de entrenamiento (típicamente 20-50%), forzando a la red a aprender características redundantes y más robustas, reduciendo overfitting significativamente."
+            },
+            {
+                question: "En K-Means, ¿cómo se inicializan típicamente los centroides?",
+                options: [
+                    "Aleatoriamente o usando K-Means++",
+                    "Siempre en el origen",
+                    "En los puntos más alejados",
+                    "No se inicializan"
+                ],
+                correct: 0,
+                explanation: "K-Means es sensible a la inicialización. K-Means++ mejora la inicialización aleatoria seleccionando centroides que estén lo más lejos posible entre sí, reduciendo la probabilidad de convergencia a mínimos locales pobres."
+            },
+            {
+                question: "¿Qué métrica usa K-Means para asignar puntos a clusters?",
+                options: [
+                    "Distancia euclidiana al centroide más cercano",
+                    "Correlación de Pearson",
+                    "Entropía",
+                    "Ganancia de información"
+                ],
+                correct: 0,
+                explanation: "K-Means asigna cada punto al centroide más cercano usando distancia euclidiana. Luego recalcula centroides como la media de los puntos asignados. Este proceso se repite hasta convergencia, minimizando la suma de distancias cuadradas intra-cluster (WCSS)."
+            },
+            {
+                question: "El método del codo (elbow method) se usa para:",
+                options: [
+                    "Determinar el número óptimo de clusters en K-Means",
+                    "Calcular accuracy",
+                    "Normalizar datos",
+                    "Dividir train/test"
+                ],
+                correct: 0,
+                explanation: "El método del codo grafica WCSS (Within-Cluster Sum of Squares) vs número de clusters K. El punto óptimo es donde la curva hace un 'codo' - donde añadir más clusters no reduce significativamente el WCSS."
+            },
+            {
+                question: "En SVM, ¿qué es el kernel trick?",
+                options: [
+                    "Transformar datos a un espacio de mayor dimensión sin calcularlo explícitamente",
+                    "Reducir dimensiones del dataset",
+                    "Normalizar las características",
+                    "Dividir los datos en folds"
+                ],
+                correct: 0,
+                explanation: "El kernel trick permite a SVM encontrar fronteras de decisión no-lineales mapeando implícitamente datos a un espacio de mayor dimensión usando funciones kernel (RBF, polinomial, etc.) sin calcular explícitamente las coordenadas transformadas, ahorrando computación."
+            },
+            {
+                question: "¿Qué es el hiperparámetro C en SVM?",
+                options: [
+                    "Controla el trade-off entre margen amplio y errores de clasificación",
+                    "El número de vectores de soporte",
+                    "La dimensión del espacio transformado",
+                    "El learning rate"
+                ],
+                correct: 0,
+                explanation: "C es el parámetro de regularización: C alto = margen estrecho con pocos errores (puede overfit), C bajo = margen amplio tolerando más errores (puede underfit). Controla cuánta penalización damos a los errores de clasificación."
+            },
+            {
+                question: "Batch Normalization se aplica:",
+                options: [
+                    "Después de la capa lineal, antes de la activación",
+                    "Solo en la entrada de la red",
+                    "Solo en la última capa",
+                    "Nunca en redes profundas"
+                ],
+                correct: 0,
+                explanation: "Batch Normalization normaliza las activaciones de cada capa usando las estadísticas del mini-batch, típicamente después de la transformación lineal y antes de la función de activación. Esto estabiliza y acelera el entrenamiento permitiendo learning rates más altos."
+            },
+            {
+                question: "¿Qué es cross-validation?",
+                options: [
+                    "Técnica para evaluar modelos usando múltiples divisiones de datos",
+                    "Un algoritmo de clasificación",
+                    "Una función de pérdida",
+                    "Un método de regularización"
+                ],
+                correct: 0,
+                explanation: "Cross-validation (ej: k-fold CV) divide los datos en k partes, entrena k veces usando k-1 partes y valida en la parte restante, rotando. Esto da una estimación más robusta del rendimiento del modelo y reduce el riesgo de overfitting al conjunto de validación."
+            },
+            {
+                question: "En k-fold cross-validation, si k=número de muestras, se llama:",
+                options: [
+                    "Leave-One-Out Cross-Validation (LOOCV)",
+                    "Stratified k-fold",
+                    "Time series split",
+                    "Train-test split"
+                ],
+                correct: 0,
+                explanation: "LOOCV entrena el modelo n veces (donde n = número de muestras), cada vez dejando una muestra fuera. Da estimaciones muy precisas pero es computacionalmente costoso. Útil para datasets pequeños."
+            },
+            {
+                question: "¿Qué es el bias en Machine Learning?",
+                options: [
+                    "Error por suposiciones simplificadoras del modelo",
+                    "Ruido aleatorio en los datos",
+                    "La diferencia entre train y test error",
+                    "El término independiente en regresión"
+                ],
+                correct: 0,
+                explanation: "Bias es el error introducido por aproximar un problema complejo del mundo real con un modelo más simple. Alto bias = underfitting (el modelo es demasiado simple para capturar patrones). Ej: usar regresión lineal para datos no-lineales."
+            },
+            {
+                question: "¿Qué es la varianza en el contexto del bias-variance tradeoff?",
+                options: [
+                    "Sensibilidad del modelo a fluctuaciones en datos de entrenamiento",
+                    "La dispersión de los datos",
+                    "El error promedio del modelo",
+                    "El número de parámetros"
+                ],
+                correct: 0,
+                explanation: "Varianza mide cuánto cambian las predicciones del modelo si lo entrenamos con diferentes conjuntos de datos. Alta varianza = overfitting (el modelo es muy sensible a detalles específicos del training set). El objetivo es balancear bias y varianza."
+            },
+            {
+                question: "Gradient Descent con momento (momentum) ayuda a:",
+                options: [
+                    "Acelerar la convergencia y evitar mínimos locales",
+                    "Aumentar el learning rate automáticamente",
+                    "Reducir el número de épocas",
+                    "Eliminar la necesidad de regularización"
+                ],
+                correct: 0,
+                explanation: "Momentum acumula una fracción del gradiente anterior (típicamente 0.9) al gradiente actual, como una bola rodando cuesta abajo. Esto ayuda a: 1) acelerar en direcciones consistentes, 2) amortiguar oscilaciones, 3) escapar de mínimos locales poco profundos."
+            },
+            {
+                question: "¿Qué optimizador adapta el learning rate para cada parámetro?",
+                options: [
+                    "Adam (Adaptive Moment Estimation)",
+                    "SGD básico",
+                    "Batch Gradient Descent",
+                    "Ninguno"
+                ],
+                correct: 0,
+                explanation: "Adam combina las ventajas de AdaGrad (learning rates adaptativos) y RMSprop (decay de gradientes). Mantiene promedios móviles exponenciales de gradientes y sus cuadrados, adaptando el learning rate para cada parámetro. Es muy popular por su robustez."
+            },
+            {
+                question: "En árboles de decisión, ¿qué es la poda (pruning)?",
+                options: [
+                    "Eliminar ramas para reducir overfitting",
+                    "Añadir más niveles al árbol",
+                    "Normalizar las características",
+                    "Balancear las clases"
+                ],
+                correct: 0,
+                explanation: "La poda elimina ramas que aportan poca información o que causan overfitting. Pre-poda (early stopping): parar el crecimiento antes. Post-poda: construir árbol completo y luego eliminar ramas. Usa métricas como validación cruzada para decidir qué podar."
+            },
+            {
+                question: "¿Qué mide el índice Gini en árboles de decisión?",
+                options: [
+                    "La impureza o desorden de un nodo",
+                    "La profundidad del árbol",
+                    "El accuracy del modelo",
+                    "El número de hojas"
+                ],
+                correct: 0,
+                explanation: "Gini Impurity mide la probabilidad de clasificar incorrectamente un elemento aleatorio. Gini = 1 - Σ(pi²), donde pi es la proporción de clase i. Gini=0 = nodo puro, Gini=0.5 = máxima impureza (binario). Se usa como criterio alternativo a entropía."
+            },
+            {
+                question: "Gradient Boosting construye modelos:",
+                options: [
+                    "Secuencialmente, cada uno corrigiendo errores del anterior",
+                    "En paralelo de forma independiente",
+                    "Usando solo el primer modelo",
+                    "Sin usar árboles de decisión"
+                ],
+                correct: 0,
+                explanation: "Gradient Boosting (ej: XGBoost, LightGBM) entrena modelos secuencialmente, donde cada nuevo modelo se enfoca en los errores (residuos) del ensemble anterior. Usa gradient descent en el espacio de funciones para minimizar una función de pérdida."
+            },
+            {
+                question: "En una Red Neuronal Convolucional (CNN), las capas convolucionales extraen:",
+                options: [
+                    "Características locales espaciales (bordes, texturas, patrones)",
+                    "Características globales únicamente",
+                    "Solo colores de la imagen",
+                    "Texto de imágenes"
+                ],
+                correct: 0,
+                explanation: "Las capas convolucionales aplican filtros/kernels que se deslizan sobre la imagen detectando patrones locales. Capas tempranas detectan características simples (bordes, colores), capas profundas combinan estas en patrones complejos (formas, objetos). El peso compartido reduce parámetros."
+            },
+            {
+                question: "Pooling (ej: Max Pooling) en CNNs sirve para:",
+                options: [
+                    "Reducir dimensionalidad y lograr invarianza a pequeñas traslaciones",
+                    "Aumentar el número de parámetros",
+                    "Clasificar la imagen",
+                    "Normalizar valores de píxeles"
+                ],
+                correct: 0,
+                explanation: "Max Pooling toma el valor máximo en una ventana (ej: 2x2), reduciendo las dimensiones espaciales. Beneficios: 1) reduce parámetros y computación, 2) provee invarianza a pequeñas traslaciones, 3) ayuda a extraer características dominantes."
+            },
+            {
+                question: "En redes neuronales, ¿qué es backpropagation?",
+                options: [
+                    "Algoritmo para calcular gradientes usando la regla de la cadena",
+                    "Una técnica de regularización",
+                    "Un tipo de arquitectura de red",
+                    "Un método de inicialización de pesos"
+                ],
+                correct: 0,
+                explanation: "Backpropagation (propagación hacia atrás) usa la regla de la cadena del cálculo para calcular eficientemente gradientes de la función de pérdida con respecto a cada peso, propagando el error desde la salida hasta la entrada. Es fundamental para entrenar redes neuronales."
+            },
+            {
+                question: "¿Qué es early stopping?",
+                options: [
+                    "Detener entrenamiento cuando el error de validación deja de mejorar",
+                    "Iniciar el entrenamiento antes",
+                    "Usar menos épocas siempre",
+                    "Eliminar características"
+                ],
+                correct: 0,
+                explanation: "Early stopping monitorea una métrica en el conjunto de validación durante el entrenamiento. Si deja de mejorar por N épocas consecutivas (patience), detiene el entrenamiento. Previene overfitting sin necesidad de entrenar hasta convergencia completa."
+            },
+            {
+                question: "La matriz de confusión multiclase tiene dimensiones:",
+                options: [
+                    "n_clases × n_clases",
+                    "Siempre 2×2",
+                    "n_muestras × n_clases",
+                    "n_características × n_clases"
+                ],
+                correct: 0,
+                explanation: "Para k clases, la matriz de confusión es k×k. El elemento (i,j) representa instancias de clase i predichas como clase j. La diagonal contiene predicciones correctas. Se calculan métricas macro/micro averaged de esta matriz."
+            },
+            {
+                question: "¿Qué hace la técnica de Data Augmentation?",
+                options: [
+                    "Crea variaciones de los datos existentes (rotaciones, flips, etc.)",
+                    "Elimina datos ruidosos",
+                    "Reduce el número de características",
+                    "Aumenta el learning rate"
+                ],
+                correct: 0,
+                explanation: "Data Augmentation genera nuevas muestras aplicando transformaciones (rotaciones, traslaciones, zoom, flips, cambios de brillo) a datos existentes. Aumenta efectivamente el tamaño del dataset, mejora la generalización y reduce overfitting, especialmente en visión por computadora."
+            },
+            {
+                question: "En clustering, el coeficiente de silueta mide:",
+                options: [
+                    "Qué tan bien están separados y cohesionados los clusters",
+                    "El número óptimo de dimensiones",
+                    "El error de clasificación",
+                    "La profundidad del árbol"
+                ],
+                correct: 0,
+                explanation: "El coeficiente de silueta para cada punto mide: (b-a)/max(a,b), donde a=distancia promedio intra-cluster, b=distancia promedio al cluster más cercano. Valores: 1=excelente, 0=clusters superpuestos, -1=mal asignado. Se promedia sobre todos los puntos."
+            },
+            {
+                question: "PCA (Principal Component Analysis) se usa para:",
+                options: [
+                    "Reducir dimensionalidad preservando máxima varianza",
+                    "Clasificar datos",
+                    "Aumentar el número de características",
+                    "Balancear clases"
+                ],
+                correct: 0,
+                explanation: "PCA identifica las direcciones (componentes principales) de máxima varianza en los datos mediante eigendecomposición de la matriz de covarianza. Proyectar datos en los primeros k componentes reduce dimensiones preservando la mayor información posible, útil para visualización y reducción de ruido."
+            },
+            {
+                question: "La curva ROC grafica:",
+                options: [
+                    "Tasa de Verdaderos Positivos vs Tasa de Falsos Positivos",
+                    "Precision vs Recall",
+                    "Error vs Épocas",
+                    "Accuracy vs Tiempo"
+                ],
+                correct: 0,
+                explanation: "La curva ROC (Receiver Operating Characteristic) grafica TPR (Recall) en eje Y vs FPR (TN/(TN+FP)) en eje X variando el umbral de clasificación. AUC (Area Under Curve) mide la calidad: AUC=1 perfecto, AUC=0.5 aleatorio. Útil para evaluar clasificadores binarios independientemente del umbral."
+            },
+            {
+                question: "¿Qué es AUC-ROC?",
+                options: [
+                    "Área bajo la curva ROC, mide capacidad de discriminación",
+                    "Un algoritmo de clustering",
+                    "Una función de activación",
+                    "Un tipo de regularización"
+                ],
+                correct: 0,
+                explanation: "AUC-ROC (Area Under the ROC Curve) mide la probabilidad de que el modelo ordene un ejemplo positivo aleatorio más alto que uno negativo. AUC=1: clasificador perfecto, AUC=0.5: no mejor que azar, AUC<0.5: peor que azar (invierte predicciones)."
+            },
+            {
+                question: "En ensemble learning, ¿qué es bagging?",
+                options: [
+                    "Entrenar múltiples modelos en subconjuntos aleatorios con reemplazo",
+                    "Entrenar modelos secuencialmente",
+                    "Usar un solo modelo muy complejo",
+                    "Reducir el número de características"
+                ],
+                correct: 0,
+                explanation: "Bagging (Bootstrap Aggregating) entrena múltiples modelos en diferentes muestras bootstrap (muestreo con reemplazo) del dataset original, luego combina predicciones por votación/promedio. Reduce varianza sin aumentar bias. Random Forest es un ejemplo famoso de bagging."
+            },
+            {
+                question: "La maldición de la dimensionalidad se refiere a:",
+                options: [
+                    "Problemas que surgen al trabajar con espacios de alta dimensión",
+                    "Tener demasiados datos",
+                    "Modelos muy simples",
+                    "Pocos hiperparámetros"
+                ],
+                correct: 0,
+                explanation: "En alta dimensión: 1) puntos se vuelven equidistantes (distancias pierden significado), 2) datos se vuelven sparse, 3) se necesitan exponencialmente más datos, 4) muchos algoritmos se vuelven ineficientes. Soluciones: reducción de dimensionalidad (PCA, selección de características)."
+            },
+            {
+                question: "Transfer Learning consiste en:",
+                options: [
+                    "Usar un modelo pre-entrenado y adaptarlo a una nueva tarea",
+                    "Transferir datos entre datasets",
+                    "Cambiar el algoritmo durante entrenamiento",
+                    "Convertir regresión a clasificación"
+                ],
+                correct: 0,
+                explanation: "Transfer Learning aprovecha conocimiento aprendido de una tarea/dominio (ej: ImageNet) para otra relacionada. Típicamente se usa un modelo pre-entrenado como extractor de características o se fine-tunea. Muy efectivo cuando tienes pocos datos en la tarea objetivo."
+            },
+            {
+                question: "¿Qué es feature engineering?",
+                options: [
+                    "Crear, transformar y seleccionar características para mejorar el modelo",
+                    "Entrenar más rápido el modelo",
+                    "Aumentar el learning rate",
+                    "Reducir el número de clases"
+                ],
+                correct: 0,
+                explanation: "Feature engineering es el arte de crear características informativas a partir de datos crudos: combinaciones, transformaciones (log, sqrt), binning, encoding categórico, extracción de fechas, agregaciones, etc. A menudo es más importante que el algoritmo elegido."
+            },
+            {
+                question: "One-Hot Encoding se usa para:",
+                options: [
+                    "Convertir variables categóricas en vectores binarios",
+                    "Normalizar datos numéricos",
+                    "Reducir dimensiones",
+                    "Inicializar pesos"
+                ],
+                correct: 0,
+                explanation: "One-Hot Encoding convierte cada categoría en una columna binaria. Ej: Color={Rojo,Verde,Azul} → [1,0,0], [0,1,0], [0,0,1]. Necesario para algoritmos que requieren entrada numérica. Cuidado: puede crear muchas dimensiones con categorías numerosas (usa target encoding o embeddings)."
+            },
+            {
+                question: "En K-NN (K-Nearest Neighbors), aumentar K generalmente:",
+                options: [
+                    "Reduce varianza pero aumenta bias",
+                    "Aumenta varianza y reduce bias",
+                    "No afecta el modelo",
+                    "Solo afecta el tiempo de entrenamiento"
+                ],
+                correct: 0,
+                explanation: "K-NN con K grande: fronteras de decisión más suaves (menos varianza, más bias, menos overfitting). K pequeño: fronteras complejas (más varianza, menos bias, más overfitting). K=1 memoriza datos. K=N siempre predice la clase mayoritaria. Óptimo: K moderado, impar para evitar empates."
+            },
+            {
+                question: "¿Qué es un autoencoder?",
+                options: [
+                    "Red neuronal que aprende a comprimir y reconstruir datos",
+                    "Un algoritmo de clustering",
+                    "Una técnica de regularización",
+                    "Un optimizador"
+                ],
+                correct: 0,
+                explanation: "Un autoencoder tiene arquitectura encoder-decoder: comprime input a representación latente (bottleneck) y luego lo reconstruye. Se entrena minimizando error de reconstrucción. Usos: reducción de dimensionalidad, detección de anomalías, denoising, aprendizaje de características."
+            },
+            {
+                question: "En series temporales, ¿qué es estacionariedad?",
+                options: [
+                    "Propiedades estadísticas (media, varianza) constantes en el tiempo",
+                    "Datos sin valores faltantes",
+                    "Frecuencia de muestreo constante",
+                    "Ausencia de outliers"
+                ],
+                correct: 0,
+                explanation: "Una serie es estacionaria si media, varianza y autocovarianza son constantes en el tiempo. La mayoría de modelos (ARIMA) asumen estacionariedad. Se logra mediante diferenciación, transformaciones (log), o detrending. Test Dickey-Fuller verifica estacionariedad."
+            },
+            {
+                question: "La métrica Macro-Average en clasificación multiclase:",
+                options: [
+                    "Calcula métrica para cada clase y promedia sin pesar",
+                    "Pondera por tamaño de clase",
+                    "Solo considera la clase mayoritaria",
+                    "Es igual al accuracy"
+                ],
+                correct: 0,
+                explanation: "Macro-Average calcula la métrica (precision, recall, F1) independientemente para cada clase y promedia dándoles igual peso. Útil cuando todas las clases son igualmente importantes. Micro-Average agrega globalmente (pondera por frecuencia), útil con desbalance."
+            },
+            {
+                question: "¿Qué es el learning rate en gradient descent?",
+                options: [
+                    "Tamaño del paso en dirección del gradiente",
+                    "Velocidad de procesamiento de datos",
+                    "Número de iteraciones",
+                    "Porcentaje de datos de entrenamiento"
+                ],
+                correct: 0,
+                explanation: "Learning rate (α o η) controla cuánto actualizamos los pesos: peso_nuevo = peso_viejo - α*gradiente. α muy alto: puede diverger/oscilar. α muy bajo: converge lentamente. Técnicas: learning rate schedules (decay), adaptive rates (Adam), warm-up."
+            },
+            {
+                question: "¿Qué algoritmo usa 'voting' para clasificar?",
+                options: [
+                    "Random Forest y otros métodos ensemble",
+                    "Regresión Logística",
+                    "K-Means",
+                    "PCA"
+                ],
+                correct: 0,
+                explanation: "Ensemble methods combinan múltiples modelos base mediante voting: hard voting (mayoría de votos) para clasificación, soft voting (promedio de probabilidades), averaging para regresión. Random Forest, Voting Classifier son ejemplos que aprovechan la sabiduría de la multitud."
+            },
+            {
+                question: "La regularización L1 y L2 se diferencian en que L1:",
+                options: [
+                    "Puede hacer coeficientes exactamente cero (sparse)",
+                    "Siempre da coeficientes mayores",
+                    "No reduce overfitting",
+                    "Es más computacionalmente costosa"
+                ],
+                correct: 0,
+                explanation: "L1 (Lasso) usa |β|: genera sparsity (coeficientes exactamente 0), bueno para selección de características. L2 (Ridge) usa β²: reduce magnitud pero rara vez hace 0, mejor con multicolinealidad. Elastic Net combina ambas: α*L1 + (1-α)*L2."
+            },
+            {
+                question: "En neural networks, ¿qué es el vanishing gradient problem?",
+                options: [
+                    "Gradientes muy pequeños que dificultan aprendizaje en capas iniciales",
+                    "Falta de datos de entrenamiento",
+                    "Overfitting severo",
+                    "Errores de implementación"
+                ],
+                correct: 0,
+                explanation: "Con sigmoid/tanh, gradientes se multiplican en backprop y decaen exponencialmente en redes profundas. Soluciones: ReLU (no satura), Batch Normalization, arquitecturas residuales (ResNet), LSTM/GRU (para RNNs), inicialización cuidadosa (He, Xavier)."
+            },
+            {
+                question: "¿Qué tipo de problema es detectar emails spam?",
+                options: [
+                    "Clasificación binaria supervisada",
+                    "Regresión",
+                    "Clustering no supervisado",
+                    "Aprendizaje por refuerzo"
+                ],
+                correct: 0,
+                explanation: "Detectar spam es clasificación binaria (spam/no spam) supervisada porque tenemos etiquetas. Algoritmos comunes: Naive Bayes (clásico para texto), Regresión Logística, SVM, Random Forest. Features: frecuencia de palabras (TF-IDF), metadatos del email."
+            },
+            {
+                question: "Naive Bayes asume que las características son:",
+                options: [
+                    "Condicionalmente independientes dada la clase",
+                    "Altamente correlacionadas",
+                    "Distribuidas uniformemente",
+                    "Categóricas siempre"
+                ],
+                correct: 0,
+                explanation: "Naive Bayes aplica teorema de Bayes asumiendo independencia condicional: P(X|Y) = ∏P(xi|Y). Esta asunción 'naive' (ingenua) rara vez es cierta pero el algoritmo funciona sorprendentemente bien en práctica, especialmente en clasificación de texto (spam, sentimiento)."
+            },
+            {
+                question: "En Deep Learning, ¿qué es fine-tuning?",
+                options: [
+                    "Reentrenar parcialmente un modelo pre-entrenado en nuevos datos",
+                    "Aumentar el número de capas",
+                    "Reducir el learning rate solamente",
+                    "Eliminar neuronas"
+                ],
+                correct: 0,
+                explanation: "Fine-tuning: 1) Tomar modelo pre-entrenado (ej: en ImageNet), 2) Congelar capas iniciales (características generales), 3) Reentrenar capas finales + nueva capa de clasificación en dataset específico con learning rate bajo. Aprovecha transfer learning efectivamente."
+            }
+        ];
+
+        let currentQuiz = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function startQuiz() {
+            currentQuiz = shuffleArray(questionBank).slice(0, 20);
+            currentQuestionIndex = 0;
+            score = 0;
+            answered = false;
+
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            document.getElementById('resultScreen').style.display = 'none';
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const question = currentQuiz[currentQuestionIndex];
+            
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('explanationContainer').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-secondary option-btn w-100 animate__animated animate__fadeInLeft';
+                btn.style.animationDelay = `${index * 0.1}s`;
+                btn.innerHTML = `<strong>${String.fromCharCode(65 + index)}.</strong> ${option}`;
+                btn.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+
+            updateProgress();
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (answered) return;
+            answered = true;
+
+            const question = currentQuiz[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option-btn');
+            
+            buttons.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                    btn.innerHTML += ' <i class="fas fa-check-circle text-success"></i>';
+                }
+                if (index === selectedIndex && selectedIndex !== question.correct) {
+                    btn.classList.add('incorrect');
+                    btn.innerHTML += ' <i class="fas fa-times-circle text-danger"></i>';
+                }
+            });
+
+            if (selectedIndex === question.correct) {
+                score++;
+                document.getElementById('score').textContent = score;
+                swal({
+                    title: "¡Correcto!",
+                    text: "Excelente trabajo",
+                    icon: "success",
+                    button: "Continuar",
+                    timer: 2000
+                });
+            } else {
+                swal({
+                    title: "Incorrecto",
+                    text: "Revisa la explicación abajo",
+                    icon: "error",
+                    button: "Entendido"
+                });
+            }
+
+            showExplanation(question, selectedIndex);
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function showExplanation(question, selectedIndex) {
+            const container = document.getElementById('explanationContainer');
+            const isCorrect = selectedIndex === question.correct;
+            
+            container.innerHTML = `
+                <div class="explanation-box animate__animated animate__fadeIn">
+                    <h5 class="mb-3">
+                        <i class="fas fa-lightbulb text-warning"></i> 
+                        ${isCorrect ? 'Explicación' : '¿Por qué está mal?'}
+                    </h5>
+                    ${!isCorrect ? `<p><strong>Respuesta correcta:</strong> ${question.options[question.correct]}</p>` : ''}
+                    <p>${question.explanation}</p>
+                </div>
+            `;
+            container.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < currentQuiz.length) {
+                document.getElementById('quizScreen').classList.remove('animate__fadeIn');
+                document.getElementById('quizScreen').classList.add('animate__fadeOut');
+                
+                setTimeout(() => {
+                    document.getElementById('quizScreen').classList.remove('animate__fadeOut');
+                    document.getElementById('quizScreen').classList.add('animate__fadeIn');
+                    loadQuestion();
+                }, 300);
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / currentQuiz.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            
+            const percentage = (score / currentQuiz.length) * 100;
+            document.getElementById('finalScore').textContent = `${score} / ${currentQuiz.length}`;
+            
+            let message = '';
+            let emoji = '';
+            
+            if (percentage >= 90) {
+                message = '¡Excelente! Dominas muy bien Machine Learning';
+                emoji = '🏆';
+            } else if (percentage >= 70) {
+                message = '¡Muy bien! Tienes buenos conocimientos';
+                emoji = '🎯';
+            } else if (percentage >= 50) {
+                message = 'Buen intento. Sigue practicando';
+                emoji = '📚';
+            } else {
+                message = 'Necesitas reforzar tus conocimientos';
+                emoji = '💪';
+            }
+            
+            document.getElementById('performance').innerHTML = `
+                <h3 class="mb-3">${emoji} ${percentage.toFixed(1)}%</h3>
+                <p class="lead">${message}</p>
+            `;
+
+            swal({
+                title: "¡Quiz Completado!",
+                text: `Obtuviste ${score} de ${currentQuiz.length} respuestas correctas (${percentage.toFixed(1)}%)`,
+                icon: percentage >= 70 ? "success" : "info",
+                button: "Ver Resultados"
+            });
+        }
+    </script>
+</body>
+</html>

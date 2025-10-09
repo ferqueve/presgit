@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modo Claro/Oscuro y Perfil de Usuario</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
+            --code-bg: #f8f9fa;
+            --accent: #0d6efd;
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --border-color: #495057;
+            --card-bg: #2d2d2d;
+            --code-bg: #1a1a1a;
+            --accent: #0d6efd;
+        }
+        
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background-color: var(--card-bg) !important;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand, .nav-link {
+            color: var(--text-primary) !important;
+        }
+        
+        .slide-container {
+            min-height: calc(100vh - 120px);
+            display: none;
+            padding: 40px 0;
+        }
+        
+        .slide-container.active {
+            display: block;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+        }
+        
+        code {
+            background-color: var(--code-bg);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--text-primary);
+        }
+        
+        .btn-theme-toggle {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .exercise-box {
+            background-color: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .exercise-input, .exercise-input:focus {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .profile-img-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+        }
+        
+        .slide-number {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .highlight {
+            background-color: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .comparison-table td, .comparison-table th {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .badge-custom {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+        
+        .demo-box {
+            background-color: var(--bg-secondary);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .code-error {
+            background-color: #fee;
+            border-left: 3px solid #f00;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        [data-theme="dark"] .code-error {
+            background-color: #4a1111;
+            border-left: 3px solid #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#slide1">
+                <i class="fas fa-graduation-cap"></i> Curso: Modo Claro/Oscuro
+            </a>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-primary me-2" onclick="prevSlide()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-outline-primary" onclick="nextSlide()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Botón de cambio de tema -->
+    <button class="btn btn-theme-toggle btn-primary animate__animated animate__pulse animate__infinite" onclick="toggleTheme()" title="Cambiar tema">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+
+    <div class="container">
+        <!-- Slide 1: Introducción -->
+        <div class="slide-container active animate__animated animate__fadeIn" id="slide1">
+            <div class="text-center mb-5">
+                <h1 class="display-3 mb-3">
+                    <i class="fas fa-sun text-warning"></i>
+                    <i class="fas fa-moon text-primary"></i>
+                </h1>
+                <h1 class="display-4">Modo Claro y Modo Oscuro</h1>
+                <p class="lead">Implementación y Persistencia de Datos</p>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-md-6 mb-4">
+                    <div class="card animate__animated animate__fadeInLeft">
+                        <div class="card-header">
+                            <i class="fas fa-book"></i> ¿Qué aprenderás?
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Implementar modo claro/oscuro (3 métodos)</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Usar variables CSS personalizadas</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Persistencia con localStorage</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Crear perfil de usuario</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Guardar imágenes en Base64</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card animate__animated animate__fadeInRight">
+                        <div class="card-header">
+                            <i class="fas fa-tools"></i> Tecnologías
+                        </div>
+                        <div class="card-body">
+                            <span class="badge bg-primary badge-custom m-1">HTML5</span>
+                            <span class="badge bg-success badge-custom m-1">CSS3</span>
+                            <span class="badge bg-warning badge-custom m-1">JavaScript</span>
+                            <span class="badge bg-info badge-custom m-1">Bootstrap</span>
+                            <span class="badge bg-danger badge-custom m-1">FontAwesome</span>
+                            <span class="badge bg-secondary badge-custom m-1">SweetAlert</span>
+                            <span class="badge bg-dark badge-custom m-1">localStorage</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Conceptos del Modo Oscuro -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide2">
+            <h2 class="mb-4"><i class="fas fa-lightbulb"></i> Conceptos Fundamentales</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">¿Qué es el Modo Oscuro?</div>
+                <div class="card-body">
+                    <p>El modo oscuro es una configuración de interfaz que utiliza colores oscuros para el fondo y colores claros para el texto. Sus beneficios incluyen:</p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-eye fa-3x text-primary mb-2"></i>
+                                <h5>Reduce Fatiga Visual</h5>
+                                <p class="text-secondary">Menos luz azul en ambientes oscuros</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-battery-full fa-3x text-success mb-2"></i>
+                                <h5>Ahorra Batería</h5>
+                                <p class="text-secondary">Menos energía en pantallas OLED/AMOLED</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-palette fa-3x text-warning mb-2"></i>
+                                <h5>Estética Moderna</h5>
+                                <p class="text-secondary">Diseño elegante y profesional</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Comparación de Modos</div>
+                <div class="card-body">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Característica</th>
+                                <th><i class="fas fa-sun text-warning"></i> Modo Claro</th>
+                                <th><i class="fas fa-moon text-primary"></i> Modo Oscuro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Fondo</strong></td>
+                                <td>Colores claros (#ffffff, #f8f9fa)</td>
+                                <td>Colores oscuros (#1a1a1a, #2d2d2d)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Texto</strong></td>
+                                <td>Oscuro (#212529)</td>
+                                <td>Claro (#e9ecef)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Contraste</strong></td>
+                                <td>Alto contraste claro/oscuro</td>
+                                <td>Contraste suave oscuro/claro</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Uso Recomendado</strong></td>
+                                <td>Ambientes iluminados, día</td>
+                                <td>Ambientes oscuros, noche</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Variables CSS -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide3">
+            <h2 class="mb-4"><i class="fas fa-code"></i> Variables CSS Personalizadas</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Paso 1: Definir Variables</div>
+                <div class="card-body">
+                    <p>Las variables CSS (custom properties) permiten reutilizar valores y cambiarlos dinámicamente:</p>
+                    <pre><code>:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+    --accent: #0d6efd;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #e9ecef;
+    --text-secondary: #adb5bd;
+    --border-color: #495057;
+    --accent: #0d6efd;
+}</code></pre>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i> <strong>Importante:</strong> El selector <code>[data-theme="dark"]</code> se activa cuando el elemento HTML tiene el atributo <code>data-theme="dark"</code>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">Paso 2: Aplicar Variables</div>
+                <div class="card-body">
+                    <pre><code>body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}</code></pre>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i> <strong>Ventaja:</strong> Al cambiar el atributo <code>data-theme</code>, todos los colores se actualizan automáticamente.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Paso 3: Añadir Transiciones</div>
+                <div class="card-body">
+                    <pre><code>* {
+    transition: background-color 0.3s ease, 
+                color 0.3s ease, 
+                border-color 0.3s ease;
+}</code></pre>
+                    <p class="mt-2">Esto crea una animación suave al cambiar de tema.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Método 1 - Botón -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide4">
+            <h2 class="mb-4"><i class="fas fa-toggle-on"></i> Método 1: Toggle con Botón</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">HTML del Botón</div>
+                <div class="card-body">
+                    <pre><code>&lt;button class="btn btn-primary" onclick="toggleTheme()"&gt;
+    &lt;i class="fas fa-moon" id="theme-icon"&gt;&lt;/i&gt;
+    Cambiar Tema
+&lt;/button&gt;</code></pre>
+                    <p class="mt-3"><strong>Ventajas:</strong></p>
+                    <ul>
+                        <li>Simple y directo</li>
+                        <li>Fácil de entender para el usuario</li>
+                        <li>Funciona con un solo clic</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">JavaScript del Toggle</div>
+                <div class="card-body">
+                    <pre><code>function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Cambiar el atributo data-theme
+    html.setAttribute('data-theme', newTheme);
+    
+    // Actualizar el ícono
+    const icon = document.getElementById('theme-icon');
+    if (newTheme === 'dark') {
+        icon.className = 'fas fa-sun';
+    } else {
+        icon.className = 'fas fa-moon';
+    }
+    
+    // Guardar en localStorage (para persistencia)
+    localStorage.setItem('theme', newTheme);
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Demo Interactiva</div>
+                <div class="card-body">
+                    <div class="demo-box">
+                        <p>Prueba el botón flotante en la esquina superior derecha →</p>
+                        <p class="text-muted">Observa cómo cambian todos los colores automáticamente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Método 2 - Checkbox -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide5">
+            <h2 class="mb-4"><i class="fas fa-check-square"></i> Método 2: Toggle con Checkbox</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">HTML del Checkbox (Switch)</div>
+                <div class="card-body">
+                    <pre><code>&lt;div class="form-check form-switch"&gt;
+    &lt;input class="form-check-input" 
+           type="checkbox" 
+           id="themeSwitch"
+           onchange="toggleThemeCheckbox()"&gt;
+    &lt;label class="form-check-label" for="themeSwitch"&gt;
+        &lt;i class="fas fa-moon"&gt;&lt;/i&gt; Modo Oscuro
+    &lt;/label&gt;
+&lt;/div&gt;</code></pre>
+                    <p class="mt-3"><strong>Ventajas:</strong></p>
+                    <ul>
+                        <li>Muestra visualmente el estado actual (ON/OFF)</li>
+                        <li>Interfaz familiar para los usuarios</li>
+                        <li>Diseño tipo "switch" moderno</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">JavaScript para Checkbox</div>
+                <div class="card-body">
+                    <pre><code>function toggleThemeCheckbox() {
+    const checkbox = document.getElementById('themeSwitch');
+    const html = document.documentElement;
+    
+    // Si está marcado = modo oscuro, si no = modo claro
+    if (checkbox.checked) {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        html.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Cargar estado al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const checkbox = document.getElementById('themeSwitch');
+    
+    // Marcar o desmarcar según el tema guardado
+    checkbox.checked = (savedTheme === 'dark');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+});</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Demo Visual</div>
+                <div class="card-body">
+                    <div class="demo-box">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="demoSwitch">
+                            <label class="form-check-label" for="demoSwitch">
+                                <i class="fas fa-moon"></i> Modo Oscuro
+                            </label>
+                        </div>
+                        <p class="text-muted mt-3">Este es un ejemplo de switch (no funcional en esta demo)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Método 3 - Radio Buttons -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide6">
+            <h2 class="mb-4"><i class="fas fa-dot-circle"></i> Método 3: Selección con Radio Buttons</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">HTML de Radio Buttons</div>
+                <div class="card-body">
+                    <pre><code>&lt;div class="btn-group" role="group"&gt;
+    &lt;input type="radio" 
+           class="btn-check" 
+           name="theme" 
+           id="lightMode" 
+           value="light"
+           onchange="changeTheme()"&gt;
+    &lt;label class="btn btn-outline-primary" for="lightMode"&gt;
+        &lt;i class="fas fa-sun"&gt;&lt;/i&gt; Claro
+    &lt;/label&gt;
+
+    &lt;input type="radio" 
+           class="btn-check" 
+           name="theme" 
+           id="darkMode" 
+           value="dark"
+           onchange="changeTheme()"&gt;
+    &lt;label class="btn btn-outline-primary" for="darkMode"&gt;
+        &lt;i class="fas fa-moon"&gt;&lt;/i&gt; Oscuro
+    &lt;/label&gt;
+    
+    &lt;input type="radio" 
+           class="btn-check" 
+           name="theme" 
+           id="autoMode" 
+           value="auto"
+           onchange="changeTheme()"&gt;
+    &lt;label class="btn btn-outline-primary" for="autoMode"&gt;
+        &lt;i class="fas fa-adjust"&gt;&lt;/i&gt; Auto
+    &lt;/label&gt;
+&lt;/div&gt;</code></pre>
+                    <p class="mt-3"><strong>Ventajas:</strong></p>
+                    <ul>
+                        <li>Permite múltiples opciones (claro, oscuro, automático)</li>
+                        <li>Muestra claramente todas las opciones disponibles</li>
+                        <li>Excelente para configuraciones de usuario</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">JavaScript para Radio Buttons</div>
+                <div class="card-body">
+                    <pre><code>function changeTheme() {
+    // Obtener el radio button seleccionado
+    const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+    const html = document.documentElement;
+    
+    if (selectedTheme === 'auto') {
+        // Detectar preferencia del sistema
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = prefersDark ? 'dark' : 'light';
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', 'auto');
+    } else {
+        html.setAttribute('data-theme', selectedTheme);
+        localStorage.setItem('theme', selectedTheme);
+    }
+}
+
+// Cargar al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    
+    if (savedTheme === 'auto') {
+        document.getElementById('autoMode').checked = true;
+        changeTheme();
+    } else {
+        document.getElementById(savedTheme + 'Mode').checked = true;
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+});</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Demo Visual</div>
+                <div class="card-body">
+                    <div class="demo-box">
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="demoTheme" id="demoLight" checked>
+                            <label class="btn btn-outline-primary" for="demoLight">
+                                <i class="fas fa-sun"></i> Claro
+                            </label>
+
+                            <input type="radio" class="btn-check" name="demoTheme" id="demoDark">
+                            <label class="btn btn-outline-primary" for="demoDark">
+                                <i class="fas fa-moon"></i> Oscuro
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="demoTheme" id="demoAuto">
+                            <label class="btn btn-outline-primary" for="demoAuto">
+                                <i class="fas fa-adjust"></i> Auto
+                            </label>
+                        </div>
+                        <p class="text-muted mt-3">Ejemplo de radio buttons para selección de tema</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Comparación de Métodos -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide7">
+            <h2 class="mb-4"><i class="fas fa-balance-scale"></i> Comparación de Métodos</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">¿Cuál método elegir?</div>
+                <div class="card-body">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Método</th>
+                                <th>Complejidad</th>
+                                <th>UX</th>
+                                <th>Casos de Uso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Botón Toggle</strong></td>
+                                <td><span class="badge bg-success">Fácil</span></td>
+                                <td><span class="badge bg-success">Excelente</span></td>
+                                <td>Apps simples, blogs, sitios web básicos</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Checkbox/Switch</strong></td>
+                                <td><span class="badge bg-success">Fácil</span></td>
+                                <td><span class="badge bg-primary">Muy buena</span></td>
+                                <td>Paneles de configuración, preferencias</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Radio Buttons</strong></td>
+                                <td><span class="badge bg-warning">Media</span></td>
+                                <td><span class="badge bg-primary">Muy buena</span></td>
+                                <td>Múltiples opciones de tema, modo auto</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">Botón</div>
+                        <div class="card-body">
+                            <p><strong>✅ Pros:</strong></p>
+                            <ul>
+                                <li>Más simple</li>
+                                <li>Menos código</li>
+                                <li>Un solo clic</li>
+                            </ul>
+                            <p><strong>❌ Contras:</strong></p>
+                            <ul>
+                                <li>Solo 2 opciones</li>
+                                <li>Estado no obvio</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">Checkbox</div>
+                        <div class="card-body">
+                            <p><strong>✅ Pros:</strong></p>
+                            <ul>
+                                <li>Estado visual claro</li>
+                                <li>Switch moderno</li>
+                                <li>Intuitivo</li>
+                            </ul>
+                            <p><strong>❌ Contras:</strong></p>
+                            <ul>
+                                <li>Solo 2 estados</li>
+                                <li>Más espacio</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">Radio Buttons</div>
+                        <div class="card-body">
+                            <p><strong>✅ Pros:</strong></p>
+                            <ul>
+                                <li>3+ opciones</li>
+                                <li>Modo automático</li>
+                                <li>Muy flexible</li>
+                            </ul>
+                            <p><strong>❌ Contras:</strong></p>
+                            <ul>
+                                <li>Más complejo</li>
+                                <li>Más espacio UI</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Ejercicio 1 -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide8">
+            <h2 class="mb-4"><i class="fas fa-pencil-alt"></i> Ejercicio 1: Variables CSS</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta 1: Sintaxis de Variables</div>
+                <div class="card-body">
+                    <p><strong>¿Cuál es la sintaxis correcta para definir una variable CSS llamada "color-principal" con valor #0d6efd?</strong></p>
+                    <div class="exercise-box">
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise1" 
+                               placeholder="Escribe tu respuesta aquí"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise1()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result1" class="mt-3"></div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3" style="display:none;" id="hint1">
+                        <strong>Pista:</strong> Las variables CSS en :root se definen con dos guiones: <code>--nombre: valor;</code>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('hint1').style.display='block'">
+                        <i class="fas fa-lightbulb"></i> Ver Pista
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pregunta 2: Usar Variables</div>
+                <div class="card-body">
+                    <p><strong>Completa el código para aplicar la variable CSS:</strong></p>
+                    <pre><code>body {
+    background-color: __________(--bg-primary);
+}</code></pre>
+                    <div class="exercise-box">
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise1b" 
+                               placeholder="Completa con la función correcta"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise1b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result1b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Ejercicio 2 -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide9">
+            <h2 class="mb-4"><i class="fas fa-pencil-alt"></i> Ejercicio 2: Selector de Tema Oscuro</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta 1: Selector CSS</div>
+                <div class="card-body">
+                    <p><strong>¿Cuál es el selector correcto para aplicar estilos en modo oscuro?</strong></p>
+                    <div class="exercise-box">
+                        <select class="form-select exercise-input mb-2" id="exercise2a">
+                            <option value="">Selecciona una opción</option>
+                            <option value=".dark">. dark { }</option>
+                            <option value="[data-theme='dark']">[data-theme="dark"] { }</option>
+                            <option value="#dark">#dark { }</option>
+                            <option value="dark">dark { }</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="checkExercise2a()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result2a" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pregunta 2: Atributo HTML</div>
+                <div class="card-body">
+                    <p><strong>Completa el código JavaScript para activar el modo oscuro:</strong></p>
+                    <pre><code>const html = document.documentElement;
+html.setAttribute('___________', 'dark');</code></pre>
+                    <div class="exercise-box">
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise2b" 
+                               placeholder="¿Qué atributo se debe cambiar?"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise2b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result2b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Ejercicio 3 -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide10">
+            <h2 class="mb-4"><i class="fas fa-pencil-alt"></i> Ejercicio 3: localStorage</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta 1: Métodos de localStorage</div>
+                <div class="card-body">
+                    <p><strong>¿Qué método se usa para GUARDAR un dato en localStorage?</strong></p>
+                    <div class="exercise-box">
+                        <select class="form-select exercise-input mb-2" id="exercise3a">
+                            <option value="">Selecciona una opción</option>
+                            <option value="save">localStorage.save()</option>
+                            <option value="setItem">localStorage.setItem()</option>
+                            <option value="add">localStorage.add()</option>
+                            <option value="store">localStorage.store()</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="checkExercise3a()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result3a" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pregunta 2: Recuperar Datos</div>
+                <div class="card-body">
+                    <p><strong>Completa el código para recuperar el tema guardado:</strong></p>
+                    <pre><code>const savedTheme = localStorage.____________('theme');</code></pre>
+                    <div class="exercise-box">
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise3b" 
+                               placeholder="Método para recuperar datos"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise3b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result3b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Ejercicio 4 - Verdadero o Falso -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide11">
+            <h2 class="mb-4"><i class="fas fa-pencil-alt"></i> Ejercicio 4: Verdadero o Falso</h2>
+            
+            <div class="card mb-3">
+                <div class="card-header">Pregunta 1</div>
+                <div class="card-body">
+                    <p><strong>localStorage puede guardar objetos JavaScript directamente sin convertirlos.</strong></p>
+                    <div class="exercise-box">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="q4a" id="q4a_true" value="true">
+                            <label class="form-check-label" for="q4a_true">Verdadero</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="q4a" id="q4a_false" value="false">
+                            <label class="form-check-label" for="q4a_false">Falso</label>
+                        </div>
+                        <button class="btn btn-primary mt-2" onclick="checkExercise4a()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result4a" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-3">
+                <div class="card-header">Pregunta 2</div>
+                <div class="card-body">
+                    <p><strong>Las variables CSS definidas en :root están disponibles en todos los elementos de la página.</strong></p>
+                    <div class="exercise-box">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="q4b" id="q4b_true" value="true">
+                            <label class="form-check-label" for="q4b_true">Verdadero</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="q4b" id="q4b_false" value="false">
+                            <label class="form-check-label" for="q4b_false">Falso</label>
+                        </div>
+                        <button class="btn btn-primary mt-2" onclick="checkExercise4b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result4b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pregunta 3</div>
+                <div class="card-body">
+                    <p><strong>El método getAttribute() y el método setAttribute() solo funcionan con el elemento body.</strong></p>
+                    <div class="exercise-box">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="q4c" id="q4c_true" value="true">
+                            <label class="form-check-label" for="q4c_true">Verdadero</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="q4c" id="q4c_false" value="false">
+                            <label class="form-check-label" for="q4c_false">Falso</label>
+                        </div>
+                        <button class="btn btn-primary mt-2" onclick="checkExercise4c()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result4c" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Ejercicio 5 - Encontrar Errores -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide12">
+            <h2 class="mb-4"><i class="fas fa-bug"></i> Ejercicio 5: Encuentra el Error</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Código con Error #1</div>
+                <div class="card-body">
+                    <p><strong>Este código debería cambiar el tema, pero no funciona. ¿Cuál es el error?</strong></p>
+                    <div class="code-error">
+<pre><code>function toggleTheme() {
+    const html = document.body;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+}</code></pre>
+                    </div>
+                    <div class="exercise-box">
+                        <textarea class="form-control exercise-input mb-2" 
+                                  id="exercise5a" 
+                                  rows="2" 
+                                  placeholder="Explica cuál es el error"
+                                  onkeydown="preventSpaceExit(event)"></textarea>
+                        <button class="btn btn-primary" onclick="checkExercise5a()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result5a" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Código con Error #2</div>
+                <div class="card-body">
+                    <p><strong>Este código debería guardar el perfil, pero no persiste. ¿Qué falta?</strong></p>
+                    <div class="code-error">
+<pre><code>function saveProfile() {
+    const profile = {
+        nombre: 'Juan',
+        apellido: 'Pérez'
+    };
+    localStorage.setItem('userProfile', profile);
+}</code></pre>
+                    </div>
+                    <div class="exercise-box">
+                        <textarea class="form-control exercise-input mb-2" 
+                                  id="exercise5b" 
+                                  rows="2" 
+                                  placeholder="¿Qué falta en este código?"
+                                  onkeydown="preventSpaceExit(event)"></textarea>
+                        <button class="btn btn-primary" onclick="checkExercise5b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result5b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Ejercicio 6 - Completar Código -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide13">
+            <h2 class="mb-4"><i class="fas fa-code"></i> Ejercicio 6: Completar el Código</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Desafío: Cargar Tema al Iniciar</div>
+                <div class="card-body">
+                    <p><strong>Completa este código para cargar el tema guardado cuando la página se carga:</strong></p>
+                    <pre><code>document.addEventListener('__________', function() {
+    const savedTheme = __________.getItem('theme') || 'light';
+    document.documentElement.________('data-theme', savedTheme);
+});</code></pre>
+                    <div class="exercise-box">
+                        <p>Completa los 3 espacios en blanco (separados por comas):</p>
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise6a" 
+                               placeholder="Ej: palabra1, palabra2, palabra3"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise6a()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result6a" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Desafío: Guardar Perfil Completo</div>
+                <div class="card-body">
+                    <p><strong>Escribe el código completo para guardar un objeto de perfil en localStorage:</strong></p>
+                    <pre><code>// El objeto ya está creado:
+const profileData = {
+    nombre: 'María',
+    email: 'maria@example.com'
+};
+
+// Tu código aquí (una línea):
+________________________________</code></pre>
+                    <div class="exercise-box">
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise6b" 
+                               placeholder="Escribe la línea de código completa"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise6b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result6b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Ejercicio 7 - Orden de Ejecución -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide14">
+            <h2 class="mb-4"><i class="fas fa-sort-numeric-down"></i> Ejercicio 7: Orden Correcto</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta: Orden de Guardado</div>
+                <div class="card-body">
+                    <p><strong>Ordena estos pasos para guardar y recuperar un perfil correctamente:</strong></p>
+                    <ol>
+                        <li>localStorage.getItem('userProfile')</li>
+                        <li>JSON.stringify(profileData)</li>
+                        <li>Crear objeto profileData con los datos del formulario</li>
+                        <li>JSON.parse(savedProfile)</li>
+                        <li>localStorage.setItem('userProfile', jsonString)</li>
+                    </ol>
+                    <p class="text-muted">Ordena primero los pasos de GUARDADO (3 pasos), luego los de RECUPERACIÓN (2 pasos)</p>
+                    <div class="exercise-box">
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise7" 
+                               placeholder="Orden correcto (ej: 3,2,5,1,4)"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise7()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result7" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pregunta: Orden del Toggle</div>
+                <div class="card-body">
+                    <p><strong>¿En qué orden deben ejecutarse estas acciones al hacer toggle del tema?</strong></p>
+                    <ol>
+                        <li>Guardar en localStorage</li>
+                        <li>Actualizar el ícono del botón</li>
+                        <li>Determinar el nuevo tema (dark o light)</li>
+                        <li>Cambiar el atributo data-theme del HTML</li>
+                        <li>Obtener el tema actual</li>
+                    </ol>
+                    <div class="exercise-box">
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise7b" 
+                               placeholder="Orden correcto (ej: 5,3,4,2,1)"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise7b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result7b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Ejercicio 8 - Pregunta Conceptual -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide15">
+            <h2 class="mb-4"><i class="fas fa-brain"></i> Ejercicio 8: Preguntas Conceptuales</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta 1: JSON</div>
+                <div class="card-body">
+                    <p><strong>¿Por qué es necesario usar JSON.stringify() antes de guardar objetos en localStorage?</strong></p>
+                    <div class="exercise-box">
+                        <textarea class="form-control exercise-input mb-2" 
+                                  id="exercise8a" 
+                                  rows="3" 
+                                  placeholder="Explica con tus propias palabras"
+                                  onkeydown="preventSpaceExit(event)"></textarea>
+                        <button class="btn btn-primary" onclick="checkExercise8a()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result8a" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta 2: Ventajas del Método</div>
+                <div class="card-body">
+                    <p><strong>¿Cuál es la principal ventaja de usar un checkbox/switch en lugar de un botón para cambiar el tema?</strong></p>
+                    <div class="exercise-box">
+                        <select class="form-select exercise-input mb-2" id="exercise8b">
+                            <option value="">Selecciona una opción</option>
+                            <option value="mas-rapido">Es más rápido de implementar</option>
+                            <option value="estado-visual">Muestra visualmente el estado actual (ON/OFF)</option>
+                            <option value="menos-codigo">Requiere menos código JavaScript</option>
+                            <option value="mas-bonito">Se ve más bonito</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="checkExercise8b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result8b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pregunta 3: Variables CSS</div>
+                <div class="card-body">
+                    <p><strong>¿Qué sucede si cambias el valor de una variable CSS en [data-theme="dark"]?</strong></p>
+                    <div class="exercise-box">
+                        <select class="form-select exercise-input mb-2" id="exercise8c">
+                            <option value="">Selecciona una opción</option>
+                            <option value="nada">No sucede nada</option>
+                            <option value="todos">Cambia solo ese elemento específico</option>
+                            <option value="temaoscuro">Todos los elementos que usen esa variable se actualizan cuando el tema es oscuro</option>
+                            <option value="error">Genera un error en el navegador</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="checkExercise8c()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result8c" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Perfil de Usuario -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide16">
+            <h2 class="mb-4"><i class="fas fa-user-circle"></i> Pantalla de Mi Perfil</h2>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">Estructura HTML</div>
+                        <div class="card-body">
+                            <pre><code>&lt;div class="profile-container"&gt;
+    &lt;div class="text-center mb-4"&gt;
+        &lt;img id="profileImg" 
+             src="default-avatar.png" 
+             class="profile-img-preview"&gt;
+        &lt;input type="file" 
+               id="imageUpload" 
+               accept="image/*" 
+               style="display:none"&gt;
+        &lt;button onclick="selectImage()"&gt;
+            Cambiar Foto
+        &lt;/button&gt;
+    &lt;/div&gt;
+    
+    &lt;input type="text" 
+           id="nombre" 
+           placeholder="Nombre"&gt;
+    &lt;input type="text" 
+           id="apellido" 
+           placeholder="Apellido"&gt;
+    &lt;input type="email" 
+           id="email" 
+           placeholder="Email"&gt;
+    &lt;input type="tel" 
+           id="telefono" 
+           placeholder="Teléfono"&gt;
+    
+    &lt;button onclick="saveProfile()"&gt;
+        Guardar Perfil
+    &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">Ejemplo Visual</div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <img src="https://via.placeholder.com/150" class="profile-img-preview" alt="Perfil">
+                                <button class="btn btn-primary mt-2 d-block mx-auto">
+                                    <i class="fas fa-camera"></i> Cambiar Foto
+                                </button>
+                            </div>
+                            <input type="text" class="form-control mb-2 exercise-input" placeholder="Nombre" value="Juan">
+                            <input type="text" class="form-control mb-2 exercise-input" placeholder="Apellido" value="Pérez">
+                            <input type="email" class="form-control mb-2 exercise-input" placeholder="Email" value="juan@example.com">
+                            <input type="tel" class="form-control mb-2 exercise-input" placeholder="Teléfono" value="+598 99 123 456">
+                            <button class="btn btn-success w-100">
+                                <i class="fas fa-save"></i> Guardar Perfil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: JavaScript para Perfil -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide17">
+            <h2 class="mb-4"><i class="fab fa-js"></i> Guardar y Cargar Perfil</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Guardar Datos del Perfil</div>
+                <div class="card-body">
+                    <pre><code>function saveProfile() {
+    const profileData = {
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value
+    };
+    
+    // Guardar en localStorage
+    localStorage.setItem('userProfile', JSON.stringify(profileData));
+    
+    // Confirmación con SweetAlert
+    Swal.fire({
+        icon: 'success',
+        title: '¡Perfil guardado!',
+        text: 'Tus datos se han guardado correctamente',
+        timer: 2000
+    });
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Cargar Datos al Iniciar</div>
+                <div class="card-body">
+                    <pre><code>document.addEventListener('DOMContentLoaded', function() {
+    // Cargar perfil guardado
+    const savedProfile = localStorage.getItem('userProfile');
+    
+    if (savedProfile) {
+        const profile = JSON.parse(savedProfile);
+        document.getElementById('nombre').value = profile.nombre;
+        document.getElementById('apellido').value = profile.apellido;
+        document.getElementById('email').value = profile.email;
+        document.getElementById('telefono').value = profile.telefono;
+    } else {
+        // Primera vez: precargar email del usuario actual
+        const currentUser = getCurrentUser(); // Tu función
+        document.getElementById('email').value = currentUser.email;
+    }
+});</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: ¿Qué es Base64? -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide18">
+            <h2 class="mb-4"><i class="fas fa-code"></i> ¿Qué es Base64?</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Concepto Fundamental</div>
+                <div class="card-body">
+                    <p class="lead">Base64 es un <strong>método de codificación</strong> que convierte datos binarios (como imágenes) en texto ASCII.</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="fas fa-image fa-3x text-primary mb-3"></i>
+                                <h5>Imagen Original</h5>
+                                <p class="text-muted">Archivo binario (.jpg, .png)</p>
+                                <code>01010110 11001010...</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
+                                <h5>Imagen en Base64</h5>
+                                <p class="text-muted">Texto ASCII</p>
+                                <code>iVBORw0KGgoAAAA...</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">¿Por qué usar Base64?</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-database fa-3x text-info mb-2"></i>
+                                <h6>Almacenar en localStorage</h6>
+                                <p class="text-secondary small">localStorage solo acepta strings (texto)</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-code fa-3x text-warning mb-2"></i>
+                                <h6>Incrustar en HTML/CSS</h6>
+                                <p class="text-secondary small">Puedes poner imágenes directamente en el código</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-network-wired fa-3x text-danger mb-2"></i>
+                                <h6>Transferir datos</h6>
+                                <p class="text-secondary small">Enviar imágenes en JSON o APIs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Formato de una Imagen Base64</div>
+                <div class="card-body">
+                    <p>Una imagen Base64 tiene este formato:</p>
+                    <pre><code>data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...</code></pre>
+                    
+                    <div class="alert alert-info mt-3">
+                        <strong>Partes del formato:</strong>
+                        <ul class="mb-0">
+                            <li><code>data:</code> - Indica que es un Data URL</li>
+                            <li><code>image/png</code> - MIME type (tipo de imagen)</li>
+                            <li><code>base64</code> - Método de codificación</li>
+                            <li><code>iVBORw0K...</code> - Los datos codificados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 19: FileReader API -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide19">
+            <h2 class="mb-4"><i class="fas fa-file-upload"></i> FileReader API</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">¿Qué es FileReader?</div>
+                <div class="card-body">
+                    <p><strong>FileReader</strong> es una API de JavaScript que permite leer archivos del usuario y convertirlos a diferentes formatos.</p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6>Métodos principales:</h6>
+                            <ul>
+                                <li><code>readAsDataURL()</code> - Convierte a Base64</li>
+                                <li><code>readAsText()</code> - Lee como texto plano</li>
+                                <li><code>readAsArrayBuffer()</code> - Lee como buffer binario</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Eventos:</h6>
+                            <ul>
+                                <li><code>onload</code> - Cuando termina de leer</li>
+                                <li><code>onerror</code> - Si ocurre un error</li>
+                                <li><code>onprogress</code> - Progreso de lectura</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">Flujo de Trabajo</div>
+                <div class="card-body">
+                    <div class="demo-box">
+                        <div class="row text-center">
+                            <div class="col">
+                                <i class="fas fa-mouse-pointer fa-2x text-primary"></i>
+                                <p class="small mt-2">1. Usuario selecciona archivo</p>
+                            </div>
+                            <div class="col">
+                                <i class="fas fa-arrow-right fa-2x text-secondary"></i>
+                            </div>
+                            <div class="col">
+                                <i class="fas fa-file-code fa-2x text-success"></i>
+                                <p class="small mt-2">2. FileReader lee el archivo</p>
+                            </div>
+                            <div class="col">
+                                <i class="fas fa-arrow-right fa-2x text-secondary"></i>
+                            </div>
+                            <div class="col">
+                                <i class="fas fa-text-height fa-2x text-warning"></i>
+                                <p class="small mt-2">3. Convierte a Base64</p>
+                            </div>
+                            <div class="col">
+                                <i class="fas fa-arrow-right fa-2x text-secondary"></i>
+                            </div>
+                            <div class="col">
+                                <i class="fas fa-save fa-2x text-danger"></i>
+                                <p class="small mt-2">4. Guarda en localStorage</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Código Básico</div>
+                <div class="card-body">
+                    <pre><code>// Crear instancia de FileReader
+const reader = new FileReader();
+
+// Definir qué hacer cuando termine de leer
+reader.onload = function(event) {
+    // event.target.result contiene la imagen en Base64
+    console.log(event.target.result);
+};
+
+// Leer el archivo como Data URL (Base64)
+reader.readAsDataURL(archivo);</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 20: Implementación Completa -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide20">
+            <h2 class="mb-4"><i class="fas fa-image"></i> Implementación: Guardar Imagen</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Paso 1: HTML del Input</div>
+                <div class="card-body">
+                    <pre><code>&lt;!-- Input oculto para seleccionar archivo --&gt;
+&lt;input type="file" 
+       id="imageUpload" 
+       accept="image/*" 
+       style="display:none"&gt;
+
+&lt;!-- Imagen de preview --&gt;
+&lt;img id="profileImg" 
+     src="default-avatar.png" 
+     class="profile-img"&gt;
+
+&lt;!-- Botón para activar el input --&gt;
+&lt;button onclick="selectImage()"&gt;
+    &lt;i class="fas fa-camera"&gt;&lt;/i&gt; Cambiar Foto
+&lt;/button&gt;</code></pre>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i> <strong>Nota:</strong> El atributo <code>accept="image/*"</code> filtra solo archivos de imagen.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Paso 2: JavaScript - Activar Input</div>
+                <div class="card-body">
+                    <pre><code>function selectImage() {
+    // Simula un click en el input oculto
+    document.getElementById('imageUpload').click();
+}</code></pre>
+                    <p class="mt-3 text-muted">Esto abre el explorador de archivos del sistema operativo.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 21: Convertir y Guardar -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide21">
+            <h2 class="mb-4"><i class="fas fa-exchange-alt"></i> Convertir y Guardar Imagen</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Paso 3: Evento 'change' - Convertir a Base64</div>
+                <div class="card-body">
+                    <pre><code>document.getElementById('imageUpload').addEventListener('change', function(e) {
+    // Obtener el archivo seleccionado
+    const file = e.target.files[0];
+    
+    // Verificar que hay un archivo
+    if (file) {
+        // Crear FileReader
+        const reader = new FileReader();
+        
+        // Definir qué hacer cuando termine de leer
+        reader.onload = function(event) {
+            // event.target.result contiene la imagen en Base64
+            const base64Image = event.target.result;
+            
+            // Mostrar preview de la imagen
+            document.getElementById('profileImg').src = base64Image;
+            
+            // Guardar en localStorage
+            localStorage.setItem('profileImage', base64Image);
+            
+            console.log('Imagen guardada en Base64');
+        };
+        
+        // ¡IMPORTANTE! Esto inicia la conversión a Base64
+        reader.readAsDataURL(file);
+    }
+});</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Explicación Paso a Paso</div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <td><strong>1.</strong></td>
+                            <td><code>e.target.files[0]</code></td>
+                            <td>Obtiene el primer archivo seleccionado</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2.</strong></td>
+                            <td><code>new FileReader()</code></td>
+                            <td>Crea una instancia para leer archivos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3.</strong></td>
+                            <td><code>reader.onload</code></td>
+                            <td>Define el callback que se ejecuta al terminar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4.</strong></td>
+                            <td><code>event.target.result</code></td>
+                            <td>Contiene la imagen en formato Base64</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5.</strong></td>
+                            <td><code>readAsDataURL(file)</code></td>
+                            <td>Inicia la conversión a Base64</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 22: Cargar Imagen Guardada -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide22">
+            <h2 class="mb-4"><i class="fas fa-download"></i> Cargar Imagen Guardada</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Paso 4: Recuperar al Cargar la Página</div>
+                <div class="card-body">
+                    <pre><code>document.addEventListener('DOMContentLoaded', function() {
+    // Intentar recuperar la imagen guardada
+    const savedImage = localStorage.getItem('profileImage');
+    
+    // Si existe, cargarla
+    if (savedImage) {
+        document.getElementById('profileImg').src = savedImage;
+        console.log('Imagen de perfil cargada desde localStorage');
+    } else {
+        console.log('No hay imagen guardada, usando imagen por defecto');
+    }
+});</code></pre>
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-check-circle"></i> <strong>¡Eso es todo!</strong> La imagen ahora persiste al cerrar y abrir el navegador.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Código Completo Integrado</div>
+                <div class="card-body">
+                    <pre><code>// SELECCIONAR IMAGEN
+function selectImage() {
+    document.getElementById('imageUpload').click();
+}
+
+// CONVERTIR Y GUARDAR
+document.getElementById('imageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const base64Image = event.target.result;
+            document.getElementById('profileImg').src = base64Image;
+            localStorage.setItem('profileImage', base64Image);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// CARGAR AL INICIAR
+document.addEventListener('DOMContentLoaded', function() {
+    const savedImage = localStorage.getItem('profileImage');
+    if (savedImage) {
+        document.getElementById('profileImg').src = savedImage;
+    }
+});</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 23: Ventajas y Limitaciones -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide23">
+            <h2 class="mb-4"><i class="fas fa-balance-scale"></i> Base64: Ventajas y Limitaciones</h2>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-thumbs-up"></i> Ventajas
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>Sin servidor necesario:</strong> No necesitas subir archivos a un servidor</li>
+                                <li><strong>Funciona offline:</strong> La imagen está en el navegador del usuario</li>
+                                <li><strong>Fácil de implementar:</strong> Solo JavaScript, sin backend</li>
+                                <li><strong>Portabilidad:</strong> Puedes copiar/pegar el string Base64</li>
+                                <li><strong>Un solo request:</strong> La imagen está en el HTML/CSS</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-danger text-white">
+                            <i class="fas fa-exclamation-triangle"></i> Limitaciones
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>Tamaño aumenta ~33%:</strong> Base64 es más grande que el archivo original</li>
+                                <li><strong>Límite de localStorage:</strong> Solo 5-10MB por dominio</li>
+                                <li><strong>No se cachea:</strong> El navegador no puede cachear Base64 en localStorage</li>
+                                <li><strong>Rendimiento:</strong> Imágenes grandes pueden ralentizar la app</li>
+                                <li><strong>No compartible:</strong> Cada usuario debe tener su propia copia</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">Comparación de Tamaños</div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tamaño Original</th>
+                                <th>Tamaño en Base64</th>
+                                <th>Incremento</th>
+                                <th>¿Recomendado?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>50 KB</td>
+                                <td>~67 KB</td>
+                                <td>+33%</td>
+                                <td><span class="badge bg-success">✓ Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>200 KB</td>
+                                <td>~267 KB</td>
+                                <td>+33%</td>
+                                <td><span class="badge bg-success">✓ Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>500 KB</td>
+                                <td>~667 KB</td>
+                                <td>+33%</td>
+                                <td><span class="badge bg-warning">⚠ Con cuidado</span></td>
+                            </tr>
+                            <tr>
+                                <td>1 MB</td>
+                                <td>~1.33 MB</td>
+                                <td>+33%</td>
+                                <td><span class="badge bg-warning">⚠ Con cuidado</span></td>
+                            </tr>
+                            <tr>
+                                <td>5 MB</td>
+                                <td>~6.7 MB</td>
+                                <td>+33%</td>
+                                <td><span class="badge bg-danger">✗ No</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Recomendaciones</div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <strong>✓ Usar Base64 cuando:</strong>
+                        <ul class="mb-0">
+                            <li>La imagen es pequeña (menos de 200 KB)</li>
+                            <li>Es una foto de perfil o avatar</li>
+                            <li>No tienes servidor backend</li>
+                            <li>Quieres persistencia local simple</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>⚠ Considerar alternativas cuando:</strong>
+                        <ul class="mb-0">
+                            <li>Las imágenes son grandes (más de 500 KB)</li>
+                            <li>Tienes muchas imágenes</li>
+                            <li>Necesitas compartir imágenes entre usuarios</li>
+                            <li>Requieres edición de imágenes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 24: Alternativas -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide24">
+            <h2 class="mb-4"><i class="fas fa-lightbulb"></i> Alternativas a Base64</h2>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-database"></i> IndexedDB
+                        </div>
+                        <div class="card-body">
+                            <p><strong>¿Qué es?</strong> Base de datos del navegador para almacenar grandes cantidades de datos.</p>
+                            <p><strong>Ventajas:</strong></p>
+                            <ul>
+                                <li>Almacena archivos binarios directamente</li>
+                                <li>Sin límite de 5MB (puede guardar GB)</li>
+                                <li>Mejor rendimiento para archivos grandes</li>
+                            </ul>
+                            <p><strong>Desventajas:</strong></p>
+                            <ul>
+                                <li>API más compleja</li>
+                                <li>Requiere más código</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-cloud-upload-alt"></i> Subir a Servidor
+                        </div>
+                        <div class="card-body">
+                            <p><strong>¿Qué es?</strong> Enviar la imagen a un servidor backend.</p>
+                            <p><strong>Ventajas:</strong></p>
+                            <ul>
+                                <li>Sin límites de tamaño</li>
+                                <li>Cacheable por el navegador</li>
+                                <li>Compartible entre usuarios</li>
+                                <li>Backups automáticos</li>
+                            </ul>
+                            <p><strong>Desventajas:</strong></p>
+                            <ul>
+                                <li>Requiere backend</li>
+                                <li>Costos de hosting</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <i class="fas fa-link"></i> Blob URLs
+                        </div>
+                        <div class="card-body">
+                            <p><strong>¿Qué es?</strong> URLs temporales que apuntan a datos en memoria.</p>
+                            <p><strong>Ventajas:</strong></p>
+                            <ul>
+                                <li>Muy eficiente en memoria</li>
+                                <li>No aumenta el tamaño</li>
+                            </ul>
+                            <p><strong>Desventajas:</strong></p>
+                            <ul>
+                                <li>No persiste al cerrar la página</li>
+                                <li>Temporal</li>
+                            </ul>
+                            <pre class="mt-2"><code>const url = URL.createObjectURL(file);
+img.src = url;</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-cloud"></i> Servicios Cloud
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Ejemplos:</strong> Cloudinary, Firebase Storage, AWS S3</p>
+                            <p><strong>Ventajas:</strong></p>
+                            <ul>
+                                <li>CDN incluido (carga rápida)</li>
+                                <li>Optimización automática</li>
+                                <li>Redimensionamiento on-the-fly</li>
+                            </ul>
+                            <p><strong>Desventajas:</strong></p>
+                            <ul>
+                                <li>Costos mensuales</li>
+                                <li>Dependencia externa</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 25: Optimización de Imágenes -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide25">
+            <h2 class="mb-4"><i class="fas fa-compress"></i> Optimización de Imágenes</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Comprimir Antes de Guardar</div>
+                <div class="card-body">
+                    <p>Antes de convertir a Base64, puedes comprimir la imagen en el cliente:</p>
+                    <pre><code>function compressImage(file, maxWidth, quality) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Crear canvas
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Redimensionar si es muy grande
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Dibujar imagen redimensionada
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convertir a Base64 con calidad reducida
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedBase64);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// Uso:
+document.getElementById('imageUpload').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Comprimir a máximo 800px de ancho, calidad 0.8
+        const compressedImage = await compressImage(file, 800, 0.8);
+        
+        document.getElementById('profileImg').src = compressedImage;
+        localStorage.setItem('profileImage', compressedImage);
+    }
+});</code></pre>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Parámetros de Calidad</div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Calidad</th>
+                                    <th>Tamaño</th>
+                                    <th>Uso</th>
+                                </tr>
+                                <tr>
+                                    <td>1.0</td>
+                                    <td>100%</td>
+                                    <td>Sin compresión</td>
+                                </tr>
+                                <tr>
+                                    <td>0.9</td>
+                                    <td>~50%</td>
+                                    <td>Fotos importantes</td>
+                                </tr>
+                                <tr>
+                                    <td>0.8</td>
+                                    <td>~35%</td>
+                                    <td>⭐ Recomendado</td>
+                                </tr>
+                                <tr>
+                                    <td>0.7</td>
+                                    <td>~25%</td>
+                                    <td>Avatares pequeños</td>
+                                </tr>
+                                <tr>
+                                    <td>0.5</td>
+                                    <td>~15%</td>
+                                    <td>Thumbnails</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Tips de Optimización</div>
+                        <div class="card-body">
+                            <ul>
+                                <li><i class="fas fa-check text-success"></i> Usar JPEG para fotos (mejor compresión)</li>
+                                <li><i class="fas fa-check text-success"></i> Usar PNG para logos/íconos</li>
+                                <li><i class="fas fa-check text-success"></i> Redimensionar al tamaño de uso (no guardar 4K si usarás 200px)</li>
+                                <li><i class="fas fa-check text-success"></i> Calidad 0.8 es un buen balance</li>
+                                <li><i class="fas fa-check text-success"></i> Validar el tamaño antes de guardar</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 26: Ejercicio Base64 -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide26">
+            <h2 class="mb-4"><i class="fas fa-pencil-alt"></i> Ejercicio 9: Base64</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta 1: Concepto</div>
+                <div class="card-body">
+                    <p><strong>¿Qué hace el método readAsDataURL() de FileReader?</strong></p>
+                    <div class="exercise-box">
+                        <select class="form-select exercise-input mb-2" id="exercise9a">
+                            <option value="">Selecciona una opción</option>
+                            <option value="lee-url">Lee una URL de internet</option>
+                            <option value="convierte-base64">Convierte un archivo a formato Base64</option>
+                            <option value="sube-servidor">Sube el archivo a un servidor</option>
+                            <option value="comprime">Comprime la imagen automáticamente</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="checkExercise9a()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result9a" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">Pregunta 2: Completar Código</div>
+                <div class="card-body">
+                    <p><strong>Completa el código para obtener el archivo seleccionado:</strong></p>
+                    <pre><code>document.getElementById('imageUpload').addEventListener('change', function(e) {
+    const file = e.____________.files[___];
+});</code></pre>
+                    <div class="exercise-box">
+                        <p>Completa los 2 espacios (separados por coma):</p>
+                        <input type="text" 
+                               class="form-control exercise-input mb-2" 
+                               id="exercise9b" 
+                               placeholder="ej: palabra1, 0"
+                               onkeydown="preventSpaceExit(event)">
+                        <button class="btn btn-primary" onclick="checkExercise9b()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result9b" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pregunta 3: Tamaño</div>
+                <div class="card-body">
+                    <p><strong>Si una imagen original pesa 300 KB, ¿aproximadamente cuánto pesará en Base64?</strong></p>
+                    <div class="exercise-box">
+                        <select class="form-select exercise-input mb-2" id="exercise9c">
+                            <option value="">Selecciona una opción</option>
+                            <option value="igual">~300 KB (igual)</option>
+                            <option value="menor">~200 KB (menos)</option>
+                            <option value="mayor">~400 KB (más)</option>
+                            <option value="doble">~600 KB (el doble)</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="checkExercise9c()">
+                            <i class="fas fa-check"></i> Verificar
+                        </button>
+                        <div id="result9c" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 19: Ejercicio Final -->
+        <div class="slide-container animate__animated animate__fadeIn" id="slide19">
+            <h2 class="mb-4"><i class="fas fa-trophy"></i> Ejercicio Final: Proyecto Completo</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-clipboard-list"></i> Checklist del Proyecto
+                </div>
+                <div class="card-body">
+                    <p class="lead">Verifica que hayas completado todos los requisitos:</p>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check1">
+                        <label class="form-check-label" for="check1">
+                            <strong>1. Prototipo en Figma</strong> - Diseño de modo claro/oscuro para todo el sitio
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check2">
+                        <label class="form-check-label" for="check2">
+                            <strong>2. Pantalla Mi Perfil en Figma</strong> - Con campos: Nombre, Apellido, Email, Teléfono y foto
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check3">
+                        <label class="form-check-label" for="check3">
+                            <strong>3. Implementar modo claro/oscuro</strong> - En TODAS las páginas del sitio
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check4">
+                        <label class="form-check-label" for="check4">
+                            <strong>4. Persistencia del tema</strong> - El modo seleccionado debe mantenerse al cerrar/abrir navegador
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check5">
+                        <label class="form-check-label" for="check5">
+                            <strong>5. Página my-profile.html</strong> - Crear la página con navegación desde menú de usuario
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check6">
+                        <label class="form-check-label" for="check6">
+                            <strong>6. Precargar email</strong> - La primera vez que se ingresa a my-profile.html
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check7">
+                        <label class="form-check-label" for="check7">
+                            <strong>7. Guardar datos del perfil</strong> - Persistir localmente (excepto imagen)
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="check8">
+                        <label class="form-check-label" for="check8">
+                            <strong>DESAFÍO: Imagen persistente</strong> - Guardar foto de perfil en Base64
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-thumbs-up"></i> Mejores Prácticas
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Usar variables CSS para consistencia</li>
+                                <li>Añadir transiciones suaves (0.3s)</li>
+                                <li>Validar datos antes de guardar</li>
+                                <li>Manejar errores con try-catch</li>
+                                <li>Comprimir imágenes antes de Base64</li>
+                                <li>Respetar preferencias del sistema</li>
+                                <li>Proveer valor por defecto con || operator</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <i class="fas fa-exclamation-triangle"></i> Errores Comunes
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Olvidar JSON.parse() al recuperar</li>
+                                <li>Usar document.body en vez de documentElement</li>
+                                <li>No verificar si hay datos guardados</li>
+                                <li>Imágenes muy grandes en localStorage</li>
+                                <li>No actualizar el ícono del tema</li>
+                                <li>Olvidar el atributo data-theme</li>
+                                <li>No cargar el tema al iniciar la página</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <h3><i class="fas fa-graduation-cap"></i> ¡Felicitaciones!</h3>
+                <p class="lead">Has completado el curso sobre Modo Claro/Oscuro y Perfil de Usuario</p>
+                <p>Ahora estás listo para implementar estas funcionalidades en tu proyecto</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador de slide -->
+    <div class="slide-number">
+        <span id="current-slide">1</span> / <span id="total-slides">19</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 19;
+        let currentTheme = 'light';
+        
+        document.getElementById('total-slides').textContent = totalSlides;
+        
+        function preventSpaceExit(event) {
+            if (event.key === ' ') {
+                event.stopPropagation();
+            }
+        }
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', currentTheme);
+            
+            const icon = document.getElementById('theme-icon');
+            icon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: `Modo ${currentTheme === 'dark' ? 'Oscuro' : 'Claro'} activado`,
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+        
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide-container');
+            
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+            else currentSlide = n;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide${currentSlide}`).classList.add('active');
+            document.getElementById('current-slide').textContent = currentSlide;
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                showSlide(currentSlide + 1);
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Curso Completado!',
+                    text: 'Has llegado al final de la presentación'
+                });
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 1) showSlide(currentSlide - 1);
+        }
+        
+        function showSuccess(id, message) {
+            document.getElementById(id).innerHTML = `
+                <div class="alert alert-success animate__animated animate__bounceIn">
+                    <i class="fas fa-check-circle"></i> ${message}
+                </div>`;
+        }
+        
+        function showError(id, message) {
+            document.getElementById(id).innerHTML = `
+                <div class="alert alert-danger animate__animated animate__shakeX">
+                    <i class="fas fa-times-circle"></i> ${message}
+                </div>`;
+        }
+        
+        // Ejercicio 1
+        function checkExercise1() {
+            const answer = document.getElementById('exercise1').value.trim().toLowerCase();
+            const correct = answer.includes('--color-principal') && answer.includes('#0d6efd');
+            
+            if (correct) {
+                showSuccess('result1', '¡Correcto! La sintaxis es: <code>--color-principal: #0d6efd;</code>');
+            } else {
+                showError('result1', 'Intenta de nuevo. Recuerda: las variables CSS comienzan con --');
+            }
+        }
+        
+        function checkExercise1b() {
+            const answer = document.getElementById('exercise1b').value.trim().toLowerCase();
+            if (answer === 'var' || answer === 'var()') {
+                showSuccess('result1b', '¡Excelente! La función es <code>var(--bg-primary)</code>');
+            } else {
+                showError('result1b', 'Incorrecto. La función para usar variables CSS es var()');
+            }
+        }
+        
+        // Ejercicio 2
+        function checkExercise2a() {
+            const answer = document.getElementById('exercise2a').value;
+            if (answer === "[data-theme='dark']") {
+                showSuccess('result2a', '¡Perfecto! [data-theme="dark"] es el selector de atributo correcto');
+            } else {
+                showError('result2a', 'Esa no es la opción correcta. Piensa en atributos HTML...');
+            }
+        }
+        
+        function checkExercise2b() {
+            const answer = document.getElementById('exercise2b').value.trim().toLowerCase();
+            if (answer === 'data-theme') {
+                showSuccess('result2b', '¡Correcto! El atributo es "data-theme"');
+            } else {
+                showError('result2b', 'Incorrecto. Revisa el selector CSS de la pregunta anterior');
+            }
+        }
+        
+        // Ejercicio 3
+        function checkExercise3a() {
+            const answer = document.getElementById('exercise3a').value;
+            if (answer === 'setItem') {
+                showSuccess('result3a', '¡Perfecto! setItem(clave, valor) guarda datos en localStorage');
+            } else {
+                showError('result3a', 'Esa no es la función correcta');
+            }
+        }
+        
+        function checkExercise3b() {
+            const answer = document.getElementById('exercise3b').value.trim().toLowerCase();
+            if (answer === 'getitem' || answer === 'getitem()') {
+                showSuccess('result3b', '¡Correcto! getItem("clave") recupera datos guardados');
+            } else {
+                showError('result3b', 'Piensa en el opuesto de setItem...');
+            }
+        }
+        
+        // Ejercicio 4
+        function checkExercise4a() {
+            const answer = document.querySelector('input[name="q4a"]:checked');
+            if (answer && answer.value === 'false') {
+                showSuccess('result4a', '¡Correcto! localStorage solo guarda strings. Debes usar JSON.stringify() para objetos.');
+            } else {
+                showError('result4a', 'Falso. localStorage solo puede guardar cadenas de texto (strings).');
+            }
+        }
+        
+        function checkExercise4b() {
+            const answer = document.querySelector('input[name="q4b"]:checked');
+            if (answer && answer.value === 'true') {
+                showSuccess('result4b', '¡Verdadero! Las variables en :root se heredan a todos los elementos.');
+            } else {
+                showError('result4b', 'Verdadero. :root es el elemento raíz y sus variables son globales.');
+            }
+        }
+        
+        function checkExercise4c() {
+            const answer = document.querySelector('input[name="q4c"]:checked');
+            if (answer && answer.value === 'false') {
+                showSuccess('result4c', '¡Correcto! getAttribute y setAttribute funcionan con cualquier elemento del DOM.');
+            } else {
+                showError('result4c', 'Falso. Estos métodos funcionan con cualquier elemento HTML.');
+            }
+        }
+        
+        // Ejercicio 5
+        function checkExercise5a() {
+            const answer = document.getElementById('exercise5a').value.trim().toLowerCase();
+            const hasCorrect = answer.includes('body') || answer.includes('documentelement') || answer.includes('html');
+            if (hasCorrect) {
+                showSuccess('result5a', '¡Correcto! Debería ser document.documentElement (no document.body). El atributo data-theme debe estar en el elemento HTML raíz.');
+            } else {
+                showError('result5a', 'Pista: El problema está en qué elemento se obtiene. ¿Dónde debe estar data-theme?');
+            }
+        }
+        
+        function checkExercise5b() {
+            const answer = document.getElementById('exercise5b').value.trim().toLowerCase();
+            const hasCorrect = answer.includes('json') || answer.includes('stringify');
+            if (hasCorrect) {
+                showSuccess('result5b', '¡Exacto! Falta JSON.stringify(profile) porque localStorage solo acepta strings.');
+            } else {
+                showError('result5b', 'Pista: ¿Qué tipo de datos acepta localStorage? ¿Cómo convertimos objetos?');
+            }
+        }
+        
+        // Ejercicio 6
+        function checkExercise6a() {
+            const answer = document.getElementById('exercise6a').value.trim().toLowerCase().replace(/\s/g, '');
+            const correct = answer === 'domcontentloaded,localstorage,setattribute';
+            if (correct) {
+                showSuccess('result6a', '¡Perfecto! El código completo es: DOMContentLoaded, localStorage, setAttribute');
+            } else {
+                showError('result6a', 'Incorrecto. Piensa: ¿qué evento esperar? ¿dónde leer? ¿cómo aplicar?');
+            }
+        }
+        
+        function checkExercise6b() {
+            const answer = document.getElementById('exercise6b').value.trim();
+            const hasCorrect = answer.includes('localStorage.setItem') && 
+                              answer.includes('JSON.stringify') && 
+                              answer.includes('profileData');
+            if (hasCorrect) {
+                showSuccess('result6b', '¡Excelente! La respuesta es: localStorage.setItem("userProfile", JSON.stringify(profileData));');
+            } else {
+                showError('result6b', 'Debes usar setItem con el objeto convertido a JSON. Revisa el slide 17.');
+            }
+        }
+        
+        // Ejercicio 7
+        function checkExercise7() {
+            const answer = document.getElementById('exercise7').value.trim().replace(/\s/g, '');
+            if (answer === '3,2,5,1,4') {
+                showSuccess('result7', '¡Perfecto! Orden: Crear objeto → Stringify → SetItem → GetItem → Parse');
+            } else {
+                showError('result7', 'Incorrecto. Piensa: primero GUARDADO (crear, convertir, guardar), luego RECUPERACIÓN (obtener, parsear)');
+            }
+        }
+        
+        function checkExercise7b() {
+            const answer = document.getElementById('exercise7b').value.trim().replace(/\s/g, '');
+            if (answer === '5,3,4,2,1' || answer === '5,3,4,1,2') {
+                showSuccess('result7b', '¡Correcto! Primero obtener tema actual → determinar nuevo → cambiar atributo → actualizar UI → guardar');
+            } else {
+                showError('result7b', 'Piensa en el flujo lógico: ¿qué necesitas saber primero? ¿qué cambias primero en el DOM?');
+            }
+        }
+        
+        // Ejercicio 8
+        function checkExercise8a() {
+            const answer = document.getElementById('exercise8a').value.trim().toLowerCase();
+            const hasCorrect = answer.includes('string') || answer.includes('texto') || 
+                              answer.includes('cadena') || answer.includes('solo') ||
+                              answer.includes('convierte');
+            if (hasCorrect) {
+                showSuccess('result8a', '¡Muy bien! localStorage solo puede guardar strings (texto). JSON.stringify() convierte objetos JavaScript a texto.');
+            } else {
+                showError('result8a', 'Pista: piensa en qué tipo de datos puede almacenar localStorage');
+            }
+        }
+        
+        function checkExercise8b() {
+            const answer = document.getElementById('exercise8b').value;
+            if (answer === 'estado-visual') {
+                showSuccess('result8b', '¡Correcto! El checkbox muestra claramente si está activado (ON) o desactivado (OFF).');
+            } else {
+                showError('result8b', 'Piensa en la experiencia del usuario: ¿qué información adicional da un checkbox?');
+            }
+        }
+        
+        function checkExercise8c() {
+            const answer = document.getElementById('exercise8c').value;
+            if (answer === 'temaoscuro') {
+                showSuccess('result8c', '¡Perfecto! Todos los elementos que usen var(--esa-variable) se actualizarán automáticamente en modo oscuro.');
+            } else {
+                showError('result8c', 'Las variables CSS son reactivas. Cuando cambias su valor, ¿qué sucede con los elementos que las usan?');
+            }
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>

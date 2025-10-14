@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Profile README - Tutorial Interactivo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            color: #333;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .slide h2 {
+            color: #764ba2;
+            margin-bottom: 25px;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .slide h3 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .slide p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .slide ul {
+            font-size: 1.2rem;
+            line-height: 2;
+            margin-left: 30px;
+        }
+
+        .slide ul li {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            overflow-x: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-block .keyword {
+            color: #c678dd;
+        }
+
+        .code-block .string {
+            color: #98c379;
+        }
+
+        .code-block .comment {
+            color: #5c6370;
+            font-style: italic;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #f093fb 0%, #f5576c 100%);
+            padding: 5px 15px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .icon-large {
+            font-size: 5rem;
+            text-align: center;
+            margin: 30px 0;
+            color: #667eea;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-box h4 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .img-example {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+
+        .badge-custom {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 30px;
+                height: 90vh;
+            }
+            
+            .slide h1 {
+                font-size: 2.5rem;
+            }
+            
+            .slide h2 {
+                font-size: 2rem;
+            }
+            
+            .slide p, .slide ul {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Portada -->
+        <div class="slide active animate__animated animate__fadeIn">
+            <div class="text-center">
+                <div class="icon-large">
+                    <i class="fab fa-github"></i>
+                </div>
+                <h1>README Especial de GitHub</h1>
+                <h2 style="color: #764ba2; margin-top: 30px;">Personaliza tu Perfil de GitHub</h2>
+                <p style="font-size: 1.5rem; margin-top: 50px; color: #666;">
+                    Aprende a crear un repositorio especial que muestre tu README en tu perfil de GitHub
+                </p>
+                <div style="margin-top: 80px;">
+                    <span class="badge-custom"><i class="fab fa-markdown"></i> Markdown</span>
+                    <span class="badge-custom"><i class="fab fa-github"></i> GitHub</span>
+                    <span class="badge-custom"><i class="fas fa-code"></i> HTML</span>
+                    <span class="badge-custom"><i class="fas fa-palette"></i> Diseño</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: ¿Qué es un README? -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-book"></i> ¿Qué es un README?</h2>
+            <p>
+                Un <span class="highlight">README</span> es un archivo de documentación que proporciona información importante sobre un proyecto.
+            </p>
+            
+            <h3><i class="fas fa-star"></i> Características principales:</h3>
+            <ul>
+                <li><strong>Primer contacto:</strong> Es lo primero que ven los visitantes de tu repositorio</li>
+                <li><strong>Documentación:</strong> Explica qué hace tu proyecto y cómo usarlo</li>
+                <li><strong>Formato estándar:</strong> Se nombra típicamente como <code>README.md</code></li>
+                <li><strong>Lenguaje Markdown:</strong> Utiliza sintaxis simple para formatear texto</li>
+            </ul>
+
+            <div class="feature-box animate__animated animate__pulse animate__delay-1s">
+                <h4><i class="fas fa-lightbulb"></i> ¿Sabías que?</h4>
+                <p style="margin: 0; font-size: 1.2rem;">
+                    El término "README" proviene de los primeros días de la computación, donde los archivos se nombraban para indicar "LÉEME PRIMERO"
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 3: ¿Para qué sirve? -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-question-circle"></i> ¿Para qué sirve un README?</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-6 mb-4">
+                    <div class="feature-box">
+                        <h4><i class="fas fa-info-circle"></i> Informar</h4>
+                        <p>Describe qué hace tu proyecto, sus características principales y su propósito</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="feature-box">
+                        <h4><i class="fas fa-rocket"></i> Guiar</h4>
+                        <p>Proporciona instrucciones de instalación y uso del proyecto</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="feature-box">
+                        <h4><i class="fas fa-users"></i> Atraer</h4>
+                        <p>Motiva a otros desarrolladores a contribuir o usar tu proyecto</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="feature-box">
+                        <h4><i class="fas fa-certificate"></i> Profesionalizar</h4>
+                        <p>Demuestra que tu proyecto es serio y está bien documentado</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Lenguaje Markdown -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fab fa-markdown"></i> Lenguaje Markdown</h2>
+            <p>
+                Markdown es un <span class="highlight">lenguaje de marcado ligero</span> creado por John Gruber en 2004. 
+                Es fácil de leer y escribir, y se convierte automáticamente en HTML.
+            </p>
+
+            <h3><i class="fas fa-code"></i> Sintaxis básica de Markdown:</h3>
+
+            <div class="code-block">
+<span class="comment"># Título principal (h1)</span>
+<span class="comment">## Subtítulo (h2)</span>
+<span class="comment">### Título nivel 3 (h3)</span>
+
+<span class="comment">**Texto en negrita**</span>
+<span class="comment">*Texto en cursiva*</span>
+
+<span class="comment">- Lista sin orden</span>
+<span class="comment">- Otro elemento</span>
+
+<span class="comment">1. Lista ordenada</span>
+<span class="comment">2. Segundo elemento</span>
+
+<span class="comment">[Enlace](https://github.com)</span>
+<span class="comment">![Imagen](url-de-imagen.png)</span>
+
+<span class="comment">```javascript</span>
+<span class="comment">// Bloque de código</span>
+<span class="comment">console.log("Hola Mundo");</span>
+<span class="comment">```</span>
+            </div>
+        </div>
+
+        <!-- Slide 5: README Especial de GitHub -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-magic"></i> README Especial de GitHub</h2>
+            <p>
+                GitHub permite crear un <span class="highlight">repositorio especial</span> que muestra un README directamente en tu perfil.
+            </p>
+
+            <h3><i class="fas fa-gift"></i> ¿Qué lo hace especial?</h3>
+            <ul>
+                <li><strong>Visibilidad destacada:</strong> Aparece en la parte superior de tu perfil</li>
+                <li><strong>Primera impresión:</strong> Es lo primero que ven quienes visitan tu perfil</li>
+                <li><strong>Personalización total:</strong> Puedes incluir lo que quieras: presentación, habilidades, proyectos, estadísticas</li>
+                <li><strong>Nombre especial:</strong> El repositorio debe tener el mismo nombre que tu usuario</li>
+            </ul>
+
+            <div class="feature-box animate__animated animate__bounceIn animate__delay-1s">
+                <h4><i class="fas fa-exclamation-triangle"></i> Requisito importante:</h4>
+                <p style="margin: 0; font-size: 1.2rem;">
+                    El nombre del repositorio <strong>debe ser exactamente igual</strong> a tu nombre de usuario de GitHub
+                </p>
+                <p style="margin-top: 10px; font-size: 1.1rem;">
+                    Ejemplo: Si tu usuario es <code>juanperez</code>, el repositorio debe llamarse <code>juanperez</code>
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Paso 1 - Crear Repositorio -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-clipboard-list"></i> Paso 1: Crear el Repositorio</h2>
+            
+            <div style="margin: 30px 0;">
+                <p><span class="step-number">1</span> Inicia sesión en GitHub y ve a tu perfil</p>
+                <p><span class="step-number">2</span> Haz clic en el botón <strong>"New"</strong> o <strong>"Nuevo repositorio"</strong></p>
+                <p><span class="step-number">3</span> En "Repository name", escribe tu nombre de usuario exactamente como aparece</p>
+                <p><span class="step-number">4</span> Marca la opción <strong>"Public"</strong> (debe ser público para que funcione)</p>
+                <p><span class="step-number">5</span> <strong>Importante:</strong> Marca la casilla <strong>"Add a README file"</strong></p>
+                <p><span class="step-number">6</span> Haz clic en <strong>"Create repository"</strong></p>
+            </div>
+
+            <div class="feature-box">
+                <h4><i class="fas fa-info-circle"></i> GitHub te mostrará un mensaje especial:</h4>
+                <p style="margin: 0; font-size: 1.1rem; font-style: italic;">
+                    "✨ You found a secret! [Tu usuario]/[Tu usuario] is a special repository that you can use to add a README.md to your GitHub profile."
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 7: Paso 2 - Editar README -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-edit"></i> Paso 2: Editar tu README.md</h2>
+            
+            <p>Una vez creado el repositorio, puedes personalizar tu README:</p>
+
+            <div style="margin: 30px 0;">
+                <p><span class="step-number">1</span> Abre el archivo <code>README.md</code> en tu repositorio</p>
+                <p><span class="step-number">2</span> Haz clic en el icono del lápiz <i class="fas fa-pencil-alt"></i> para editar</p>
+                <p><span class="step-number">3</span> Escribe tu contenido usando sintaxis Markdown</p>
+                <p><span class="step-number">4</span> Usa la pestaña <strong>"Preview"</strong> para ver cómo se verá</p>
+                <p><span class="step-number">5</span> Guarda los cambios con <strong>"Commit changes"</strong></p>
+            </div>
+
+            <h3><i class="fas fa-lightbulb"></i> Ejemplo básico:</h3>
+            <div class="code-block">
+<span class="comment"># ¡Hola! 👋 Soy [Tu Nombre]</span>
+
+<span class="comment">## Sobre mí</span>
+<span class="string">Desarrollador Full Stack apasionado por crear soluciones innovadoras.</span>
+
+<span class="comment">## 🚀 Habilidades</span>
+<span class="comment">- JavaScript, Python, React</span>
+<span class="comment">- Node.js, Express, MongoDB</span>
+<span class="comment">- Git, Docker, AWS</span>
+
+<span class="comment">## 📫 Contacto</span>
+<span class="comment">- LinkedIn: [Tu perfil](https://linkedin.com/in/tuperfil)</span>
+<span class="comment">- Email: tuemail@ejemplo.com</span>
+            </div>
+        </div>
+
+        <!-- Slide 8: Elementos avanzados -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-star"></i> Elementos Avanzados para tu README</h2>
+            
+            <h3><i class="fas fa-chart-line"></i> Estadísticas de GitHub:</h3>
+            <div class="code-block">
+<span class="comment">![GitHub Stats](https://github-readme-stats.vercel.app/api?username=tuusuario&show_icons=true&theme=radical)</span>
+            </div>
+
+            <h3><i class="fas fa-trophy"></i> Lenguajes más usados:</h3>
+            <div class="code-block">
+<span class="comment">![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=tuusuario&layout=compact)</span>
+            </div>
+
+            <h3><i class="fas fa-shield-alt"></i> Badges personalizados:</h3>
+            <div class="code-block">
+<span class="comment">![JavaScript](https://img.shields.io/badge/-JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)</span>
+<span class="comment">![React](https://img.shields.io/badge/-React-61DAFB?style=flat-square&logo=react&logoColor=black)</span>
+<span class="comment">![Node.js](https://img.shields.io/badge/-Node.js-339933?style=flat-square&logo=node.js&logoColor=white)</span>
+            </div>
+
+            <h3><i class="fas fa-images"></i> GIFs y imágenes:</h3>
+            <div class="code-block">
+<span class="comment">![Animación](https://media.giphy.com/media/URL-DEL-GIF/giphy.gif)</span>
+            </div>
+        </div>
+
+        <!-- Slide 9: Consejos y buenas prácticas -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-thumbs-up"></i> Consejos y Buenas Prácticas</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-6 mb-3">
+                    <div class="feature-box">
+                        <h4><i class="fas fa-check-circle"></i> Hazlo</h4>
+                        <ul style="color: white; margin: 0;">
+                            <li>Sé auténtico y personal</li>
+                            <li>Actualiza regularmente</li>
+                            <li>Incluye enlaces funcionales</li>
+                            <li>Usa emojis con moderación</li>
+                            <li>Muestra tus mejores proyectos</li>
+                            <li>Incluye formas de contacto</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="feature-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h4><i class="fas fa-times-circle"></i> Evita</h4>
+                        <ul style="color: white; margin: 0;">
+                            <li>Información desactualizada</li>
+                            <li>Enlaces rotos</li>
+                            <li>Demasiado texto</li>
+                            <li>Exagerar habilidades</li>
+                            <li>Copiar READMEs completos</li>
+                            <li>Sobrecarga visual</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-box" style="margin-top: 30px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h4><i class="fas fa-rocket"></i> Tip profesional:</h4>
+                <p style="margin: 0; font-size: 1.2rem;">
+                    Tu README de perfil es tu carta de presentación digital. Trata de que refleje tu personalidad y experiencia de manera profesional pero creativa.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 10: Recursos adicionales -->
+        <div class="slide animate__animated animate__fadeIn">
+            <h2><i class="fas fa-book-open"></i> Recursos y Herramientas Útiles</h2>
+            
+            <h3><i class="fas fa-tools"></i> Generadores y herramientas:</h3>
+            <ul>
+                <li><strong>GitHub Profile README Generator:</strong> Crea tu README de forma interactiva</li>
+                <li><strong>Shields.io:</strong> Genera badges personalizados para tu README</li>
+                <li><strong>GitHub Readme Stats:</strong> Muestra tus estadísticas de GitHub</li>
+                <li><strong>Simple Icons:</strong> Iconos de marcas para tus badges</li>
+            </ul>
+
+            <h3><i class="fas fa-graduation-cap"></i> Aprende más:</h3>
+            <ul>
+                <li><strong>GitHub Docs:</strong> Documentación oficial sobre Markdown</li>
+                <li><strong>Markdown Guide:</strong> Guía completa de sintaxis Markdown</li>
+                <li><strong>Awesome GitHub Profile README:</strong> Colección de ejemplos inspiradores</li>
+            </ul>
+
+            <h3><i class="fas fa-palette"></i> Inspiración:</h3>
+            <ul>
+                <li>Explora perfiles de otros desarrolladores en GitHub</li>
+                <li>Busca "awesome github profile readme" en GitHub</li>
+                <li>Únete a comunidades de desarrolladores</li>
+            </ul>
+        </div>
+
+        <!-- Slide 11: Conclusión -->
+        <div class="slide animate__animated animate__fadeIn">
+            <div class="text-center">
+                <div class="icon-large">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                </div>
+                <h1>¡Listo para Comenzar!</h1>
+                
+                <div style="margin-top: 50px;">
+                    <h3 style="color: #667eea;">Resumen de pasos:</h3>
+                    <div style="text-align: left; max-width: 800px; margin: 30px auto;">
+                        <p><span class="step-number">1</span> Crea un repositorio con tu nombre de usuario</p>
+                        <p><span class="step-number">2</span> Marca "Public" y "Add a README file"</p>
+                        <p><span class="step-number">3</span> Edita el README.md con Markdown</p>
+                        <p><span class="step-number">4</span> Personaliza con tu información</p>
+                        <p><span class="step-number">5</span> Añade elementos visuales y estadísticas</p>
+                        <p><span class="step-number">6</span> ¡Guarda y disfruta tu nuevo perfil!</p>
+                    </div>
+                </div>
+
+                <div class="feature-box animate__animated animate__pulse animate__infinite" style="margin-top: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h4><i class="fas fa-heart"></i> ¡Tu perfil de GitHub te está esperando!</h4>
+                    <p style="margin: 0; font-size: 1.3rem;">
+                        Ahora tienes todas las herramientas para crear un README impresionante que destaque tu perfil de desarrollador
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contador de slides -->
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">11</span>
+    </div>
+
+    <!-- Navegación -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+            <i class="fas fa-arrow-left"></i> Anterior
+        </button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">
+            Siguiente <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript personalizado -->
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        // Actualizar contador total
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            // Remover clase active de todas las slides
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+                slide.classList.remove('animate__fadeIn');
+            });
+
+            // Ajustar índice si está fuera de rango
+            if (n >= totalSlides) {
+                currentSlide = totalSlides - 1;
+            }
+            if (n < 0) {
+                currentSlide = 0;
+            }
+
+            // Mostrar slide actual con animación
+            slides[currentSlide].classList.add('active');
+            slides[currentSlide].classList.add('animate__fadeIn');
+
+            // Actualizar contador
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+
+            // Actualizar botones
+            updateButtons();
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            // Deshabilitar botón anterior en primera slide
+            prevBtn.disabled = currentSlide === 0;
+
+            // Deshabilitar botón siguiente en última slide
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') {
+                if (currentSlide > 0) {
+                    changeSlide(-1);
+                }
+            } else if (event.key === 'ArrowRight') {
+                if (currentSlide < totalSlides - 1) {
+                    changeSlide(1);
+                }
+            }
+        });
+
+        // Inicializar
+        showSlide(currentSlide);
+
+        // Efecto de partículas en el fondo (opcional)
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.width = '5px';
+            particle.style.height = '5px';
+            particle.style.background = 'rgba(255, 255, 255, 0.5)';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.top = '-10px';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '1';
+            document.body.appendChild(particle);
+
+            let pos = -10;
+            const speed = Math.random() * 3 + 1;
+            
+            const interval = setInterval(() => {
+                pos += speed;
+                particle.style.top = pos + 'px';
+                
+                if (pos > window.innerHeight) {
+                    clearInterval(interval);
+                    particle.remove();
+                }
+            }, 50);
+        }
+
+        // Crear partículas ocasionalmente
+        setInterval(createParticle, 2000);
+    </script>
+</body>
+</html>

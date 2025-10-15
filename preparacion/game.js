@@ -587,12 +587,12 @@ function endGame() {
                 <div style="text-align: left; padding: 20px;">
                     <h4>${victory ? '¡Has completado la batalla!' : 'Fin del juego'}</h4>
                     <hr>
-                    <p><strong>👤 Estudiante:</strong> ${studentName}</p>
-                    <p><strong>📚 Cuestionario:</strong> #${quizNumber}</p>
-                    <p><strong>✅ Correctas:</strong> ${correctAnswers} / ${TOTAL_QUESTIONS}</p>
-                    <p><strong>📊 Porcentaje:</strong> ${percentage.toFixed(1)}%</p>
-                    <p><strong>💚 Tu salud:</strong> ${playerHealth}</p>
-                    <p><strong>❤️ Salud enemigo:</strong> ${enemyHealth}</p>
+                    <p><strong> Estudiante:</strong> ${studentName}</p>
+                    <p><strong> Cuestionario:</strong> #${quizNumber}</p>
+                    <p><strong> Correctas:</strong> ${correctAnswers} / ${TOTAL_QUESTIONS}</p>
+                    <p><strong> Porcentaje:</strong> ${percentage.toFixed(1)}%</p>
+                    <p><strong> Tu salud:</strong> ${playerHealth}</p>
+                    <p><strong> Salud enemigo:</strong> ${enemyHealth}</p>
                     ${victory ? '<p style="color: #10b981; font-weight: bold;">🎉 ¡Excelente trabajo!</p>' : ''}
                 </div>
             `,

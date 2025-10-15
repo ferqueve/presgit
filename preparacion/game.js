@@ -397,6 +397,17 @@ function selectAnswer(index, button) {
 }
 
 function activateHelper() {
+    // Si ya hay un helper activo, no hacer nada
+    if (helperActive) {
+        return;
+    }
+    
+    // Limpiar cualquier sprite anterior que pueda existir
+    if (helperSprite) {
+        helperSprite.destroy();
+        helperSprite = null;
+    }
+    
     helperActive = true;
     const helperName = createHelper(currentScene);
     
@@ -434,7 +445,10 @@ function activateHelper() {
                 y: 100,
                 duration: 500,
                 onComplete: () => {
-                    helperSprite.destroy();
+                    if (helperSprite) {
+                        helperSprite.destroy();
+                        helperSprite = null;
+                    }
                     document.getElementById('helpIndicator').classList.add('d-none');
                     helperActive = false;
                     consecutiveErrors = 0;

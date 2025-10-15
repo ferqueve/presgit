@@ -1,0 +1,24 @@
+{
+  "preguntas": [
+    {"pregunta": "¿Qué hace array.filter()?", "opciones": ["Filtra elementos según una condición", "Transforma elementos", "Ordena elementos", "Suma valores"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.sort()?", "opciones": ["Ordena elementos", "Filtra elementos", "Convierte a string", "Itera elementos"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.map()?", "opciones": ["Transforma cada elemento", "Filtra elementos", "Reduce a un valor", "Concatena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.reduce()?", "opciones": ["Reduce a un solo valor", "Filtra elementos", "Suma cadenas", "Ordena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.find()?", "opciones": ["Devuelve el primer elemento que cumple", "Devuelve todos los que cumplen", "Ordena elementos", "Suma valores"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.forEach()?", "opciones": ["Itera sin devolver nada", "Devuelve nuevo array", "Filtra elementos", "Ordena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.some()?", "opciones": ["Verifica si alguno cumple la condición", "Filtra elementos", "Cuenta elementos", "Concatena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.every()?", "opciones": ["Verifica si todos cumplen", "Devuelve el primero", "Ordena elementos", "Filtra"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.includes()?", "opciones": ["Verifica si contiene un valor", "Devuelve un índice", "Suma valores", "Crea nuevo array"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.indexOf()?", "opciones": ["Devuelve el índice de un elemento", "Filtra elementos", "Ordena", "Suma"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.concat()?", "opciones": ["Une dos o más arrays", "Filtra elementos", "Ordena", "Suma"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.reverse()?", "opciones": ["Invierte el orden del array", "Ordena ascendente", "Elimina duplicados", "Devuelve primer elemento"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.slice(1,3)?", "opciones": ["Devuelve una copia del índice 1 al 2", "Elimina elementos", "Filtra elementos", "Ordena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.splice(1,1)?", "opciones": ["Elimina un elemento desde el índice 1", "Copia un elemento", "Agrega un elemento", "Ordena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.join('-')?", "opciones": ["Une elementos con guiones", "Divide el array", "Filtra", "Ordena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.pop()?", "opciones": ["Elimina el último elemento", "Elimina el primero", "Agrega elemento", "Ordena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.shift()?", "opciones": ["Elimina el primer elemento", "Agrega al final", "Copia array", "Filtra"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.push('x')?", "opciones": ["Agrega 'x' al final", "Agrega 'x' al inicio", "Elimina 'x'", "Ordena"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.sort((a,b)=>a-b)?", "opciones": ["Ordena numéricamente ascendente", "Ordena alfabéticamente", "Invierte", "Elimina duplicados"], "correcta": 0},
+    {"pregunta": "¿Qué hace array.filter(x => x > 10)?", "opciones": ["Devuelve elementos mayores a 10", "Devuelve el primero mayor a 10", "Ordena", "Suma"], "correcta": 0}
+  ]
+}

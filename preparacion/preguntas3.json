@@ -1,0 +1,24 @@
+{
+  "preguntas": [
+    {"pregunta": "¿Qué hace el método GET?", "opciones": ["Obtiene datos del servidor", "Crea datos", "Actualiza datos", "Elimina datos"], "correcta": 0},
+    {"pregunta": "¿Qué hace POST?", "opciones": ["Crea un nuevo recurso", "Actualiza recurso", "Elimina recurso", "Obtiene recurso"], "correcta": 0},
+    {"pregunta": "¿Qué hace PUT?", "opciones": ["Reemplaza completamente un recurso", "Elimina recurso", "Crea nuevo", "Obtiene datos"], "correcta": 0},
+    {"pregunta": "¿Qué hace DELETE?", "opciones": ["Elimina un recurso", "Crea recurso", "Obtiene recurso", "Actualiza recurso"], "correcta": 0},
+    {"pregunta": "¿Qué código indica éxito general?", "opciones": ["100", "200", "300", "404"], "correcta": 1},
+    {"pregunta": "¿Qué código indica recurso creado?", "opciones": ["201", "202", "301", "204"], "correcta": 0},
+    {"pregunta": "¿Qué código indica 'No encontrado'?", "opciones": ["500", "403", "404", "302"], "correcta": 2},
+    {"pregunta": "¿Qué código indica 'Sin contenido'?", "opciones": ["200", "204", "400", "500"], "correcta": 1},
+    {"pregunta": "¿Qué código indica 'Error interno del servidor'?", "opciones": ["404", "401", "500", "301"], "correcta": 2},
+    {"pregunta": "¿Qué código indica 'No autorizado'?", "opciones": ["403", "401", "404", "500"], "correcta": 1},
+    {"pregunta": "¿Qué es una API REST?", "opciones": ["Interfaz para comunicación HTTP", "Base de datos", "Archivo JSON", "Librería de frontend"], "correcta": 0},
+    {"pregunta": "¿Qué verbo HTTP se usa para actualizar parcialmente?", "opciones": ["PUT", "PATCH", "POST", "MERGE"], "correcta": 1},
+    {"pregunta": "¿Qué cabecera define el tipo de contenido?", "opciones": ["Accept", "Content-Type", "Body-Type", "Mime"], "correcta": 1},
+    {"pregunta": "¿Qué cabecera indica tipo de respuesta esperado?", "opciones": ["Accept", "Content-Length", "Response-Type", "Output"], "correcta": 0},
+    {"pregunta": "¿Qué es un endpoint?", "opciones": ["URL de acceso a recurso", "Archivo JSON", "Cabecera HTTP", "Código de error"], "correcta": 0},
+    {"pregunta": "¿Qué significa idempotente?", "opciones": ["Produce mismo resultado al repetirse", "Solo se ejecuta una vez", "Depende del servidor", "Es aleatorio"], "correcta": 0},
+    {"pregunta": "¿Cuál de estos métodos es idempotente?", "opciones": ["POST", "PUT", "PATCH", "HEAD"], "correcta": 1},
+    {"pregunta": "¿Qué código indica redirección permanente?", "opciones": ["302", "301", "307", "308"], "correcta": 1},
+    {"pregunta": "¿Qué código indica solicitud incorrecta?", "opciones": ["400", "401", "402", "403"], "correcta": 0},
+    {"pregunta": "¿Qué método HTTP usa el navegador al ingresar una URL?", "opciones": ["GET", "POST", "HEAD", "PUT"], "correcta": 0}
+  ]
+}

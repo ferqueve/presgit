@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalla del Conocimiento - Grupos 310 y 316</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Pantalla de Inicio -->
+    <div id="startScreen" class="start-screen">
+        <div class="start-container">
+            <div class="start-header">
+                <h1 class="animate__animated animate__fadeInDown">
+                    <i class="fas fa-gamepad"></i> Preparacón para evaluación.
+                </h1>
+                <p>Grupos 310 y 316</p>
+            </div>
+            
+            <div class="start-content">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> <strong>Información del Juego:</strong>
+                    <ul>
+                        <li>30 preguntas de múltiple opción</li>
+                        <li>3 tutores enemigos en diferentes etapas</li>
+                        <li>Sistema de ayuda si fallas 3 seguidas</li>
+                        <li>Cuestionario aleatorio (1-5)</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <label for="studentName" class="form-label">
+                        <i class="fas fa-user"></i> Tu nombre:
+                    </label>
+                    <input type="text" class="form-control form-control-lg" id="studentName" 
+                           placeholder="Ingresa tu nombre" required>
+                </div>
+
+                <button class="btn btn-primary btn-lg w-100" onclick="startGame()">
+                    <i class="fas fa-play"></i> Comenzar Batalla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Juego -->
+    <div id="gameScreen" class="game-screen d-none">
+        <div class="game-container">
+            <!-- Header con Info -->
+            <div class="game-header">
+                <div class="header-info">
+                    <span id="quizNumber" class="badge bg-primary">
+                        <i class="fas fa-book"></i> Cuestionario #1
+                    </span>
+                    <span id="stageInfo" class="badge bg-warning text-dark">
+                        <i class="fas fa-trophy"></i> Etapa 1: vs Tutor Juan
+                    </span>
+                </div>
+            </div>
+
+            <!-- Barras de Vida -->
+            <div class="health-section">
+                <div class="health-player">
+                    <div class="character-info">
+                        <i class="fas fa-user-graduate"></i>
+                        <span id="playerName">Estudiante</span>
+                    </div>
+                    <div class="health-bar-container">
+                        <div class="health-bar player" id="playerHealthBar">
+                            <span id="playerHealthText">100 / 100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-counter">
+                    <div class="counter-label">Pregunta</div>
+                    <div class="counter-value" id="questionCounter">1 / 30</div>
+                </div>
+
+                <div class="health-enemy">
+                    <div class="character-info text-end">
+                        <span id="enemyName">Tutor Juan</span>
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="health-bar-container">
+                        <div class="health-bar enemy" id="enemyHealthBar">
+                            <span id="enemyHealthText">100 / 100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Preguntas -->
+            <div class="quiz-section">
+                <div class="question-badge" id="questionBadge">Pregunta 1</div>
+                <h5 id="questionText" class="question-text">Cargando pregunta...</h5>
+                <div id="optionsContainer" class="options-container"></div>
+                <div class="text-end mt-3">
+                    <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas de Phaser -->
+            <div class="game-canvas-section">
+                <div id="game-container"></div>
+            </div>
+
+            <!-- Indicador de Ayuda -->
+            <div id="helpIndicator" class="help-indicator d-none">
+                <i class="fas fa-heart"></i> Ayuda disponible en 
+                <span id="helperName">Tutora Natalia</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.18/sweetalert2.all.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+/* Variables Globales */
+:root {
+    --primary: #667eea;
+    --secondary: #764ba2;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #fbbf24;
+    --dark-bg: #1a1d23;
+    --card-bg: #25282e;
+}
+
+/* Reset y Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #2d3139 100%);
+    color: white;
+    overflow-x: hidden;
+}
+
+/* Pantalla de Inicio */
+.start-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.start-container {
+    max-width: 600px;
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.start-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.start-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.start-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.start-content {
+    padding: 30px;
+}
+
+/* Pantalla de Juego */
+.game-screen {
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.game-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Header del Juego */
+.game-header {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.header-info {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.header-info .badge {
+    font-size: 1rem;
+    padding: 8px 15px;
+}
+
+/* Sección de Salud */
+.health-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.health-player,
+.health-enemy {
+    flex: 1;
+}
+
+.character-info {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.health-player .character-info {
+    color: var(--success);
+}
+
+.health-enemy .character-info {
+    color: var(--danger);
+    justify-content: flex-end;
+}
+
+.health-bar-container {
+    height: 28px;
+    background: var(--dark-bg);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 2px solid var(--primary);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.health-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.health-bar.player {
+    background: linear-gradient(90deg, var(--success), #34d399);
+}
+
+.health-bar.enemy {
+    background: linear-gradient(90deg, var(--danger), #f87171);
+}
+
+.question-counter {
+    background: var(--card-bg);
+    padding: 10px 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.counter-label {
+    font-size: 0.85rem;
+    color: #adb5bd;
+    margin-bottom: 5px;
+}
+
+.counter-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+/* Sección de Preguntas */
+.quiz-section {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    min-height: 220px;
+}
+
+.question-badge {
+    background: var(--primary);
+    color: white;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: #e9ecef;
+    line-height: 1.6;
+}
+
+.options-container {
+    display: grid;
+    gap: 10px;
+}
+
+.option-btn {
+    background: #2d3139;
+    border: 2px solid var(--primary);
+    color: white;
+    padding: 12px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+.option-btn:hover:not(:disabled) {
+    background: var(--primary);
+    transform: translateX(5px);
+}
+
+.option-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.option-btn.correct {
+    background: var(--success);
+    border-color: var(--success);
+    animation: pulse 0.5s;
+}
+
+.option-btn.incorrect {
+    background: var(--danger);
+    border-color: var(--danger);
+    animation: shake 0.5s;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.btn-next {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-next:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+}
+
+.btn-next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Canvas del Juego */
+.game-canvas-section {
+    background: var(--dark-bg);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    margin-bottom: 15px;
+}
+
+#game-container canvas {
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Indicador de Ayuda */
+.help-indicator {
+    background: linear-gradient(135deg, #ff6b9d, #c06c84);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+    animation: glow 2s infinite;
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4); }
+    50% { box-shadow: 0 5px 30px rgba(255, 107, 157, 0.8); }
+}
+
+/* Utilidades */
+.d-none {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .health-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .question-counter {
+        order: -1;
+        width: 100%;
+    }
+    
+    .start-header h1 {
+        font-size: 2rem;
+    }
+    
+    .counter-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animaciones adicionales */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate__animated {
+    animation-duration: 1s;
+}
+
+.animate__fadeInDown {
+    animation-name: fadeInDown;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -100%, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}

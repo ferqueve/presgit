@@ -1,0 +1,24 @@
+{
+  "preguntas": [
+    {"pregunta": "¿Qué comando crea un nuevo repositorio Git?", "opciones": ["git start", "git init", "git new", "git repo"], "correcta": 1},
+    {"pregunta": "¿Cómo se agrega un archivo al área de preparación?", "opciones": ["git stage archivo.js", "git add archivo.js", "git include archivo.js", "git push archivo.js"], "correcta": 1},
+    {"pregunta": "¿Qué comando guarda los cambios en un commit?", "opciones": ["git commit -m 'mensaje'", "git save", "git push commit", "git update"], "correcta": 0},
+    {"pregunta": "¿Qué comando muestra el historial de commits?", "opciones": ["git list", "git history", "git log", "git commits"], "correcta": 2},
+    {"pregunta": "¿Qué hace 'git status'?", "opciones": ["Muestra el estado actual", "Elimina ramas", "Sube cambios", "Inicia repositorio"], "correcta": 0},
+    {"pregunta": "¿Qué comando se usa para crear una nueva rama?", "opciones": ["git branch nueva-rama", "git create-branch", "git new", "git fork"], "correcta": 0},
+    {"pregunta": "¿Qué hace 'git checkout main'?", "opciones": ["Elimina una rama", "Cambia a la rama main", "Crea la rama main", "Sube cambios a main"], "correcta": 1},
+    {"pregunta": "¿Qué hace 'git merge ramaX'?", "opciones": ["Combina ramaX con la actual", "Elimina ramaX", "Crea ramaX", "Copia ramaX"], "correcta": 0},
+    {"pregunta": "¿Qué comando descarga los cambios del repositorio remoto sin fusionarlos?", "opciones": ["git fetch", "git pull", "git clone", "git sync"], "correcta": 0},
+    {"pregunta": "¿Qué comando descarga e integra cambios del remoto?", "opciones": ["git pull", "git fetch", "git merge", "git update"], "correcta": 0},
+    {"pregunta": "¿Qué hace 'git push'?", "opciones": ["Sube commits al remoto", "Descarga commits", "Combina ramas", "Guarda cambios localmente"], "correcta": 0},
+    {"pregunta": "¿Qué comando elimina una rama local?", "opciones": ["git remove branch", "git delete", "git branch -d nombre", "git discard"], "correcta": 2},
+    {"pregunta": "¿Qué hace 'git clone'?", "opciones": ["Descarga un repositorio completo", "Crea una rama", "Sube cambios", "Combina commits"], "correcta": 0},
+    {"pregunta": "¿Qué hace 'git diff'?", "opciones": ["Muestra diferencias entre versiones", "Fusiona ramas", "Guarda cambios", "Crea commits"], "correcta": 0},
+    {"pregunta": "¿Qué hace 'git reset --hard'?", "opciones": ["Deshace todos los cambios sin guardar", "Borra el repositorio", "Actualiza remoto", "Guarda cambios"], "correcta": 0},
+    {"pregunta": "¿Qué comando crea un tag?", "opciones": ["git create tag", "git tag v1.0", "git mark v1.0", "git checkpoint"], "correcta": 1},
+    {"pregunta": "¿Qué comando elimina archivos no rastreados?", "opciones": ["git remove", "git clean -f", "git delete untracked", "git reset"], "correcta": 1},
+    {"pregunta": "¿Qué hace 'git stash'?", "opciones": ["Guarda cambios temporalmente", "Elimina commits", "Sube cambios", "Combina ramas"], "correcta": 0},
+    {"pregunta": "¿Qué hace 'git remote -v'?", "opciones": ["Lista repositorios remotos", "Verifica versión de Git", "Lista ramas", "Inicia un remoto"], "correcta": 0},
+    {"pregunta": "¿Qué hace 'git revert'?", "opciones": ["Crea un commit que revierte otro", "Elimina commits permanentemente", "Fusiona ramas", "Deshace cambios sin guardar"], "correcta": 0}
+  ]
+}

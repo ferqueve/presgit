@@ -18,6 +18,7 @@ let questions = [];
 let quizNumber = 0;
 let currentStage = 1;
 let helperActive = false;
+let helperInterval = null;
 
 const TOTAL_QUESTIONS = 30;
 const QUESTIONS_PER_STAGE = 10;
@@ -401,20 +402,24 @@ function selectAnswer(index, button) {
 function activateHelper() {
     console.log('activateHelper llamado. helperActive:', helperActive);
     
-    // Si ya hay un helper activo, no hacer nada
-    if (helperActive) {
-        console.log('Helper ya activo, abortando');
-        return;
+    // Limpiar CUALQUIER helper anterior inmediatamente
+    if (helperInterval) {
+        console.log('Limpiando intervalo anterior');
+        clearInterval(helperInterval);
+        helperInterval = null;
     }
     
-    // Limpiar cualquier sprite anterior que pueda existir
     if (helperSprite) {
-        console.log('Limpiando helper sprite anterior');
+        console.log('Destruyendo sprite anterior inmediatamente');
         helperSprite.destroy();
         helperSprite = null;
     }
     
+    // Resetear estado
     helperActive = true;
+    consecutiveErrors = 0;
+    
+    // Crear nuevo helper
     const helperName = createHelper(currentScene);
     console.log('Helper creado:', helperName);
     
@@ -433,21 +438,28 @@ function activateHelper() {
     
     // 5 disparos consecutivos
     let shots = 0;
-    const interval = setInterval(() => {
-        console.log('Disparo del helper:', shots + 1);
-        if (shots < 5 && helperSprite) {
-            shootProjectile(450, 200, 750, 200, 0xff6b9d);
-            setTimeout(() => {
-                if (enemyHealth > 0) {
-                    enemyHealth -= 3;
-                    updateHealth();
-                    showDamage(enemySprite);
-                }
-            }, 400);
+    helperInterval = setInterval(() => {
+        console.log('Disparo del helper:', shots + 1, 'helperSprite existe:', !!helperSprite);
+        
+        if (shots < 5) {
+            // Verificar que el sprite existe antes de disparar
+            if (helperSprite) {
+                shootProjectile(450, 200, 750, 200, 0xff6b9d);
+                setTimeout(() => {
+                    if (enemyHealth > 0) {
+                        enemyHealth -= 3;
+                        updateHealth();
+                        if (enemySprite) {
+                            showDamage(enemySprite);
+                        }
+                    }
+                }, 400);
+            }
             shots++;
         } else {
             console.log('Finalizando ataques del helper');
-            clearInterval(interval);
+            clearInterval(helperInterval);
+            helperInterval = null;
             
             // Desaparecer helper
             if (helperSprite) {
@@ -463,14 +475,13 @@ function activateHelper() {
                         }
                         document.getElementById('helpIndicator').classList.add('d-none');
                         helperActive = false;
-                        consecutiveErrors = 0;
-                        console.log('Helper desactivado');
+                        console.log('Helper desactivado completamente');
                     }
                 });
             } else {
                 helperActive = false;
-                consecutiveErrors = 0;
                 document.getElementById('helpIndicator').classList.add('d-none');
+                console.log('Helper desactivado (sprite ya destruido)');
             }
         }
     }, 800);

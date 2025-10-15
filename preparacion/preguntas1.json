@@ -1,24 +1,154 @@
 {
   "preguntas": [
-    {"pregunta": "¿Qué comando crea un nuevo repositorio Git?", "opciones": ["git start", "git init", "git new", "git repo"], "correcta": 1},
-    {"pregunta": "¿Cómo se agrega un archivo al área de preparación?", "opciones": ["git stage archivo.js", "git add archivo.js", "git include archivo.js", "git push archivo.js"], "correcta": 1},
-    {"pregunta": "¿Qué comando guarda los cambios en un commit?", "opciones": ["git commit -m 'mensaje'", "git save", "git push commit", "git update"], "correcta": 0},
-    {"pregunta": "¿Qué comando muestra el historial de commits?", "opciones": ["git list", "git history", "git log", "git commits"], "correcta": 2},
-    {"pregunta": "¿Qué hace 'git status'?", "opciones": ["Muestra el estado actual", "Elimina ramas", "Sube cambios", "Inicia repositorio"], "correcta": 0},
-    {"pregunta": "¿Qué comando se usa para crear una nueva rama?", "opciones": ["git branch nueva-rama", "git create-branch", "git new", "git fork"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'git checkout main'?", "opciones": ["Elimina una rama", "Cambia a la rama main", "Crea la rama main", "Sube cambios a main"], "correcta": 1},
-    {"pregunta": "¿Qué hace 'git merge ramaX'?", "opciones": ["Combina ramaX con la actual", "Elimina ramaX", "Crea ramaX", "Copia ramaX"], "correcta": 0},
-    {"pregunta": "¿Qué comando descarga los cambios del repositorio remoto sin fusionarlos?", "opciones": ["git fetch", "git pull", "git clone", "git sync"], "correcta": 0},
-    {"pregunta": "¿Qué comando descarga e integra cambios del remoto?", "opciones": ["git pull", "git fetch", "git merge", "git update"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'git push'?", "opciones": ["Sube commits al remoto", "Descarga commits", "Combina ramas", "Guarda cambios localmente"], "correcta": 0},
-    {"pregunta": "¿Qué comando elimina una rama local?", "opciones": ["git remove branch", "git delete", "git branch -d nombre", "git discard"], "correcta": 2},
-    {"pregunta": "¿Qué hace 'git clone'?", "opciones": ["Descarga un repositorio completo", "Crea una rama", "Sube cambios", "Combina commits"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'git diff'?", "opciones": ["Muestra diferencias entre versiones", "Fusiona ramas", "Guarda cambios", "Crea commits"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'git reset --hard'?", "opciones": ["Deshace todos los cambios sin guardar", "Borra el repositorio", "Actualiza remoto", "Guarda cambios"], "correcta": 0},
-    {"pregunta": "¿Qué comando crea un tag?", "opciones": ["git create tag", "git tag v1.0", "git mark v1.0", "git checkpoint"], "correcta": 1},
-    {"pregunta": "¿Qué comando elimina archivos no rastreados?", "opciones": ["git remove", "git clean -f", "git delete untracked", "git reset"], "correcta": 1},
-    {"pregunta": "¿Qué hace 'git stash'?", "opciones": ["Guarda cambios temporalmente", "Elimina commits", "Sube cambios", "Combina ramas"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'git remote -v'?", "opciones": ["Lista repositorios remotos", "Verifica versión de Git", "Lista ramas", "Inicia un remoto"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'git revert'?", "opciones": ["Crea un commit que revierte otro", "Elimina commits permanentemente", "Fusiona ramas", "Deshace cambios sin guardar"], "correcta": 0}
+    {
+      "pregunta": "¿Qué comando se usa para crear un nuevo repositorio en la carpeta actual?",
+      "opciones": ["git start", "git init", "git repo", "git new"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Para qué sirve el comando 'git add archivo.js'?",
+      "opciones": ["Agregar el archivo al área de preparación (staging)", "Subir el archivo al remoto", "Eliminar el archivo del historial", "Fusionar el archivo con otra rama"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo guardas los cambios con un mensaje en un commit?",
+      "opciones": ["git save 'mensaje'", "git push -m 'mensaje'", "git commit -m 'mensaje'", "git commit --save 'mensaje'"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué comando simple usas para cambiarte a una rama existente?",
+      "opciones": ["git move rama", "git goto rama", "git checkout -b rama", "git switch rama"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "¿Qué comando te muestra qué archivos están modificados, en staging o sin seguimiento?",
+      "opciones": ["git status", "git show", "git diff --staged", "git changes"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo creas una nueva rama sin cambiarte a ella?",
+      "opciones": ["git new rama-nueva", "git create rama-nueva", "git branch rama-nueva", "git mkbranch rama-nueva"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué comando fusiona la rama indicada con la rama actual?",
+      "opciones": ["git mix rama", "git join rama", "git merge rama", "git attach rama"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué comando descarga e integra los cambios del remoto a tu rama actual en un paso?",
+      "opciones": ["git fetch", "git update", "git sync", "git pull"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "¿Qué comando solo descarga referencias del remoto sin integrarlas?",
+      "opciones": ["git fetch", "git pull", "git clone", "git remote"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué comando clona un repositorio remoto a una carpeta local?",
+      "opciones": ["git copy <URL>", "git fork <URL>", "git clone <URL>", "git fetch <URL>"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Con qué comando ves el historial de commits de la rama actual?",
+      "opciones": ["git history", "git log", "git commits", "git timeline"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué comando muestra las diferencias de contenido entre tu trabajo y el último commit?",
+      "opciones": ["git show-last", "git compare", "git changes", "git diff"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "¿Cómo deshaces el último commit pero conservas los cambios en staging/working?",
+      "opciones": ["git revert HEAD --hard", "git reset --hard HEAD~1", "git reset --soft HEAD~1", "git clean -fd"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Cómo descartas todos los cambios locales y vuelves al último commit?",
+      "opciones": ["git reset --hard HEAD", "git undo-all", "git revert-all", "git clear"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Para qué sirve 'git stash'?",
+      "opciones": ["Guardar temporalmente cambios no confirmados", "Borrar commits antiguos", "Subir cambios al remoto", "Cambiar de rama y fusionar"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué comando te lista las ramas locales?",
+      "opciones": ["git list-branches", "git branches", "git show-branches", "git branch"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "¿Cómo borras una rama local ya fusionada?",
+      "opciones": ["git delete-branch nombre", "git branch --rm nombre", "git branch -d nombre", "git remove-branch nombre"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Cómo configuras el nombre de usuario global de Git?",
+      "opciones": ["git config --global user.name \"Tu Nombre\"", "git set user.name \"Tu Nombre\"", "git user.name \"Tu Nombre\"", "git whoami --set \"Tu Nombre\""],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo configuras el correo global de Git?",
+      "opciones": ["git mail set \"tu@correo.com\"", "git config --global user.email \"tu@correo.com\"", "git set email \"tu@correo.com\"", "git config email \"tu@correo.com\""],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué comando sueles usar la primera vez para subir tu rama y establecer el upstream?",
+      "opciones": ["git push origin", "git upload -u origin rama", "git send origin rama", "git push -u origin rama"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué hace 'git cherry-pick <hash>'?",
+      "opciones": ["Resetea a un commit específico", "Elimina un commit del historial", "Reescribe el autor del commit", "Aplica un commit específico en tu rama actual"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "¿Con qué comando ves los remotos configurados y sus URLs?",
+      "opciones": ["git remote -v", "git remotes list", "git origin show", "git url show"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo modificas el mensaje del último commit sin crear uno nuevo?",
+      "opciones": ["git edit-last", "git commit --amend", "git message --edit", "git log --amend"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Cómo creas una etiqueta (tag) anotada llamada v1.0?",
+      "opciones": ["git tag v1.0", "git label -a v1.0 -m \"v1.0\"", "git tag -a v1.0 -m \"v1.0\"", "git tag --msg v1.0"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué hace 'git revert <hash>'?",
+      "opciones": ["Elimina definitivamente ese commit", "Deshace cambios sin crear commit", "Crea un commit que invierte los cambios del indicado", "Limpia archivos sin seguimiento"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "¿Qué archivo usas para ignorar archivos y carpetas en el repositorio?",
+      "opciones": [".gitignore", ".gitkeep", ".gitconfig", ".ignoregit"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo deshaces cambios en un archivo del directorio de trabajo y vuelves al último commit?",
+      "opciones": ["git undo archivo.js", "git restore --staged archivo.js", "git restore archivo.js", "git checkout -b archivo.js"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Cómo quitas un archivo del staging (volverlo a 'modificado')?",
+      "opciones": ["git unstage archivo.js", "git restore --staged archivo.js", "git reset --hard archivo.js", "git pop archivo.js"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Cómo haces el primer push de una rama nueva y dejas vinculada la rama remota para próximos push/pull?",
+      "opciones": ["git push origin rama", "git send -u origin rama", "git upload origin rama", "git push -u origin rama"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "Si quieres traer cambios del remoto pero reescribiendo tu historial local para evitar merges extra, ¿qué usas?",
+      "opciones": ["git pull --rebase", "git fetch --merge", "git update --linear", "git sync --rebase"],
+      "correcta": 0
+    }
   ]
 }

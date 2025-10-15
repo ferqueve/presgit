@@ -1,24 +1,169 @@
 {
   "preguntas": [
-    {"pregunta": "¿Qué devuelve fetch() por defecto?", "opciones": ["Una promesa", "Un objeto JSON", "Un string", "Un número"], "correcta": 0},
-    {"pregunta": "¿Qué método HTTP usa fetch() por defecto?", "opciones": ["POST", "GET", "PUT", "DELETE"], "correcta": 1},
-    {"pregunta": "¿Qué función convierte una respuesta a JSON?", "opciones": ["res.text()", "res.parse()", "res.json()", "res.convert()"], "correcta": 2},
-    {"pregunta": "¿Cómo se maneja el error de fetch?", "opciones": ["Con try/catch", "Con .error()", "Con .catch()", "No se puede manejar"], "correcta": 2},
-    {"pregunta": "¿Qué hace async/await con fetch?", "opciones": ["Bloquea la página", "Simplifica promesas", "Convierte JSON a string", "Repite peticiones"], "correcta": 1},
-    {"pregunta": "¿Qué hace fetch('url', {method:'POST'})?", "opciones": ["Envía datos al servidor", "Obtiene datos", "Elimina datos", "Actualiza datos"], "correcta": 0},
-    {"pregunta": "¿Qué hace el encabezado 'Content-Type: application/json'?", "opciones": ["Indica que se envían datos JSON", "Indica idioma", "Indica tipo de archivo", "Indica método HTTP"], "correcta": 0},
-    {"pregunta": "¿Qué parámetro de fetch define el cuerpo del mensaje?", "opciones": ["body", "data", "content", "payload"], "correcta": 0},
-    {"pregunta": "¿Qué devuelve response.ok?", "opciones": ["true si la respuesta fue exitosa", "El JSON del servidor", "El código de error", "Nada"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'await fetch(url)'?", "opciones": ["Espera la respuesta antes de continuar", "Crea una promesa", "Detiene el servidor", "Muestra error"], "correcta": 0},
-    {"pregunta": "¿Qué método se usa para enviar datos al servidor?", "opciones": ["GET", "POST", "DELETE", "HEAD"], "correcta": 1},
-    {"pregunta": "¿Cómo se envían encabezados personalizados?", "opciones": ["Con headers: {}", "Con meta: {}", "Con info: {}", "Con sendHeaders()"], "correcta": 0},
-    {"pregunta": "¿Qué método borra un recurso en el servidor?", "opciones": ["DELETE", "REMOVE", "CLEAR", "DROP"], "correcta": 0},
-    {"pregunta": "¿Qué hace el método PUT?", "opciones": ["Crea nuevo recurso", "Actualiza completamente un recurso", "Obtiene recurso", "Elimina recurso"], "correcta": 1},
-    {"pregunta": "¿Qué diferencia hay entre PUT y PATCH?", "opciones": ["PUT reemplaza todo, PATCH modifica parte", "Son iguales", "PATCH elimina recursos", "PUT crea nuevos recursos"], "correcta": 0},
-    {"pregunta": "¿Qué tipo de dato maneja fetch?", "opciones": ["Promesa", "Array", "String", "Objeto simple"], "correcta": 0},
-    {"pregunta": "¿Qué propiedad de response indica el código HTTP?", "opciones": ["response.code", "response.status", "response.http", "response.ok"], "correcta": 1},
-    {"pregunta": "¿Qué sucede si fetch no puede conectar?", "opciones": ["Lanza un error", "Devuelve null", "Devuelve status 404", "Devuelve 0"], "correcta": 0},
-    {"pregunta": "¿Qué hace .then() en fetch?", "opciones": ["Encadena acciones tras la promesa", "Repite la solicitud", "Cierra conexión", "Reinicia el fetch"], "correcta": 0},
-    {"pregunta": "¿Qué hace .finally() en fetch?", "opciones": ["Se ejecuta siempre al final", "Solo en errores", "Solo si es exitosa", "Nunca se ejecuta"], "correcta": 0}
+    {
+      "pregunta": "¿Qué devuelve la función fetch() cuando se ejecuta?",
+      "opciones": ["Un objeto JSON", "Una promesa", "Un array", "Una cadena de texto"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué método HTTP usa fetch() si no se indica otro?",
+      "opciones": ["POST", "GET", "PUT", "DELETE"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Cómo conviertes la respuesta de fetch a formato JSON?",
+      "opciones": ["response.parse()", "response.json()", "response.toJSON()", "response.getJSON()"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué hace el bloque .then() al usar fetch?",
+      "opciones": ["Maneja errores", "Encadena una acción tras resolver la promesa", "Ejecuta código antes del fetch", "Cierra la conexión"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué hace el bloque .catch() en una promesa fetch?",
+      "opciones": ["Guarda datos", "Repite la petición", "Maneja errores o rechazos", "Convierte la respuesta en JSON"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué propiedad de la respuesta indica si fue exitosa?",
+      "opciones": ["response.code", "response.ok", "response.success", "response.valid"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué método de response devuelve el cuerpo en texto plano?",
+      "opciones": ["response.text()", "response.data()", "response.body()", "response.value()"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué palabra clave se usa junto a fetch para manejarlo con sintaxis moderna y limpia?",
+      "opciones": ["await", "async", "then", "wait"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué función debes usar para indicar que una función trabaja con await?",
+      "opciones": ["defer", "promise", "async", "next"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué hace el parámetro 'method' en fetch?",
+      "opciones": ["Define el tipo de contenido", "Define el tipo de solicitud HTTP", "Define la respuesta esperada", "Define el nombre de la API"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué hace el parámetro 'headers' en fetch?",
+      "opciones": ["Define la ruta de respuesta", "Agrega encabezados HTTP personalizados", "Guarda las cookies", "Activa CORS automáticamente"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué valor tiene normalmente 'Content-Type' cuando se envían datos en JSON?",
+      "opciones": ["application/json", "text/json", "multipart/form-data", "text/plain"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo se envían datos con fetch usando POST?",
+      "opciones": [
+        "fetch(url, {method:'POST', body: JSON.stringify(datos)})",
+        "fetch(url, datos)",
+        "fetch(url, {send: datos})",
+        "fetch.post(url, datos)"
+      ],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace la opción 'body' en fetch?",
+      "opciones": ["Contiene los datos a enviar", "Contiene las cabeceras HTTP", "Define la URL base", "Activa el modo de depuración"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué sucede si fetch no puede conectarse al servidor?",
+      "opciones": ["Lanza un error que se puede capturar", "Devuelve un JSON vacío", "Se congela la app", "Retorna null"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo verificas el código de estado HTTP con fetch?",
+      "opciones": ["response.status", "response.code", "response.http", "response.statusCode"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué método de HTTP suele usarse con fetch para eliminar recursos?",
+      "opciones": ["REMOVE", "DELETE", "CLEAR", "DROP"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué método se usa para actualizar parcialmente un recurso con fetch?",
+      "opciones": ["PUT", "PATCH", "UPDATE", "POST"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué diferencia hay entre PUT y POST al usar fetch?",
+      "opciones": [
+        "POST crea recursos nuevos, PUT reemplaza los existentes",
+        "PUT crea, POST reemplaza",
+        "PUT se usa solo en APIs públicas",
+        "POST no envía cuerpo en la petición"
+      ],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué significa que fetch sea asíncrono?",
+      "opciones": [
+        "Se ejecuta de forma paralela sin bloquear el flujo del programa",
+        "Bloquea el navegador hasta tener respuesta",
+        "Se ejecuta solo en segundo plano",
+        "Detiene la ejecución hasta recibir datos"
+      ],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace .finally() en una promesa de fetch?",
+      "opciones": ["Ejecuta código solo si hay error", "Ejecuta siempre al finalizar", "Convierte la promesa en síncrona", "Cierra la conexión"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué tipo de dato devuelve response.json()?",
+      "opciones": ["Objeto JavaScript", "Texto plano", "XML", "Promesa"],
+      "correcta": 3
+    },
+    {
+      "pregunta": "¿Qué propiedad de fetch puedes usar para verificar si la respuesta fue exitosa?",
+      "opciones": ["response.valid", "response.ok", "response.success", "response.code"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué librería de JS usa internamente fetch para las promesas?",
+      "opciones": ["Axios", "Promise", "NodeRequest", "XHR"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué tipo de error maneja .catch()?",
+      "opciones": ["Errores de red o rechazo de promesa", "Errores de sintaxis", "Errores lógicos", "Todos los anteriores"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué valor devuelve response.ok cuando el estado HTTP es 404?",
+      "opciones": ["true", "false", "null", "undefined"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué hace el método HEAD cuando se usa con fetch?",
+      "opciones": ["Obtiene solo los encabezados", "Obtiene el cuerpo sin encabezados", "Elimina un recurso", "Actualiza un registro"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué palabra clave debes usar para pausar la ejecución hasta recibir la respuesta de fetch?",
+      "opciones": ["await", "pause", "stop", "wait"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué tipo de dato se envía con el cuerpo de la petición en JSON?",
+      "opciones": ["Cadena convertida con JSON.stringify()", "Objeto crudo", "Array de datos", "Archivo binario"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cómo podrías manejar múltiples fetch en paralelo?",
+      "opciones": ["Promise.all()", "fetch.all()", "await.all()", "fetchGroup()"],
+      "correcta": 0
+    }
   ]
 }

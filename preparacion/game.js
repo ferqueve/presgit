@@ -227,38 +227,35 @@ function createPlayer(scene) {
 
 function createEnemy(scene, stage) {
     const enemy = enemies[stage - 1];
-    const textureName = enemy.texture || `tutor_${enemy.name.toLowerCase().split(' ')[1]}`;
-    
-    if (enemySprite) {
-        enemySprite.destroy();
-    }
-    
+    const textureName = enemy.texture;
+
+    // Escala personalizada
+    let scale = 0.1;
+    if (textureName === 'tutor_juan') scale = 0.1;
+    if (textureName === 'tutor_nicolas') scale = 0.1;
+    if (textureName === 'tutor_fernando') scale = 0.25; // Ajustá acá según necesites
+
+    if (enemySprite) enemySprite.destroy();
+
     if (scene.textures.exists(textureName)) {
         enemySprite = scene.add.sprite(750, 200, textureName);
-        enemySprite.setScale(0.1);
+        enemySprite.setScale(scale);
     } else {
         const g = scene.add.graphics();
         g.fillStyle(enemy.color, 1);
         g.fillRoundedRect(0, 0, 80, 80, 12);
         g.generateTexture(`enemyShape${stage}`, 80, 80);
         enemySprite = scene.add.sprite(750, 200, `enemyShape${stage}`);
-        
-        // Cara malvada
-        const face = scene.add.graphics();
-        face.fillStyle(0xff0000, 1);
-        face.fillCircle(738, 192, 8);
-        face.fillCircle(762, 192, 8);
     }
-    
-    // Resetear salud del enemigo
+
     enemyHealth = 100;
     updateHealth();
-    
-    // Actualizar nombre
+
     document.getElementById('enemyName').textContent = enemy.name;
     document.getElementById('stageInfo').innerHTML = 
         `<i class="fas fa-trophy"></i> Etapa ${stage}: vs ${enemy.name}`;
 }
+
 
 function createHelper(scene) {
     const helperName = helpers[Math.floor(Math.random() * helpers.length)];

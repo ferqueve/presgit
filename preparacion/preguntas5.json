@@ -1,24 +1,149 @@
 {
   "preguntas": [
-    {"pregunta": "¿Qué hace array.filter()?", "opciones": ["Filtra elementos según una condición", "Transforma elementos", "Ordena elementos", "Suma valores"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.sort()?", "opciones": ["Ordena elementos", "Filtra elementos", "Convierte a string", "Itera elementos"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.map()?", "opciones": ["Transforma cada elemento", "Filtra elementos", "Reduce a un valor", "Concatena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.reduce()?", "opciones": ["Reduce a un solo valor", "Filtra elementos", "Suma cadenas", "Ordena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.find()?", "opciones": ["Devuelve el primer elemento que cumple", "Devuelve todos los que cumplen", "Ordena elementos", "Suma valores"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.forEach()?", "opciones": ["Itera sin devolver nada", "Devuelve nuevo array", "Filtra elementos", "Ordena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.some()?", "opciones": ["Verifica si alguno cumple la condición", "Filtra elementos", "Cuenta elementos", "Concatena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.every()?", "opciones": ["Verifica si todos cumplen", "Devuelve el primero", "Ordena elementos", "Filtra"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.includes()?", "opciones": ["Verifica si contiene un valor", "Devuelve un índice", "Suma valores", "Crea nuevo array"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.indexOf()?", "opciones": ["Devuelve el índice de un elemento", "Filtra elementos", "Ordena", "Suma"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.concat()?", "opciones": ["Une dos o más arrays", "Filtra elementos", "Ordena", "Suma"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.reverse()?", "opciones": ["Invierte el orden del array", "Ordena ascendente", "Elimina duplicados", "Devuelve primer elemento"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.slice(1,3)?", "opciones": ["Devuelve una copia del índice 1 al 2", "Elimina elementos", "Filtra elementos", "Ordena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.splice(1,1)?", "opciones": ["Elimina un elemento desde el índice 1", "Copia un elemento", "Agrega un elemento", "Ordena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.join('-')?", "opciones": ["Une elementos con guiones", "Divide el array", "Filtra", "Ordena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.pop()?", "opciones": ["Elimina el último elemento", "Elimina el primero", "Agrega elemento", "Ordena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.shift()?", "opciones": ["Elimina el primer elemento", "Agrega al final", "Copia array", "Filtra"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.push('x')?", "opciones": ["Agrega 'x' al final", "Agrega 'x' al inicio", "Elimina 'x'", "Ordena"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.sort((a,b)=>a-b)?", "opciones": ["Ordena numéricamente ascendente", "Ordena alfabéticamente", "Invierte", "Elimina duplicados"], "correcta": 0},
-    {"pregunta": "¿Qué hace array.filter(x => x > 10)?", "opciones": ["Devuelve elementos mayores a 10", "Devuelve el primero mayor a 10", "Ordena", "Suma"], "correcta": 0}
+    {
+      "pregunta": "¿Qué hace el método filter() en un array?",
+      "opciones": ["Filtra los elementos según una condición", "Convierte cada elemento en texto", "Ordena los elementos", "Elimina el array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace el método sort() sin función de comparación?",
+      "opciones": ["Ordena alfabéticamente los elementos", "Ordena numéricamente", "No hace nada", "Devuelve un nuevo array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace el método map()?",
+      "opciones": ["Transforma cada elemento del array y devuelve un nuevo array", "Filtra los elementos", "Elimina elementos duplicados", "Suma todos los valores"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace reduce() en un array?",
+      "opciones": ["Reduce el array a un solo valor acumulado", "Convierte los elementos a texto", "Cuenta elementos", "Divide el array en partes"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace el método find()?",
+      "opciones": ["Devuelve el primer elemento que cumple la condición", "Devuelve todos los elementos que cumplen la condición", "Devuelve el índice", "Elimina el primer elemento"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace forEach()?",
+      "opciones": ["Ejecuta una función en cada elemento sin devolver nada", "Devuelve un nuevo array", "Filtra los elementos", "Ordena el array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace some()?",
+      "opciones": ["Comprueba si al menos un elemento cumple la condición", "Verifica si todos cumplen", "Ordena elementos", "Devuelve un nuevo array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace every()?",
+      "opciones": ["Verifica si todos los elementos cumplen la condición", "Devuelve el primero que cumple", "Ordena los elementos", "Convierte el array en string"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace includes()?",
+      "opciones": ["Verifica si un valor está dentro del array", "Agrega un valor al array", "Elimina un valor", "Devuelve el índice del valor"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace indexOf()?",
+      "opciones": ["Devuelve la posición del primer elemento encontrado", "Devuelve el último índice", "Agrega un elemento", "Elimina un elemento"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace concat()?",
+      "opciones": ["Une dos o más arrays", "Filtra los arrays", "Invierte los arrays", "Elimina arrays duplicados"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace reverse()?",
+      "opciones": ["Invierte el orden de los elementos", "Ordena de forma ascendente", "Convierte a texto", "Elimina el último elemento"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace slice(1, 3)?",
+      "opciones": ["Devuelve los elementos entre las posiciones 1 y 2", "Elimina los elementos entre 1 y 3", "Ordena el array", "Duplica los elementos"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace splice(2, 1)?",
+      "opciones": ["Elimina un elemento desde la posición 2", "Copia un elemento", "Agrega un elemento al final", "Invierte el array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace join('-')?",
+      "opciones": ["Une los elementos separados por guiones", "Elimina los guiones del texto", "Divide el array", "Reemplaza valores nulos"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace pop()?",
+      "opciones": ["Elimina el último elemento y lo devuelve", "Elimina el primer elemento", "Agrega un elemento", "Invierte el array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace shift()?",
+      "opciones": ["Elimina el primer elemento del array", "Agrega un elemento al final", "Filtra elementos", "Ordena el array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace push('x')?",
+      "opciones": ["Agrega 'x' al final del array", "Agrega 'x' al inicio", "Elimina 'x'", "Busca 'x'"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace un sort((a, b) => a - b)?",
+      "opciones": ["Ordena los números en forma ascendente", "Ordena alfabéticamente", "Ordena descendente", "Invierte el array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace sort((a, b) => b - a)?",
+      "opciones": ["Ordena los números de mayor a menor", "Ordena de menor a mayor", "Convierte a texto", "Invierte el orden"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace filter(x => x % 2 === 0)?",
+      "opciones": ["Devuelve los números pares", "Devuelve los impares", "Devuelve solo el primer par", "Elimina los pares"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace map(x => x * 2)?",
+      "opciones": ["Devuelve un nuevo array con los valores multiplicados por 2", "Elimina los valores", "Devuelve solo los pares", "Suma los valores"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace reduce((a, b) => a + b, 0)?",
+      "opciones": ["Suma todos los elementos del array", "Multiplica todos los elementos", "Concatena los elementos", "Devuelve el último elemento"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace find(x => x > 10)?",
+      "opciones": ["Devuelve el primer número mayor que 10", "Devuelve todos los mayores a 10", "Devuelve su índice", "Elimina los mayores a 10"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace every(x => x > 0)?",
+      "opciones": ["Comprueba si todos los elementos son mayores que 0", "Devuelve el primero mayor a 0", "Filtra los negativos", "Suma los positivos"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace some(x => x < 0)?",
+      "opciones": ["Comprueba si hay algún número negativo", "Elimina los negativos", "Filtra los positivos", "Suma todos los negativos"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace includes('hola')?",
+      "opciones": ["Verifica si el array contiene 'hola'", "Agrega 'hola' al array", "Elimina 'hola'", "Convierte a texto"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace flat()?",
+      "opciones": ["Aplana arrays anidados en un solo nivel", "Elimina los arrays vacíos", "Convierte a texto", "Invierte el array"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué hace toString() en un array?",
+      "opciones": ["Convierte el array en una cadena de texto", "Elimina el array", "Cuenta los elementos", "Ordena los elementos"],
+      "correcta": 0
+    }
   ]
 }

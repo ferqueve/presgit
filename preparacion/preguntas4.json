@@ -1,24 +1,154 @@
 {
   "preguntas": [
-    {"pregunta": "¿Cuántas columnas tiene el sistema de grilla de Bootstrap?", "opciones": ["10", "12", "16", "8"], "correcta": 1},
-    {"pregunta": "¿Qué clase define una fila?", "opciones": ["col", "row", "container", "grid"], "correcta": 1},
-    {"pregunta": "¿Qué clase define una columna?", "opciones": ["col", "row", "column", "grid-col"], "correcta": 0},
-    {"pregunta": "¿Qué clase centra un texto?", "opciones": ["mx-auto", "text-center", "justify-content", "align-center"], "correcta": 1},
-    {"pregunta": "¿Qué clase hace una imagen responsive?", "opciones": ["img-fluid", "img-responsive", "responsive", "fluid-img"], "correcta": 0},
-    {"pregunta": "¿Qué breakpoint corresponde a pantallas medianas?", "opciones": ["576px", "768px", "992px", "1200px"], "correcta": 1},
-    {"pregunta": "¿Qué clase oculta un elemento?", "opciones": ["hide", "d-none", "invisible", "no-display"], "correcta": 1},
-    {"pregunta": "¿Qué clase muestra un borde primario?", "opciones": ["border", "border-primary", "b-primary", "outline-primary"], "correcta": 1},
-    {"pregunta": "¿Qué clase crea un botón con borde?", "opciones": ["btn-outline-primary", "btn-border", "btn-line", "btn-flat"], "correcta": 0},
-    {"pregunta": "¿Qué clase aplica margen automático horizontal?", "opciones": ["mx-auto", "text-center", "center", "m-auto"], "correcta": 0},
-    {"pregunta": "¿Qué clase define un contenedor central?", "opciones": ["container", "row", "grid", "block"], "correcta": 0},
-    {"pregunta": "¿Qué clase alinea verticalmente el contenido?", "opciones": ["align-items-center", "v-center", "center-y", "flex-middle"], "correcta": 0},
-    {"pregunta": "¿Qué clase cambia el color de fondo?", "opciones": ["bg-primary", "background", "fill", "color-bg"], "correcta": 0},
-    {"pregunta": "¿Qué hace 'col-md-6'?", "opciones": ["Ocupa 6 columnas desde pantallas medianas", "Ocupa todo el ancho", "Ocupa 6 columnas en móviles", "Crea 6 filas"], "correcta": 0},
-    {"pregunta": "¿Cuántos breakpoints tiene Bootstrap 5?", "opciones": ["4", "5", "6", "7"], "correcta": 1},
-    {"pregunta": "¿Qué clase define un espacio entre columnas?", "opciones": ["g-3", "gap-3", "col-gap-3", "space-3"], "correcta": 0},
-    {"pregunta": "¿Qué clase agrega padding interno?", "opciones": ["p-3", "m-3", "pl-3", "pt-3"], "correcta": 0},
-    {"pregunta": "¿Qué clase elimina márgenes?", "opciones": ["m-0", "p-0", "no-margin", "clear"], "correcta": 0},
-    {"pregunta": "¿Qué clase crea un contenedor fluido?", "opciones": ["container-fluid", "container-100", "fluid", "flex-container"], "correcta": 0},
-    {"pregunta": "¿Qué clase centra un div dentro de otro usando flexbox?", "opciones": ["d-flex justify-content-center", "align-center", "flex-center", "center-block"], "correcta": 0}
+    {
+      "pregunta": "¿Cuántas columnas tiene el sistema de grilla de Bootstrap?",
+      "opciones": ["8", "10", "12", "16"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué clase define una fila en Bootstrap?",
+      "opciones": ["row", "col", "container", "grid-row"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase se usa para definir una columna en la grilla?",
+      "opciones": ["col", "column", "grid", "section"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase se utiliza para centrar horizontalmente un elemento?",
+      "opciones": ["mx-auto", "center", "justify-center", "h-center"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase hace que una imagen sea adaptable al ancho del contenedor?",
+      "opciones": ["img-responsive", "img-fluid", "image-flex", "img-fit"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué clase define un contenedor con ancho fijo según el tamaño del dispositivo?",
+      "opciones": ["container", "container-fluid", "box", "wrapper"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase define un contenedor que ocupa todo el ancho disponible?",
+      "opciones": ["container-full", "container-fluid", "wrapper", "full-container"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué clase define el color de fondo azul estándar de Bootstrap?",
+      "opciones": ["bg-primary", "background-blue", "blue-bg", "bg-main"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase se usa para aplicar márgenes horizontales automáticos?",
+      "opciones": ["mx-auto", "m-auto", "text-center", "px-auto"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase se usa para alinear texto al centro?",
+      "opciones": ["text-center", "center-text", "align-center", "text-middle"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase crea un botón con solo borde de color primario?",
+      "opciones": ["btn-border-primary", "btn-outline-primary", "btn-primary-border", "btn-line-primary"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué clase hace que un elemento no se muestre?",
+      "opciones": ["invisible", "d-none", "hide", "no-display"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué clase de utilidad elimina todos los márgenes?",
+      "opciones": ["m-0", "p-0", "no-margin", "none"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase elimina todo el padding de un elemento?",
+      "opciones": ["m-0", "no-padding", "p-0", "padless"],
+      "correcta": 2
+    },
+    {
+      "pregunta": "¿Qué clase aplica un espaciado interno general de 3 unidades?",
+      "opciones": ["p-3", "padding-3", "pad-3", "space-3"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase centra verticalmente contenido dentro de un contenedor flex?",
+      "opciones": ["align-items-center", "justify-content-center", "v-center", "flex-center"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase centra contenido horizontalmente en un contenedor flex?",
+      "opciones": ["justify-content-center", "align-items-center", "mx-auto", "text-center"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase aplica color de texto blanco?",
+      "opciones": ["text-light", "text-white", "text-clear", "text-bright"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué clase cambia el color del texto a gris secundario?",
+      "opciones": ["text-muted", "text-secondary", "text-gray", "text-dark"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase crea un borde alrededor de un elemento?",
+      "opciones": ["border", "outline", "box-border", "bordered"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase redondea los bordes de un elemento?",
+      "opciones": ["rounded", "radius", "curve", "border-round"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué breakpoint corresponde a pantallas pequeñas (sm)?",
+      "opciones": ["576px", "768px", "992px", "1200px"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué breakpoint corresponde a pantallas medianas (md)?",
+      "opciones": ["576px", "768px", "992px", "1200px"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué breakpoint corresponde a pantallas grandes (lg)?",
+      "opciones": ["768px", "992px", "1200px", "1400px"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué breakpoint corresponde a pantallas extra grandes (xl)?",
+      "opciones": ["992px", "1200px", "1400px", "1600px"],
+      "correcta": 1
+    },
+    {
+      "pregunta": "¿Qué clase establece un espacio entre columnas en la grilla?",
+      "opciones": ["g-3", "gap-3", "grid-3", "col-space-3"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase alinea una imagen al centro dentro de su contenedor?",
+      "opciones": ["mx-auto d-block", "center-img", "align-center", "img-center"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase hace un texto en negrita?",
+      "opciones": ["fw-bold", "font-bold", "text-strong", "bold"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Qué clase hace un texto en cursiva?",
+      "opciones": ["fst-italic", "font-italic", "text-italic", "italic"],
+      "correcta": 0
+    },
+    {
+      "pregunta": "¿Cuántos breakpoints principales tiene Bootstrap 5?",
+      "opciones": ["4", "5", "6", "7"],
+      "correcta": 1
+    }
   ]
 }

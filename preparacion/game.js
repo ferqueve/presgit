@@ -273,8 +273,10 @@ function createHelper(scene) {
         const g = scene.add.graphics();
         g.fillStyle(0xff6b9d, 1);
         g.fillRoundedRect(0, 0, 70, 70, 10);
-        g.generateTexture('helperShape', 70, 70);
-        helperSprite = scene.add.sprite(x, y, 'helperShape');
+        // Usar timestamp para hacer la textura única cada vez
+        const uniqueTextureName = 'helperShape' + Date.now();
+        g.generateTexture(uniqueTextureName, 70, 70);
+        helperSprite = scene.add.sprite(x, y, uniqueTextureName);
         
         // Cara amigable
         const face = scene.add.graphics();
@@ -397,19 +399,24 @@ function selectAnswer(index, button) {
 }
 
 function activateHelper() {
+    console.log('activateHelper llamado. helperActive:', helperActive);
+    
     // Si ya hay un helper activo, no hacer nada
     if (helperActive) {
+        console.log('Helper ya activo, abortando');
         return;
     }
     
     // Limpiar cualquier sprite anterior que pueda existir
     if (helperSprite) {
+        console.log('Limpiando helper sprite anterior');
         helperSprite.destroy();
         helperSprite = null;
     }
     
     helperActive = true;
     const helperName = createHelper(currentScene);
+    console.log('Helper creado:', helperName);
     
     document.getElementById("helperName").textContent = helperName;
     const indicator = document.getElementById("helpIndicator");
@@ -427,37 +434,47 @@ function activateHelper() {
     // 5 disparos consecutivos
     let shots = 0;
     const interval = setInterval(() => {
-        if (shots < 5) {
+        console.log('Disparo del helper:', shots + 1);
+        if (shots < 5 && helperSprite) {
             shootProjectile(450, 200, 750, 200, 0xff6b9d);
             setTimeout(() => {
-                enemyHealth -= 3;
-                updateHealth();
-                showDamage(enemySprite);
+                if (enemyHealth > 0) {
+                    enemyHealth -= 3;
+                    updateHealth();
+                    showDamage(enemySprite);
+                }
             }, 400);
             shots++;
         } else {
+            console.log('Finalizando ataques del helper');
             clearInterval(interval);
             
             // Desaparecer helper
-            currentScene.tweens.add({
-                targets: helperSprite,
-                alpha: 0,
-                y: 100,
-                duration: 500,
-                onComplete: () => {
-                    if (helperSprite) {
-                        helperSprite.destroy();
-                        helperSprite = null;
+            if (helperSprite) {
+                currentScene.tweens.add({
+                    targets: helperSprite,
+                    alpha: 0,
+                    y: 100,
+                    duration: 500,
+                    onComplete: () => {
+                        if (helperSprite) {
+                            helperSprite.destroy();
+                            helperSprite = null;
+                        }
+                        document.getElementById('helpIndicator').classList.add('d-none');
+                        helperActive = false;
+                        consecutiveErrors = 0;
+                        console.log('Helper desactivado');
                     }
-                    document.getElementById('helpIndicator').classList.add('d-none');
-                    helperActive = false;
-                    consecutiveErrors = 0;
-                }
-            });
+                });
+            } else {
+                helperActive = false;
+                consecutiveErrors = 0;
+                document.getElementById('helpIndicator').classList.add('d-none');
+            }
         }
     }, 800);
 }
-
 function nextQuestion() {
     currentQuestion++;
     

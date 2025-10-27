@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cómo implementar un carrito de compra - Métodos implicados</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2563EB;
+            --secondary-color: #F97316;
+            --accent-color: #10B981;
+            --dark-bg: #1E293B;
+            --code-bg: #0F172A;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1E40AF 100%);
+        }
+        
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+            overflow-y: auto;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-header {
+            border-left: 6px solid var(--primary-color);
+            padding-left: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .slide-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: #E2E8F0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .code-block .keyword { color: #C792EA; }
+        .code-block .string { color: #C3E88D; }
+        .code-block .function { color: #82AAFF; }
+        .code-block .comment { color: #697098; font-style: italic; }
+        
+        .badge-tech {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin: 0.3rem;
+        }
+        
+        .badge-method {
+            background: var(--accent-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .feature-card {
+            background: #F8FAFC;
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 0.8rem 0;
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateX(10px);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+        
+        .nav-btn:disabled {
+            background: #64748B;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+        
+        .slide-counter {
+            color: white;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1E40AF 100%);
+            color: white;
+        }
+        
+        .title-slide h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .title-slide h2 {
+            font-size: 2rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .tech-icons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .tech-icons i {
+            font-size: 3rem;
+            opacity: 0.9;
+        }
+        
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            border: 2px solid var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        ul.custom-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        ul.custom-list li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+        
+        ul.custom-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--secondary-color);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="presentation-container">
+        <!-- Slide 1: Título -->
+        <div class="slide active animate__animated animate__fadeIn" data-slide="1">
+            <div class="title-slide">
+                <i class="fas fa-shopping-cart" style="font-size: 5rem; margin-bottom: 2rem;"></i>
+                <h1>Cómo implementar un carrito de compra</h1>
+                <h2>Métodos implicados</h2>
+                <div class="tech-icons">
+                    <i class="fab fa-html5" title="HTML5"></i>
+                    <i class="fab fa-bootstrap" title="Bootstrap"></i>
+                    <i class="fab fa-font-awesome" title="Font Awesome"></i>
+                    <i class="fab fa-js-square" title="JavaScript"></i>
+                </div>
+                <p style="margin-top: 2rem; font-size: 1.2rem; opacity: 0.8;">
+                    HTML • Bootstrap • Font Awesome • SweetAlert • Animate.css
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Tecnologías -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="2">
+            <div class="slide-header">
+                <h2><i class="fas fa-code"></i> Tecnologías Utilizadas</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <span class="badge-tech"><i class="fab fa-html5"></i> HTML5</span>
+                        <p class="mt-2 mb-0">Estructura semántica del carrito y formularios</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <span class="badge-tech"><i class="fab fa-bootstrap"></i> Bootstrap</span>
+                        <p class="mt-2 mb-0">Framework CSS para diseño responsive y componentes</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <span class="badge-tech"><i class="fab fa-font-awesome"></i> Font Awesome</span>
+                        <p class="mt-2 mb-0">Iconos para mejorar la interfaz visual del carrito</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <span class="badge-tech"><i class="fas fa-bell"></i> SweetAlert</span>
+                        <p class="mt-2 mb-0">Alertas elegantes para confirmaciones y notificaciones</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <span class="badge-tech"><i class="fas fa-magic"></i> Animate.css</span>
+                        <p class="mt-2 mb-0">Animaciones fluidas al agregar y quitar productos</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <span class="badge-tech"><i class="fab fa-js-square"></i> JavaScript</span>
+                        <p class="mt-2 mb-0">Lógica del carrito, arrays y manipulación del DOM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Fetch API - Productos -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="3">
+            <div class="slide-header">
+                <h2><i class="fas fa-download"></i> Fetch API - Obtener Productos</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> Código para cargar productos desde una API:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">async function</span> <span class="function">cargarProductos</span>() {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'api/productos'</span>);
+    
+    <span class="keyword">if</span> (!response.ok) {
+      <span class="keyword">throw new</span> <span class="function">Error</span>(<span class="string">'Error al cargar productos'</span>);
+    }
+    
+    <span class="keyword">const</span> productos = <span class="keyword">await</span> response.<span class="function">json</span>();
+    <span class="function">mostrarProductos</span>(productos);
+    
+  } <span class="keyword">catch</span> (error) {
+    console.<span class="function">error</span>(<span class="string">'Error:'</span>, error);
+    Swal.<span class="function">fire</span>(<span class="string">'Error'</span>, 
+      <span class="string">'No se pudieron cargar los productos'</span>, 
+      <span class="string">'error'</span>);
+  }
+}</pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-lightbulb"></i> Conceptos clave:</h5>
+                        <ul class="custom-list">
+                            <li><strong>async/await</strong> para manejo asíncrono limpio</li>
+                            <li><strong>fetch()</strong> realiza la petición HTTP GET</li>
+                            <li><strong>response.json()</strong> convierte la respuesta a objeto JavaScript</li>
+                            <li><strong>try/catch</strong> maneja errores de red o servidor</li>
+                            <li><strong>SweetAlert</strong> muestra mensajes de error elegantes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Fetch API - Comentarios -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="4">
+            <div class="slide-header">
+                <h2><i class="fas fa-comments"></i> Fetch API - Obtener Comentarios</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> Cargar comentarios de un producto específico:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">async function</span> <span class="function">cargarComentarios</span>(productoId) {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(
+      <span class="string">`api/productos/${productoId}/comentarios`</span>
+    );
+    
+    <span class="keyword">const</span> comentarios = <span class="keyword">await</span> response.<span class="function">json</span>();
+    
+    comentarios.<span class="function">forEach</span>(comentario => {
+      <span class="function">agregarComentarioAlDOM</span>(comentario);
+    });
+    
+  } <span class="keyword">catch</span> (error) {
+    console.<span class="function">error</span>(<span class="string">'Error al cargar comentarios:'</span>, error);
+  }
+}</pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-check-circle"></i> Elementos importantes:</h5>
+                        <ul class="custom-list">
+                            <li><strong>Template literals</strong> (backticks) para URL dinámica con variables</li>
+                            <li><strong>forEach()</strong> itera sobre cada comentario del array</li>
+                            <li><strong>Separación de lógica</strong> y renderizado en funciones distintas</li>
+                            <li>Manejo de errores sin detener la aplicación</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Arrays - Agregar -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="5">
+            <div class="slide-header">
+                <h2><i class="fas fa-plus-circle"></i> Arrays - Métodos para Agregar Productos</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><span class="badge-method">push()</span> Agrega al final del array</h5>
+                    <div class="code-block">
+<pre><span class="keyword">let</span> carrito = [];
+
+<span class="keyword">function</span> <span class="function">agregarAlCarrito</span>(producto) {
+  carrito.<span class="function">push</span>({
+    id: producto.id,
+    nombre: producto.nombre,
+    precio: producto.precio,
+    cantidad: 1
+  });
+  <span class="function">actualizarCarrito</span>();
+  
+  <span class="comment">// Animación y alerta</span>
+  Swal.<span class="function">fire</span>({
+    icon: <span class="string">'success'</span>,
+    title: <span class="string">'¡Producto agregado!'</span>,
+    timer: 1500
+  });
+}</pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <h5><span class="badge-method">unshift()</span> Agrega al inicio del array</h5>
+                    <div class="code-block">
+<pre><span class="keyword">let</span> carrito = [];
+
+<span class="keyword">function</span> <span class="function">agregarAlInicio</span>(producto) {
+  carrito.<span class="function">unshift</span>({
+    id: producto.id,
+    nombre: producto.nombre,
+    precio: producto.precio,
+    cantidad: 1
+  });
+  <span class="function">actualizarCarrito</span>();
+}</pre>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i> <strong>Nota:</strong> push() es más común para carritos ya que muestra productos en el orden en que se agregaron.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Arrays - Quitar -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="6">
+            <div class="slide-header">
+                <h2><i class="fas fa-minus-circle"></i> Arrays - Métodos para Quitar Productos</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><span class="badge-method">splice()</span> Elimina por índice (mutable)</h5>
+                    <div class="code-block">
+<pre><span class="keyword">function</span> <span class="function">quitarProductoPorIndice</span>(indice) {
+  carrito.<span class="function">splice</span>(indice, 1);
+  <span class="function">actualizarCarrito</span>();
+}
+
+<span class="comment">// Ejemplo de uso</span>
+<span class="function">quitarProductoPorIndice</span>(2); <span class="comment">// Quita el 3er elemento</span></pre>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> splice() modifica el array original directamente
+                    </div>
+                </div>
+                
+                <div>
+                    <h5><span class="badge-method">filter()</span> Elimina por condición (inmutable)</h5>
+                    <div class="code-block">
+<pre><span class="keyword">function</span> <span class="function">quitarProductoPorId</span>(productoId) {
+  carrito = carrito.<span class="function">filter</span>(
+    item => item.id !== productoId
+  );
+  <span class="function">actualizarCarrito</span>();
+}
+
+<span class="comment">// Ejemplo de uso</span>
+<span class="function">quitarProductoPorId</span>(42); <span class="comment">// Quita producto con id 42</span></pre>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> filter() crea un nuevo array. Es más funcional y previene errores.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Arrays - Buscar y Actualizar -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="7">
+            <div class="slide-header">
+                <h2><i class="fas fa-search"></i> Arrays - Buscar y Actualizar Productos</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><span class="badge-method">find()</span> Buscar un producto</h5>
+                    <div class="code-block">
+<pre><span class="keyword">const</span> producto = carrito.<span class="function">find</span>(
+  item => item.id === productoId
+);
+
+<span class="keyword">if</span> (producto) {
+  console.<span class="function">log</span>(<span class="string">'Encontrado:'</span>, producto);
+}</pre>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5><span class="badge-method">findIndex()</span> Localizar posición</h5>
+                    <div class="code-block">
+<pre><span class="keyword">const</span> indice = carrito.<span class="function">findIndex</span>(
+  item => item.id === productoId
+);
+
+<span class="keyword">if</span> (indice !== -1) {
+  console.<span class="function">log</span>(<span class="string">'Posición:'</span>, indice);
+}</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h5><span class="badge-method">map()</span> Actualizar cantidades (crea nuevo array)</h5>
+                <div class="code-block">
+<pre><span class="keyword">function</span> <span class="function">actualizarCantidad</span>(productoId, nuevaCantidad) {
+  carrito = carrito.<span class="function">map</span>(item => {
+    <span class="keyword">if</span> (item.id === productoId) {
+      <span class="keyword">return</span> { ...item, cantidad: nuevaCantidad };
+    }
+    <span class="keyword">return</span> item;
+  });
+  <span class="function">actualizarCarrito</span>();
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Cálculo de Subtotal -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="8">
+            <div class="slide-header">
+                <h2><i class="fas fa-calculator"></i> Cálculo de Subtotal con reduce()</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> El método reduce() es ideal para sumar totales:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">function</span> <span class="function">calcularSubtotal</span>() {
+  <span class="keyword">const</span> subtotal = carrito.<span class="function">reduce</span>((acumulador, item) => {
+    <span class="keyword">return</span> acumulador + (item.precio * item.cantidad);
+  }, 0);
+  
+  <span class="keyword">return</span> subtotal;
+}
+
+<span class="comment">// Ejemplo de uso</span>
+<span class="keyword">const</span> subtotal = <span class="function">calcularSubtotal</span>();
+console.<span class="function">log</span>(<span class="string">`Subtotal: $${subtotal.toFixed(2)}`</span>);</pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-brain"></i> Cómo funciona reduce():</h5>
+                        <ul class="custom-list">
+                            <li><strong>Acumulador:</strong> Guarda el total acumulado en cada iteración</li>
+                            <li><strong>Item:</strong> Producto actual del array que se está procesando</li>
+                            <li><strong>Valor inicial (0):</strong> Punto de partida del acumulador</li>
+                            <li><strong>Return:</strong> Suma precio × cantidad al acumulador</li>
+                        </ul>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-star"></i> <strong>Ventaja:</strong> Convierte un array completo en un solo valor numérico de forma elegante y funcional.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Métodos de Pago -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="9">
+            <div class="slide-header">
+                <h2><i class="fas fa-credit-card"></i> Métodos de Pago</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> HTML para seleccionar método de pago:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">&lt;div</span> <span class="string">class</span>=<span class="string">"form-check"</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;input</span> <span class="string">class</span>=<span class="string">"form-check-input"</span> <span class="string">type</span>=<span class="string">"radio"</span> 
+         <span class="string">name</span>=<span class="string">"metodoPago"</span> <span class="string">id</span>=<span class="string">"transferencia"</span> 
+         <span class="string">value</span>=<span class="string">"transferencia"</span> <span class="string">checked</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;label</span> <span class="string">for</span>=<span class="string">"transferencia"</span><span class="keyword">&gt;</span>
+    <i class="fas fa-university"></i> Transferencia Bancaria
+  <span class="keyword">&lt;/label&gt;</span>
+<span class="keyword">&lt;/div&gt;</span>
+
+<span class="keyword">&lt;div</span> <span class="string">class</span>=<span class="string">"form-check"</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;input</span> <span class="string">class</span>=<span class="string">"form-check-input"</span> <span class="string">type</span>=<span class="string">"radio"</span> 
+         <span class="string">name</span>=<span class="string">"metodoPago"</span> <span class="string">id</span>=<span class="string">"tarjeta"</span> 
+         <span class="string">value</span>=<span class="string">"tarjeta"</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;label</span> <span class="string">for</span>=<span class="string">"tarjeta"</span><span class="keyword">&gt;</span>
+    <i class="fas fa-credit-card"></i> Tarjeta de Crédito/Débito
+  <span class="keyword">&lt;/label&gt;</span>
+<span class="keyword">&lt;/div&gt;</span></pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <h5><i class="fas fa-js"></i> JavaScript para obtener la selección:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">function</span> <span class="function">obtenerMetodoPago</span>() {
+  <span class="keyword">const</span> metodo = document.<span class="function">querySelector</span>(
+    <span class="string">'input[name="metodoPago"]:checked'</span>
+  ).value;
+  
+  <span class="keyword">return</span> metodo;
+}
+
+<span class="comment">// Uso</span>
+<span class="keyword">const</span> pago = <span class="function">obtenerMetodoPago</span>();
+console.<span class="function">log</span>(pago); <span class="comment">// "transferencia" o "tarjeta"</span></pre>
+                    </div>
+                    
+                    <div class="alert alert-primary mt-3">
+                        <i class="fas fa-lightbulb"></i> Los radio buttons permiten seleccionar solo una opción a la vez al compartir el mismo atributo <code>name</code>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Tipos de Envío -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="10">
+            <div class="slide-header">
+                <h2><i class="fas fa-truck"></i> Tipos de Envío - Normal y Urgente</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> HTML para seleccionar tipo de envío:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">&lt;select</span> <span class="string">id</span>=<span class="string">"tipoEnvio"</span> <span class="string">class</span>=<span class="string">"form-select"</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">"normal"</span><span class="keyword">&gt;</span>
+    <i class="fas fa-shipping-fast"></i> Normal (Gratis)
+  <span class="keyword">&lt;/option&gt;</span>
+  <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">"urgente"</span><span class="keyword">&gt;</span>
+    <i class="fas fa-rocket"></i> Urgente (+3% del total)
+  <span class="keyword">&lt;/option&gt;</span>
+<span class="keyword">&lt;/select&gt;</span></pre>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i> <strong>Envío urgente:</strong> Cuesta el 3% del valor total del carrito.
+                    </div>
+                </div>
+                
+                <div>
+                    <h5><i class="fas fa-js"></i> JavaScript para calcular costo de envío:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">function</span> <span class="function">calcularCostoEnvio</span>(subtotal) {
+  <span class="keyword">const</span> tipoEnvio = document
+    .<span class="function">getElementById</span>(<span class="string">'tipoEnvio'</span>).value;
+  
+  <span class="keyword">if</span> (tipoEnvio === <span class="string">'urgente'</span>) {
+    <span class="keyword">return</span> subtotal * 0.03; <span class="comment">// 3%</span>
+  }
+  
+  <span class="keyword">return</span> 0; <span class="comment">// Envío normal es gratis</span>
+}
+
+<span class="comment">// Ejemplo de uso</span>
+<span class="keyword">const</span> subtotal = 1000;
+<span class="keyword">const</span> costoEnvio = <span class="function">calcularCostoEnvio</span>(subtotal);
+console.<span class="function">log</span>(<span class="string">`Envío: $${costoEnvio}`</span>); 
+<span class="comment">// $30 si es urgente, $0 si es normal</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Cálculo del Total -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="11">
+            <div class="slide-header">
+                <h2><i class="fas fa-receipt"></i> Cálculo del Total Final</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> Función completa para calcular el total:</h5>
+                    <div class="code-block">
+<pre><span class="keyword">function</span> <span class="function">calcularTotal</span>() {
+  <span class="comment">// 1. Calcular subtotal</span>
+  <span class="keyword">const</span> subtotal = carrito.<span class="function">reduce</span>((acc, item) => {
+    <span class="keyword">return</span> acc + (item.precio * item.cantidad);
+  }, 0);
+  
+  <span class="comment">// 2. Calcular costo de envío</span>
+  <span class="keyword">const</span> costoEnvio = <span class="function">calcularCostoEnvio</span>(subtotal);
+  
+  <span class="comment">// 3. Calcular total</span>
+  <span class="keyword">const</span> total = subtotal + costoEnvio;
+  
+  <span class="comment">// 4. Actualizar el DOM</span>
+  document.<span class="function">getElementById</span>(<span class="string">'subtotal'</span>).textContent = 
+    <span class="string">`$${subtotal.toFixed(2)}`</span>;
+  document.<span class="function">getElementById</span>(<span class="string">'envio'</span>).textContent = 
+    <span class="string">`$${costoEnvio.toFixed(2)}`</span>;
+  document.<span class="function">getElementById</span>(<span class="string">'total'</span>).textContent = 
+    <span class="string">`$${total.toFixed(2)}`</span>;
+  
+  <span class="keyword">return</span> total;
+}</pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-list-ol"></i> Proceso paso a paso:</h5>
+                        <ol>
+                            <li class="mb-2"><strong>Calcular subtotal</strong> usando reduce() para sumar precio × cantidad de cada producto</li>
+                            <li class="mb-2"><strong>Calcular envío</strong> aplicando 3% si es urgente, 0 si es normal</li>
+                            <li class="mb-2"><strong>Sumar ambos valores</strong> para obtener el total final</li>
+                            <li class="mb-2"><strong>Actualizar interfaz</strong> mostrando los valores formateados en el DOM</li>
+                        </ol>
+                        
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-check"></i> <strong>toFixed(2)</strong> formatea números a 2 decimales para mostrar precios correctamente ($19.99)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Formulario de Comentarios -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="12">
+            <div class="slide-header">
+                <h2><i class="fas fa-comment-dots"></i> Formulario de Comentarios y Calificación</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> HTML del formulario:</h5>
+                    <div class="code-block" style="font-size: 0.8rem;">
+<pre><span class="keyword">&lt;form</span> <span class="string">id</span>=<span class="string">"formComentario"</span><span class="keyword">&gt;</span>
+  <span class="keyword">&lt;div</span> <span class="string">class</span>=<span class="string">"mb-3"</span><span class="keyword">&gt;</span>
+    <span class="keyword">&lt;label</span> <span class="string">for</span>=<span class="string">"comentario"</span><span class="keyword">&gt;</span>Comentario<span class="keyword">&lt;/label&gt;</span>
+    <span class="keyword">&lt;textarea</span> <span class="string">id</span>=<span class="string">"comentario"</span> 
+              <span class="string">class</span>=<span class="string">"form-control"</span> 
+              <span class="string">rows</span>=<span class="string">"3"</span> <span class="string">required</span><span class="keyword">&gt;&lt;/textarea&gt;</span>
+  <span class="keyword">&lt;/div&gt;</span>
+  
+  <span class="keyword">&lt;div</span> <span class="string">class</span>=<span class="string">"mb-3"</span><span class="keyword">&gt;</span>
+    <span class="keyword">&lt;label</span> <span class="string">for</span>=<span class="string">"calificacion"</span><span class="keyword">&gt;</span>Calificación<span class="keyword">&lt;/label&gt;</span>
+    <span class="keyword">&lt;select</span> <span class="string">id</span>=<span class="string">"calificacion"</span> 
+            <span class="string">class</span>=<span class="string">"form-select"</span> <span class="string">required</span><span class="keyword">&gt;</span>
+      <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">""</span><span class="keyword">&gt;</span>Selecciona...<span class="keyword">&lt;/option&gt;</span>
+      <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">"5"</span><span class="keyword">&gt;</span>⭐⭐⭐⭐⭐ Excelente<span class="keyword">&lt;/option&gt;</span>
+      <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">"4"</span><span class="keyword">&gt;</span>⭐⭐⭐⭐ Muy bueno<span class="keyword">&lt;/option&gt;</span>
+      <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">"3"</span><span class="keyword">&gt;</span>⭐⭐⭐ Bueno<span class="keyword">&lt;/option&gt;</span>
+      <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">"2"</span><span class="keyword">&gt;</span>⭐⭐ Regular<span class="keyword">&lt;/option&gt;</span>
+      <span class="keyword">&lt;option</span> <span class="string">value</span>=<span class="string">"1"</span><span class="keyword">&gt;</span>⭐ Malo<span class="keyword">&lt;/option&gt;</span>
+    <span class="keyword">&lt;/select&gt;</span>
+  <span class="keyword">&lt;/div&gt;</span>
+  
+  <span class="keyword">&lt;button</span> <span class="string">type</span>=<span class="string">"submit"</span> 
+          <span class="string">class</span>=<span class="string">"btn btn-primary"</span><span class="keyword">&gt;</span>
+    <i class="fas fa-paper-plane"></i> Enviar Comentario
+  <span class="keyword">&lt;/button&gt;</span>
+<span class="keyword">&lt;/form&gt;</span></pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-puzzle-piece"></i> Elementos clave:</h5>
+                        <ul class="custom-list">
+                            <li><strong>&lt;textarea&gt;</strong> para texto largo del comentario</li>
+                            <li><strong>&lt;select&gt;</strong> con opciones de 1-5 estrellas</li>
+                            <li><strong>required</strong> valida campos obligatorios antes de enviar</li>
+                            <li><strong>Bootstrap classes</strong> para estilo profesional</li>
+                            <li><strong>Font Awesome icons</strong> mejoran la experiencia visual</li>
+                        </ul>
+                    </div>
+                    
+                    <h5 class="mt-4"><i class="fas fa-code"></i> Manejo del evento submit:</h5>
+                    <div class="code-block" style="font-size: 0.8rem;">
+<pre>document.<span class="function">getElementById</span>(<span class="string">'formComentario'</span>)
+  .<span class="function">addEventListener</span>(<span class="string">'submit'</span>, <span class="keyword">async</span> (e) => {
+    e.<span class="function">preventDefault</span>();
+    <span class="keyword">const</span> texto = document
+      .<span class="function">getElementById</span>(<span class="string">'comentario'</span>).value;
+    <span class="keyword">const</span> estrellas = document
+      .<span class="function">getElementById</span>(<span class="string">'calificacion'</span>).value;
+    
+    <span class="keyword">await</span> <span class="function">enviarComentario</span>(productoId, texto, estrellas);
+});</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Enviar Comentario -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="13">
+            <div class="slide-header">
+                <h2><i class="fas fa-paper-plane"></i> Enviar Comentario con POST</h2>
+            </div>
+            
+            <div class="code-block" style="font-size: 0.85rem;">
+<pre><span class="keyword">async function</span> <span class="function">enviarComentario</span>(productoId, comentario, calificacion) {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'api/comentarios'</span>, {
+      method: <span class="string">'POST'</span>,
+      headers: {
+        <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+      },
+      body: JSON.<span class="function">stringify</span>({
+        productoId: productoId,
+        texto: comentario,
+        estrellas: calificacion,
+        fecha: <span class="keyword">new</span> <span class="function">Date</span>().<span class="function">toISOString</span>()
+      })
+    });
+    
+    <span class="keyword">if</span> (!response.ok) {
+      <span class="keyword">throw new</span> <span class="function">Error</span>(<span class="string">'Error al enviar comentario'</span>);
+    }
+    
+    <span class="keyword">const</span> resultado = <span class="keyword">await</span> response.<span class="function">json</span>();
+    
+    <span class="comment">// Mostrar mensaje de éxito con SweetAlert</span>
+    Swal.<span class="function">fire</span>({
+      icon: <span class="string">'success'</span>,
+      title: <span class="string">'¡Éxito!'</span>,
+      text: <span class="string">'Comentario enviado correctamente'</span>,
+      confirmButtonColor: <span class="string">'#10B981'</span>
+    });
+    
+    <span class="comment">// Limpiar formulario</span>
+    document.<span class="function">getElementById</span>(<span class="string">'formComentario'</span>).<span class="function">reset</span>();
+    
+  } <span class="keyword">catch</span> (error) {
+    console.<span class="function">error</span>(<span class="string">'Error:'</span>, error);
+    Swal.<span class="function">fire</span>({
+      icon: <span class="string">'error'</span>,
+      title: <span class="string">'Error'</span>,
+      text: <span class="string">'No se pudo enviar el comentario'</span>
+    });
+  }
+}</pre>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Elementos POST:</h6>
+                        <ul class="mb-0">
+                            <li><strong>method: 'POST'</strong> para crear recursos</li>
+                            <li><strong>headers</strong> especifica tipo de contenido JSON</li>
+                            <li><strong>body</strong> contiene los datos a enviar</li>
+                            <li><strong>JSON.stringify()</strong> convierte objeto a string JSON</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-check-circle"></i> Mejores prácticas:</h6>
+                        <ul class="mb-0">
+                            <li>Validar respuesta con <code>response.ok</code></li>
+                            <li>Mostrar feedback al usuario con SweetAlert</li>
+                            <li>Limpiar formulario con <code>reset()</code></li>
+                            <li>Manejar errores gracefully</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: SweetAlert -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="14">
+            <div class="slide-header">
+                <h2><i class="fas fa-bell"></i> SweetAlert - Alertas Elegantes</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-code"></i> Alerta simple de éxito:</h5>
+                    <div class="code-block">
+<pre>Swal.<span class="function">fire</span>(<span class="string">'¡Producto agregado!'</span>, <span class="string">''</span>, <span class="string">'success'</span>);</pre>
+                    </div>
+                    
+                    <h5 class="mt-3"><i class="fas fa-code"></i> Alerta con más opciones:</h5>
+                    <div class="code-block">
+<pre>Swal.<span class="function">fire</span>({
+  title: <span class="string">'¡Producto agregado!'</span>,
+  text: <span class="string">'El producto se agregó al carrito'</span>,
+  icon: <span class="string">'success'</span>,
+  timer: 2000,
+  showConfirmButton: <span class="keyword">false</span>
+});</pre>
+                    </div>
+                    
+                    <h5 class="mt-3"><i class="fas fa-code"></i> Confirmación antes de eliminar:</h5>
+                    <div class="code-block">
+<pre>Swal.<span class="function">fire</span>({
+  title: <span class="string">'¿Estás seguro?'</span>,
+  text: <span class="string">'Se eliminará el producto del carrito'</span>,
+  icon: <span class="string">'warning'</span>,
+  showCancelButton: <span class="keyword">true</span>,
+  confirmButtonText: <span class="string">'Sí, eliminar'</span>,
+  cancelButtonText: <span class="string">'Cancelar'</span>
+}).<span class="function">then</span>((result) => {
+  <span class="keyword">if</span> (result.isConfirmed) {
+    <span class="function">quitarProducto</span>(id);
+    Swal.<span class="function">fire</span>(<span class="string">'¡Eliminado!'</span>, <span class="string">''</span>, <span class="string">'success'</span>);
+  }
+});</pre>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-palette"></i> Tipos de alertas:</h5>
+                        <ul class="custom-list">
+                            <li><strong>success</strong> - Operación exitosa ✓</li>
+                            <li><strong>error</strong> - Error o fallo ✗</li>
+                            <li><strong>warning</strong> - Advertencia ⚠</li>
+                            <li><strong>info</strong> - Información ℹ</li>
+                            <li><strong>question</strong> - Pregunta ?</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight-box mt-3">
+                        <h5><i class="fas fa-cog"></i> Opciones útiles:</h5>
+                        <ul class="custom-list">
+                            <li><strong>timer:</strong> Cierra automáticamente después de X ms</li>
+                            <li><strong>showConfirmButton:</strong> Muestra/oculta botón OK</li>
+                            <li><strong>showCancelButton:</strong> Muestra botón Cancelar</li>
+                            <li><strong>confirmButtonColor:</strong> Color del botón confirmar</li>
+                            <li><strong>then():</strong> Ejecuta código según respuesta del usuario</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-star"></i> SweetAlert mejora significativamente la UX comparado con alert() nativo.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Animate.css -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="15">
+            <div class="slide-header">
+                <h2><i class="fas fa-magic"></i> Animate.css - Animaciones Fluidas</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-7">
+                    <h5><i class="fas fa-code"></i> Agregar producto con animación:</h5>
+                    <div class="code-block" style="font-size: 0.85rem;">
+<pre><span class="keyword">function</span> <span class="function">agregarProductoConAnimacion</span>(producto) {
+  <span class="comment">// Agregar producto al carrito</span>
+  carrito.<span class="function">push</span>(producto);
+  
+  <span class="comment">// Crear elemento HTML</span>
+  <span class="keyword">const</span> elementoHTML = <span class="function">crearElementoProducto</span>(producto);
+  
+  <span class="comment">// Aplicar animación de entrada</span>
+  elementoHTML.classList.<span class="function">add</span>(
+    <span class="string">'animate__animated'</span>, 
+    <span class="string">'animate__fadeInUp'</span>
+  );
+  
+  <span class="comment">// Agregar al contenedor</span>
+  document.<span class="function">getElementById</span>(<span class="string">'listaCarrito'</span>)
+    .<span class="function">appendChild</span>(elementoHTML);
+  
+  <span class="function">actualizarTotal</span>();
+}</pre>
+                    </div>
+                    
+                    <h5 class="mt-3"><i class="fas fa-code"></i> Quitar producto con animación:</h5>
+                    <div class="code-block" style="font-size: 0.85rem;">
+<pre><span class="keyword">function</span> <span class="function">quitarProductoConAnimacion</span>(id, elemento) {
+  <span class="comment">// Animación de salida</span>
+  elemento.classList.<span class="function">add</span>(
+    <span class="string">'animate__animated'</span>, 
+    <span class="string">'animate__fadeOutRight'</span>
+  );
+  
+  <span class="comment">// Esperar a que termine la animación</span>
+  elemento.<span class="function">addEventListener</span>(<span class="string">'animationend'</span>, () => {
+    <span class="comment">// Quitar del carrito</span>
+    carrito = carrito.<span class="function">filter</span>(item => item.id !== id);
+    <span class="comment">// Quitar del DOM</span>
+    elemento.<span class="function">remove</span>();
+    <span class="function">actualizarTotal</span>();
+  });
+}</pre>
+                    </div>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-star"></i> Animaciones útiles:</h5>
+                        <ul class="custom-list">
+                            <li><strong>fadeInUp</strong> - Entrada desde abajo</li>
+                            <li><strong>fadeOutRight</strong> - Salida hacia derecha</li>
+                            <li><strong>bounceIn</strong> - Entrada con rebote</li>
+                            <li><strong>slideInLeft</strong> - Deslizar desde izq.</li>
+                            <li><strong>pulse</strong> - Pulso (llamar atención)</li>
+                            <li><strong>shake</strong> - Agitar (error)</li>
+                            <li><strong>zoomIn</strong> - Acercar con zoom</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="fas fa-lightbulb"></i> Cómo usar:</h6>
+                        <ol class="mb-0">
+                            <li>Importar Animate.css en el HTML</li>
+                            <li>Agregar clase <code>animate__animated</code></li>
+                            <li>Agregar clase de animación específica</li>
+                            <li>Usar <code>animationend</code> para ejecutar código al terminar</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: LocalStorage -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="16">
+            <div class="slide-header">
+                <h2><i class="fas fa-save"></i> LocalStorage - Persistencia de Datos</h2>
+            </div>
+            
+            <div class="two-columns">
+                <div>
+                    <h5><i class="fas fa-code"></i> Guardar y cargar el carrito:</h5>
+                    <div class="code-block">
+<pre><span class="comment">// Guardar carrito en localStorage</span>
+<span class="keyword">function</span> <span class="function">guardarCarrito</span>() {
+  localStorage.<span class="function">setItem</span>(
+    <span class="string">'carrito'</span>, 
+    JSON.<span class="function">stringify</span>(carrito)
+  );
+}
+
+<span class="comment">// Cargar carrito desde localStorage</span>
+<span class="keyword">function</span> <span class="function">cargarCarrito</span>() {
+  <span class="keyword">const</span> carritoGuardado = 
+    localStorage.<span class="function">getItem</span>(<span class="string">'carrito'</span>);
+  
+  <span class="keyword">if</span> (carritoGuardado) {
+    carrito = JSON.<span class="function">parse</span>(carritoGuardado);
+    <span class="function">renderizarCarrito</span>();
+    <span class="function">actualizarTotal</span>();
+  }
+}
+
+<span class="comment">// Limpiar carrito</span>
+<span class="keyword">function</span> <span class="function">vaciarCarrito</span>() {
+  carrito = [];
+  localStorage.<span class="function">removeItem</span>(<span class="string">'carrito'</span>);
+  <span class="function">renderizarCarrito</span>();
+  <span class="function">actualizarTotal</span>();
+}
+
+<span class="comment">// Llamar al cargar la página</span>
+window.<span class="function">addEventListener</span>(<span class="string">'DOMContentLoaded'</span>, () => {
+  <span class="function">cargarCarrito</span>();
+});</pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-database"></i> Métodos localStorage:</h5>
+                        <ul class="custom-list">
+                            <li><strong>setItem(key, value)</strong> - Guardar dato</li>
+                            <li><strong>getItem(key)</strong> - Recuperar dato</li>
+                            <li><strong>removeItem(key)</strong> - Eliminar dato</li>
+                            <li><strong>clear()</strong> - Limpiar todo el storage</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Importante:</h6>
+                        <p class="mb-2">localStorage solo guarda <strong>strings</strong>, por eso necesitamos:</p>
+                        <ul class="mb-0">
+                            <li><code>JSON.stringify()</code> para convertir objetos a string antes de guardar</li>
+                            <li><code>JSON.parse()</code> para convertir el string de vuelta a objeto al recuperar</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-check"></i> Con localStorage, el carrito persiste incluso si el usuario cierra el navegador.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Mejores Prácticas -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="17">
+            <div class="slide-header">
+                <h2><i class="fas fa-star"></i> Mejores Prácticas de Desarrollo</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Validación de datos</h6>
+                        <p class="mb-0">Siempre valida la entrada del usuario antes de procesar, tanto en cliente como en servidor.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Manejo de errores</h6>
+                        <p class="mb-0">Usa try/catch en operaciones asíncronas y proporciona mensajes claros al usuario.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Feedback al usuario</h6>
+                        <p class="mb-0">Informa de cada acción con alertas, notificaciones o cambios visuales en la interfaz.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Modularización</h6>
+                        <p class="mb-0">Separa funciones por responsabilidad: renderizar, calcular, validar, guardar.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Persistencia</h6>
+                        <p class="mb-0">Guarda el carrito en localStorage para no perder datos entre sesiones.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Accesibilidad</h6>
+                        <p class="mb-0">Usa etiquetas semánticas, atributos ARIA y asegura navegación por teclado.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Rendimiento</h6>
+                        <p class="mb-0">Evita manipulaciones excesivas del DOM, actualiza en lote cuando sea posible.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h6><i class="fas fa-check-circle text-success"></i> Seguridad</h6>
+                        <p class="mb-0">Valida datos en el servidor, sanitiza entrada, usa HTTPS para transacciones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: Conclusión -->
+        <div class="slide animate__animated animate__fadeIn" data-slide="18">
+            <div class="title-slide">
+                <i class="fas fa-check-circle" style="font-size: 5rem; margin-bottom: 2rem; color: #10B981;"></i>
+                <h2 style="font-size: 3rem; margin-bottom: 2rem;">¡Resumen de Conceptos!</h2>
+                
+                <div style="max-width: 900px; font-size: 1.2rem; line-height: 2;">
+                    <p><i class="fas fa-download"></i> <strong>Fetch API</strong> para obtener productos y comentarios desde el servidor</p>
+                    <p><i class="fas fa-list"></i> <strong>Arrays y métodos</strong> (push, filter, map, reduce) para gestionar el carrito</p>
+                    <p><i class="fas fa-calculator"></i> <strong>Cálculos dinámicos</strong> de subtotal, envío (3% urgente) y total</p>
+                    <p><i class="fas fa-credit-card"></i> <strong>Formularios</strong> para métodos de pago, envío y comentarios</p>
+                    <p><i class="fas fa-bell"></i> <strong>SweetAlert</strong> para alertas elegantes y <strong>Animate.css</strong> para animaciones</p>
+                    <p><i class="fas fa-save"></i> <strong>LocalStorage</strong> para persistir datos entre sesiones</p>
+                </div>
+                
+                <div style="margin-top: 3rem;">
+                    <h3 style="font-size: 2rem; opacity: 0.9;">¡A implementar tu carrito de compra!</h3>
+                    <p style="font-size: 1.1rem; opacity: 0.8; margin-top: 1rem;">
+                        <i class="fab fa-github"></i> Recuerda: La práctica hace al maestro
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">18</span>
+        </span>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+            
+            // Actualizar contador
+            document.getElementById('currentSlide').textContent = index + 1;
+            
+            // Actualizar barra de progreso
+            const progress = ((index + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Actualizar botones de navegación
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === totalSlides - 1;
+            
+            // Agregar animación al cambiar slide
+            slides[index].classList.remove('animate__fadeIn');
+            void slides[index].offsetWidth; // Trigger reflow
+            slides[index].classList.add('animate__fadeIn');
+        }
+        
+        function changeSlide(direction) {
+            currentSlideIndex += direction;
+            if (currentSlideIndex < 0) currentSlideIndex = 0;
+            if (currentSlideIndex >= totalSlides) currentSlideIndex = totalSlides - 1;
+            showSlide(currentSlideIndex);
+        }
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+        
+        // Inicializar
+        showSlide(0);
+        
+        // Demo de SweetAlert en la slide correspondiente
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mostrar demo cuando se llegue a la slide de SweetAlert
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.target.dataset.slide === '14') {
+                        // Puedes descomentar esto para mostrar un demo automático
+                        // setTimeout(() => {
+                        //     Swal.fire({
+                        //         title: 'Demo de SweetAlert',
+                        //         text: 'Así se ven las alertas elegantes',
+                        //         icon: 'success',
+                        //         timer: 2000
+                        //     });
+                        // }, 500);
+                    }
+                });
+            });
+            
+            slides.forEach(slide => observer.observe(slide));
+        });
+    </script>
+</body>
+</html>

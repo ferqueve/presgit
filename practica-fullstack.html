@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Full-Stack: Node.js + Express</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+    
+    <!-- jsPDF para generar certificados -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .slide {
+            display: none;
+            min-height: 90vh;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .slide-title {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .code-block .comment {
+            color: #6272a4;
+        }
+        
+        .code-block .keyword {
+            color: #ff79c6;
+        }
+        
+        .code-block .string {
+            color: #f1fa8c;
+        }
+        
+        .code-block .function {
+            color: #50fa7b;
+        }
+        
+        .step-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            transition: transform 0.3s;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .step-number {
+            background: white;
+            color: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        
+        .nav-buttons button {
+            margin: 0 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            border: none;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        
+        .nav-buttons button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .fernanditos-counter {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .fernandito-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+        
+        .icon-box {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 15px;
+            transition: all 0.3s;
+        }
+        
+        .icon-box:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .icon-box i {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .question-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .question-number {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .alert-custom {
+            border-radius: 15px;
+            border: none;
+            padding: 20px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .terminal {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+        }
+        
+        .architecture-diagram {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .diagram-box {
+            display: inline-block;
+            padding: 20px 40px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            margin: 10px;
+            font-weight: bold;
+        }
+        
+        .arrow {
+            color: #667eea;
+            font-size: 40px;
+            margin: 0 20px;
+        }
+        
+        .quiz-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .quiz-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .quiz-question {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .quiz-option {
+            background: white;
+            border: 3px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+        
+        .quiz-option:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(10px);
+        }
+        
+        .certificate-preview {
+            border: 5px solid #FFD700;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="slide-counter" id="slideCounter">
+        Slide <span id="currentSlide">1</span> / <span id="totalSlides">15</span>
+    </div>
+    
+    <div class="fernanditos-counter">
+        <span class="fernandito-icon">🪙</span>
+        <span id="fernanditos">0</span> Fernanditos
+    </div>
+    
+    <!-- Slide 1: Portada -->
+    <div class="slide active animate__animated animate__fadeIn">
+        <div class="slide-content text-center">
+            <h1 class="display-3 slide-title animate__animated animate__bounceIn">
+                <i class="fas fa-code"></i> Tutorial Full-Stack MVC
+            </h1>
+            <h2 class="text-muted mb-5">Node.js + Express + Arquitectura MVC</h2>
+            
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fab fa-node-js" style="color: #68a063;"></i>
+                        <h4>Node.js</h4>
+                        <p>Backend JavaScript</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-server" style="color: #764ba2;"></i>
+                        <h4>Express</h4>
+                        <p>Framework Web</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-laptop-code" style="color: #667eea;"></i>
+                        <h4>Frontend</h4>
+                        <p>HTML + JavaScript</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info alert-custom mt-5">
+                <i class="fas fa-graduation-cap"></i>
+                <strong>Objetivo:</strong> Crear una aplicación completa con arquitectura MVC (Model-View-Controller), persistencia en JSON y separación de responsabilidades
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 2: Arquitectura MVC -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-sitemap"></i> Arquitectura MVC del Proyecto
+            </h1>
+            
+            <div class="alert alert-info alert-custom">
+                <i class="fas fa-info-circle"></i>
+                <strong>MVC</strong> = Model - View - Controller (patrón de diseño que separa responsabilidades)
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <h4><i class="fas fa-database"></i> MODEL</h4>
+                        <p class="mt-3">Gestiona los datos</p>
+                        <ul class="mt-3">
+                            <li>Lee/escribe archivos JSON</li>
+                            <li>Operaciones con datos</li>
+                            <li>Validaciones básicas</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <h4><i class="fas fa-cogs"></i> CONTROLLER</h4>
+                        <p class="mt-3">Lógica de negocio</p>
+                        <ul class="mt-3">
+                            <li>Procesa peticiones</li>
+                            <li>Llama al modelo</li>
+                            <li>Prepara respuestas</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <h4><i class="fas fa-route"></i> ROUTER</h4>
+                        <p class="mt-3">Define rutas</p>
+                        <ul class="mt-3">
+                            <li>GET /items</li>
+                            <li>GET /items/:id</li>
+                            <li>POST /items</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="architecture-diagram mt-4">
+                <div class="diagram-box">
+                    <i class="fas fa-desktop fa-2x mb-2"></i><br>
+                    <strong>FRONTEND</strong><br>
+                    <small>index.html</small>
+                </div>
+                
+                <span class="arrow">→</span>
+                
+                <div class="diagram-box">
+                    <strong>ROUTER</strong><br>
+                    <small>routes/items.js</small>
+                </div>
+                
+                <span class="arrow">→</span>
+                
+                <div class="diagram-box">
+                    <strong>CONTROLLER</strong><br>
+                    <small>controllers/itemController.js</small>
+                </div>
+                
+                <span class="arrow">→</span>
+                
+                <div class="diagram-box">
+                    <strong>MODEL</strong><br>
+                    <small>models/itemModel.js</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QUIZ 1: Después de Arquitectura MVC -->
+    <div class="slide quiz-slide">
+        <div class="quiz-content animate__animated">
+            <h1 style="color: #667eea; text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-brain"></i> ¡Quiz Time! 🎯
+            </h1>
+            <div class="quiz-question">
+                <strong>Pregunta 1:</strong> ¿Qué significa MVC?
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'a')">
+                <strong>A)</strong> Mi Vista Completa
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'b')">
+                <strong>B)</strong> Modelo Vista Creación
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'correct')">
+                <strong>C)</strong> Model View Controller
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'd')">
+                <strong>D)</strong> Método Visual Controlado
+            </div>
+            <div class="alert alert-info mt-4" style="text-align: center;">
+                <i class="fas fa-coins"></i> <strong>Premio:</strong> 30 Fernanditos por respuesta correcta
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 3: Estructura de Archivos -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-folder-tree"></i> Estructura de Archivos MVC
+            </h1>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h3><i class="fas fa-folder-open"></i> Estructura del Proyecto</h3>
+                    <div class="terminal">
+                        proyecto-fullstack/<br>
+                        ├── <i class="fas fa-file-code"></i> index.html<br>
+                        ├── <i class="fas fa-file-code"></i> server.js<br>
+                        ├── <i class="fas fa-folder"></i> models/<br>
+                        │&nbsp;&nbsp; └── itemModel.js<br>
+                        ├── <i class="fas fa-folder"></i> controllers/<br>
+                        │&nbsp;&nbsp; └── itemController.js<br>
+                        ├── <i class="fas fa-folder"></i> routes/<br>
+                        │&nbsp;&nbsp; └── items.js<br>
+                        ├── <i class="fas fa-folder"></i> data/<br>
+                        │&nbsp;&nbsp; └── items.json<br>
+                        └── <i class="fas fa-folder"></i> node_modules/
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h3><i class="fas fa-list-check"></i> Archivos a Crear</h3>
+                    <div class="step-card">
+                        <p><span class="step-number">1</span> server.js (servidor principal)</p>
+                    </div>
+                    <div class="step-card">
+                        <p><span class="step-number">2</span> models/itemModel.js</p>
+                    </div>
+                    <div class="step-card">
+                        <p><span class="step-number">3</span> controllers/itemController.js</p>
+                    </div>
+                    <div class="step-card">
+                        <p><span class="step-number">4</span> routes/items.js</p>
+                    </div>
+                    <div class="step-card">
+                        <p><span class="step-number">5</span> data/items.json</p>
+                    </div>
+                    <div class="step-card">
+                        <p><span class="step-number">6</span> index.html (frontend)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info alert-custom mt-4">
+                <i class="fas fa-terminal"></i>
+                <strong>Comandos iniciales:</strong>
+                <div class="terminal mt-2">
+                    $ mkdir proyecto-fullstack<br>
+                    $ cd proyecto-fullstack<br>
+                    $ mkdir models controllers routes data<br>
+                    $ npm init -y<br>
+                    $ npm install express cors
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 4: Crear archivo JSON -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-file-code"></i> Paso 1: Crear archivo JSON
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">1</span> Crear data/items.json</h4>
+            </div>
+            
+            <div class="code-block">
+[]
+            </div>
+            
+            <div class="alert alert-success alert-custom">
+                <i class="fas fa-check-circle"></i>
+                <strong>Explicación:</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Este archivo almacenará nuestros datos de forma persistente</li>
+                    <li>Comienza como un array vacío</li>
+                    <li>Se leerá y escribirá usando Node.js (módulo fs)</li>
+                    <li>Los datos NO se perderán al reiniciar el servidor</li>
+                </ul>
+            </div>
+            
+            <div class="alert alert-warning alert-custom mt-3">
+                <i class="fas fa-lightbulb"></i>
+                <strong>Importante:</strong> Asegúrate de crear la carpeta <code>data/</code> primero con el comando <code>mkdir data</code>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QUIZ 2: Después de JSON -->
+    <div class="slide quiz-slide">
+        <div class="quiz-content animate__animated">
+            <h1 style="color: #667eea; text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-trophy"></i> ¡Quiz Time! 🎯
+            </h1>
+            <div class="quiz-question">
+                <strong>Pregunta 2:</strong> ¿Qué ventaja tiene guardar datos en un archivo JSON en lugar de solo en memoria (array)?
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'a')">
+                <strong>A)</strong> Es más rápido
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'correct')">
+                <strong>B)</strong> Los datos persisten aunque reinicies el servidor
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'c')">
+                <strong>C)</strong> Usa menos memoria RAM
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'd')">
+                <strong>D)</strong> No necesitas Node.js
+            </div>
+            <div class="alert alert-info mt-4" style="text-align: center;">
+                <i class="fas fa-coins"></i> <strong>Premio:</strong> 30 Fernanditos por respuesta correcta
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 5: Crear Model -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-database"></i> Paso 2: Crear el MODEL
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">2</span> Crear models/itemModel.js</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="keyword">const</span> fs = <span class="function">require</span>(<span class="string">'fs'</span>);
+<span class="keyword">const</span> path = <span class="function">require</span>(<span class="string">'path'</span>);
+
+<span class="keyword">const</span> dataPath = path.<span class="function">join</span>(__dirname, <span class="string">'../data/items.json'</span>);
+
+<span class="comment">// Leer todos los items del archivo JSON</span>
+<span class="keyword">const</span> <span class="function">getAllItems</span> = () => {
+    <span class="keyword">const</span> data = fs.<span class="function">readFileSync</span>(dataPath, <span class="string">'utf8'</span>);
+    <span class="keyword">return</span> JSON.<span class="function">parse</span>(data);
+};
+
+<span class="comment">// Guardar items en el archivo JSON</span>
+<span class="keyword">const</span> <span class="function">saveItems</span> = (items) => {
+    fs.<span class="function">writeFileSync</span>(dataPath, JSON.<span class="function">stringify</span>(items, <span class="keyword">null</span>, <span class="string">2</span>));
+};
+
+<span class="comment">// Agregar un nuevo item</span>
+<span class="keyword">const</span> <span class="function">addItem</span> = (item) => {
+    <span class="keyword">const</span> items = <span class="function">getAllItems</span>();
+    items.<span class="function">push</span>(item);
+    <span class="function">saveItems</span>(items);
+    <span class="keyword">return</span> items;
+};
+
+<span class="comment">// Obtener un item por índice</span>
+<span class="keyword">const</span> <span class="function">getItemById</span> = (id) => {
+    <span class="keyword">const</span> items = <span class="function">getAllItems</span>();
+    <span class="keyword">return</span> items[id];
+};
+
+module.exports = { getAllItems, addItem, getItemById };
+            </div>
+            
+            <div class="alert alert-info alert-custom">
+                <i class="fas fa-info-circle"></i>
+                <strong>Responsabilidades del MODEL:</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Leer datos desde items.json</li>
+                    <li>Escribir datos en items.json</li>
+                    <li>Operaciones CRUD básicas</li>
+                    <li>NO maneja peticiones HTTP</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 6: Crear Controller -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-cogs"></i> Paso 3: Crear el CONTROLLER
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">3</span> Crear controllers/itemController.js</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="keyword">const</span> itemModel = <span class="function">require</span>(<span class="string">'../models/itemModel'</span>);
+
+<span class="comment">// Obtener todos los items</span>
+<span class="keyword">const</span> <span class="function">getAll</span> = (req, res) => {
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> items = itemModel.<span class="function">getAllItems</span>();
+        res.<span class="function">json</span>({
+            success: <span class="keyword">true</span>,
+            count: items.length,
+            data: items
+        });
+    } <span class="keyword">catch</span> (error) {
+        res.<span class="function">status</span>(<span class="string">500</span>).<span class="function">json</span>({ 
+            success: <span class="keyword">false</span>, 
+            message: <span class="string">'Error al leer los datos'</span> 
+        });
+    }
+};
+
+<span class="comment">// Obtener un item específico</span>
+<span class="keyword">const</span> <span class="function">getById</span> = (req, res) => {
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> id = <span class="function">parseInt</span>(req.params.id);
+        <span class="keyword">const</span> item = itemModel.<span class="function">getItemById</span>(id);
+        
+        <span class="keyword">if</span> (item !== <span class="keyword">undefined</span>) {
+            res.<span class="function">json</span>({ success: <span class="keyword">true</span>, data: item });
+        } <span class="keyword">else</span> {
+            res.<span class="function">status</span>(<span class="string">404</span>).<span class="function">json</span>({ 
+                success: <span class="keyword">false</span>, 
+                message: <span class="string">'Elemento no encontrado'</span> 
+            });
+        }
+    } <span class="keyword">catch</span> (error) {
+        res.<span class="function">status</span>(<span class="string">500</span>).<span class="function">json</span>({ 
+            success: <span class="keyword">false</span>, 
+            message: <span class="string">'Error al obtener el elemento'</span> 
+        });
+    }
+};
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 7: Controller - Función POST -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-plus-circle"></i> Paso 3 (cont.): Función POST del Controller
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">3</span> Agregar función create al controller</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="comment">// Agregar un nuevo item (continúa en itemController.js)</span>
+<span class="keyword">const</span> <span class="function">create</span> = (req, res) => {
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> { item } = req.body;
+        
+        <span class="comment">// Validación</span>
+        <span class="keyword">if</span> (!item || item.trim() === <span class="string">''</span>) {
+            <span class="keyword">return</span> res.<span class="function">status</span>(<span class="string">400</span>).<span class="function">json</span>({
+                success: <span class="keyword">false</span>,
+                message: <span class="string">'El item no puede estar vacío'</span>
+            });
+        }
+        
+        <span class="comment">// Agregar item usando el modelo</span>
+        <span class="keyword">const</span> items = itemModel.<span class="function">addItem</span>(item);
+        
+        res.<span class="function">status</span>(<span class="string">201</span>).<span class="function">json</span>({
+            success: <span class="keyword">true</span>,
+            message: <span class="string">'Elemento agregado correctamente'</span>,
+            data: item,
+            totalItems: items.length
+        });
+    } <span class="keyword">catch</span> (error) {
+        res.<span class="function">status</span>(<span class="string">500</span>).<span class="function">json</span>({ 
+            success: <span class="keyword">false</span>, 
+            message: <span class="string">'Error al guardar el elemento'</span> 
+        });
+    }
+};
+
+<span class="comment">// Exportar todas las funciones</span>
+module.exports = { getAll, getById, create };
+            </div>
+            
+            <div class="alert alert-success alert-custom">
+                <i class="fas fa-check-circle"></i>
+                <strong>Responsabilidades del CONTROLLER:</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Recibe y procesa las peticiones HTTP</li>
+                    <li>Valida los datos recibidos</li>
+                    <li>Llama al modelo para operaciones con datos</li>
+                    <li>Envía respuestas al cliente (frontend)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 8: Crear Router -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-route"></i> Paso 4: Crear el ROUTER
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">4</span> Crear routes/items.js</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="keyword">const</span> express = <span class="function">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> router = express.<span class="function">Router</span>();
+<span class="keyword">const</span> itemController = <span class="function">require</span>(<span class="string">'../controllers/itemController'</span>);
+
+<span class="comment">// Definir las rutas y conectarlas con el controller</span>
+router.<span class="function">get</span>(<span class="string">'/'</span>, itemController.getAll);
+router.<span class="function">get</span>(<span class="string">'/:id'</span>, itemController.getById);
+router.<span class="function">post</span>(<span class="string">'/'</span>, itemController.create);
+
+module.exports = router;
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="alert alert-info alert-custom">
+                        <i class="fas fa-map-signs"></i>
+                        <strong>Responsabilidades del ROUTER:</strong>
+                        <ul class="mt-2 mb-0">
+                            <li><strong>GET /</strong> → llama a <code>itemController.getAll</code></li>
+                            <li><strong>GET /:id</strong> → llama a <code>itemController.getById</code></li>
+                            <li><strong>POST /</strong> → llama a <code>itemController.create</code></li>
+                            <li>Solo define rutas, NO procesa lógica</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-success alert-custom">
+                <i class="fas fa-lightbulb"></i>
+                <strong>Ventaja:</strong> Las rutas están organizadas y separadas del servidor principal
+            </div>
+        </div>
+    </div>
+    
+    <!-- QUIZ 3: Después de Router -->
+    <div class="slide quiz-slide">
+        <div class="quiz-content animate__animated">
+            <h1 style="color: #667eea; text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-star"></i> ¡Quiz Time! 🎯
+            </h1>
+            <div class="quiz-question">
+                <strong>Pregunta 3:</strong> ¿Cuál es la responsabilidad principal del ROUTER en MVC?
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'a')">
+                <strong>A)</strong> Guardar datos en la base de datos
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'b')">
+                <strong>B)</strong> Validar los datos del usuario
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'correct')">
+                <strong>C)</strong> Definir las rutas y conectarlas con el controller
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'd')">
+                <strong>D)</strong> Renderizar las vistas HTML
+            </div>
+            <div class="alert alert-info mt-4" style="text-align: center;">
+                <i class="fas fa-coins"></i> <strong>Premio:</strong> 30 Fernanditos por respuesta correcta
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 9: Crear Server Principal -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-server"></i> Paso 5: Crear SERVER principal
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">5</span> Crear server.js (conecta todo)</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="keyword">const</span> express = <span class="function">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> cors = <span class="function">require</span>(<span class="string">'cors'</span>);
+<span class="keyword">const</span> itemRoutes = <span class="function">require</span>(<span class="string">'./routes/items'</span>);
+
+<span class="keyword">const</span> app = <span class="function">express</span>();
+<span class="keyword">const</span> PORT = <span class="string">3000</span>;
+
+<span class="comment">// Middlewares</span>
+app.<span class="function">use</span>(<span class="function">cors</span>()); <span class="comment">// Permitir peticiones desde el frontend</span>
+app.<span class="function">use</span>(express.<span class="function">json</span>()); <span class="comment">// Parsear JSON en el body</span>
+app.<span class="function">use</span>(express.<span class="function">static</span>(<span class="string">'.'</span>)); <span class="comment">// Servir archivos estáticos</span>
+
+<span class="comment">// Usar las rutas de items con prefijo /items</span>
+app.<span class="function">use</span>(<span class="string">'/items'</span>, itemRoutes);
+
+<span class="comment">// Iniciar servidor</span>
+app.<span class="function">listen</span>(PORT, () => {
+    console.<span class="function">log</span>(<span class="string">`✅ Servidor corriendo en http://localhost:${PORT}`</span>);
+    console.<span class="function">log</span>(<span class="string">'📝 Endpoints:'</span>);
+    console.<span class="function">log</span>(<span class="string">'   GET  /items      - Todos los elementos'</span>);
+    console.<span class="function">log</span>(<span class="string">'   GET  /items/:id  - Elemento específico'</span>);
+    console.<span class="function">log</span>(<span class="string">'   POST /items      - Agregar elemento'</span>);
+});
+            </div>
+            
+            <div class="alert alert-success alert-custom">
+                <i class="fas fa-puzzle-piece"></i>
+                <strong>¡Todo conectado!</strong> Server → Router → Controller → Model → JSON
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 10: Resumen del Flujo MVC -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-diagram-project"></i> Flujo MVC Completo
+            </h1>
+            
+            <div class="alert alert-info alert-custom">
+                <i class="fas fa-info-circle"></i>
+                <strong>¿Cómo fluyen los datos en nuestra aplicación?</strong>
+            </div>
+            
+            <div class="architecture-diagram">
+                <div class="diagram-box" style="background: #e3f2fd;">
+                    <strong>1. FRONTEND</strong><br>
+                    <small>Usuario hace click</small>
+                </div>
+                
+                <div style="margin: 20px 0;">↓ POST /items</div>
+                
+                <div class="diagram-box" style="background: #fff3e0;">
+                    <strong>2. SERVER.JS</strong><br>
+                    <small>Recibe petición</small>
+                </div>
+                
+                <div style="margin: 20px 0;">↓ Ruta /items</div>
+                
+                <div class="diagram-box" style="background: #f3e5f5;">
+                    <strong>3. ROUTER</strong><br>
+                    <small>routes/items.js</small>
+                </div>
+                
+                <div style="margin: 20px 0;">↓ Llama a create()</div>
+                
+                <div class="diagram-box" style="background: #e8f5e9;">
+                    <strong>4. CONTROLLER</strong><br>
+                    <small>Valida y procesa</small>
+                </div>
+                
+                <div style="margin: 20px 0;">↓ addItem()</div>
+                
+                <div class="diagram-box" style="background: #fce4ec;">
+                    <strong>5. MODEL</strong><br>
+                    <small>Guarda en JSON</small>
+                </div>
+                
+                <div style="margin: 20px 0;">↓ Respuesta</div>
+                
+                <div class="diagram-box" style="background: #e0f2f1;">
+                    <strong>6. FRONTEND</strong><br>
+                    <small>Muestra mensaje</small>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="alert alert-success alert-custom">
+                        <strong>✅ Ventajas de MVC:</strong>
+                        <ul class="mt-2 mb-0">
+                            <li>Código organizado</li>
+                            <li>Fácil de mantener</li>
+                            <li>Reutilizable</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-warning alert-custom">
+                        <strong>📂 Archivos creados:</strong>
+                        <ul class="mt-2 mb-0">
+                            <li>data/items.json</li>
+                            <li>models/itemModel.js</li>
+                            <li>controllers/itemController.js</li>
+                            <li>routes/items.js</li>
+                            <li>server.js</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QUIZ 4: Después de Flujo MVC -->
+    <div class="slide quiz-slide">
+        <div class="quiz-content animate__animated">
+            <h1 style="color: #667eea; text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-rocket"></i> ¡Quiz Time! 🎯
+            </h1>
+            <div class="quiz-question">
+                <strong>Pregunta 4:</strong> En el flujo MVC, ¿qué componente se encarga de leer y escribir en el archivo JSON?
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(4, 'a')">
+                <strong>A)</strong> El CONTROLLER
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(4, 'correct')">
+                <strong>B)</strong> El MODEL
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(4, 'c')">
+                <strong>C)</strong> El ROUTER
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(4, 'd')">
+                <strong>D)</strong> El SERVER.JS
+            </div>
+            <div class="alert alert-info mt-4" style="text-align: center;">
+                <i class="fas fa-coins"></i> <strong>Premio:</strong> 30 Fernanditos por respuesta correcta
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 11: Frontend - Paso 6 -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-desktop"></i> Frontend - Paso 6: Estructura HTML
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">6</span> Crear archivo index.html con estructura básica</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="comment">&lt;!DOCTYPE html&gt;</span>
+<span class="keyword">&lt;html</span> lang=<span class="string">"es"</span><span class="keyword">&gt;</span>
+<span class="keyword">&lt;head&gt;</span>
+    <span class="keyword">&lt;meta</span> charset=<span class="string">"UTF-8"</span><span class="keyword">&gt;</span>
+    <span class="keyword">&lt;meta</span> name=<span class="string">"viewport"</span> content=<span class="string">"width=device-width, initial-scale=1.0"</span><span class="keyword">&gt;</span>
+    <span class="keyword">&lt;title&gt;</span>Gestor de Items<span class="keyword">&lt;/title&gt;</span>
+    
+    <span class="comment">&lt;!-- Bootstrap --&gt;</span>
+    <span class="keyword">&lt;link</span> href=<span class="string">"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"</span> 
+          rel=<span class="string">"stylesheet"</span><span class="keyword">&gt;</span>
+    
+    <span class="comment">&lt;!-- Font Awesome --&gt;</span>
+    <span class="keyword">&lt;link</span> href=<span class="string">"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"</span> 
+          rel=<span class="string">"stylesheet"</span><span class="keyword">&gt;</span>
+<span class="keyword">&lt;/head&gt;</span>
+<span class="keyword">&lt;body&gt;</span>
+    <span class="comment">&lt;!-- Contenido aquí --&gt;</span>
+<span class="keyword">&lt;/body&gt;</span>
+<span class="keyword">&lt;/html&gt;</span>
+            </div>
+            
+            <div class="alert alert-info alert-custom">
+                <i class="fas fa-link"></i>
+                <strong>Librerías incluidas:</strong> Bootstrap (diseño), Font Awesome (iconos)
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 12: Frontend - Paso 7 -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-paint-brush"></i> Frontend - Paso 7: Interfaz de Usuario
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">7</span> Crear formulario y lista de elementos</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="keyword">&lt;div</span> class=<span class="string">"container mt-5"</span><span class="keyword">&gt;</span>
+    <span class="keyword">&lt;h1</span> class=<span class="string">"text-center"</span><span class="keyword">&gt;</span><i class="fas fa-list"></i> Gestor de Items<span class="keyword">&lt;/h1&gt;</span>
+    
+    <span class="comment">&lt;!-- Formulario para agregar --&gt;</span>
+    <span class="keyword">&lt;div</span> class=<span class="string">"card mt-4"</span><span class="keyword">&gt;</span>
+        <span class="keyword">&lt;div</span> class=<span class="string">"card-body"</span><span class="keyword">&gt;</span>
+            <span class="keyword">&lt;input</span> type=<span class="string">"text"</span> id=<span class="string">"itemInput"</span> class=<span class="string">"form-control"</span> 
+                   placeholder=<span class="string">"Escribe un nuevo item..."</span><span class="keyword">&gt;</span>
+            <span class="keyword">&lt;button</span> onclick=<span class="string">"addItem()"</span> class=<span class="string">"btn btn-primary mt-2"</span><span class="keyword">&gt;</span>
+                <i class="fas fa-plus"></i> Agregar
+            <span class="keyword">&lt;/button&gt;</span>
+        <span class="keyword">&lt;/div&gt;</span>
+    <span class="keyword">&lt;/div&gt;</span>
+    
+    <span class="comment">&lt;!-- Lista de items --&gt;</span>
+    <span class="keyword">&lt;div</span> id=<span class="string">"itemsList"</span> class=<span class="string">"mt-4"</span><span class="keyword">&gt;&lt;/div&gt;</span>
+<span class="keyword">&lt;/div&gt;</span>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="icon-box">
+                        <i class="fas fa-keyboard"></i>
+                        <h5>Input</h5>
+                        <p>Campo de texto para escribir items</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="icon-box">
+                        <i class="fas fa-list-ul"></i>
+                        <h5>Lista</h5>
+                        <p>Div donde se mostrarán los items</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 13: Frontend - Paso 8 -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-code"></i> Frontend - Paso 8: JavaScript (Agregar Item)
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">8</span> Función para agregar items con POST</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="keyword">&lt;script&gt;</span>
+<span class="comment">// Función para agregar un nuevo item</span>
+<span class="keyword">async function</span> <span class="function">addItem</span>() {
+    <span class="keyword">const</span> input = document.<span class="function">getElementById</span>(<span class="string">'itemInput'</span>);
+    <span class="keyword">const</span> item = input.value.trim();
+    
+    <span class="keyword">if</span> (!item) {
+        Swal.<span class="function">fire</span>(<span class="string">'Error'</span>, <span class="string">'Por favor escribe algo'</span>, <span class="string">'error'</span>);
+        <span class="keyword">return</span>;
+    }
+    
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'http://localhost:3000/items'</span>, {
+            method: <span class="string">'POST'</span>,
+            headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+            body: JSON.<span class="function">stringify</span>({ item })
+        });
+        
+        <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+        
+        <span class="keyword">if</span> (data.success) {
+            Swal.<span class="function">fire</span>(<span class="string">'¡Éxito!'</span>, <span class="string">'Item agregado'</span>, <span class="string">'success'</span>);
+            input.value = <span class="string">''</span>;
+            <span class="function">loadItems</span>(); <span class="comment">// Recargar lista</span>
+        }
+    } <span class="keyword">catch</span> (error) {
+        Swal.<span class="function">fire</span>(<span class="string">'Error'</span>, <span class="string">'No se pudo conectar al servidor'</span>, <span class="string">'error'</span>);
+    }
+}
+<span class="keyword">&lt;/script&gt;</span>
+            </div>
+            
+            <div class="alert alert-success alert-custom">
+                <i class="fas fa-info-circle"></i>
+                <strong>Conceptos clave:</strong> fetch() para peticiones HTTP, async/await, SweetAlert para mensajes
+            </div>
+        </div>
+    </div>
+    
+    <!-- QUIZ 5: Después de JavaScript -->
+    <div class="slide quiz-slide">
+        <div class="quiz-content animate__animated">
+            <h1 style="color: #667eea; text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-fire"></i> ¡Quiz Time! 🎯
+            </h1>
+            <div class="quiz-question">
+                <strong>Pregunta 5:</strong> ¿Qué método HTTP usamos para agregar un nuevo elemento desde el frontend?
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(5, 'a')">
+                <strong>A)</strong> GET
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(5, 'correct')">
+                <strong>B)</strong> POST
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(5, 'c')">
+                <strong>C)</strong> PUT
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(5, 'd')">
+                <strong>D)</strong> DELETE
+            </div>
+            <div class="alert alert-info mt-4" style="text-align: center;">
+                <i class="fas fa-coins"></i> <strong>Premio:</strong> 30 Fernanditos por respuesta correcta
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 14: Frontend - Paso 9 -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-sync-alt"></i> Frontend - Paso 9: JavaScript (Cargar Items)
+            </h1>
+            
+            <div class="step-card">
+                <h4><span class="step-number">9</span> Función para cargar todos los items con GET</h4>
+            </div>
+            
+            <div class="code-block">
+<span class="comment">// Función para cargar todos los items</span>
+<span class="keyword">async function</span> <span class="function">loadItems</span>() {
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'http://localhost:3000/items'</span>);
+        <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+        
+        <span class="keyword">const</span> container = document.<span class="function">getElementById</span>(<span class="string">'itemsList'</span>);
+        container.innerHTML = <span class="string">''</span>;
+        
+        data.data.<span class="function">forEach</span>((item, index) => {
+            container.innerHTML += <span class="string">`
+                &lt;div class="alert alert-info"&gt;
+                    &lt;strong&gt;#${index}:&lt;/strong&gt; ${item}
+                &lt;/div&gt;
+            `</span>;
+        });
+    } <span class="keyword">catch</span> (error) {
+        console.<span class="function">error</span>(<span class="string">'Error al cargar items:'</span>, error);
+    }
+}
+
+<span class="comment">// Cargar items al iniciar la página</span>
+<span class="function">loadItems</span>();
+            </div>
+            
+            <div class="alert alert-info alert-custom">
+                <i class="fas fa-magic"></i>
+                <strong>¡Listo!</strong> Tu aplicación full-stack está completa y funcionando
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 15: Pruebas -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-vial"></i> Probando la Aplicación MVC
+            </h1>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="step-card">
+                        <h4><span class="step-number">1</span> Iniciar el servidor</h4>
+                        <div class="terminal mt-3">
+                            $ node server.js
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="step-card">
+                        <h4><span class="step-number">2</span> Abrir en el navegador</h4>
+                        <div class="terminal mt-3">
+                            http://localhost:3000
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card mt-4">
+                <h4><i class="fas fa-tasks"></i> Pruebas a realizar:</h4>
+                <ul class="mt-3">
+                    <li>✅ Agregar varios elementos usando el formulario</li>
+                    <li>✅ Verificar que aparecen en la lista</li>
+                    <li>✅ <strong>Abrir data/items.json y verificar que los datos están guardados</strong></li>
+                    <li>✅ Probar enviar un campo vacío (debe dar error)</li>
+                    <li>✅ <strong>Reiniciar el servidor y verificar que los datos persisten</strong></li>
+                    <li>✅ Abrir consola del navegador (F12) para ver logs</li>
+                    <li>✅ Probar las rutas en el navegador:
+                        <ul>
+                            <li><code>http://localhost:3000/items</code> (ver todos)</li>
+                            <li><code>http://localhost:3000/items/0</code> (ver primer elemento)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="alert alert-success alert-custom mt-4">
+                <i class="fas fa-rocket"></i>
+                <strong>¡Felicitaciones!</strong> Has creado tu primera aplicación full-stack con arquitectura MVC
+            </div>
+            
+            <div class="alert alert-info alert-custom mt-3">
+                <i class="fas fa-database"></i>
+                <strong>Persistencia verificada:</strong> Los datos en items.json NO se pierden al reiniciar
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 16: Preguntas -->
+    <div class="slide">
+        <div class="slide-content">
+            <h1 class="slide-title">
+                <i class="fas fa-question-circle"></i> Evaluación - 10 Preguntas
+            </h1>
+            
+            <div class="alert alert-primary alert-custom">
+                <i class="fas fa-clipboard-check"></i>
+                <strong>Responde las siguientes preguntas basándote en lo aprendido</strong>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">1</span> ¿Qué significa MVC y cuáles son las responsabilidades de cada componente?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">2</span> ¿Cuál es la función del MODEL en este proyecto? Menciona al menos 2 responsabilidades.</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">3</span> ¿Para qué sirve el CONTROLLER? ¿Qué hace antes de llamar al modelo?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">4</span> ¿Qué hace el ROUTER? ¿Por qué es útil separar las rutas del servidor principal?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">5</span> Explica el flujo completo: ¿Qué sucede cuando el frontend hace un POST /items?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">6</span> ¿Dónde se guardan los datos en este proyecto? ¿Qué ventaja tiene vs guardar en memoria?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">7</span> ¿Qué módulos de Node.js se usan para leer y escribir el archivo JSON?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">8</span> ¿Por qué usamos <code>module.exports</code> en los archivos del backend?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">9</span> Si agregas un item y reinicias el servidor, ¿se pierde el dato? ¿Por qué?</p>
+            </div>
+            
+            <div class="question-card">
+                <p><span class="question-number">10</span> ¿Cuáles son las ventajas de usar arquitectura MVC en lugar de poner todo en un solo archivo?</p>
+            </div>
+            
+            <div class="alert alert-warning alert-custom mt-4">
+                <i class="fas fa-graduation-cap"></i>
+                <strong>Entrega:</strong> Responde estas preguntas por escrito, incluye capturas de pantalla de:
+                <ul class="mt-2 mb-0">
+                    <li>Tu estructura de carpetas</li>
+                    <li>El contenido del archivo items.json con datos</li>
+                    <li>La aplicación funcionando en el navegador</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide FINAL: Certificado -->
+    <div class="slide">
+        <div class="slide-content text-center">
+            <h1 class="slide-title animate__animated animate__bounceIn">
+                <i class="fas fa-award"></i> ¡Felicitaciones!
+            </h1>
+            
+            <div class="alert alert-success alert-custom mb-4">
+                <h3>🎉 ¡Has completado el tutorial! 🎉</h3>
+                <p class="mb-0">Total de Fernanditos ganados: <strong><span id="finalFernanditos">0</span> 🪙</strong></p>
+            </div>
+            
+            <div class="certificate-preview mb-4">
+                <h2 style="color: #667eea; margin-bottom: 30px;">🏆 CERTIFICADO DE PARTICIPACIÓN 🏆</h2>
+                <p style="font-size: 18px;">Este certificado se otorga a:</p>
+                <h3 style="color: #333; margin: 20px 0;" id="studentNameDisplay">_____________________</h3>
+                <p style="font-size: 16px; line-height: 1.8;">
+                    Por completar exitosamente el tutorial<br>
+                    <strong>"Conceptos Básicos de Modelo Vista Controlador (MVC)"</strong><br>
+                    <br>
+                    Fernanditos ganados: <strong><span id="certFernanditos">0</span> 🪙</strong><br>
+                    Fecha: <span id="certDate"></span>
+                </p>
+                <div style="margin-top: 40px;">
+                    <i class="fas fa-certificate" style="font-size: 60px; color: #FFD700;"></i>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary btn-lg" onclick="generateCertificate()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 15px 40px; font-size: 20px;">
+                <i class="fas fa-download"></i> Generar Mi Certificado PDF
+            </button>
+            
+            <div class="alert alert-info alert-custom mt-4">
+                <i class="fas fa-info-circle"></i>
+                Se te pedirá tu nombre y se generará un certificado PDF personalizado
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navegación -->
+    <div class="nav-buttons">
+        <button onclick="previousSlide()">
+            <i class="fas fa-arrow-left"></i> Anterior
+        </button>
+        <button onclick="nextSlide()">
+            Siguiente <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let fernanditos = 0;
+        let answeredQuestions = new Set();
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        // Actualizar contador de fernanditos
+        function updateFernanditos(amount) {
+            fernanditos += amount;
+            document.getElementById('fernanditos').textContent = fernanditos;
+            document.getElementById('finalFernanditos').textContent = fernanditos;
+            document.getElementById('certFernanditos').textContent = fernanditos;
+        }
+        
+        // Función para verificar respuestas del quiz
+        function checkAnswer(questionNum, answer) {
+            // Evitar responder la misma pregunta dos veces
+            if (answeredQuestions.has(questionNum)) {
+                Swal.fire({
+                    title: '¡Ya respondiste esta pregunta!',
+                    text: 'Solo puedes responder cada pregunta una vez',
+                    icon: 'info',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+            
+            if (answer === 'correct') {
+                answeredQuestions.add(questionNum);
+                updateFernanditos(30);
+                
+                Swal.fire({
+                    title: '¡Correcto! 🎉',
+                    html: '<div style="font-size: 60px; margin: 20px 0;">🪙🪙🪙</div><h3>+30 Fernanditos</h3><p>¡Excelente trabajo!</p>',
+                    icon: 'success',
+                    confirmButtonColor: '#667eea',
+                    confirmButtonText: 'Continuar',
+                    background: '#f0f9ff'
+                }).then(() => {
+                    nextSlide();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Respuesta Incorrecta',
+                    text: '¡Inténtalo de nuevo! Piensa bien la respuesta.',
+                    icon: 'error',
+                    confirmButtonColor: '#667eea',
+                    confirmButtonText: 'Intentar otra vez'
+                });
+            }
+        }
+        
+        // Generar certificado PDF
+        async function generateCertificate() {
+            const { value: studentName } = await Swal.fire({
+                title: 'Ingresa tu nombre',
+                input: 'text',
+                inputLabel: 'Nombre completo',
+                inputPlaceholder: 'Ej: Juan Pérez',
+                confirmButtonColor: '#667eea',
+                confirmButtonText: 'Generar Certificado',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return '¡Necesitas escribir tu nombre!';
+                    }
+                }
+            });
+            
+            if (studentName) {
+                // Actualizar vista previa
+                document.getElementById('studentNameDisplay').textContent = studentName;
+                
+                // Fecha actual
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('es-ES', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                document.getElementById('certDate').textContent = dateStr;
+                
+                // Generar PDF
+                Swal.fire({
+                    title: 'Generando certificado...',
+                    html: 'Por favor espera un momento',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                setTimeout(() => {
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({
+                            orientation: 'landscape',
+                            unit: 'mm',
+                            format: 'a4'
+                        });
+                        
+                        // Fondo y bordes
+                        doc.setFillColor(102, 126, 234);
+                        doc.rect(0, 0, 297, 210, 'F');
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(10, 10, 277, 190, 'F');
+                        doc.setDrawColor(255, 215, 0);
+                        doc.setLineWidth(3);
+                        doc.rect(15, 15, 267, 180);
+                        
+                        // Título
+                        doc.setFontSize(32);
+                        doc.setTextColor(102, 126, 234);
+                        doc.text('CERTIFICADO DE PARTICIPACIÓN', 148.5, 40, { align: 'center' });
+                        
+                        // Subtítulo
+                        doc.setFontSize(16);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text('Este certificado se otorga a:', 148.5, 60, { align: 'center' });
+                        
+                        // Nombre del estudiante
+                        doc.setFontSize(28);
+                        doc.setTextColor(51, 51, 51);
+                        doc.setFont(undefined, 'bold');
+                        doc.text(studentName.toUpperCase(), 148.5, 80, { align: 'center' });
+                        
+                        // Línea decorativa
+                        doc.setDrawColor(102, 126, 234);
+                        doc.setLineWidth(0.5);
+                        doc.line(80, 85, 217, 85);
+                        
+                        // Descripción
+                        doc.setFontSize(14);
+                        doc.setFont(undefined, 'normal');
+                        doc.setTextColor(80, 80, 80);
+                        doc.text('Por completar exitosamente el tutorial', 148.5, 100, { align: 'center' });
+                        
+                        doc.setFontSize(16);
+                        doc.setFont(undefined, 'bold');
+                        doc.setTextColor(102, 126, 234);
+                        doc.text('"Conceptos Básicos de Modelo Vista Controlador (MVC)"', 148.5, 110, { align: 'center' });
+                        
+                        // Fernanditos
+                        doc.setFontSize(14);
+                        doc.setFont(undefined, 'normal');
+                        doc.setTextColor(255, 140, 0);
+                        doc.text(`Fernanditos ganados: ${fernanditos} 🪙`, 148.5, 125, { align: 'center' });
+                        
+                        // Fecha
+                        doc.setFontSize(12);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Fecha: ${dateStr}`, 148.5, 140, { align: 'center' });
+                        
+                        // Firma decorativa
+                        doc.setFontSize(10);
+                        doc.setTextColor(102, 126, 234);
+                        doc.text('Tutorial Full-Stack MVC', 148.5, 165, { align: 'center' });
+                        doc.line(110, 170, 187, 170);
+                        doc.setFontSize(8);
+                        doc.text('Arquitectura Model-View-Controller', 148.5, 175, { align: 'center' });
+                        
+                        // Guardar PDF
+                        doc.save(`Certificado_MVC_${studentName.replace(/\s+/g, '_')}.pdf`);
+                        
+                        Swal.fire({
+                            title: '¡Certificado Generado! 🎓',
+                            html: `<p>Tu certificado ha sido descargado exitosamente</p>
+                                   <p><strong>Fernanditos totales: ${fernanditos} 🪙</strong></p>`,
+                            icon: 'success',
+                            confirmButtonColor: '#667eea',
+                            confirmButtonText: '¡Genial!'
+                        });
+                    } catch (error) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Hubo un problema al generar el certificado. Intenta de nuevo.',
+                            icon: 'error',
+                            confirmButtonColor: '#667eea'
+                        });
+                    }
+                }, 1000);
+            }
+        }
+        
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.remove('animate__fadeIn');
+            
+            currentSlide = (n + totalSlides) % totalSlides;
+            
+            slides[currentSlide].classList.add('active');
+            slides[currentSlide].classList.add('animate__animated', 'animate__fadeIn');
+            
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            
+            // Mostrar mensaje de bienvenida en primera slide
+            if (currentSlide === 0) {
+                setTimeout(() => {
+                    Swal.fire({
+                        title: '¡Bienvenido!',
+                        text: 'Usa las flechas de navegación para avanzar por las slides',
+                        icon: 'info',
+                        confirmButtonColor: '#667eea'
+                    });
+                }, 500);
+            }
+            
+            // Mensaje especial en la última slide (Certificado)
+            if (currentSlide === totalSlides - 1) {
+                document.getElementById('finalFernanditos').textContent = fernanditos;
+                document.getElementById('certFernanditos').textContent = fernanditos;
+                setTimeout(() => {
+                    Swal.fire({
+                        title: '¡Felicitaciones! 🎉',
+                        html: `<p>Has completado el tutorial</p>
+                               <p><strong>Fernanditos ganados: ${fernanditos} 🪙</strong></p>
+                               <p>¡Genera tu certificado!</p>`,
+                        icon: 'success',
+                        confirmButtonColor: '#667eea'
+                    });
+                }, 500);
+            }
+        }
+        
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+        
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+        
+        // Mostrar primera slide
+        showSlide(0);
+    </script>
+</body>
+</html>

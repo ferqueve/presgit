@@ -1511,24 +1511,18 @@ app.<span class="function">listen</span>(PORT, () => {
                         doc.setTextColor(102, 126, 234);
                         doc.text('"Conceptos Básicos de Modelo Vista Controlador (MVC)"', 148.5, 110, { align: 'center' });
                         
-                        // Fernanditos
-                        doc.setFontSize(14);
-                        doc.setFont(undefined, 'normal');
-                        doc.setTextColor(255, 140, 0);
-                        doc.text(`Fernanditos ganados: ${fernanditos} 🪙`, 148.5, 125, { align: 'center' });
-                        
                         // Fecha
                         doc.setFontSize(12);
                         doc.setTextColor(100, 100, 100);
-                        doc.text(`Fecha: ${dateStr}`, 148.5, 140, { align: 'center' });
+                        doc.text(`Fecha: ${dateStr}`, 148.5, 130, { align: 'center' });
                         
                         // Firma decorativa
                         doc.setFontSize(10);
                         doc.setTextColor(102, 126, 234);
-                        doc.text('Tutorial Full-Stack MVC', 148.5, 165, { align: 'center' });
-                        doc.line(110, 170, 187, 170);
+                        doc.text('Tutorial Full-Stack MVC', 148.5, 155, { align: 'center' });
+                        doc.line(110, 160, 187, 160);
                         doc.setFontSize(8);
-                        doc.text('Arquitectura Model-View-Controller', 148.5, 175, { align: 'center' });
+                        doc.text('Arquitectura Model-View-Controller', 148.5, 165, { align: 'center' });
                         
                         // Guardar PDF
                         doc.save(`Certificado_MVC_${studentName.replace(/\s+/g, '_')}.pdf`);

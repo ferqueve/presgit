@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bases de Datos y Persistencia - Curso Interactivo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF and QRCode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .presentation-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: 600px;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-header {
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .slide-title {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 2.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .navigation {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn-custom:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        
+        .quiz-option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+            transform: translateX(10px);
+        }
+        
+        .quiz-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .icon-large {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+        
+        .comparison-table {
+            margin: 20px 0;
+        }
+        
+        .highlight-box {
+            background: #fef5e7;
+            border-left: 5px solid #f39c12;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .diagram-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .db-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 10px 0;
+            transition: transform 0.3s;
+        }
+        
+        .db-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .certificate-preview {
+            border: 5px solid gold;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        #qrcode {
+            display: inline-block;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator animate__animated animate__fadeInDown">
+        <i class="fas fa-book-reader"></i>
+        <strong>Diapositiva: <span id="currentSlide">1</span>/<span id="totalSlides">25</span></strong>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Bienvenida -->
+        <div class="slide active animate__animated animate__fadeIn" data-slide="1">
+            <div class="text-center">
+                <i class="fas fa-database icon-large animate__animated animate__bounceIn" style="color: #667eea;"></i>
+                <h1 class="slide-title animate__animated animate__fadeInUp">Bases de Datos y Persistencia</h1>
+                <p class="lead mt-4">Un viaje completo por el mundo de las bases de datos</p>
+                <div class="mt-5">
+                    <i class="fas fa-server fa-3x mx-3" style="color: #4a5568;"></i>
+                    <i class="fas fa-cloud-upload-alt fa-3x mx-3" style="color: #667eea;"></i>
+                    <i class="fas fa-code fa-3x mx-3" style="color: #764ba2;"></i>
+                </div>
+                <p class="mt-5 text-muted">Presiona "Siguiente" para comenzar tu aprendizaje</p>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="startPresentation()">
+                    <i class="fas fa-play"></i> Comenzar
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 2: ¿Qué es la Persistencia? -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-save"></i> ¿Qué es la Persistencia?</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-lightbulb text-warning"></i> Definición</h4>
+                    <p>La <strong>persistencia de datos</strong> es la capacidad de guardar información de manera permanente, incluso después de que el programa o sistema se cierre.</p>
+                    
+                    <div class="highlight-box mt-4">
+                        <h5><i class="fas fa-check-circle text-success"></i> ¿Por qué es importante?</h5>
+                        <ul>
+                            <li>Mantener datos entre sesiones</li>
+                            <li>Recuperar información histórica</li>
+                            <li>Compartir datos entre aplicaciones</li>
+                            <li>Garantizar integridad de la información</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h4><i class="fas fa-layer-group text-info"></i> Tipos de Persistencia</h4>
+                    <div class="db-card mb-3">
+                        <i class="fas fa-file-alt fa-2x mb-2"></i>
+                        <h5>Archivos</h5>
+                        <p>Almacenamiento básico en disco (txt, JSON, XML)</p>
+                    </div>
+                    <div class="db-card mb-3">
+                        <i class="fas fa-database fa-2x mb-2"></i>
+                        <h5>Bases de Datos</h5>
+                        <p>Sistemas estructurados y optimizados</p>
+                    </div>
+                    <div class="db-card">
+                        <i class="fas fa-cloud fa-2x mb-2"></i>
+                        <h5>Cloud Storage</h5>
+                        <p>Almacenamiento distribuido en la nube</p>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Tipos de Bases de Datos -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-sitemap"></i> Tipos de Bases de Datos</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-3 border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="fas fa-table"></i> Relacionales (SQL)</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Organizan datos en tablas con relaciones definidas</p>
+                            <ul>
+                                <li>MySQL / MariaDB</li>
+                                <li>PostgreSQL</li>
+                                <li>SQLite</li>
+                                <li>Oracle Database</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-3 border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-file-code"></i> No Relacionales (NoSQL)</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Estructuras flexibles para diferentes necesidades</p>
+                            <ul>
+                                <li><strong>Documentos:</strong> MongoDB, CouchDB</li>
+                                <li><strong>Clave-Valor:</strong> Redis, DynamoDB</li>
+                                <li><strong>Grafos:</strong> Neo4j, ArangoDB</li>
+                                <li><strong>Columnas:</strong> Cassandra, HBase</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Quiz 1 -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle"></i> Quiz #1</h2>
+            </div>
+            <h4 class="mb-4">¿Cuál de las siguientes NO es una característica de la persistencia de datos?</h4>
+            <div class="quiz-container">
+                <div class="quiz-option" onclick="selectQuizOption(this, 4, 'A', false)">
+                    <strong>A)</strong> Mantener datos entre sesiones de la aplicación
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 4, 'B', false)">
+                    <strong>B)</strong> Almacenar información de manera permanente
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 4, 'C', true)">
+                    <strong>C)</strong> Los datos se pierden al cerrar la aplicación
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 4, 'D', false)">
+                    <strong>D)</strong> Recuperar información histórica
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" id="nextBtn4" disabled onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 5: SQLite -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-feather"></i> SQLite - La Base de Datos Ligera</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-info-circle text-primary"></i> ¿Qué es SQLite?</h4>
+                    <p>SQLite es una biblioteca que proporciona una base de datos SQL embebida y autónoma, sin necesidad de servidor.</p>
+                    
+                    <h5 class="mt-4"><i class="fas fa-star text-warning"></i> Características</h5>
+                    <ul>
+                        <li>Sin configuración (zero-configuration)</li>
+                        <li>Archivo único (.db, .sqlite)</li>
+                        <li>Perfecta para aplicaciones móviles</li>
+                        <li>Ideal para desarrollo y prototipado</li>
+                        <li>Cross-platform</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-code"></i> Ejemplo de uso</h5>
+                    <div class="code-block">
+// Node.js con sqlite3
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('mibase.db');
+
+// Crear tabla
+db.run(`CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    email TEXT UNIQUE,
+    edad INTEGER
+)`);
+
+// Insertar datos
+db.run(`INSERT INTO usuarios 
+    (nombre, email, edad) 
+    VALUES (?, ?, ?)`,
+    ['Juan', 'juan@email.com', 25]);
+
+// Consultar
+db.all('SELECT * FROM usuarios', (err, rows) => {
+    console.log(rows);
+});
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 6: MySQL y MariaDB -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-server"></i> MySQL & MariaDB</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fab fa-mysql fa-2x text-info"></i> MySQL</h4>
+                    <p>Sistema de gestión de bases de datos relacional más popular del mundo, propiedad de Oracle.</p>
+                    <ul>
+                        <li>Alto rendimiento</li>
+                        <li>Escalabilidad</li>
+                        <li>Ampliamente soportado</li>
+                        <li>Gran comunidad</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4><i class="fas fa-fish fa-2x text-success"></i> MariaDB</h4>
+                    <p>Fork de MySQL creado por los desarrolladores originales. Totalmente compatible con MySQL pero de código abierto.</p>
+                    <ul>
+                        <li>100% compatible con MySQL</li>
+                        <li>Completamente open source</li>
+                        <li>Más características</li>
+                        <li>Mejor rendimiento</li>
+                    </ul>
+                </div>
+            </div>
+            <h5 class="mt-4"><i class="fas fa-code"></i> Ejemplo de conexión con Node.js</h5>
+            <div class="code-block">
+const mysql = require('mysql2/promise');
+
+// Crear conexión
+const connection = await mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'mi_aplicacion'
+});
+
+// Ejecutar query
+const [rows] = await connection.execute(
+    'SELECT * FROM productos WHERE precio > ?',
+    [100]
+);
+
+console.log(rows);
+await connection.end();
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 7: La Familia SQL -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-users"></i> La Familia SQL</h2>
+            </div>
+            <p class="lead">Todas las bases de datos SQL comparten un lenguaje común: <strong>Structured Query Language</strong></p>
+            
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-plus-circle fa-3x text-success mb-2"></i>
+                        <h5>CREATE</h5>
+                        <small>Crear estructuras</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-search fa-3x text-primary mb-2"></i>
+                        <h5>SELECT</h5>
+                        <small>Consultar datos</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-edit fa-3x text-warning mb-2"></i>
+                        <h5>UPDATE</h5>
+                        <small>Modificar datos</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-trash fa-3x text-danger mb-2"></i>
+                        <h5>DELETE</h5>
+                        <small>Eliminar datos</small>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="mt-4"><i class="fas fa-code"></i> Ejemplos de SQL</h5>
+            <div class="code-block">
+-- Crear tabla
+CREATE TABLE empleados (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    departamento VARCHAR(50),
+    salario DECIMAL(10,2),
+    fecha_ingreso DATE
+);
+
+-- Insertar datos
+INSERT INTO empleados (nombre, departamento, salario, fecha_ingreso)
+VALUES ('Ana García', 'Desarrollo', 65000.00, '2024-01-15');
+
+-- Consultar con JOIN
+SELECT e.nombre, e.salario, d.nombre_dept
+FROM empleados e
+INNER JOIN departamentos d ON e.departamento = d.id
+WHERE e.salario > 50000;
+
+-- Actualizar
+UPDATE empleados 
+SET salario = salario * 1.10 
+WHERE departamento = 'Desarrollo';
+
+-- Eliminar
+DELETE FROM empleados WHERE fecha_ingreso < '2020-01-01';
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 8: Quiz 2 -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle"></i> Quiz #2</h2>
+            </div>
+            <h4 class="mb-4">¿Cuál es la principal diferencia entre SQLite y MySQL?</h4>
+            <div class="quiz-container">
+                <div class="quiz-option" onclick="selectQuizOption(this, 8, 'A', false)">
+                    <strong>A)</strong> SQLite es más rápido que MySQL en todos los casos
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 8, 'B', true)">
+                    <strong>B)</strong> SQLite es una base de datos embebida sin servidor, mientras MySQL requiere un servidor
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 8, 'C', false)">
+                    <strong>C)</strong> SQLite no soporta SQL estándar
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 8, 'D', false)">
+                    <strong>D)</strong> MySQL no puede usarse en aplicaciones web
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" id="nextBtn8" disabled onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 9: Introducción a MongoDB -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-leaf" style="color: #4caf50;"></i> MongoDB - Bases de Datos Orientadas a Documentos</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-book text-success"></i> ¿Qué es MongoDB?</h4>
+                    <p>MongoDB es una base de datos NoSQL orientada a documentos que almacena datos en formato JSON (BSON).</p>
+                    
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-rocket"></i> Ventajas</h5>
+                        <ul>
+                            <li><strong>Esquema flexible:</strong> No requiere estructura fija</li>
+                            <li><strong>Escalabilidad horizontal:</strong> Fácil de distribuir</li>
+                            <li><strong>Alto rendimiento:</strong> Optimizado para lectura/escritura</li>
+                            <li><strong>Consultas ricas:</strong> Soporte para queries complejas</li>
+                            <li><strong>JSON nativo:</strong> Perfecto para aplicaciones web</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-diagram-project"></i> Estructura de Datos</h5>
+                    <div class="code-block">
+// Documento en MongoDB (JSON)
+{
+    "_id": ObjectId("507f1f77bcf86cd799439011"),
+    "nombre": "Juan Pérez",
+    "email": "juan@email.com",
+    "edad": 28,
+    "direccion": {
+        "calle": "Av. Principal 123",
+        "ciudad": "Madrid",
+        "codigo_postal": "28001"
+    },
+    "hobbies": ["programación", "lectura", "gaming"],
+    "activo": true,
+    "fecha_registro": ISODate("2024-01-15T10:30:00Z")
+}
+                    </div>
+                    <p class="mt-3"><i class="fas fa-lightbulb text-warning"></i> <strong>Nota:</strong> Los documentos pueden tener diferentes campos en la misma colección.</p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 10: MongoDB - Operaciones CRUD -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-cogs"></i> MongoDB - Operaciones CRUD</h2>
+            </div>
+            <h5><i class="fas fa-code"></i> Ejemplos Prácticos con Node.js</h5>
+            <div class="code-block">
+const { MongoClient } = require('mongodb');
+
+// Conexión
+const client = new MongoClient('mongodb://localhost:27017');
+await client.connect();
+const db = client.db('mi_aplicacion');
+const usuarios = db.collection('usuarios');
+
+// CREATE - Insertar documentos
+await usuarios.insertOne({
+    nombre: "María López",
+    email: "maria@email.com",
+    edad: 32,
+    rol: "desarrolladora"
+});
+
+await usuarios.insertMany([
+    { nombre: "Pedro", email: "pedro@email.com", edad: 25 },
+    { nombre: "Laura", email: "laura@email.com", edad: 28 }
+]);
+
+// READ - Consultar documentos
+const usuario = await usuarios.findOne({ email: "maria@email.com" });
+const mayores30 = await usuarios.find({ edad: { $gt: 30 } }).toArray();
+const developers = await usuarios.find({ 
+    rol: "desarrolladora" 
+}).sort({ edad: -1 }).limit(10).toArray();
+
+// UPDATE - Actualizar documentos
+await usuarios.updateOne(
+    { email: "maria@email.com" },
+    { $set: { edad: 33, ciudad: "Barcelona" } }
+);
+
+await usuarios.updateMany(
+    { rol: "desarrolladora" },
+    { $inc: { salario: 5000 } }  // Incrementar salario
+);
+
+// DELETE - Eliminar documentos
+await usuarios.deleteOne({ email: "pedro@email.com" });
+await usuarios.deleteMany({ activo: false });
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 11: MongoDB - Consultas Avanzadas -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-search-plus"></i> MongoDB - Consultas Avanzadas</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-filter"></i> Operadores de Consulta</h5>
+                    <div class="code-block">
+// Operadores de comparación
+db.productos.find({
+    precio: { $gte: 100, $lte: 500 },
+    stock: { $ne: 0 }
+});
+
+// Operadores lógicos
+db.productos.find({
+    $or: [
+        { categoria: "electrónica" },
+        { precio: { $lt: 50 } }
+    ]
+});
+
+// Búsqueda en arrays
+db.usuarios.find({
+    hobbies: { $in: ["programación", "gaming"] }
+});
+
+// Búsqueda en subdocumentos
+db.usuarios.find({
+    "direccion.ciudad": "Madrid"
+});
+
+// Expresiones regulares
+db.productos.find({
+    nombre: { $regex: /^laptop/i }
+});
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-chart-bar"></i> Agregaciones</h5>
+                    <div class="code-block">
+// Pipeline de agregación
+db.ventas.aggregate([
+    // Filtrar por fecha
+    {
+        $match: {
+            fecha: { 
+                $gte: new Date('2024-01-01') 
+            }
+        }
+    },
+    // Agrupar por categoría
+    {
+        $group: {
+            _id: "$categoria",
+            total_ventas: { $sum: "$monto" },
+            cantidad: { $count: {} },
+            promedio: { $avg: "$monto" }
+        }
+    },
+    // Ordenar por total
+    {
+        $sort: { total_ventas: -1 }
+    },
+    // Limitar resultados
+    {
+        $limit: 5
+    }
+]);
+
+// Lookup (JOIN)
+db.pedidos.aggregate([
+    {
+        $lookup: {
+            from: "usuarios",
+            localField: "usuario_id",
+            foreignField: "_id",
+            as: "usuario_info"
+        }
+    }
+]);
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 12: Quiz 3 -->
+        <div class="slide" data-slide="12">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle"></i> Quiz #3</h2>
+            </div>
+            <h4 class="mb-4">¿Qué formato utiliza MongoDB para almacenar documentos?</h4>
+            <div class="quiz-container">
+                <div class="quiz-option" onclick="selectQuizOption(this, 12, 'A', false)">
+                    <strong>A)</strong> XML
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 12, 'B', false)">
+                    <strong>B)</strong> CSV
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 12, 'C', true)">
+                    <strong>C)</strong> BSON (Binary JSON)
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 12, 'D', false)">
+                    <strong>D)</strong> YAML
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" id="nextBtn12" disabled onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 13: MongoDB Compass -->
+        <div class="slide" data-slide="13">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-compass"></i> MongoDB Compass</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-desktop text-primary"></i> ¿Qué es Compass?</h4>
+                    <p><strong>MongoDB Compass</strong> es la interfaz gráfica oficial (GUI) para MongoDB que permite explorar y manipular datos de forma visual.</p>
+                    
+                    <h5 class="mt-4"><i class="fas fa-star text-warning"></i> Características</h5>
+                    <ul>
+                        <li><i class="fas fa-check text-success"></i> Visualización de datos en tiempo real</li>
+                        <li><i class="fas fa-check text-success"></i> Constructor visual de queries</li>
+                        <li><i class="fas fa-check text-success"></i> Análisis de esquemas</li>
+                        <li><i class="fas fa-check text-success"></i> Índices y rendimiento</li>
+                        <li><i class="fas fa-check text-success"></i> Import/Export de datos</li>
+                        <li><i class="fas fa-check text-success"></i> Validación de esquemas</li>
+                    </ul>
+                    
+                    <div class="highlight-box mt-4">
+                        <h6><i class="fas fa-user-tag"></i> Ideal para:</h6>
+                        <p>Desarrolladores que prefieren trabajar visualmente, hacer pruebas rápidas o explorar estructuras de datos sin escribir código.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="fas fa-laptop-code"></i> Interfaz de Compass</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-database fa-4x text-success"></i>
+                            </div>
+                            <h6><i class="fas fa-plug"></i> Conexión Local</h6>
+                            <div class="code-block">
+mongodb://localhost:27017
+                            </div>
+                            
+                            <h6 class="mt-3"><i class="fas fa-tools"></i> Funcionalidades</h6>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <i class="fas fa-search text-primary"></i> Explorador de bases de datos
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-edit text-warning"></i> Editor de documentos
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-chart-line text-info"></i> Métricas de rendimiento
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-code text-success"></i> Shell integrada
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 14: MongoDB Atlas -->
+        <div class="slide" data-slide="14">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-cloud"></i> MongoDB Atlas</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-server text-success"></i> ¿Qué es Atlas?</h4>
+                    <p><strong>MongoDB Atlas</strong> es el servicio de base de datos en la nube (DBaaS) totalmente administrado por MongoDB.</p>
+                    
+                    <h5 class="mt-4"><i class="fas fa-rocket"></i> Ventajas</h5>
+                    <ul>
+                        <li><i class="fas fa-cloud-upload-alt text-primary"></i> Hosting en la nube (AWS, Azure, GCP)</li>
+                        <li><i class="fas fa-shield-alt text-success"></i> Seguridad avanzada y backups automáticos</li>
+                        <li><i class="fas fa-chart-line text-info"></i> Escalabilidad automática</li>
+                        <li><i class="fas fa-globe text-warning"></i> Distribución global</li>
+                        <li><i class="fas fa-cog"></i> Mantenimiento automatizado</li>
+                        <li><i class="fas fa-gift text-danger"></i> Tier gratuito disponible (512MB)</li>
+                    </ul>
+                    
+                    <div class="highlight-box">
+                        <h6><i class="fas fa-lightbulb"></i> Caso de uso:</h6>
+                        <p>Aplicaciones en producción que requieren alta disponibilidad, escalabilidad y seguridad sin preocuparse por la infraestructura.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-code"></i> Conexión a Atlas</h5>
+                    <div class="code-block">
+// String de conexión de Atlas
+const uri = "mongodb+srv://usuario:password@cluster0.mongodb.net/mydb?retryWrites=true&w=majority";
+
+const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+await client.connect();
+console.log("Conectado a MongoDB Atlas");
+                    </div>
+                    
+                    <h5 class="mt-3"><i class="fas fa-layer-group"></i> Características Premium</h5>
+                    <div class="db-card mb-2">
+                        <i class="fas fa-chart-area"></i>
+                        <strong>Monitoring:</strong> Métricas en tiempo real
+                    </div>
+                    <div class="db-card mb-2">
+                        <i class="fas fa-bell"></i>
+                        <strong>Alertas:</strong> Notificaciones personalizadas
+                    </div>
+                    <div class="db-card mb-2">
+                        <i class="fas fa-search"></i>
+                        <strong>Atlas Search:</strong> Búsqueda full-text
+                    </div>
+                    <div class="db-card">
+                        <i class="fas fa-brain"></i>
+                        <strong>Atlas Data Lake:</strong> Análisis de big data
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 15: Compass vs Atlas -->
+        <div class="slide" data-slide="15">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-balance-scale"></i> Compass vs Atlas</h2>
+            </div>
+            <h4 class="text-center mb-4">Diferencias Clave</h4>
+            <table class="table table-bordered comparison-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="fas fa-tag"></i> Aspecto</th>
+                        <th><i class="fas fa-compass"></i> MongoDB Compass</th>
+                        <th><i class="fas fa-cloud"></i> MongoDB Atlas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Tipo</strong></td>
+                        <td>Cliente GUI Desktop</td>
+                        <td>Servicio Cloud (DBaaS)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Función</strong></td>
+                        <td>Interfaz para visualizar y manipular datos</td>
+                        <td>Hosting de base de datos en la nube</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ubicación</strong></td>
+                        <td>Se ejecuta en tu computadora</td>
+                        <td>Servidores en la nube (AWS/Azure/GCP)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conexión</strong></td>
+                        <td>Se conecta a cualquier instancia de MongoDB</td>
+                        <td>Proporciona la instancia de MongoDB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Costo</strong></td>
+                        <td>Gratuito</td>
+                        <td>Gratuito hasta 512MB, luego de pago</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mantenimiento</strong></td>
+                        <td>No aplica (es solo un cliente)</td>
+                        <td>Totalmente administrado por MongoDB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uso Típico</strong></td>
+                        <td>Desarrollo, testing, exploración</td>
+                        <td>Producción, aplicaciones en vivo</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Pueden usarse juntos</h6>
+                        <p class="mb-0">Puedes usar Compass para conectarte y administrar visualmente tu base de datos alojada en Atlas.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-check-circle"></i> Recomendación</h6>
+                        <p class="mb-0">Atlas para producción + Compass para desarrollo = Combinación perfecta</p>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 16: Quiz 4 -->
+        <div class="slide" data-slide="16">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle"></i> Quiz #4</h2>
+            </div>
+            <h4 class="mb-4">¿Cuál es la diferencia principal entre MongoDB Compass y MongoDB Atlas?</h4>
+            <div class="quiz-container">
+                <div class="quiz-option" onclick="selectQuizOption(this, 16, 'A', false)">
+                    <strong>A)</strong> Compass es de pago y Atlas es gratuito
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 16, 'B', true)">
+                    <strong>B)</strong> Compass es una aplicación GUI de escritorio, mientras Atlas es un servicio de hosting en la nube
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 16, 'C', false)">
+                    <strong>C)</strong> Compass solo funciona con SQL y Atlas con NoSQL
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 16, 'D', false)">
+                    <strong>D)</strong> No hay diferencia, son el mismo producto
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" id="nextBtn16" disabled onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 17: Otros Tipos de Bases de Datos -->
+        <div class="slide" data-slide="17">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-project-diagram"></i> Otros Tipos de Bases de Datos NoSQL</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5><i class="fas fa-key"></i> Clave-Valor (Key-Value)</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Ejemplos:</strong> Redis, DynamoDB, Memcached</p>
+                            <p><strong>Estructura:</strong> Pares simples de clave → valor</p>
+                            <div class="code-block">
+// Redis
+SET usuario:1000 "Juan Pérez"
+GET usuario:1000
+HSET usuario:1001 nombre "María" edad 28
+                            </div>
+                            <p><strong>Uso ideal:</strong> Cache, sesiones, contadores</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5><i class="fas fa-project-diagram"></i> Bases de Grafos</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Ejemplos:</strong> Neo4j, ArangoDB, Amazon Neptune</p>
+                            <p><strong>Estructura:</strong> Nodos y relaciones</p>
+                            <div class="code-block">
+// Neo4j (Cypher)
+CREATE (u:Usuario {nombre: 'Ana'})
+CREATE (u2:Usuario {nombre: 'Luis'})
+CREATE (u)-[:SIGUE]->(u2)
+MATCH (u:Usuario)-[:SIGUE]->(amigo)
+WHERE u.nombre = 'Ana'
+RETURN amigo.nombre
+                            </div>
+                            <p><strong>Uso ideal:</strong> Redes sociales, recomendaciones</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="fas fa-columns"></i> Columnar (Wide-Column)</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Ejemplos:</strong> Cassandra, HBase, ScyllaDB</p>
+                            <p><strong>Estructura:</strong> Familias de columnas</p>
+                            <div class="code-block">
+// Cassandra (CQL)
+CREATE TABLE usuarios (
+    user_id UUID PRIMARY KEY,
+    email text,
+    nombre text,
+    timestamp timestamp
+);
+INSERT INTO usuarios (user_id, email, nombre)
+VALUES (uuid(), 'ana@email.com', 'Ana');
+                            </div>
+                            <p><strong>Uso ideal:</strong> Big data, series temporales</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-clock"></i> Series Temporales</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Ejemplos:</strong> InfluxDB, TimescaleDB, Prometheus</p>
+                            <p><strong>Estructura:</strong> Datos con timestamp</p>
+                            <div class="code-block">
+// InfluxDB
+temperature,location=room1 value=22.5
+temperature,location=room2 value=23.1
+
+SELECT mean(value) FROM temperature
+WHERE location = 'room1'
+AND time > now() - 1h
+GROUP BY time(10m)
+                            </div>
+                            <p><strong>Uso ideal:</strong> IoT, monitoreo, métricas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 18: Node.js + Express Setup -->
+        <div class="slide" data-slide="18">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fab fa-node-js"></i> Integrando Bases de Datos con Node.js + Express</h2>
+            </div>
+            <h5><i class="fas fa-download"></i> Configuración Inicial</h5>
+            <div class="code-block">
+// Inicializar proyecto
+npm init -y
+
+// Instalar dependencias
+npm install express mongoose mysql2 sqlite3 dotenv
+
+// Estructura del proyecto
+proyecto/
+├── src/
+│   ├── config/
+│   │   ├── database.js
+│   │   └── mongodb.js
+│   ├── models/
+│   │   ├── Usuario.js
+│   │   └── Producto.js
+│   ├── routes/
+│   │   ├── usuarios.js
+│   │   └── productos.js
+│   └── app.js
+├── .env
+└── package.json
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-file-code"></i> Archivo .env</h5>
+                    <div class="code-block">
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/miapp
+# o Atlas
+MONGODB_ATLAS=mongodb+srv://user:pass@cluster.mongodb.net/
+
+# MySQL
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=password
+MYSQL_DATABASE=miapp
+
+# SQLite
+SQLITE_PATH=./database.sqlite
+
+PORT=3000
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-server"></i> app.js básico</h5>
+                    <div class="code-block">
+require('dotenv').config();
+const express = require('express');
+const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Conectar a base de datos
+const connectDB = require('./config/mongodb');
+connectDB();
+
+// Rutas
+app.use('/api/usuarios', require('./routes/usuarios'));
+app.use('/api/productos', require('./routes/productos'));
+
+// Servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor en puerto ${PORT}`);
+});
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 19: MongoDB con Mongoose -->
+        <div class="slide" data-slide="19">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-leaf"></i> MongoDB con Mongoose en Express</h2>
+            </div>
+            <h5><i class="fas fa-plug"></i> Configuración de Conexión</h5>
+            <div class="code-block">
+// config/mongodb.js
+const mongoose = require('mongoose');
+
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log('MongoDB conectado exitosamente');
+    } catch (error) {
+        console.error('Error de conexión:', error);
+        process.exit(1);
+    }
+};
+
+module.exports = connectDB;
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-database"></i> Definir Modelo</h5>
+                    <div class="code-block">
+// models/Usuario.js
+const mongoose = require('mongoose');
+
+const usuarioSchema = new mongoose.Schema({
+    nombre: {
+        type: String,
+        required: [true, 'Nombre requerido'],
+        trim: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true
+    },
+    edad: {
+        type: Number,
+        min: 0,
+        max: 120
+    },
+    activo: {
+        type: Boolean,
+        default: true
+    },
+    roles: [String],
+    direccion: {
+        calle: String,
+        ciudad: String,
+        pais: String
+    }
+}, {
+    timestamps: true // createdAt, updatedAt
+});
+
+module.exports = mongoose.model('Usuario', usuarioSchema);
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-route"></i> Rutas API</h5>
+                    <div class="code-block">
+// routes/usuarios.js
+const express = require('express');
+const router = express.Router();
+const Usuario = require('../models/Usuario');
+
+// GET todos los usuarios
+router.get('/', async (req, res) => {
+    try {
+        const usuarios = await Usuario.find();
+        res.json(usuarios);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST crear usuario
+router.post('/', async (req, res) => {
+    try {
+        const usuario = new Usuario(req.body);
+        await usuario.save();
+        res.status(201).json(usuario);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// PUT actualizar usuario
+router.put('/:id', async (req, res) => {
+    try {
+        const usuario = await Usuario.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        if (!usuario) {
+            return res.status(404).json({ error: 'No encontrado' });
+        }
+        res.json(usuario);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// DELETE eliminar usuario
+router.delete('/:id', async (req, res) => {
+    try {
+        const usuario = await Usuario.findByIdAndDelete(req.params.id);
+        if (!usuario) {
+            return res.status(404).json({ error: 'No encontrado' });
+        }
+        res.json({ mensaje: 'Eliminado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+module.exports = router;
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 20: MySQL con Express -->
+        <div class="slide" data-slide="20">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-database"></i> MySQL/MariaDB con Express</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-plug"></i> Configuración</h5>
+                    <div class="code-block">
+// config/mysql.js
+const mysql = require('mysql2/promise');
+
+const pool = mysql.createPool({
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Verificar conexión
+pool.getConnection()
+    .then(connection => {
+        console.log('MySQL conectado');
+        connection.release();
+    })
+    .catch(err => {
+        console.error('Error MySQL:', err);
+    });
+
+module.exports = pool;
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-route"></i> Rutas con MySQL</h5>
+                    <div class="code-block">
+// routes/productos.js
+const express = require('express');
+const router = express.Router();
+const db = require('../config/mysql');
+
+// GET todos los productos
+router.get('/', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT * FROM productos'
+        );
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST crear producto
+router.post('/', async (req, res) => {
+    try {
+        const { nombre, precio, stock } = req.body;
+        const [result] = await db.query(
+            'INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)',
+            [nombre, precio, stock]
+        );
+        res.status(201).json({
+            id: result.insertId,
+            nombre,
+            precio,
+            stock
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// PUT actualizar producto
+router.put('/:id', async (req, res) => {
+    try {
+        const { nombre, precio, stock } = req.body;
+        const [result] = await db.query(
+            'UPDATE productos SET nombre=?, precio=?, stock=? WHERE id=?',
+            [nombre, precio, stock, req.params.id]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'No encontrado' });
+        }
+        res.json({ id: req.params.id, nombre, precio, stock });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+module.exports = router;
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 21: Quiz 5 -->
+        <div class="slide" data-slide="21">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle"></i> Quiz #5</h2>
+            </div>
+            <h4 class="mb-4">¿Qué librería se usa comúnmente para trabajar con MongoDB en Node.js de forma más sencilla?</h4>
+            <div class="quiz-container">
+                <div class="quiz-option" onclick="selectQuizOption(this, 21, 'A', true)">
+                    <strong>A)</strong> Mongoose
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 21, 'B', false)">
+                    <strong>B)</strong> Sequelize
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 21, 'C', false)">
+                    <strong>C)</strong> TypeORM
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 21, 'D', false)">
+                    <strong>D)</strong> Knex.js
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" id="nextBtn21" disabled onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 22: Ejemplo Práctico Completo -->
+        <div class="slide" data-slide="22">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-project-diagram"></i> Ejemplo Práctico: API REST Completa</h2>
+            </div>
+            <h5><i class="fas fa-lightbulb text-warning"></i> Sistema de Gestión de Tareas con MongoDB</h5>
+            <div class="code-block">
+// models/Tarea.js
+const mongoose = require('mongoose');
+
+const tareaSchema = new mongoose.Schema({
+    titulo: { type: String, required: true },
+    descripcion: String,
+    completada: { type: Boolean, default: false },
+    prioridad: { type: String, enum: ['baja', 'media', 'alta'], default: 'media' },
+    fechaLimite: Date,
+    etiquetas: [String],
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' }
+}, { timestamps: true });
+
+module.exports = mongoose.model('Tarea', tareaSchema);
+
+// routes/tareas.js
+const express = require('express');
+const router = express.Router();
+const Tarea = require('../models/Tarea');
+
+// Obtener todas las tareas con filtros
+router.get('/', async (req, res) => {
+    try {
+        const { completada, prioridad, usuario } = req.query;
+        const filtro = {};
+        
+        if (completada !== undefined) filtro.completada = completada === 'true';
+        if (prioridad) filtro.prioridad = prioridad;
+        if (usuario) filtro.usuario = usuario;
+        
+        const tareas = await Tarea.find(filtro)
+            .populate('usuario', 'nombre email')
+            .sort({ createdAt: -1 });
+            
+        res.json({
+            total: tareas.length,
+            tareas
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Crear nueva tarea
+router.post('/', async (req, res) => {
+    try {
+        const tarea = new Tarea(req.body);
+        await tarea.save();
+        await tarea.populate('usuario', 'nombre email');
+        res.status(201).json(tarea);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Marcar como completada
+router.patch('/:id/completar', async (req, res) => {
+    try {
+        const tarea = await Tarea.findByIdAndUpdate(
+            req.params.id,
+            { completada: true },
+            { new: true }
+        );
+        if (!tarea) return res.status(404).json({ error: 'Tarea no encontrada' });
+        res.json(tarea);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Estadísticas de tareas
+router.get('/estadisticas', async (req, res) => {
+    try {
+        const stats = await Tarea.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: 1 },
+                    completadas: { $sum: { $cond: ['$completada', 1, 0] } },
+                    pendientes: { $sum: { $cond: ['$completada', 0, 1] } }
+                }
+            }
+        ]);
+        
+        const porPrioridad = await Tarea.aggregate([
+            { $group: { _id: '$prioridad', count: { $sum: 1 } } }
+        ]);
+        
+        res.json({
+            general: stats[0],
+            porPrioridad
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+module.exports = router;
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 23: Mejores Prácticas -->
+        <div class="slide" data-slide="23">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-check-double"></i> Mejores Prácticas</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-success mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-shield-alt"></i> Seguridad</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><i class="fas fa-check text-success"></i> Usar variables de entorno (.env)</li>
+                                <li><i class="fas fa-check text-success"></i> Validar todas las entradas</li>
+                                <li><i class="fas fa-check text-success"></i> Prevenir inyección SQL/NoSQL</li>
+                                <li><i class="fas fa-check text-success"></i> Implementar autenticación (JWT)</li>
+                                <li><i class="fas fa-check text-success"></i> Usar HTTPS en producción</li>
+                                <li><i class="fas fa-check text-success"></i> Limitar rate de requests</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-warning mb-3">
+                        <div class="card-header bg-warning">
+                            <h5><i class="fas fa-tachometer-alt"></i> Rendimiento</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><i class="fas fa-bolt text-warning"></i> Crear índices apropiados</li>
+                                <li><i class="fas fa-bolt text-warning"></i> Usar paginación</li>
+                                <li><i class="fas fa-bolt text-warning"></i> Implementar caché (Redis)</li>
+                                <li><i class="fas fa-bolt text-warning"></i> Optimizar queries complejas</li>
+                                <li><i class="fas fa-bolt text-warning"></i> Connection pooling</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card border-info mb-3">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="fas fa-code"></i> Código Limpio</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><i class="fas fa-code-branch text-info"></i> Separar lógica en capas (MVC)</li>
+                                <li><i class="fas fa-code-branch text-info"></i> Manejo de errores consistente</li>
+                                <li><i class="fas fa-code-branch text-info"></i> Usar async/await</li>
+                                <li><i class="fas fa-code-branch text-info"></i> Documentar el código</li>
+                                <li><i class="fas fa-code-branch text-info"></i> Testing (Jest, Mocha)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="fas fa-database"></i> Bases de Datos</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><i class="fas fa-save text-primary"></i> Backups automáticos</li>
+                                <li><i class="fas fa-save text-primary"></i> Monitoreo de rendimiento</li>
+                                <li><i class="fas fa-save text-primary"></i> Versionado de esquemas</li>
+                                <li><i class="fas fa-save text-primary"></i> Normalización apropiada (SQL)</li>
+                                <li><i class="fas fa-save text-primary"></i> Desnormalización estratégica (NoSQL)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 24: Quiz Final -->
+        <div class="slide" data-slide="24">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-graduation-cap"></i> Quiz Final</h2>
+            </div>
+            <h4 class="mb-4">¿Cuál es la mejor elección de base de datos para un sistema de recomendaciones basado en relaciones entre usuarios?</h4>
+            <div class="quiz-container">
+                <div class="quiz-option" onclick="selectQuizOption(this, 24, 'A', false)">
+                    <strong>A)</strong> SQLite
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 24, 'B', false)">
+                    <strong>B)</strong> MongoDB
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 24, 'C', true)">
+                    <strong>C)</strong> Base de datos de grafos (Neo4j)
+                </div>
+                <div class="quiz-option" onclick="selectQuizOption(this, 24, 'D', false)">
+                    <strong>D)</strong> Redis
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn btn-custom" id="nextBtn24" disabled onclick="showResults()">
+                    Ver Resultados <i class="fas fa-chart-pie"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 25: Resultados -->
+        <div class="slide" data-slide="25">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-trophy"></i> ¡Felicitaciones!</h2>
+            </div>
+            <div class="text-center mb-4">
+                <h3>Has completado el curso</h3>
+                <p class="lead">Aquí está tu rendimiento:</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="resultsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="fas fa-chart-bar"></i> Estadísticas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h4><i class="fas fa-check-circle text-success"></i> Respuestas Correctas: <span id="correctCount">0</span></h4>
+                            </div>
+                            <div class="mb-3">
+                                <h4><i class="fas fa-times-circle text-danger"></i> Respuestas Incorrectas: <span id="incorrectCount">0</span></h4>
+                            </div>
+                            <div class="mb-3">
+                                <h4><i class="fas fa-percentage text-info"></i> Porcentaje: <span id="percentage">0</span>%</h4>
+                            </div>
+                            <div class="alert alert-success mt-4">
+                                <h5 id="resultMessage"><i class="fas fa-star"></i> ¡Excelente trabajo!</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <button class="btn btn-custom btn-lg" onclick="generateCertificate()">
+                    <i class="fas fa-certificate"></i> Generar Mi Certificado
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 25;
+        const quizAnswers = {};
+        let studentName = '';
+        let studentId = '';
+        
+        function updateProgress() {
+            document.getElementById('currentSlide').textContent = currentSlide;
+        }
+        
+        function startPresentation() {
+            requestName();
+        }
+        
+        function requestName() {
+            Swal.fire({
+                title: '¡Bienvenido!',
+                text: 'Por favor, ingresa tu nombre para comenzar:',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'words'
+                },
+                showCancelButton: false,
+                allowOutsideClick: false,
+                confirmButtonText: 'Comenzar',
+                confirmButtonColor: '#667eea',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return '¡Por favor ingresa tu nombre!';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    studentName = result.value;
+                    studentId = generateId();
+                    Swal.fire({
+                        title: `¡Hola, ${studentName}!`,
+                        text: 'Tu ID de estudiante: ' + studentId,
+                        icon: 'success',
+                        confirmButtonColor: '#667eea',
+                        timer: 3000
+                    });
+                    nextSlide();
+                }
+            });
+        }
+        
+        function generateId() {
+            let id = '';
+            for (let i = 0; i < 15; i++) {
+                id += Math.floor(Math.random() * 10);
+            }
+            return id;
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                document.querySelector(`[data-slide="${currentSlide}"]`).classList.remove('active');
+                currentSlide++;
+                const nextSlideElement = document.querySelector(`[data-slide="${currentSlide}"]`);
+                nextSlideElement.classList.add('active');
+                nextSlideElement.classList.add('animate__animated', 'animate__fadeIn');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+        
+        function previousSlide() {
+            if (currentSlide > 1) {
+                document.querySelector(`[data-slide="${currentSlide}"]`).classList.remove('active');
+                currentSlide--;
+                const prevSlideElement = document.querySelector(`[data-slide="${currentSlide}"]`);
+                prevSlideElement.classList.add('active');
+                prevSlideElement.classList.add('animate__animated', 'animate__fadeIn');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+        
+        function selectQuizOption(element, slideNumber, option, isCorrect) {
+            // Remover selección previa
+            const container = element.parentElement;
+            container.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Marcar como seleccionado
+            element.classList.add('selected');
+            
+            // Guardar respuesta
+            quizAnswers[slideNumber] = isCorrect;
+            
+            // Habilitar botón siguiente
+            const nextBtn = document.getElementById(`nextBtn${slideNumber}`);
+            nextBtn.disabled = false;
+            
+            // Mostrar feedback
+            if (isCorrect) {
+                Swal.fire({
+                    title: '¡Correcto!',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: '¡Incorrecto!',
+                    text: 'Revisa el contenido anterior',
+                    icon: 'error',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }
+        
+        function showResults() {
+            nextSlide();
+            calculateResults();
+        }
+        
+        function calculateResults() {
+            const totalQuestions = Object.keys(quizAnswers).length;
+            const correctAnswers = Object.values(quizAnswers).filter(answer => answer === true).length;
+            const incorrectAnswers = totalQuestions - correctAnswers;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            
+            document.getElementById('correctCount').textContent = correctAnswers;
+            document.getElementById('incorrectCount').textContent = incorrectAnswers;
+            document.getElementById('percentage').textContent = percentage;
+            
+            let message = '';
+            if (percentage >= 80) {
+                message = '¡Excelente trabajo! Dominas el tema.';
+            } else if (percentage >= 60) {
+                message = '¡Buen trabajo! Pero puedes mejorar.';
+            } else {
+                message = 'Te recomendamos repasar el material.';
+            }
+            document.getElementById('resultMessage').innerHTML = `<i class="fas fa-star"></i> ${message}`;
+            
+            // Crear gráfico
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Correctas', 'Incorrectas'],
+                    datasets: [{
+                        data: [correctAnswers, incorrectAnswers],
+                        backgroundColor: ['#4caf50', '#f44336'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Resultados del Quiz',
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function generateCertificate() {
+            const percentage = parseInt(document.getElementById('percentage').textContent);
+            const currentDate = new Date().toLocaleDateString('es-ES');
+            
+            try {
+                // Enviar datos a la API
+                await fetch('https://aprobalo.com/calificaciones', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: studentId,
+                        nombre: studentName,
+                        curso: 'Bases de Datos y Persistencia',
+                        fecha_emision: currentDate,
+                        calificacion: percentage
+                    })
+                });
+                
+                // Generar PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // Fondo y borde
+                doc.setFillColor(240, 240, 255);
+                doc.rect(0, 0, 297, 210, 'F');
+                doc.setDrawColor(102, 126, 234);
+                doc.setLineWidth(3);
+                doc.rect(10, 10, 277, 190);
+                
+                // Título
+                doc.setFontSize(40);
+                doc.setTextColor(102, 126, 234);
+                doc.text('CERTIFICADO DE PARTICIPACIÓN', 148.5, 40, { align: 'center' });
+                
+                // Subtítulo
+                doc.setFontSize(16);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Se otorga a:', 148.5, 60, { align: 'center' });
+                
+                // Nombre del estudiante
+                doc.setFontSize(32);
+                doc.setTextColor(0, 0, 0);
+                doc.text(studentName, 148.5, 80, { align: 'center' });
+                
+                // Descripción del curso
+                doc.setFontSize(14);
+                doc.setTextColor(80, 80, 80);
+                doc.text('Por haber completado exitosamente el curso:', 148.5, 100, { align: 'center' });
+                doc.setFontSize(20);
+                doc.setTextColor(102, 126, 234);
+                doc.text('Bases de Datos y Persistencia', 148.5, 115, { align: 'center' });
+                
+                // Calificación
+                doc.setFontSize(14);
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Calificación obtenida: ${percentage}%`, 148.5, 130, { align: 'center' });
+                
+                // Generar QR
+                const qrUrl = `https://aprobalo.com/calificaciones/${studentId}`;
+                const qrCanvas = document.createElement('canvas');
+                const qr = new QRCode(qrCanvas, {
+                    text: qrUrl,
+                    width: 128,
+                    height: 128
+                });
+                
+                // Esperar a que se genere el QR
+                setTimeout(() => {
+                    const qrImage = qrCanvas.toDataURL();
+                    doc.addImage(qrImage, 'PNG', 230, 150, 30, 30);
+                    
+                    // Texto del QR
+                    doc.setFontSize(10);
+                    doc.text('Verificar certificado', 245, 185, { align: 'center' });
+                    
+                    // Fecha e ID
+                    doc.setFontSize(12);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Fecha de emisión: ${currentDate}`, 30, 185);
+                    doc.text(`ID: ${studentId}`, 30, 190);
+                    
+                    // Descargar PDF
+                    doc.save(`Certificado_${studentName.replace(/\s+/g, '_')}_${studentId}.pdf`);
+                    
+                    Swal.fire({
+                        title: '¡Certificado Generado!',
+                        html: `
+                            <p>Tu certificado ha sido descargado exitosamente.</p>
+                            <p><strong>ID:</strong> ${studentId}</p>
+                            <p>Puedes verificarlo en: <a href="${qrUrl}" target="_blank">${qrUrl}</a></p>
+                        `,
+                        icon: 'success',
+                        confirmButtonColor: '#667eea'
+                    });
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al generar el certificado. Por favor, intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        }
+        
+        // Modificar el botón de certificado para llamar a la función correcta
+        document.addEventListener('DOMContentLoaded', function() {
+            // El botón ya tiene onclick en el HTML, pero lo podemos reforzar aquí si es necesario
+        });
+        
+        // Inicializar
+        updateProgress();
+    </script>
+</body>
+</html>

@@ -1960,10 +1960,21 @@ module.exports = router;
             const percentage = parseInt(document.getElementById('percentage').textContent);
             const currentDate = new Date().toLocaleDateString('es-ES');
             
+            // Mostrar indicador de carga
+            Swal.fire({
+                title: 'Generando certificado...',
+                html: 'Por favor espera un momento',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Intentar enviar datos a la API (no bloqueante)
             try {
-                // Enviar datos a la API
                 await fetch('https://aprobalo.com/calificaciones', {
                     method: 'POST',
+                    mode: 'no-cors', // Usar no-cors para evitar bloqueo por CORS
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -1975,8 +1986,14 @@ module.exports = router;
                         calificacion: percentage
                     })
                 });
-                
-                // Generar PDF
+                console.log('Datos enviados a la API exitosamente');
+            } catch (error) {
+                // Silenciosamente capturar el error y continuar
+                console.log('Nota: No se pudo conectar con el servidor de calificaciones, pero el certificado se generará localmente.');
+            }
+            
+            // Generar PDF (siempre se ejecuta, independiente del fetch)
+            try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({
                     orientation: 'landscape',
@@ -1984,85 +2001,144 @@ module.exports = router;
                     format: 'a4'
                 });
                 
-                // Fondo y borde
+                // Fondo y borde decorativo
                 doc.setFillColor(240, 240, 255);
                 doc.rect(0, 0, 297, 210, 'F');
+                
+                // Borde principal
                 doc.setDrawColor(102, 126, 234);
                 doc.setLineWidth(3);
                 doc.rect(10, 10, 277, 190);
                 
+                // Borde interno
+                doc.setLineWidth(1);
+                doc.setDrawColor(118, 75, 162);
+                doc.rect(15, 15, 267, 180);
+                
                 // Título
                 doc.setFontSize(40);
+                doc.setFont(undefined, 'bold');
                 doc.setTextColor(102, 126, 234);
-                doc.text('CERTIFICADO DE PARTICIPACIÓN', 148.5, 40, { align: 'center' });
+                doc.text('CERTIFICADO DE PARTICIPACIÓN', 148.5, 45, { align: 'center' });
+                
+                // Línea decorativa
+                doc.setDrawColor(102, 126, 234);
+                doc.setLineWidth(0.5);
+                doc.line(50, 52, 247, 52);
                 
                 // Subtítulo
                 doc.setFontSize(16);
+                doc.setFont(undefined, 'normal');
                 doc.setTextColor(100, 100, 100);
-                doc.text('Se otorga a:', 148.5, 60, { align: 'center' });
+                doc.text('Se otorga a:', 148.5, 65, { align: 'center' });
                 
                 // Nombre del estudiante
                 doc.setFontSize(32);
+                doc.setFont(undefined, 'bold');
                 doc.setTextColor(0, 0, 0);
-                doc.text(studentName, 148.5, 80, { align: 'center' });
+                doc.text(studentName, 148.5, 85, { align: 'center' });
+                
+                // Línea bajo el nombre
+                doc.setDrawColor(180, 180, 180);
+                doc.setLineWidth(0.3);
+                doc.line(70, 90, 227, 90);
                 
                 // Descripción del curso
                 doc.setFontSize(14);
+                doc.setFont(undefined, 'normal');
                 doc.setTextColor(80, 80, 80);
-                doc.text('Por haber completado exitosamente el curso:', 148.5, 100, { align: 'center' });
-                doc.setFontSize(20);
-                doc.setTextColor(102, 126, 234);
-                doc.text('Bases de Datos y Persistencia', 148.5, 115, { align: 'center' });
+                doc.text('Por haber completado exitosamente el curso:', 148.5, 105, { align: 'center' });
                 
-                // Calificación
-                doc.setFontSize(14);
+                doc.setFontSize(22);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(102, 126, 234);
+                doc.text('Bases de Datos y Persistencia', 148.5, 120, { align: 'center' });
+                
+                // Calificación con badge
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'normal');
                 doc.setTextColor(80, 80, 80);
-                doc.text(`Calificación obtenida: ${percentage}%`, 148.5, 130, { align: 'center' });
+                doc.text('Calificación obtenida:', 148.5, 140, { align: 'center' });
+                
+                // Badge de calificación
+                let badgeColor = percentage >= 80 ? [76, 175, 80] : percentage >= 60 ? [255, 193, 7] : [244, 67, 54];
+                doc.setFillColor(...badgeColor);
+                doc.roundedRect(128, 145, 41, 15, 3, 3, 'F');
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(255, 255, 255);
+                doc.text(`${percentage}%`, 148.5, 155, { align: 'center' });
                 
                 // Generar QR
                 const qrUrl = `https://aprobalo.com/calificaciones/${studentId}`;
                 const qrCanvas = document.createElement('canvas');
                 const qr = new QRCode(qrCanvas, {
                     text: qrUrl,
-                    width: 128,
-                    height: 128
+                    width: 150,
+                    height: 150
                 });
                 
                 // Esperar a que se genere el QR
                 setTimeout(() => {
                     const qrImage = qrCanvas.toDataURL();
-                    doc.addImage(qrImage, 'PNG', 230, 150, 30, 30);
+                    
+                    // QR Code con borde
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(225, 145, 40, 40, 2, 2, 'F');
+                    doc.addImage(qrImage, 'PNG', 227, 147, 36, 36);
                     
                     // Texto del QR
-                    doc.setFontSize(10);
-                    doc.text('Verificar certificado', 245, 185, { align: 'center' });
-                    
-                    // Fecha e ID
-                    doc.setFontSize(12);
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
                     doc.setTextColor(100, 100, 100);
-                    doc.text(`Fecha de emisión: ${currentDate}`, 30, 185);
-                    doc.text(`ID: ${studentId}`, 30, 190);
+                    doc.text('Escanea para verificar', 245, 190, { align: 'center' });
+                    
+                    // Información adicional
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Fecha de emisión: ${currentDate}`, 25, 185);
+                    doc.text(`Certificado ID: ${studentId}`, 25, 192);
+                    
+                    // Firma/Sello
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(102, 126, 234);
+                    doc.text('Curso de Bases de Datos - Nivel Profesional', 148.5, 175, { align: 'center' });
                     
                     // Descargar PDF
                     doc.save(`Certificado_${studentName.replace(/\s+/g, '_')}_${studentId}.pdf`);
                     
+                    // Cerrar loading y mostrar éxito
                     Swal.fire({
                         title: '¡Certificado Generado!',
                         html: `
-                            <p>Tu certificado ha sido descargado exitosamente.</p>
-                            <p><strong>ID:</strong> ${studentId}</p>
-                            <p>Puedes verificarlo en: <a href="${qrUrl}" target="_blank">${qrUrl}</a></p>
+                            <div style="text-align: center;">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                <p class="lead">Tu certificado ha sido descargado exitosamente.</p>
+                                <hr>
+                                <p><strong>Nombre:</strong> ${studentName}</p>
+                                <p><strong>ID de Certificado:</strong> ${studentId}</p>
+                                <p><strong>Calificación:</strong> ${percentage}%</p>
+                                <hr>
+                                <p class="text-muted small">
+                                    <i class="fas fa-info-circle"></i> Puedes verificar tu certificado escaneando el código QR
+                                    <br>o visitando: <a href="${qrUrl}" target="_blank" class="text-primary">${qrUrl}</a>
+                                </p>
+                            </div>
                         `,
                         icon: 'success',
-                        confirmButtonColor: '#667eea'
+                        confirmButtonText: '¡Perfecto!',
+                        confirmButtonColor: '#667eea',
+                        width: 600
                     });
                 }, 500);
                 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error al generar PDF:', error);
                 Swal.fire({
                     title: 'Error',
-                    text: 'Hubo un problema al generar el certificado. Por favor, intenta nuevamente.',
+                    text: 'Hubo un problema al generar el certificado PDF. Por favor, intenta nuevamente.',
                     icon: 'error',
                     confirmButtonColor: '#667eea'
                 });

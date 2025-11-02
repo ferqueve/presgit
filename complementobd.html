@@ -2020,10 +2020,10 @@
         // Intentar enviar datos a la API (no bloqueante)
         // Intentar enviar datos a la API
         try {
-          const response = await fetch("https://aprobalo.com/calificaciones", {
-            // ✅ sin espacios
+          const response = await fetch("https://aprobalo.com/calificaciones.php", {
+         
             method: "POST",
-            // ❌ NO uses mode: 'no-cors'
+            
             headers: {
               "Content-Type": "application/json",
             },
@@ -2040,10 +2040,10 @@
             throw new Error(`Error ${response.status}: ${response.statusText}`);
           }
 
-          console.log("✅ Datos enviados a la API exitosamente");
+          console.log(" Datos enviados a la API exitosamente");
         } catch (error) {
           console.warn(
-            "⚠️ No se pudo registrar el certificado en el servidor:",
+            " No se pudo registrar el certificado en el servidor:",
             error
           );
           console.log(
@@ -2063,7 +2063,10 @@
           // Fondo y borde decorativo
           doc.setFillColor(240, 240, 255);
           doc.rect(0, 0, 297, 210, "F");
-
+          //  Borde dorado exterior
+          doc.setDrawColor(212, 175, 55); // dorado
+          doc.setLineWidth(6);
+          doc.rect(5, 5, 287, 200); 
           // Borde principal
           doc.setDrawColor(102, 126, 234);
           doc.setLineWidth(3);

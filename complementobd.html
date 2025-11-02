@@ -1966,7 +1966,7 @@ module.exports = router;
             
             // Intentar enviar datos a la API (no bloqueante)
             try {
-                await fetch('https://aprobalo.com/calificaciones', {
+                await fetch('https://aprobalo.com/guardar_certificado.php', {
                     method: 'POST',
                     mode: 'no-cors', // Usar no-cors para evitar bloqueo por CORS
                     headers: {
@@ -2064,7 +2064,7 @@ module.exports = router;
                 doc.text(`${percentage}%`, 148.5, 155, { align: 'center' });
                 
                 // Generar QR usando API
-                const qrUrl = `https://aprobalo.com/calificaciones/${studentId}`;
+                const qrUrl = `https://aprobalo.com/ver.php?id=${studentId}`;
                 const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrUrl)}`;
                 
                 // Cargar la imagen del QR
@@ -2103,17 +2103,26 @@ module.exports = router;
                         title: '¡Certificado Generado!',
                         html: `
                             <div style="text-align: center;">
-                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                                <p class="lead">Tu certificado ha sido descargado exitosamente.</p>
-                                <hr>
-                                <p><strong>Nombre:</strong> ${studentName}</p>
-                                <p><strong>ID de Certificado:</strong> ${studentId}</p>
-                                <p><strong>Calificación:</strong> ${percentage}%</p>
-                                <hr>
-                                <p class="text-muted small">
-                                    <i class="fas fa-info-circle"></i> Puedes verificar tu certificado escaneando el código QR
-                                    <br>o visitando: <a href="${qrUrl}" target="_blank" class="text-primary">${qrUrl}</a>
-                                </p>
+                                <i class="fas fa-check-circle fa-3x text-success mb-3" style="display: block; margin-bottom: 20px;"></i>
+                                <p class="lead" style="font-size: 1.1rem; margin-bottom: 20px;">Tu certificado ha sido descargado exitosamente.</p>
+                                <hr style="margin: 20px 0;">
+                                <div style="margin: 15px 0;">
+                                    <p style="margin: 8px 0;"><strong>Nombre:</strong> ${studentName}</p>
+                                    <p style="margin: 8px 0;"><strong>ID de Certificado:</strong> ${studentId}</p>
+                                    <p style="margin: 8px 0;"><strong>Calificación:</strong> ${percentage}%</p>
+                                </div>
+                                <hr style="margin: 20px 0;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">
+                                        <i class="fas fa-qrcode"></i> <strong>Verificación del Certificado:</strong>
+                                    </p>
+                                    <p style="margin: 10px 0; font-size: 0.85rem; color: #666;">
+                                        Escanea el código QR del certificado o visita:
+                                    </p>
+                                    <a href="${qrUrl}" target="_blank" style="color: #667eea; text-decoration: none; font-weight: bold; word-break: break-all; display: inline-block; margin-top: 5px;">
+                                        ${qrUrl}
+                                    </a>
+                                </div>
                             </div>
                         `,
                         icon: 'success',
@@ -2157,17 +2166,26 @@ module.exports = router;
                         title: '¡Certificado Generado!',
                         html: `
                             <div style="text-align: center;">
-                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                                <p class="lead">Tu certificado ha sido descargado exitosamente.</p>
-                                <hr>
-                                <p><strong>Nombre:</strong> ${studentName}</p>
-                                <p><strong>ID de Certificado:</strong> ${studentId}</p>
-                                <p><strong>Calificación:</strong> ${percentage}%</p>
-                                <hr>
-                                <p class="text-muted small">
-                                    <i class="fas fa-info-circle"></i> Puedes verificar tu certificado visitando:
-                                    <br><a href="${qrUrl}" target="_blank" class="text-primary">${qrUrl}</a>
-                                </p>
+                                <i class="fas fa-check-circle fa-3x text-success mb-3" style="display: block; margin-bottom: 20px;"></i>
+                                <p class="lead" style="font-size: 1.1rem; margin-bottom: 20px;">Tu certificado ha sido descargado exitosamente.</p>
+                                <hr style="margin: 20px 0;">
+                                <div style="margin: 15px 0;">
+                                    <p style="margin: 8px 0;"><strong>Nombre:</strong> ${studentName}</p>
+                                    <p style="margin: 8px 0;"><strong>ID de Certificado:</strong> ${studentId}</p>
+                                    <p style="margin: 8px 0;"><strong>Calificación:</strong> ${percentage}%</p>
+                                </div>
+                                <hr style="margin: 20px 0;">
+                                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffc107;">
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">
+                                        <i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i> <strong>Nota:</strong> El código QR no se pudo generar
+                                    </p>
+                                    <p style="margin: 10px 0; font-size: 0.85rem; color: #666;">
+                                        Puedes verificar tu certificado visitando:
+                                    </p>
+                                    <a href="${qrUrl}" target="_blank" style="color: #667eea; text-decoration: none; font-weight: bold; word-break: break-all; display: inline-block; margin-top: 5px;">
+                                        ${qrUrl}
+                                    </a>
+                                </div>
                             </div>
                         `,
                         icon: 'success',

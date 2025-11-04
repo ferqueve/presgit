@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Interactivo - DDL y DML</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- SQL.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px auto;
+            max-width: 1200px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+        
+        .icon-box {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+        
+        .icon-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .icon-box i {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-block .keyword {
+            color: #66d9ef;
+            font-weight: bold;
+        }
+        
+        .code-block .string {
+            color: #a6e22e;
+        }
+        
+        .code-block .comment {
+            color: #75715e;
+            font-style: italic;
+        }
+        
+        .sql-editor {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 0;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .sql-editor-header {
+            background: #323232;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sql-editor-title {
+            color: white;
+            margin: 0;
+            font-size: 1rem;
+        }
+        
+        .sql-editor textarea {
+            width: 100%;
+            min-height: 150px;
+            background: #1e1e1e;
+            color: #f8f8f2;
+            border: none;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            border-radius: 0;
+        }
+        
+        .sql-editor textarea:focus {
+            outline: none;
+            background: #252525;
+        }
+        
+        .sql-editor-footer {
+            background: #323232;
+            padding: 15px 20px;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-execute {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-execute:hover {
+            background: #229954;
+            transform: scale(1.05);
+        }
+        
+        .btn-clear {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-clear:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+        
+        .btn-load-example {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin: 5px;
+        }
+        
+        .results-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .results-container.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .results-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .results-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .results-table th {
+            background: var(--secondary-color);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .results-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .result-info {
+            background: #e8f4f8;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .result-error {
+            background: #ffe5e5;
+            color: var(--accent-color);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .result-success {
+            background: #e8f8f0;
+            color: var(--success-color);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .model-diagram {
+            background: #f8f9fa;
+            border-left: 4px solid var(--secondary-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .btn-question {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-question:hover {
+            background: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: var(--accent-color);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+        
+        .command-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .command-box h5 {
+            margin-bottom: 10px;
+        }
+        
+        .syntax-box {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        
+        .exercise-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .exercise-box h5 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .badge-ddl {
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 5px;
+        }
+        
+        .badge-dml {
+            background: #27ae60;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 5px;
+        }
+        
+        .db-schema {
+            background: white;
+            border: 2px solid var(--secondary-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .table-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: white;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-indicator" id="progressBar"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#inicio">
+                <i class="fas fa-code"></i> SQL Interactivo
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#introduccion">Introducción</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#ddl">DDL</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dml">DML</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#practicas">Prácticas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#ejercicios">Ejercicios</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div style="height: 80px;"></div>
+    
+    <!-- Sección de Inicio -->
+    <section id="inicio" class="section animate__animated animate__fadeIn">
+        <div class="text-center">
+            <i class="fas fa-database fa-5x text-primary mb-4 animate__animated animate__bounceIn"></i>
+            <h1 class="display-3 fw-bold animate__animated animate__fadeInDown">SQL Interactivo</h1>
+            <p class="lead animate__animated animate__fadeInUp">Aprende SQL con práctica en tiempo real</p>
+            <p class="text-muted">DDL (Lenguaje de Definición de Datos) y DML (Lenguaje de Manipulación de Datos)</p>
+            <button class="btn btn-question mt-4" onclick="iniciarPresentacion()">
+                <i class="fas fa-play"></i> Comenzar Tutorial
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 1: Introducción a SQL -->
+    <section id="introduccion" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-info-circle"></i> ¿Qué es SQL?
+        </h2>
+        
+        <div class="model-diagram">
+            <h4>SQL - Structured Query Language</h4>
+            <p><span class="highlight">SQL</span> es el lenguaje estándar para interactuar con bases de datos relacionales. Permite crear, modificar, consultar y gestionar datos de forma eficiente.</p>
+            <p><strong>Características:</strong></p>
+            <ul>
+                <li>Lenguaje declarativo (dices QUÉ quieres, no CÓMO obtenerlo)</li>
+                <li>Estándar internacional (ISO/IEC 9075)</li>
+                <li>Independiente del SGBD (con ligeras variaciones)</li>
+                <li>Potente y flexible</li>
+            </ul>
+        </div>
+        
+        <h4 class="mt-4"><i class="fas fa-layer-group"></i> Categorías de SQL</h4>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="icon-box">
+                    <i class="fas fa-hammer" style="color: #3498db;"></i>
+                    <h5>DDL</h5>
+                    <span class="badge-ddl">Data Definition Language</span>
+                    <p class="mt-3">Define la estructura de la base de datos</p>
+                    <small>CREATE, ALTER, DROP, TRUNCATE</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="icon-box">
+                    <i class="fas fa-edit" style="color: #27ae60;"></i>
+                    <h5>DML</h5>
+                    <span class="badge-dml">Data Manipulation Language</span>
+                    <p class="mt-3">Manipula los datos</p>
+                    <small>SELECT, INSERT, UPDATE, DELETE</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="icon-box">
+                    <i class="fas fa-shield-alt" style="color: #e74c3c;"></i>
+                    <h5>DCL</h5>
+                    <span class="badge" style="background: #e74c3c;">Data Control Language</span>
+                    <p class="mt-3">Controla permisos</p>
+                    <small>GRANT, REVOKE</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta1()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 2: DDL -->
+    <section id="ddl" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-hammer"></i> DDL - Data Definition Language
+        </h2>
+        
+        <div class="model-diagram">
+            <h4>¿Qué es DDL?</h4>
+            <p><span class="highlight">DDL</span> son los comandos que definen y modifican la estructura de la base de datos: tablas, índices, vistas, etc.</p>
+        </div>
+        
+        <!-- CREATE -->
+        <div class="command-box">
+            <h5><i class="fas fa-plus-circle"></i> CREATE - Crear Estructuras</h5>
+            <p>Crea nuevas tablas, bases de datos, índices o vistas.</p>
+            
+            <div class="syntax-box">
+<strong>Sintaxis:</strong>
+CREATE TABLE nombre_tabla (
+    columna1 tipo_dato [restricciones],
+    columna2 tipo_dato [restricciones],
+    ...
+);
+            </div>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Crear tabla Estudiantes</span>
+<span class="keyword">CREATE TABLE</span> Estudiantes (
+    id_estudiante <span class="keyword">INT PRIMARY KEY AUTO_INCREMENT</span>,
+    nombre <span class="keyword">VARCHAR</span>(50) <span class="keyword">NOT NULL</span>,
+    apellido <span class="keyword">VARCHAR</span>(50) <span class="keyword">NOT NULL</span>,
+    email <span class="keyword">VARCHAR</span>(100) <span class="keyword">UNIQUE</span>,
+    fecha_nacimiento <span class="keyword">DATE</span>,
+    promedio <span class="keyword">DECIMAL</span>(4,2) <span class="keyword">CHECK</span> (promedio >= 0 <span class="keyword">AND</span> promedio <= 100)
+);
+
+<span class="comment">-- Crear tabla Cursos</span>
+<span class="keyword">CREATE TABLE</span> Cursos (
+    id_curso <span class="keyword">INT PRIMARY KEY AUTO_INCREMENT</span>,
+    nombre <span class="keyword">VARCHAR</span>(100) <span class="keyword">NOT NULL</span>,
+    creditos <span class="keyword">INT DEFAULT</span> 3,
+    id_profesor <span class="keyword">INT</span>,
+    <span class="keyword">FOREIGN KEY</span> (id_profesor) <span class="keyword">REFERENCES</span> Profesores(id_profesor)
+);
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-list"></i> Tipos de Datos Comunes</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="table-card">
+                    <h6>Numéricos</h6>
+                    <ul>
+                        <li><strong>INT:</strong> Enteros (-2147483648 a 2147483647)</li>
+                        <li><strong>DECIMAL(p,s):</strong> Números exactos</li>
+                        <li><strong>FLOAT/DOUBLE:</strong> Números decimales</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="table-card">
+                    <h6>Texto</h6>
+                    <ul>
+                        <li><strong>VARCHAR(n):</strong> Cadena variable hasta n</li>
+                        <li><strong>CHAR(n):</strong> Cadena fija de n caracteres</li>
+                        <li><strong>TEXT:</strong> Texto largo</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="table-card">
+                    <h6>Fecha y Hora</h6>
+                    <ul>
+                        <li><strong>DATE:</strong> Fecha (YYYY-MM-DD)</li>
+                        <li><strong>TIME:</strong> Hora (HH:MM:SS)</li>
+                        <li><strong>DATETIME:</strong> Fecha y hora</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="table-card">
+                    <h6>Otros</h6>
+                    <ul>
+                        <li><strong>BOOLEAN:</strong> Verdadero/Falso</li>
+                        <li><strong>BLOB:</strong> Datos binarios</li>
+                        <li><strong>JSON:</strong> Datos JSON</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ALTER -->
+        <div class="command-box mt-4">
+            <h5><i class="fas fa-wrench"></i> ALTER - Modificar Estructuras</h5>
+            <p>Modifica la estructura de una tabla existente.</p>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Agregar columna</span>
+<span class="keyword">ALTER TABLE</span> Estudiantes 
+<span class="keyword">ADD</span> telefono <span class="keyword">VARCHAR</span>(15);
+
+<span class="comment">-- Modificar columna</span>
+<span class="keyword">ALTER TABLE</span> Estudiantes 
+<span class="keyword">MODIFY</span> email <span class="keyword">VARCHAR</span>(150);
+
+<span class="comment">-- Eliminar columna</span>
+<span class="keyword">ALTER TABLE</span> Estudiantes 
+<span class="keyword">DROP COLUMN</span> telefono;
+
+<span class="comment">-- Agregar clave foránea</span>
+<span class="keyword">ALTER TABLE</span> Inscripciones 
+<span class="keyword">ADD FOREIGN KEY</span> (id_estudiante) <span class="keyword">REFERENCES</span> Estudiantes(id_estudiante);
+        </div>
+        
+        <!-- DROP -->
+        <div class="command-box mt-4">
+            <h5><i class="fas fa-trash-alt"></i> DROP - Eliminar Estructuras</h5>
+            <p>Elimina permanentemente tablas, bases de datos o índices.</p>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Eliminar tabla (¡CUIDADO! No se puede deshacer)</span>
+<span class="keyword">DROP TABLE</span> Estudiantes;
+
+<span class="comment">-- Eliminar tabla si existe</span>
+<span class="keyword">DROP TABLE IF EXISTS</span> Estudiantes;
+
+<span class="comment">-- Eliminar base de datos</span>
+<span class="keyword">DROP DATABASE</span> universidad;
+        </div>
+        
+        <!-- TRUNCATE -->
+        <div class="command-box mt-4">
+            <h5><i class="fas fa-eraser"></i> TRUNCATE - Vaciar Tabla</h5>
+            <p>Elimina todos los registros de una tabla pero mantiene su estructura.</p>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Vaciar tabla (más rápido que DELETE sin WHERE)</span>
+<span class="keyword">TRUNCATE TABLE</span> Estudiantes;
+
+<span class="comment">-- Diferencia con DELETE:</span>
+<span class="comment">-- TRUNCATE: Rápido, no se puede hacer rollback, reinicia AUTO_INCREMENT</span>
+<span class="comment">-- DELETE: Más lento, se puede hacer rollback, mantiene AUTO_INCREMENT</span>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta2()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 3: DML -->
+    <section id="dml" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-edit"></i> DML - Data Manipulation Language
+        </h2>
+        
+        <div class="model-diagram">
+            <h4>¿Qué es DML?</h4>
+            <p><span class="highlight">DML</span> son los comandos para manipular datos: insertar, consultar, actualizar y eliminar registros.</p>
+        </div>
+        
+        <!-- INSERT -->
+        <div class="command-box">
+            <h5><i class="fas fa-plus"></i> INSERT - Insertar Datos</h5>
+            <p>Agrega nuevos registros a una tabla.</p>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Insertar un registro</span>
+<span class="keyword">INSERT INTO</span> Estudiantes (nombre, apellido, email, fecha_nacimiento, promedio)
+<span class="keyword">VALUES</span> (<span class="string">'Juan'</span>, <span class="string">'Pérez'</span>, <span class="string">'juan@email.com'</span>, <span class="string">'2000-05-15'</span>, 85.5);
+
+<span class="comment">-- Insertar múltiples registros</span>
+<span class="keyword">INSERT INTO</span> Estudiantes (nombre, apellido, email)
+<span class="keyword">VALUES</span> 
+    (<span class="string">'María'</span>, <span class="string">'López'</span>, <span class="string">'maria@email.com'</span>),
+    (<span class="string">'Carlos'</span>, <span class="string">'Ruiz'</span>, <span class="string">'carlos@email.com'</span>),
+    (<span class="string">'Ana'</span>, <span class="string">'García'</span>, <span class="string">'ana@email.com'</span>);
+
+<span class="comment">-- Insertar sin especificar columnas (debe coincidir el orden)</span>
+<span class="keyword">INSERT INTO</span> Estudiantes 
+<span class="keyword">VALUES</span> (1, <span class="string">'Pedro'</span>, <span class="string">'Martínez'</span>, <span class="string">'pedro@email.com'</span>, <span class="string">'1999-10-20'</span>, 90.0);
+        </div>
+        
+        <!-- SELECT -->
+        <div class="command-box mt-4">
+            <h5><i class="fas fa-search"></i> SELECT - Consultar Datos</h5>
+            <p>El comando más usado en SQL. Recupera datos de una o más tablas.</p>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Seleccionar todas las columnas</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes;
+
+<span class="comment">-- Seleccionar columnas específicas</span>
+<span class="keyword">SELECT</span> nombre, apellido, email <span class="keyword">FROM</span> Estudiantes;
+
+<span class="comment">-- WHERE: Filtrar resultados</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes 
+<span class="keyword">WHERE</span> promedio >= 80;
+
+<span class="comment">-- Operadores lógicos</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes 
+<span class="keyword">WHERE</span> promedio >= 80 <span class="keyword">AND</span> fecha_nacimiento > <span class="string">'2000-01-01'</span>;
+
+<span class="comment">-- LIKE: Búsqueda de patrones</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes 
+<span class="keyword">WHERE</span> nombre <span class="keyword">LIKE</span> <span class="string">'M%'</span>; <span class="comment">-- Nombres que empiezan con M</span>
+
+<span class="comment">-- IN: Lista de valores</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes 
+<span class="keyword">WHERE</span> nombre <span class="keyword">IN</span> (<span class="string">'Juan'</span>, <span class="string">'María'</span>, <span class="string">'Carlos'</span>);
+
+<span class="comment">-- BETWEEN: Rango de valores</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes 
+<span class="keyword">WHERE</span> promedio <span class="keyword">BETWEEN</span> 70 <span class="keyword">AND</span> 90;
+
+<span class="comment">-- ORDER BY: Ordenar resultados</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes 
+<span class="keyword">ORDER BY</span> promedio <span class="keyword">DESC</span>; <span class="comment">-- DESC = descendente, ASC = ascendente</span>
+
+<span class="comment">-- LIMIT: Limitar número de resultados</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Estudiantes 
+<span class="keyword">ORDER BY</span> promedio <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> 5; <span class="comment">-- Top 5 estudiantes</span>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-calculator"></i> Funciones de Agregación</h5>
+        
+        <div class="code-block">
+<span class="comment">-- COUNT: Contar registros</span>
+<span class="keyword">SELECT COUNT</span>(*) <span class="keyword">AS</span> total_estudiantes <span class="keyword">FROM</span> Estudiantes;
+
+<span class="comment">-- AVG: Promedio</span>
+<span class="keyword">SELECT AVG</span>(promedio) <span class="keyword">AS</span> promedio_general <span class="keyword">FROM</span> Estudiantes;
+
+<span class="comment">-- SUM: Suma</span>
+<span class="keyword">SELECT SUM</span>(creditos) <span class="keyword">FROM</span> Cursos;
+
+<span class="comment">-- MAX y MIN: Máximo y mínimo</span>
+<span class="keyword">SELECT MAX</span>(promedio), <span class="keyword">MIN</span>(promedio) <span class="keyword">FROM</span> Estudiantes;
+
+<span class="comment">-- GROUP BY: Agrupar resultados</span>
+<span class="keyword">SELECT</span> id_curso, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> num_estudiantes
+<span class="keyword">FROM</span> Inscripciones
+<span class="keyword">GROUP BY</span> id_curso;
+
+<span class="comment">-- HAVING: Filtrar grupos (se usa con GROUP BY)</span>
+<span class="keyword">SELECT</span> id_curso, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> num_estudiantes
+<span class="keyword">FROM</span> Inscripciones
+<span class="keyword">GROUP BY</span> id_curso
+<span class="keyword">HAVING COUNT</span>(*) > 10; <span class="comment">-- Cursos con más de 10 estudiantes</span>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-link"></i> JOIN - Unir Tablas</h5>
+        
+        <div class="code-block">
+<span class="comment">-- INNER JOIN: Registros que coinciden en ambas tablas</span>
+<span class="keyword">SELECT</span> e.nombre, e.apellido, c.nombre <span class="keyword">AS</span> curso
+<span class="keyword">FROM</span> Estudiantes e
+<span class="keyword">INNER JOIN</span> Inscripciones i <span class="keyword">ON</span> e.id_estudiante = i.id_estudiante
+<span class="keyword">INNER JOIN</span> Cursos c <span class="keyword">ON</span> i.id_curso = c.id_curso;
+
+<span class="comment">-- LEFT JOIN: Todos los registros de la tabla izquierda</span>
+<span class="keyword">SELECT</span> e.nombre, c.nombre <span class="keyword">AS</span> curso
+<span class="keyword">FROM</span> Estudiantes e
+<span class="keyword">LEFT JOIN</span> Inscripciones i <span class="keyword">ON</span> e.id_estudiante = i.id_estudiante
+<span class="keyword">LEFT JOIN</span> Cursos c <span class="keyword">ON</span> i.id_curso = c.id_curso;
+
+<span class="comment">-- RIGHT JOIN: Todos los registros de la tabla derecha</span>
+<span class="keyword">SELECT</span> e.nombre, c.nombre
+<span class="keyword">FROM</span> Estudiantes e
+<span class="keyword">RIGHT JOIN</span> Cursos c <span class="keyword">ON</span> e.id_estudiante = c.id_curso;
+        </div>
+        
+        <!-- UPDATE -->
+        <div class="command-box mt-4">
+            <h5><i class="fas fa-sync-alt"></i> UPDATE - Actualizar Datos</h5>
+            <p>Modifica registros existentes en una tabla.</p>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Actualizar un registro específico</span>
+<span class="keyword">UPDATE</span> Estudiantes 
+<span class="keyword">SET</span> promedio = 88.5 
+<span class="keyword">WHERE</span> id_estudiante = 1;
+
+<span class="comment">-- Actualizar múltiples columnas</span>
+<span class="keyword">UPDATE</span> Estudiantes 
+<span class="keyword">SET</span> email = <span class="string">'nuevo@email.com'</span>, promedio = 90.0
+<span class="keyword">WHERE</span> id_estudiante = 2;
+
+<span class="comment">-- ¡CUIDADO! Sin WHERE actualiza TODOS los registros</span>
+<span class="keyword">UPDATE</span> Estudiantes 
+<span class="keyword">SET</span> promedio = promedio + 5; <span class="comment">-- Aumenta 5 puntos a todos</span>
+        </div>
+        
+        <!-- DELETE -->
+        <div class="command-box mt-4">
+            <h5><i class="fas fa-trash"></i> DELETE - Eliminar Datos</h5>
+            <p>Elimina registros de una tabla.</p>
+        </div>
+        
+        <div class="code-block">
+<span class="comment">-- Eliminar un registro específico</span>
+<span class="keyword">DELETE FROM</span> Estudiantes 
+<span class="keyword">WHERE</span> id_estudiante = 1;
+
+<span class="comment">-- Eliminar múltiples registros</span>
+<span class="keyword">DELETE FROM</span> Estudiantes 
+<span class="keyword">WHERE</span> promedio < 60;
+
+<span class="comment">-- ¡CUIDADO! Sin WHERE elimina TODOS los registros</span>
+<span class="keyword">DELETE FROM</span> Estudiantes; <span class="comment">-- ¡Elimina todo!</span>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta3()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 4: Editor Interactivo -->
+    <section id="practicas" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-laptop-code"></i> Editor SQL Interactivo
+        </h2>
+        
+        <div class="model-diagram">
+            <h4><i class="fas fa-info-circle"></i> Base de Datos de Ejemplo</h4>
+            <p>Tenemos una base de datos universitaria con las siguientes tablas:</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="db-schema">
+                    <h5><i class="fas fa-table"></i> Tabla: estudiantes</h5>
+                    <ul>
+                        <li><strong>id</strong> (INT) - Primary Key</li>
+                        <li><strong>nombre</strong> (VARCHAR)</li>
+                        <li><strong>apellido</strong> (VARCHAR)</li>
+                        <li><strong>email</strong> (VARCHAR)</li>
+                        <li><strong>edad</strong> (INT)</li>
+                        <li><strong>promedio</strong> (DECIMAL)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="db-schema">
+                    <h5><i class="fas fa-table"></i> Tabla: cursos</h5>
+                    <ul>
+                        <li><strong>id</strong> (INT) - Primary Key</li>
+                        <li><strong>nombre</strong> (VARCHAR)</li>
+                        <li><strong>creditos</strong> (INT)</li>
+                        <li><strong>profesor</strong> (VARCHAR)</li>
+                        <li><strong>cupo</strong> (INT)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="db-schema">
+                    <h5><i class="fas fa-table"></i> Tabla: inscripciones</h5>
+                    <ul>
+                        <li><strong>id</strong> (INT) - Primary Key</li>
+                        <li><strong>estudiante_id</strong> (INT) - FK</li>
+                        <li><strong>curso_id</strong> (INT) - FK</li>
+                        <li><strong>calificacion</strong> (DECIMAL)</li>
+                        <li><strong>fecha</strong> (DATE)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="db-schema">
+                    <h5><i class="fas fa-table"></i> Tabla: profesores</h5>
+                    <ul>
+                        <li><strong>id</strong> (INT) - Primary Key</li>
+                        <li><strong>nombre</strong> (VARCHAR)</li>
+                        <li><strong>departamento</strong> (VARCHAR)</li>
+                        <li><strong>salario</strong> (DECIMAL)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h5><i class="fas fa-file-code"></i> Ejemplos Rápidos</h5>
+            <div class="btn-group flex-wrap" role="group">
+                <button class="btn-load-example" onclick="loadExample(1)">Ver todos los estudiantes</button>
+                <button class="btn-load-example" onclick="loadExample(2)">Estudiantes con promedio > 80</button>
+                <button class="btn-load-example" onclick="loadExample(3)">Promedio general</button>
+                <button class="btn-load-example" onclick="loadExample(4)">Top 3 estudiantes</button>
+                <button class="btn-load-example" onclick="loadExample(5)">Estudiantes por curso</button>
+                <button class="btn-load-example" onclick="loadExample(6)">Insertar estudiante</button>
+                <button class="btn-load-example" onclick="loadExample(7)">Actualizar promedio</button>
+                <button class="btn-load-example" onclick="loadExample(8)">Cursos con más de 3 créditos</button>
+            </div>
+        </div>
+        
+        <div class="sql-editor mt-4">
+            <div class="sql-editor-header">
+                <h6 class="sql-editor-title"><i class="fas fa-terminal"></i> SQL Editor</h6>
+                <div>
+                    <button class="btn btn-sm btn-outline-light" onclick="resetDatabase()">
+                        <i class="fas fa-redo"></i> Resetear BD
+                    </button>
+                </div>
+            </div>
+            <textarea id="sqlInput" placeholder="Escribe tu consulta SQL aquí...
+Ejemplo: SELECT * FROM estudiantes;">SELECT * FROM estudiantes;</textarea>
+            <div class="sql-editor-footer">
+                <div>
+                    <span style="color: #999; font-size: 0.9rem;">
+                        <i class="fas fa-keyboard"></i> Tip: Presiona Ctrl+Enter para ejecutar
+                    </span>
+                </div>
+                <div>
+                    <button class="btn-clear" onclick="clearEditor()">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
+                    <button class="btn-execute" onclick="executeSQL()">
+                        <i class="fas fa-play"></i> Ejecutar
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="resultsContainer" class="results-container">
+            <h5><i class="fas fa-table"></i> Resultados</h5>
+            <div id="resultsContent"></div>
+        </div>
+    </section>
+    
+    <!-- Sección 5: Ejercicios Prácticos -->
+    <section id="ejercicios" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-dumbbell"></i> Ejercicios Prácticos
+        </h2>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-lightbulb"></i> <strong>Instrucciones:</strong> Resuelve los siguientes ejercicios usando el editor SQL interactivo. ¡Experimenta y aprende!
+        </div>
+        
+        <div class="exercise-box">
+            <h5><i class="fas fa-star"></i> Ejercicio 1: Consultas Básicas</h5>
+            <ol>
+                <li>Selecciona todos los estudiantes cuyo nombre empiece con 'M'</li>
+                <li>Muestra el nombre y email de los estudiantes ordenados alfabéticamente</li>
+                <li>Cuenta cuántos estudiantes hay en total</li>
+                <li>Encuentra el promedio más alto y el más bajo</li>
+            </ol>
+            <button class="btn btn-sm btn-question" onclick="mostrarSolucion(1)">
+                <i class="fas fa-eye"></i> Ver Solución
+            </button>
+        </div>
+        
+        <div class="exercise-box">
+            <h5><i class="fas fa-star"></i> Ejercicio 2: Filtros y Condiciones</h5>
+            <ol>
+                <li>Encuentra estudiantes con edad entre 20 y 25 años</li>
+                <li>Selecciona estudiantes cuyo promedio sea mayor o igual a 85</li>
+                <li>Busca estudiantes con email que contenga 'gmail'</li>
+                <li>Lista estudiantes cuyo apellido no sea 'López'</li>
+            </ol>
+            <button class="btn btn-sm btn-question" onclick="mostrarSolucion(2)">
+                <i class="fas fa-eye"></i> Ver Solución
+            </button>
+        </div>
+        
+        <div class="exercise-box">
+            <h5><i class="fas fa-star"></i> Ejercicio 3: Funciones de Agregación</h5>
+            <ol>
+                <li>Calcula el promedio de edad de todos los estudiantes</li>
+                <li>Cuenta cuántos cursos tiene cada profesor</li>
+                <li>Suma el total de créditos de todos los cursos</li>
+                <li>Agrupa estudiantes por rango de promedio (0-70, 71-85, 86-100)</li>
+            </ol>
+            <button class="btn btn-sm btn-question" onclick="mostrarSolucion(3)">
+                <i class="fas fa-eye"></i> Ver Solución
+            </button>
+        </div>
+        
+        <div class="exercise-box">
+            <h5><i class="fas fa-star"></i> Ejercicio 4: JOINs</h5>
+            <ol>
+                <li>Muestra el nombre del estudiante y el curso en el que está inscrito</li>
+                <li>Lista todos los profesores y sus cursos</li>
+                <li>Encuentra estudiantes sin inscripciones (LEFT JOIN)</li>
+                <li>Calcula el promedio de calificaciones por estudiante</li>
+            </ol>
+            <button class="btn btn-sm btn-question" onclick="mostrarSolucion(4)">
+                <i class="fas fa-eye"></i> Ver Solución
+            </button>
+        </div>
+        
+        <div class="exercise-box">
+            <h5><i class="fas fa-star"></i> Ejercicio 5: INSERT, UPDATE, DELETE</h5>
+            <ol>
+                <li>Inserta un nuevo estudiante con tus datos</li>
+                <li>Actualiza el promedio de un estudiante específico</li>
+                <li>Elimina estudiantes con promedio menor a 60</li>
+                <li>Inserta 3 cursos nuevos en una sola sentencia</li>
+            </ol>
+            <button class="btn btn-sm btn-question" onclick="mostrarSolucion(5)">
+                <i class="fas fa-eye"></i> Ver Solución
+            </button>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="preguntaFinal()">
+                <i class="fas fa-trophy"></i> Evaluación Final
+            </button>
+        </div>
+    </section>
+    
+    <!-- Resumen -->
+    <section id="resumen" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-graduation-cap"></i> Resumen
+        </h2>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="command-box">
+                    <h5><i class="fas fa-hammer"></i> DDL - Comandos Principales</h5>
+                    <ul class="text-start">
+                        <li><strong>CREATE:</strong> Crear tablas/BD</li>
+                        <li><strong>ALTER:</strong> Modificar estructura</li>
+                        <li><strong>DROP:</strong> Eliminar tablas/BD</li>
+                        <li><strong>TRUNCATE:</strong> Vaciar tabla</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="command-box" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
+                    <h5><i class="fas fa-edit"></i> DML - Comandos Principales</h5>
+                    <ul class="text-start">
+                        <li><strong>SELECT:</strong> Consultar datos</li>
+                        <li><strong>INSERT:</strong> Insertar registros</li>
+                        <li><strong>UPDATE:</strong> Actualizar datos</li>
+                        <li><strong>DELETE:</strong> Eliminar registros</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="model-diagram mt-4">
+            <h5><i class="fas fa-lightbulb"></i> Consejos Importantes</h5>
+            <ol>
+                <li><strong>Siempre usa WHERE con UPDATE y DELETE</strong> para evitar modificar/eliminar todos los registros</li>
+                <li><strong>Usa transacciones</strong> para operaciones críticas (BEGIN, COMMIT, ROLLBACK)</li>
+                <li><strong>Crea índices</strong> en columnas que uses frecuentemente en WHERE y JOIN</li>
+                <li><strong>Normaliza tus tablas</strong> para evitar redundancia</li>
+                <li><strong>Documenta tu código</strong> con comentarios (-- o /* */)</li>
+                <li><strong>Haz respaldos</strong> antes de operaciones importantes</li>
+                <li><strong>Usa nombres descriptivos</strong> para tablas y columnas</li>
+                <li><strong>Practica, practica, practica</strong> - la mejor forma de aprender SQL es usándolo</li>
+            </ol>
+        </div>
+        
+        <div class="text-center mt-5">
+            <h4><i class="fas fa-rocket"></i> ¡Sigue Aprendiendo!</h4>
+            <p class="lead">Continúa practicando con proyectos reales y explorando temas avanzados:</p>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-database"></i>
+                        <h5>Bases de Datos Avanzadas</h5>
+                        <p>Vistas, procedimientos almacenados, triggers</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-chart-line"></i>
+                        <h5>Optimización</h5>
+                        <p>Índices, análisis de queries, performance</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-shield-alt"></i>
+                        <h5>Seguridad</h5>
+                        <p>Permisos, roles, prevención de SQL injection</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p><i class="fas fa-code"></i> SQL Interactivo - Tutorial Completo</p>
+        <p>DDL y DML con práctica en tiempo real</p>
+        <p><small>© 2024 - Material Educativo</small></p>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript Principal -->
+    <script>
+        let db;
+        
+        // Inicializar SQL.js y crear base de datos
+        async function initDatabase() {
+            try {
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                });
+                
+                db = new SQL.Database();
+                
+                // Crear tablas y datos de ejemplo
+                db.run(`
+                    CREATE TABLE estudiantes (
+                        id INTEGER PRIMARY KEY,
+                        nombre TEXT NOT NULL,
+                        apellido TEXT NOT NULL,
+                        email TEXT UNIQUE,
+                        edad INTEGER,
+                        promedio REAL
+                    );
+                    
+                    CREATE TABLE cursos (
+                        id INTEGER PRIMARY KEY,
+                        nombre TEXT NOT NULL,
+                        creditos INTEGER,
+                        profesor TEXT,
+                        cupo INTEGER
+                    );
+                    
+                    CREATE TABLE inscripciones (
+                        id INTEGER PRIMARY KEY,
+                        estudiante_id INTEGER,
+                        curso_id INTEGER,
+                        calificacion REAL,
+                        fecha DATE,
+                        FOREIGN KEY (estudiante_id) REFERENCES estudiantes(id),
+                        FOREIGN KEY (curso_id) REFERENCES cursos(id)
+                    );
+                    
+                    CREATE TABLE profesores (
+                        id INTEGER PRIMARY KEY,
+                        nombre TEXT NOT NULL,
+                        departamento TEXT,
+                        salario REAL
+                    );
+                    
+                    INSERT INTO estudiantes VALUES
+                        (1, 'Juan', 'Pérez', 'juan@email.com', 22, 85.5),
+                        (2, 'María', 'López', 'maria@gmail.com', 21, 92.3),
+                        (3, 'Carlos', 'Ruiz', 'carlos@email.com', 23, 78.9),
+                        (4, 'Ana', 'García', 'ana@gmail.com', 20, 88.7),
+                        (5, 'Pedro', 'Martínez', 'pedro@email.com', 24, 76.4),
+                        (6, 'Laura', 'Sánchez', 'laura@gmail.com', 22, 94.1),
+                        (7, 'Miguel', 'Torres', 'miguel@email.com', 21, 81.2),
+                        (8, 'Sofia', 'Ramírez', 'sofia@gmail.com', 23, 87.8),
+                        (9, 'Diego', 'Flores', 'diego@email.com', 20, 73.5),
+                        (10, 'Valentina', 'Castro', 'valentina@gmail.com', 22, 90.6);
+                    
+                    INSERT INTO cursos VALUES
+                        (1, 'Bases de Datos', 4, 'Dr. González', 30),
+                        (2, 'Programación', 5, 'Dra. Rodríguez', 35),
+                        (3, 'Matemáticas', 4, 'Dr. González', 40),
+                        (4, 'Física', 3, 'Dr. Morales', 25),
+                        (5, 'Química', 3, 'Dra. Vega', 30);
+                    
+                    INSERT INTO inscripciones VALUES
+                        (1, 1, 1, 87.5, '2024-01-15'),
+                        (2, 1, 2, 92.0, '2024-01-15'),
+                        (3, 2, 1, 95.5, '2024-01-16'),
+                        (4, 2, 3, 88.0, '2024-01-16'),
+                        (5, 3, 2, 76.5, '2024-01-17'),
+                        (6, 4, 1, 91.0, '2024-01-17'),
+                        (7, 5, 4, 80.5, '2024-01-18'),
+                        (8, 6, 1, 96.0, '2024-01-18'),
+                        (9, 7, 2, 83.5, '2024-01-19'),
+                        (10, 8, 3, 89.0, '2024-01-19');
+                    
+                    INSERT INTO profesores VALUES
+                        (1, 'Dr. González', 'Ciencias', 75000),
+                        (2, 'Dra. Rodríguez', 'Ingeniería', 80000),
+                        (3, 'Dr. Morales', 'Física', 72000),
+                        (4, 'Dra. Vega', 'Química', 78000);
+                `);
+                
+                console.log('Base de datos inicializada correctamente');
+            } catch (error) {
+                console.error('Error al inicializar la base de datos:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo inicializar la base de datos. Por favor, recarga la página.',
+                    icon: 'error'
+                });
+            }
+        }
+        
+        // Ejecutar SQL
+        function executeSQL() {
+            const sqlInput = document.getElementById('sqlInput').value.trim();
+            
+            if (!sqlInput) {
+                Swal.fire({
+                    title: 'Consulta vacía',
+                    text: 'Por favor, escribe una consulta SQL',
+                    icon: 'warning'
+                });
+                return;
+            }
+            
+            try {
+                const results = db.exec(sqlInput);
+                displayResults(results, sqlInput);
+            } catch (error) {
+                displayError(error.message);
+            }
+        }
+        
+        // Mostrar resultados
+        function displayResults(results, query) {
+            const container = document.getElementById('resultsContainer');
+            const content = document.getElementById('resultsContent');
+            
+            container.classList.add('show');
+            
+            if (results.length === 0) {
+                // Consulta ejecutada pero sin resultados (INSERT, UPDATE, DELETE)
+                const queryUpper = query.toUpperCase();
+                let message = '';
+                
+                if (queryUpper.includes('INSERT')) {
+                    message = 'Registro(s) insertado(s) correctamente';
+                } else if (queryUpper.includes('UPDATE')) {
+                    message = 'Registro(s) actualizado(s) correctamente';
+                } else if (queryUpper.includes('DELETE')) {
+                    message = 'Registro(s) eliminado(s) correctamente';
+                } else if (queryUpper.includes('CREATE')) {
+                    message = 'Tabla creada correctamente';
+                } else if (queryUpper.includes('DROP')) {
+                    message = 'Tabla eliminada correctamente';
+                } else {
+                    message = 'Consulta ejecutada correctamente (sin resultados)';
+                }
+                
+                content.innerHTML = `
+                    <div class="result-success">
+                        <i class="fas fa-check-circle"></i> ${message}
+                    </div>
+                `;
+                return;
+            }
+            
+            // Mostrar resultados en tabla
+            const result = results[0];
+            const rowCount = result.values.length;
+            
+            let html = `
+                <div class="result-info">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>${rowCount}</strong> registro(s) encontrado(s)
+                </div>
+                <div class="results-table">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+            `;
+            
+            // Columnas
+            result.columns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            // Filas
+            result.values.forEach(row => {
+                html += '<tr>';
+                row.forEach(cell => {
+                    html += `<td>${cell !== null ? cell : '<em>NULL</em>'}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            content.innerHTML = html;
+        }
+        
+        // Mostrar error
+        function displayError(message) {
+            const container = document.getElementById('resultsContainer');
+            const content = document.getElementById('resultsContent');
+            
+            container.classList.add('show');
+            content.innerHTML = `
+                <div class="result-error">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Error en la consulta:</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+        
+        // Limpiar editor
+        function clearEditor() {
+            document.getElementById('sqlInput').value = '';
+            document.getElementById('resultsContainer').classList.remove('show');
+        }
+        
+        // Resetear base de datos
+        function resetDatabase() {
+            Swal.fire({
+                title: '¿Resetear base de datos?',
+                text: 'Se perderán todos los cambios realizados',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, resetear',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    initDatabase();
+                    clearEditor();
+                    Swal.fire('¡Reseteado!', 'La base de datos ha sido reseteada', 'success');
+                }
+            });
+        }
+        
+        // Cargar ejemplos
+        function loadExample(num) {
+            const examples = {
+                1: 'SELECT * FROM estudiantes;',
+                2: 'SELECT * FROM estudiantes WHERE promedio > 80;',
+                3: 'SELECT AVG(promedio) AS promedio_general FROM estudiantes;',
+                4: 'SELECT * FROM estudiantes ORDER BY promedio DESC LIMIT 3;',
+                5: `SELECT e.nombre, e.apellido, c.nombre AS curso
+FROM estudiantes e
+INNER JOIN inscripciones i ON e.id = i.estudiante_id
+INNER JOIN cursos c ON i.curso_id = c.id;`,
+                6: `INSERT INTO estudiantes (id, nombre, apellido, email, edad, promedio)
+VALUES (11, 'Nuevo', 'Estudiante', 'nuevo@email.com', 21, 85.0);`,
+                7: `UPDATE estudiantes 
+SET promedio = 95.0 
+WHERE id = 1;`,
+                8: 'SELECT * FROM cursos WHERE creditos > 3;'
+            };
+            
+            document.getElementById('sqlInput').value = examples[num];
+        }
+        
+        // Atajo de teclado Ctrl+Enter
+        document.getElementById('sqlInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                executeSQL();
+            }
+        });
+        
+        // Funciones de preguntas
+        function iniciarPresentacion() {
+            Swal.fire({
+                title: '¡Bienvenido a SQL Interactivo!',
+                html: `
+                    <p>En este tutorial aprenderás:</p>
+                    <ul style="text-align: left;">
+                        <li><strong>DDL:</strong> CREATE, ALTER, DROP, TRUNCATE</li>
+                        <li><strong>DML:</strong> SELECT, INSERT, UPDATE, DELETE</li>
+                        <li><strong>Consultas avanzadas:</strong> JOIN, GROUP BY, funciones</li>
+                        <li><strong>Práctica en tiempo real</strong> con editor SQL integrado</li>
+                    </ul>
+                    <p><i class="fas fa-laptop-code"></i> Podrás ejecutar consultas directamente en tu navegador</p>
+                `,
+                icon: 'info',
+                confirmButtonText: '¡Empecemos!',
+                confirmButtonColor: '#3498db'
+            });
+        }
+        
+        function pregunta1() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: '¿Cuál es la categoría de SQL que se usa para crear tablas?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'DDL',
+                denyButtonText: 'DML',
+                cancelButtonText: 'DCL',
+                confirmButtonColor: '#27ae60'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Correcto!',
+                        html: '<strong>DDL (Data Definition Language)</strong> se usa para definir estructuras como CREATE, ALTER, DROP',
+                        icon: 'success'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Incorrecto',
+                        html: 'La respuesta correcta es <strong>DDL</strong>',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+        
+        function pregunta2() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: '¿Cuál es la diferencia entre DROP y TRUNCATE?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'DROP elimina la tabla, TRUNCATE vacía',
+                cancelButtonText: 'Son lo mismo',
+                confirmButtonColor: '#27ae60'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Excelente!',
+                        html: '<strong>DROP</strong> elimina la tabla completamente<br><strong>TRUNCATE</strong> elimina los datos pero mantiene la estructura',
+                        icon: 'success'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Incorrecto',
+                        text: 'DROP y TRUNCATE son diferentes',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+        
+        function pregunta3() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: '¿Qué pasa si haces UPDATE sin WHERE?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Actualiza todos los registros',
+                denyButtonText: 'Da error',
+                cancelButtonText: 'No hace nada',
+                confirmButtonColor: '#27ae60'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Correcto!',
+                        html: 'Sin WHERE, <strong>UPDATE actualiza TODOS los registros</strong>. ¡Ten cuidado!',
+                        icon: 'success'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Incorrecto',
+                        html: 'UPDATE sin WHERE <strong>actualiza TODOS</strong> los registros',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+        
+        function preguntaFinal() {
+            Swal.fire({
+                title: 'Evaluación Final',
+                html: `
+                    <p>¿Te sientes cómodo con SQL?</p>
+                    <p>Recuerda practicar estos conceptos:</p>
+                    <ul style="text-align: left; font-size: 0.9em;">
+                        <li>CREATE TABLE con restricciones</li>
+                        <li>INSERT, UPDATE, DELETE con WHERE</li>
+                        <li>SELECT con JOIN, GROUP BY, ORDER BY</li>
+                        <li>Funciones de agregación</li>
+                    </ul>
+                `,
+                icon: 'question',
+                confirmButtonText: '¡Sí, listo para más!',
+                showCancelButton: true,
+                cancelButtonText: 'Necesito repasar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Excelente!',
+                        html: 'Continúa practicando y explorando temas avanzados como procedimientos almacenados, triggers y optimización.',
+                        icon: 'success'
+                    });
+                } else {
+                    Swal.fire({
+                        title: '¡No hay problema!',
+                        text: 'Tómate tu tiempo para revisar los ejemplos y practicar en el editor.',
+                        icon: 'info'
+                    });
+                }
+            });
+        }
+        
+        function mostrarSolucion(num) {
+            const soluciones = {
+                1: `
+                    <strong>Solución Ejercicio 1:</strong>
+                    <pre style="text-align: left; background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+1. SELECT * FROM estudiantes WHERE nombre LIKE 'M%';
+2. SELECT nombre, email FROM estudiantes ORDER BY nombre;
+3. SELECT COUNT(*) FROM estudiantes;
+4. SELECT MAX(promedio), MIN(promedio) FROM estudiantes;</pre>
+                `,
+                2: `
+                    <strong>Solución Ejercicio 2:</strong>
+                    <pre style="text-align: left; background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+1. SELECT * FROM estudiantes WHERE edad BETWEEN 20 AND 25;
+2. SELECT * FROM estudiantes WHERE promedio >= 85;
+3. SELECT * FROM estudiantes WHERE email LIKE '%gmail%';
+4. SELECT * FROM estudiantes WHERE apellido != 'López';</pre>
+                `,
+                3: `
+                    <strong>Solución Ejercicio 3:</strong>
+                    <pre style="text-align: left; background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+1. SELECT AVG(edad) FROM estudiantes;
+2. SELECT profesor, COUNT(*) FROM cursos GROUP BY profesor;
+3. SELECT SUM(creditos) FROM cursos;
+4. SELECT 
+    CASE 
+        WHEN promedio < 70 THEN '0-70'
+        WHEN promedio < 86 THEN '71-85'
+        ELSE '86-100'
+    END AS rango,
+    COUNT(*) AS cantidad
+FROM estudiantes GROUP BY rango;</pre>
+                `,
+                4: `
+                    <strong>Solución Ejercicio 4:</strong>
+                    <pre style="text-align: left; background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+1. SELECT e.nombre, c.nombre FROM estudiantes e
+   INNER JOIN inscripciones i ON e.id = i.estudiante_id
+   INNER JOIN cursos c ON i.curso_id = c.id;
+
+2. SELECT p.nombre, c.nombre FROM profesores p
+   LEFT JOIN cursos c ON p.nombre = c.profesor;
+
+3. SELECT e.* FROM estudiantes e
+   LEFT JOIN inscripciones i ON e.id = i.estudiante_id
+   WHERE i.id IS NULL;
+
+4. SELECT e.nombre, AVG(i.calificacion) FROM estudiantes e
+   INNER JOIN inscripciones i ON e.id = i.estudiante_id
+   GROUP BY e.id, e.nombre;</pre>
+                `,
+                5: `
+                    <strong>Solución Ejercicio 5:</strong>
+                    <pre style="text-align: left; background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+1. INSERT INTO estudiantes VALUES 
+   (11, 'TuNombre', 'TuApellido', 'tu@email.com', 20, 85);
+
+2. UPDATE estudiantes SET promedio = 95.0 WHERE id = 1;
+
+3. DELETE FROM estudiantes WHERE promedio < 60;
+
+4. INSERT INTO cursos VALUES
+   (6, 'Curso1', 4, 'Profesor1', 30),
+   (7, 'Curso2', 3, 'Profesor2', 25),
+   (8, 'Curso3', 5, 'Profesor3', 35);</pre>
+                `
+            };
+            
+            Swal.fire({
+                title: 'Solución',
+                html: soluciones[num],
+                width: '800px',
+                confirmButtonText: 'Entendido'
+            });
+        }
+        
+        // Barra de progreso
+        window.addEventListener('scroll', function() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+        
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Inicializar al cargar
+        window.addEventListener('load', initDatabase);
+    </script>
+</body>
+</html>

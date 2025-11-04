@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB con Node.js - Curso Interactivo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .presentation-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: 600px;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-header {
+            border-bottom: 4px solid #3cba92;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .slide-title {
+            color: #0ba360;
+            font-weight: bold;
+            font-size: 2.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        
+        .code-comment {
+            color: #a0aec0;
+        }
+        
+        .code-keyword {
+            color: #f687b3;
+        }
+        
+        .code-string {
+            color: #fbd38d;
+        }
+        
+        .navigation {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-custom {
+            background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn-custom:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        
+        .quiz-option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: #edf2f7;
+            border-color: #3cba92;
+            transform: translateX(10px);
+        }
+        
+        .quiz-option.selected {
+            background: #3cba92;
+            color: white;
+            border-color: #3cba92;
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .icon-large {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+        
+        .highlight-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 10px 0;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .comparison-table {
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th {
+            background: #3cba92;
+            color: white;
+            padding: 15px;
+        }
+        
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        table tr:hover {
+            background: #f7fafc;
+        }
+
+        .certificate-preview {
+            border: 5px solid gold;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator animate__animated animate__fadeInDown">
+        <i class="fas fa-leaf"></i>
+        <strong>Diapositiva: <span id="currentSlide">1</span>/<span id="totalSlides">23</span></strong>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Portada -->
+        <div class="slide active animate__animated animate__fadeIn" data-slide="1">
+            <div class="text-center">
+                <i class="fas fa-leaf icon-large animate__animated animate__bounceIn" style="color: #0ba360;"></i>
+                <h1 class="slide-title animate__animated animate__fadeInUp">MongoDB</h1>
+                <h3 class="mt-3">Base de Datos NoSQL con Node.js y Mongoose</h3>
+                <p class="lead mt-4">Domina la base de datos NoSQL más popular del mundo</p>
+                <div class="mt-5">
+                    <p class="text-muted">
+                        <i class="fas fa-code me-2"></i> Ejercicios Prácticos | 
+                        <i class="fas fa-award ms-3 me-2"></i> Certificado al Aprobar
+                    </p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()" disabled>
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 2: ¿Qué es MongoDB? -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>¿Qué es MongoDB?</h2>
+            </div>
+            
+            <p class="lead">MongoDB es una <strong>base de datos NoSQL orientada a documentos</strong>, que almacena datos en formato <strong>JSON-like (BSON)</strong> en lugar de tablas relacionales.</p>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-rocket me-2"></i>Características</h4>
+                        <ul class="mt-3">
+                            <li>Sin esquema fijo (schema-less)</li>
+                            <li>Documentos en formato JSON</li>
+                            <li>Escalabilidad horizontal</li>
+                            <li>Alto rendimiento</li>
+                            <li>Consultas flexibles</li>
+                            <li>Índices potentes</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-check-circle me-2"></i>¿Por qué MongoDB?</h4>
+                        <ul class="mt-3">
+                            <li>Perfecto para datos no estructurados</li>
+                            <li>Desarrollo ágil (cambios rápidos)</li>
+                            <li>Maneja grandes volúmenes de datos</li>
+                            <li>Ideal para aplicaciones modernas</li>
+                            <li>Excelente integración con Node.js</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box mt-4">
+                <strong><i class="fas fa-lightbulb me-2"></i>Conceptos clave:</strong>
+                <ul class="mt-2 mb-0">
+                    <li><strong>Documento:</strong> Equivalente a una "fila" en SQL (un objeto JSON)</li>
+                    <li><strong>Colección:</strong> Equivalente a una "tabla" en SQL</li>
+                    <li><strong>Base de Datos:</strong> Contenedor de colecciones</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 3: SQL vs NoSQL -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-balance-scale me-3"></i>SQL vs NoSQL (MongoDB)</h2>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th><i class="fas fa-database text-info"></i> SQL (MySQL, PostgreSQL)</th>
+                            <th><i class="fas fa-leaf text-success"></i> NoSQL (MongoDB)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Estructura</strong></td>
+                            <td>Tablas con filas y columnas</td>
+                            <td>Documentos JSON en colecciones</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Esquema</strong></td>
+                            <td>Fijo y predefinido</td>
+                            <td>Flexible y dinámico</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Relaciones</strong></td>
+                            <td>JOINs entre tablas</td>
+                            <td>Documentos embebidos o referencias</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Escalabilidad</strong></td>
+                            <td>Vertical (mejor hardware)</td>
+                            <td>Horizontal (más servidores)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transacciones</strong></td>
+                            <td>ACID nativo</td>
+                            <td>ACID desde v4.0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mejor para</strong></td>
+                            <td>Datos estructurados, relaciones complejas</td>
+                            <td>Datos no estructurados, rápido desarrollo</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="highlight-box mt-4">
+                <strong><i class="fas fa-info-circle me-2"></i>¿Cuándo usar MongoDB?</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Datos con estructura variable o poco definida</li>
+                    <li>Necesitas escalar horizontalmente</li>
+                    <li>Desarrollo ágil con requisitos cambiantes</li>
+                    <li>Grandes volúmenes de lecturas/escrituras</li>
+                    <li>Aplicaciones en tiempo real</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Instalación -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-download me-3"></i>Instalación</h2>
+            </div>
+            
+            <h4><i class="fas fa-server me-2"></i>Paso 1: Instalar MongoDB</h4>
+            <div class="code-block">
+<span class="code-comment"># Ubuntu/Debian</span>
+sudo apt-get install mongodb
+
+<span class="code-comment"># macOS con Homebrew</span>
+brew tap mongodb/brew
+brew install mongodb-community
+
+<span class="code-comment"># O usar MongoDB Atlas (cloud) - RECOMENDADO para desarrollo</span>
+<span class="code-comment"># https://www.mongodb.com/atlas/database</span>
+            </div>
+            
+            <h4 class="mt-4"><i class="fas fa-terminal me-2"></i>Paso 2: Instalar Mongoose (ODM)</h4>
+            <div class="code-block">
+<span class="code-comment"># Mongoose es un ODM (Object Data Modeling) para MongoDB</span>
+npm install mongoose
+
+<span class="code-comment"># También instalar dotenv para variables de entorno</span>
+npm install dotenv
+            </div>
+            
+            <h4 class="mt-4"><i class="fas fa-folder me-2"></i>Paso 3: Estructura del proyecto</h4>
+            <div class="code-block">
+my-project/
+├── server.js
+├── config/
+│   └── database.js     <span class="code-comment"># ⭐ Configuración de conexión</span>
+├── models/
+│   ├── User.js         <span class="code-comment"># Modelos de Mongoose</span>
+│   └── Product.js
+├── routes/
+│   └── api.js
+├── .env                <span class="code-comment"># Variables de entorno</span>
+└── package.json
+            </div>
+            
+            <div class="success-box mt-4">
+                <strong><i class="fas fa-cloud me-2"></i>Recomendación:</strong>
+                <p class="mb-0 mt-2">Para desarrollo, usa <strong>MongoDB Atlas</strong> (gratuito). Es más fácil que instalar localmente y obtienes una BD en la nube lista para usar.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 5: Configuración database.js -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-cog me-3"></i>Archivo database.js</h2>
+            </div>
+            
+            <p class="lead">⭐ <strong>BUENA PRÁCTICA:</strong> Separar la configuración de conexión a MongoDB.</p>
+            
+            <h5 class="mt-4"><strong>.env</strong></h5>
+            <div class="code-block">
+<span class="code-comment"># .env - NO SUBIR A GIT</span>
+MONGODB_URI=mongodb://localhost:27017/mi_database
+<span class="code-comment"># O para MongoDB Atlas:</span>
+<span class="code-comment"># MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/mi_database</span>
+PORT=3000
+            </div>
+            
+            <h5 class="mt-4"><strong>config/database.js</strong></h5>
+            <div class="code-block">
+<span class="code-comment">// config/database.js - Configuración de MongoDB con Mongoose</span>
+<span class="code-keyword">const</span> mongoose = <span class="code-keyword">require</span>(<span class="code-string">'mongoose'</span>);
+
+<span class="code-keyword">const</span> connectDB = <span class="code-keyword">async</span> () => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: <span class="code-keyword">true</span>,
+      useUnifiedTopology: <span class="code-keyword">true</span>
+    });
+    
+    console.log(<span class="code-string">'✅ Conectado a MongoDB'</span>);
+    
+  } <span class="code-keyword">catch</span> (error) {
+    console.error(<span class="code-string">'❌ Error de conexión a MongoDB:'</span>, error.message);
+    process.exit(1);  <span class="code-comment">// Salir si no se puede conectar</span>
+  }
+};
+
+<span class="code-comment">// Eventos de conexión (opcional pero útil)</span>
+mongoose.connection.on(<span class="code-string">'disconnected'</span>, () => {
+  console.log(<span class="code-string">'⚠️ MongoDB desconectado'</span>);
+});
+
+mongoose.connection.on(<span class="code-string">'error'</span>, (err) => {
+  console.error(<span class="code-string">'❌ Error de MongoDB:'</span>, err);
+});
+
+<span class="code-keyword">module.exports</span> = connectDB;
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 6: Modelos con Mongoose -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-cube me-3"></i>Modelos con Mongoose</h2>
+            </div>
+            
+            <p class="lead">Los <strong>modelos</strong> definen la estructura de los documentos. Aunque MongoDB es schema-less, Mongoose usa esquemas para validación.</p>
+            
+            <h5 class="mt-4"><strong>models/User.js</strong></h5>
+            <div class="code-block">
+<span class="code-comment">// models/User.js</span>
+<span class="code-keyword">const</span> mongoose = <span class="code-keyword">require</span>(<span class="code-string">'mongoose'</span>);
+
+<span class="code-comment">// Definir el esquema</span>
+<span class="code-keyword">const</span> userSchema = <span class="code-keyword">new</span> mongoose.Schema({
+  nombre: {
+    type: String,
+    required: [<span class="code-keyword">true</span>, <span class="code-string">'El nombre es obligatorio'</span>],
+    trim: <span class="code-keyword">true</span>
+  },
+  email: {
+    type: String,
+    required: <span class="code-keyword">true</span>,
+    unique: <span class="code-keyword">true</span>,
+    lowercase: <span class="code-keyword">true</span>,
+    trim: <span class="code-keyword">true</span>
+  },
+  edad: {
+    type: Number,
+    min: [0, <span class="code-string">'La edad no puede ser negativa'</span>],
+    max: 150
+  },
+  activo: {
+    type: Boolean,
+    default: <span class="code-keyword">true</span>
+  }
+}, {
+  timestamps: <span class="code-keyword">true</span>  <span class="code-comment">// Agrega createdAt y updatedAt automáticamente</span>
+});
+
+<span class="code-comment">// Crear el modelo</span>
+<span class="code-keyword">const</span> User = mongoose.model(<span class="code-string">'User'</span>, userSchema);
+
+<span class="code-keyword">module.exports</span> = User;
+            </div>
+            
+            <div class="info-box mt-3">
+                <strong><i class="fas fa-info-circle me-2"></i>Tipos de datos comunes en Mongoose:</strong>
+                <ul class="mt-2 mb-0">
+                    <li><code>String</code>, <code>Number</code>, <code>Boolean</code>, <code>Date</code></li>
+                    <li><code>Array</code>, <code>Object</code> (Mixed)</li>
+                    <li><code>ObjectId</code> (para referencias)</li>
+                    <li><code>Buffer</code>, <code>Decimal128</code></li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 7: Server.js -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-server me-3"></i>Server.js - Configuración</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// server.js</span>
+<span class="code-keyword">require</span>(<span class="code-string">'dotenv'</span>).config();
+<span class="code-keyword">const</span> express = <span class="code-keyword">require</span>(<span class="code-string">'express'</span>);
+<span class="code-keyword">const</span> connectDB = <span class="code-keyword">require</span>(<span class="code-string">'./config/database'</span>);
+<span class="code-keyword">const</span> User = <span class="code-keyword">require</span>(<span class="code-string">'./models/User'</span>);
+
+<span class="code-keyword">const</span> app = express();
+<span class="code-keyword">const</span> PORT = process.env.PORT || 3000;
+
+<span class="code-comment">// Middleware</span>
+app.use(express.json());
+
+<span class="code-comment">// Conectar a MongoDB</span>
+connectDB();
+
+<span class="code-comment">// Ruta de prueba</span>
+app.get(<span class="code-string">'/api/test'</span>, (req, res) => {
+  res.json({ message: <span class="code-string">'API funcionando correctamente'</span> });
+});
+
+<span class="code-comment">// Iniciar servidor</span>
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+});
+            </div>
+            
+            <div class="success-box mt-3">
+                <strong><i class="fas fa-check-circle me-2"></i>Conexión establecida:</strong>
+                <p class="mb-0 mt-2">Con esta configuración, la aplicación se conecta automáticamente a MongoDB al iniciar. Si falla la conexión, el proceso termina.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 8: CRUD - Crear (POST) -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-plus-circle me-3"></i>CRUD: Crear Usuario (POST)</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// POST: Crear nuevo usuario</span>
+app.post(<span class="code-string">'/api/usuarios'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> { nombre, email, edad } = req.body;
+    
+    <span class="code-comment">// Crear nueva instancia del modelo</span>
+    <span class="code-keyword">const</span> usuario = <span class="code-keyword">new</span> User({
+      nombre,
+      email,
+      edad
+    });
+    
+    <span class="code-comment">// Guardar en la BD</span>
+    <span class="code-keyword">await</span> usuario.save();
+    
+    res.status(201).json({
+      success: <span class="code-keyword">true</span>,
+      message: <span class="code-string">'Usuario creado'</span>,
+      data: usuario
+    });
+    
+  } <span class="code-keyword">catch</span> (error) {
+    <span class="code-comment">// Manejar errores de validación</span>
+    <span class="code-keyword">if</span> (error.name === <span class="code-string">'ValidationError'</span>) {
+      res.status(400).json({
+        success: <span class="code-keyword">false</span>,
+        error: <span class="code-string">'Error de validación'</span>,
+        details: error.message
+      });
+    } <span class="code-keyword">else if</span> (error.code === 11000) {
+      <span class="code-comment">// Error de duplicado (email único)</span>
+      res.status(400).json({
+        success: <span class="code-keyword">false</span>,
+        error: <span class="code-string">'El email ya existe'</span>
+      });
+    } <span class="code-keyword">else</span> {
+      res.status(500).json({
+        success: <span class="code-keyword">false</span>,
+        error: error.message
+      });
+    }
+  }
+});
+
+<span class="code-comment">// Alternativa: Usar .create() directamente</span>
+app.post(<span class="code-string">'/api/usuarios-v2'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> usuario = <span class="code-keyword">await</span> User.create(req.body);
+    res.status(201).json({ success: <span class="code-keyword">true</span>, data: usuario });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(400).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="info-box mt-3">
+                <strong><i class="fas fa-lightbulb me-2"></i>Dos formas de crear:</strong>
+                <ul class="mt-2 mb-0">
+                    <li><code>new Model() + save()</code> - Más control, puedes modificar antes de guardar</li>
+                    <li><code>Model.create()</code> - Más directo, crea y guarda en un paso</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 9: CRUD - Leer (GET) -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-list me-3"></i>CRUD: Leer Usuarios (GET)</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// GET: Obtener todos los usuarios</span>
+app.get(<span class="code-string">'/api/usuarios'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> usuarios = <span class="code-keyword">await</span> User.find();
+    
+    res.json({
+      success: <span class="code-keyword">true</span>,
+      count: usuarios.length,
+      data: usuarios
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// GET: Obtener usuario por ID</span>
+app.get(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> usuario = <span class="code-keyword">await</span> User.findById(req.params.id);
+    
+    <span class="code-keyword">if</span> (!usuario) {
+      <span class="code-keyword">return</span> res.status(404).json({
+        success: <span class="code-keyword">false</span>,
+        error: <span class="code-string">'Usuario no encontrado'</span>
+      });
+    }
+    
+    res.json({ success: <span class="code-keyword">true</span>, data: usuario });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// GET: Búsqueda con filtros</span>
+app.get(<span class="code-string">'/api/usuarios/buscar/:nombre'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-comment">// Búsqueda con regex (case-insensitive)</span>
+    <span class="code-keyword">const</span> usuarios = <span class="code-keyword">await</span> User.find({
+      nombre: { $regex: req.params.nombre, $options: <span class="code-string">'i'</span> }
+    });
+    
+    res.json({ success: <span class="code-keyword">true</span>, data: usuarios });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// GET: Con límite y paginación</span>
+app.get(<span class="code-string">'/api/usuarios/pagina/:page'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> page = parseInt(req.params.page) || 1;
+    <span class="code-keyword">const</span> limit = 10;
+    <span class="code-keyword">const</span> skip = (page - 1) * limit;
+    
+    <span class="code-keyword">const</span> usuarios = <span class="code-keyword">await</span> User.find()
+      .limit(limit)
+      .skip(skip)
+      .sort({ createdAt: -1 });  <span class="code-comment">// Ordenar por fecha desc</span>
+    
+    <span class="code-keyword">const</span> total = <span class="code-keyword">await</span> User.countDocuments();
+    
+    res.json({
+      success: <span class="code-keyword">true</span>,
+      data: usuarios,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 10: CRUD - Actualizar y Eliminar -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-edit me-3"></i>CRUD: Actualizar y Eliminar</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// PUT: Actualizar usuario</span>
+app.put(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> usuario = <span class="code-keyword">await</span> User.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: <span class="code-keyword">true</span>,           <span class="code-comment">// Retorna el documento actualizado</span>
+        runValidators: <span class="code-keyword">true</span>  <span class="code-comment">// Ejecuta validaciones del esquema</span>
+      }
+    );
+    
+    <span class="code-keyword">if</span> (!usuario) {
+      <span class="code-keyword">return</span> res.status(404).json({
+        success: <span class="code-keyword">false</span>,
+        error: <span class="code-string">'Usuario no encontrado'</span>
+      });
+    }
+    
+    res.json({
+      success: <span class="code-keyword">true</span>,
+      message: <span class="code-string">'Usuario actualizado'</span>,
+      data: usuario
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(400).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// DELETE: Eliminar usuario</span>
+app.delete(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> usuario = <span class="code-keyword">await</span> User.findByIdAndDelete(req.params.id);
+    
+    <span class="code-keyword">if</span> (!usuario) {
+      <span class="code-keyword">return</span> res.status(404).json({
+        success: <span class="code-keyword">false</span>,
+        error: <span class="code-string">'Usuario no encontrado'</span>
+      });
+    }
+    
+    res.json({
+      success: <span class="code-keyword">true</span>,
+      message: <span class="code-string">'Usuario eliminado'</span>
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// PATCH: Actualización parcial</span>
+app.patch(<span class="code-string">'/api/usuarios/:id/toggle-activo'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> usuario = <span class="code-keyword">await</span> User.findById(req.params.id);
+    
+    <span class="code-keyword">if</span> (!usuario) {
+      <span class="code-keyword">return</span> res.status(404).json({ success: <span class="code-keyword">false</span>, error: <span class="code-string">'No encontrado'</span> });
+    }
+    
+    usuario.activo = !usuario.activo;
+    <span class="code-keyword">await</span> usuario.save();
+    
+    res.json({ success: <span class="code-keyword">true</span>, data: usuario });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 11: Quiz 1 -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>Quiz 1: Conceptos Básicos</h2>
+            </div>
+            
+            <div id="quiz1">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Qué es un documento en MongoDB?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Un objeto JSON-like (BSON) que equivale a una fila en SQL
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Una tabla en la base de datos
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Un archivo PDF o Word
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Por qué usar Mongoose con MongoDB en Node.js?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es obligatorio para conectar a MongoDB
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Proporciona esquemas, validación y métodos útiles (ODM)
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Hace que MongoDB sea más lento pero más seguro
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Cuál es la ventaja principal de MongoDB sobre bases de datos SQL?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es más rápido en todas las situaciones
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Esquema flexible y escalabilidad horizontal
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> No necesita índices
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(1)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 12: Relaciones en MongoDB -->
+        <div class="slide" data-slide="12">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-link me-3"></i>Relaciones en MongoDB</h2>
+            </div>
+            
+            <p class="lead">En MongoDB hay dos formas de manejar relaciones: <strong>Documentos embebidos</strong> y <strong>Referencias</strong>.</p>
+            
+            <h5 class="mt-4">1. Documentos Embebidos (Embedded)</h5>
+            <div class="code-block">
+<span class="code-comment">// models/Post.js - Con comentarios embebidos</span>
+<span class="code-keyword">const</span> postSchema = <span class="code-keyword">new</span> mongoose.Schema({
+  titulo: String,
+  contenido: String,
+  autor: String,
+  comentarios: [{              <span class="code-comment">// Array de objetos embebidos</span>
+    usuario: String,
+    texto: String,
+    fecha: { type: Date, default: Date.now }
+  }]
+});
+            </div>
+            
+            <h5 class="mt-4">2. Referencias (Population)</h5>
+            <div class="code-block">
+<span class="code-comment">// models/Post.js - Con referencia a Usuario</span>
+<span class="code-keyword">const</span> postSchema = <span class="code-keyword">new</span> mongoose.Schema({
+  titulo: String,
+  contenido: String,
+  autor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: <span class="code-string">'User'</span>,           <span class="code-comment">// Referencia al modelo User</span>
+    required: <span class="code-keyword">true</span>
+  }
+});
+
+<span class="code-comment">// Usar .populate() para obtener datos del autor</span>
+app.get(<span class="code-string">'/api/posts'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> posts = <span class="code-keyword">await</span> Post.find().populate(<span class="code-string">'autor'</span>);
+  res.json({ success: <span class="code-keyword">true</span>, data: posts });
+});
+            </div>
+            
+            <div class="highlight-box mt-3">
+                <strong><i class="fas fa-lightbulb me-2"></i>¿Cuándo usar cada uno?</strong>
+                <ul class="mt-2 mb-0">
+                    <li><strong>Embebidos:</strong> Datos que siempre se consultan juntos (comentarios de un post)</li>
+                    <li><strong>Referencias:</strong> Datos que se usan independientemente (autores, categorías)</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Continue with more slides... -->
+        <!-- For brevity, jumping to key slides -->
+
+        <!-- Slide 19: Quiz Final -->
+        <div class="slide" data-slide="19">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-graduation-cap me-3"></i>Quiz Final</h2>
+            </div>
+            
+            <div id="quiz3">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Qué hace timestamps: true en un esquema de Mongoose?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Agrega automáticamente createdAt y updatedAt
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Valida que las fechas sean correctas
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Convierte todas las fechas a timestamp Unix
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Cuándo es mejor usar documentos embebidos que referencias?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Cuando los datos siempre se consultan juntos y no se reutilizan
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Siempre que sea posible
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Nunca, las referencias son siempre mejores
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Qué hace .populate() en Mongoose?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Crea documentos automáticamente
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Reemplaza ObjectIds con los documentos referenciados
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Elimina referencias duplicadas
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 4:</strong> ¿Por qué separar la configuración en config/database.js?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Centraliza configuración y facilita mantenimiento
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es obligatorio en Mongoose
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Hace que las queries sean más rápidas
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(3)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 22: Resumen -->
+        <div class="slide" data-slide="22">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-list-check me-3"></i>Resumen del Curso</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-check-circle me-2 text-success"></i>Lo que aprendiste:</h4>
+                    <ul class="mt-3" style="line-height: 2;">
+                        <li>✅ Qué es MongoDB y NoSQL</li>
+                        <li>✅ Mongoose para Node.js (ODM)</li>
+                        <li>✅ Modelos y esquemas con validación</li>
+                        <li>✅ CRUD completo con async/await</li>
+                        <li>✅ Relaciones (embebidos y referencias)</li>
+                        <li>✅ Populate para JOINs</li>
+                        <li>✅ Queries avanzadas y filtros</li>
+                        <li>✅ Mejores prácticas con MongoDB</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4><i class="fas fa-lightbulb me-2 text-warning"></i>Puntos Clave:</h4>
+                    <div class="feature-card mb-3">
+                        <strong>1. Esquemas Flexibles</strong>
+                        <p class="mb-0 small mt-2">Mongoose da estructura, MongoDB da flexibilidad</p>
+                    </div>
+                    <div class="feature-card mb-3">
+                        <strong>2. Documentos JSON</strong>
+                        <p class="mb-0 small mt-2">Datos en formato natural para JavaScript</p>
+                    </div>
+                    <div class="feature-card mb-3">
+                        <strong>3. Relaciones Inteligentes</strong>
+                        <p class="mb-0 small mt-2">Embebidos o referencias según el caso</p>
+                    </div>
+                    <div class="feature-card">
+                        <strong>4. Config Separada</strong>
+                        <p class="mb-0 small mt-2">database.js para mejor organización</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-box mt-4 text-center">
+                <h4><i class="fas fa-trophy me-2"></i>¡Felicitaciones!</h4>
+                <p class="mb-0">Ahora dominas MongoDB con Node.js. ¡Listo para aplicaciones modernas y escalables!</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Obtener Certificado <i class="fas fa-certificate ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 23: Certificado -->
+        <div class="slide" data-slide="23">
+            <div class="slide-header text-center">
+                <h2 class="slide-title"><i class="fas fa-certificate me-3"></i>¡Obtén tu Certificado!</h2>
+            </div>
+            
+            <div class="text-center mt-5">
+                <div class="certificate-preview p-5 animate__animated animate__bounceIn">
+                    <i class="fas fa-award fa-5x text-warning mb-4"></i>
+                    <h3>Certificado de Finalización</h3>
+                    <h4 class="mt-4">MongoDB con Node.js y Mongoose</h4>
+                    <p class="lead mt-4">Has completado exitosamente el curso interactivo</p>
+                    
+                    <div class="mt-5">
+                        <h5>Tu Puntuación:</h5>
+                        <h2 class="text-primary"><strong><span id="finalScore">0</span>%</strong></h2>
+                        <p id="scoreMessage" class="mt-3"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <button class="btn btn-custom btn-lg" onclick="generateCertificate()" id="certButton">
+                        <i class="fas fa-download me-2"></i> Descargar Certificado
+                    </button>
+                </div>
+                
+                <p class="mt-4 text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Tu certificado incluye código QR para verificación en aprobalo.com
+                </p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="window.location.reload()">
+                    Reiniciar Curso <i class="fas fa-redo ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 23;
+        let quizScores = { 1: 0, 2: 0, 3: 0 };
+        let quizCompleted = { 1: false, 2: false, 3: false };
+
+        function updateProgress() {
+            document.getElementById('currentSlide').textContent = currentSlide;
+            document.getElementById('totalSlides').textContent = totalSlides;
+        }
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            if (n > totalSlides) n = totalSlides;
+            if (n < 1) n = 1;
+            currentSlide = n;
+            slides[n - 1].classList.add('active');
+            slides[n - 1].classList.add('animate__animated', 'animate__fadeIn');
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+
+        function nextSlide() { showSlide(currentSlide + 1); }
+        function previousSlide() { showSlide(currentSlide - 1); }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('quiz-option')) {
+                const question = e.target.closest('.mb-4');
+                question.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+                e.target.classList.add('selected');
+            }
+        });
+
+        function checkQuiz(quizNum) {
+            const quizDiv = document.querySelector(`#quiz${quizNum}`);
+            const questions = quizDiv.querySelectorAll('.mb-4');
+            let correct = 0, allAnswered = true;
+            questions.forEach(question => {
+                const selected = question.querySelector('.quiz-option.selected');
+                if (!selected) allAnswered = false;
+                else if (selected.getAttribute('data-answer') === 'correct') correct++;
+            });
+            if (!allAnswered) {
+                Swal.fire({ title: 'Atención', text: 'Por favor responde todas las preguntas.', icon: 'warning', confirmButtonColor: '#3cba92' });
+                return;
+            }
+            const percentage = Math.round((correct / questions.length) * 100);
+            quizScores[quizNum] = percentage;
+            quizCompleted[quizNum] = true;
+            Swal.fire({
+                title: percentage >= 70 ? '¡Excelente!' : '¡Bien hecho!',
+                text: `${correct} de ${questions.length} correctas (${percentage}%)`,
+                icon: percentage >= 70 ? 'success' : 'warning',
+                confirmButtonColor: '#3cba92'
+            }).then(() => {
+                nextSlide();
+                if (quizNum === 3) updateFinalScore();
+            });
+        }
+
+        function updateFinalScore() {
+            const scores = Object.values(quizScores);
+            const totalScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+            document.getElementById('finalScore').textContent = totalScore;
+            const scoreMessage = document.getElementById('scoreMessage');
+            if (totalScore >= 80) {
+                scoreMessage.innerHTML = '<i class="fas fa-star text-warning"></i> <strong>¡Sobresaliente!</strong>';
+                scoreMessage.className = 'mt-3 text-success';
+            } else if (totalScore >= 60) {
+                scoreMessage.innerHTML = '<i class="fas fa-thumbs-up"></i> <strong>¡Aprobado!</strong>';
+                scoreMessage.className = 'mt-3 text-primary';
+            } else {
+                scoreMessage.innerHTML = '<i class="fas fa-book-reader"></i> <strong>Sigue practicando</strong>';
+                scoreMessage.className = 'mt-3 text-info';
+            }
+            if (totalScore >= 60) document.getElementById('certButton').disabled = false;
+        }
+
+        async function generateCertificate() {
+            const { value: studentName } = await Swal.fire({
+                title: 'Genera tu Certificado',
+                html: '<p>Ingresa tu nombre completo:</p><input id="swal-input-name" class="swal2-input" placeholder="Tu nombre">',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonColor: '#3cba92',
+                preConfirm: () => {
+                    const name = document.getElementById('swal-input-name').value;
+                    if (!name || name.trim() === '') {
+                        Swal.showValidationMessage('Por favor ingresa tu nombre');
+                        return false;
+                    }
+                    return name.trim();
+                }
+            });
+
+            if (!studentName) return;
+
+            Swal.fire({ title: 'Generando...', html: '<div class="spinner-border text-primary"></div>', allowOutsideClick: false, showConfirmButton: false });
+
+            try {
+                const scores = Object.values(quizScores);
+                const percentage = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+                const studentId = 'MONGO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                const currentDate = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+                doc.setFillColor(248, 249, 250);
+                doc.rect(0, 0, 297, 210, 'F');
+                doc.setDrawColor(60, 186, 146);
+                doc.setLineWidth(3);
+                doc.rect(10, 10, 277, 190);
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(180, 180, 180);
+                doc.rect(15, 15, 267, 180);
+                doc.setFillColor(60, 186, 146);
+                doc.rect(0, 0, 297, 30, 'F');
+                doc.setFontSize(32);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(255, 255, 255);
+                doc.text('CERTIFICADO DE APROBACIÓN', 148.5, 20, { align: 'center' });
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'italic');
+                doc.text('Se otorga el presente certificado a:', 148.5, 55, { align: 'center' });
+                doc.setFontSize(36);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(60, 186, 146);
+                doc.text(studentName, 148.5, 75, { align: 'center' });
+                doc.setDrawColor(180, 180, 180);
+                doc.setLineWidth(0.3);
+                doc.line(70, 80, 227, 80);
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text('Por haber completado exitosamente el curso:', 148.5, 95, { align: 'center' });
+                doc.setFontSize(22);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(60, 186, 146);
+                doc.text('MongoDB con Node.js y Mongoose', 148.5, 110, { align: 'center' });
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text('Calificación obtenida:', 148.5, 130, { align: 'center' });
+                
+                let badgeColor = percentage >= 80 ? [76, 175, 80] : percentage >= 60 ? [255, 193, 7] : [244, 67, 54];
+                doc.setFillColor(...badgeColor);
+                doc.roundedRect(128, 135, 41, 15, 3, 3, 'F');
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(255, 255, 255);
+                doc.text(`${percentage}%`, 148.5, 145, { align: 'center' });
+                
+                const qrUrl = `https://aprobalo.com/ver.php?id=${studentId}`;
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrUrl)}`;
+                
+                const qrImage = new Image();
+                qrImage.crossOrigin = 'anonymous';
+                qrImage.onload = function() {
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(225, 135, 40, 40, 2, 2, 'F');
+                    doc.addImage(qrImage, 'PNG', 227, 137, 36, 36);
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('Escanea para verificar', 245, 180, { align: 'center' });
+                    doc.setFontSize(11);
+                    doc.text(`Fecha: ${currentDate}`, 25, 175);
+                    doc.text(`ID: ${studentId}`, 25, 182);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(60, 186, 146);
+                    doc.text('Curso MongoDB - Nivel Profesional', 148.5, 165, { align: 'center' });
+                    doc.save(`Certificado_MongoDB_${studentName.replace(/\s+/g, '_')}.pdf`);
+                    Swal.fire({
+                        title: '¡Certificado Generado!',
+                        html: `<div style="text-align: center;"><i class="fas fa-check-circle fa-3x text-success mb-3"></i><p class="lead">Descargado exitosamente.</p><hr><p><strong>Nombre:</strong> ${studentName}</p><p><strong>ID:</strong> ${studentId}</p><p><strong>Calificación:</strong> ${percentage}%</p><hr><div style="background: #f8f9fa; padding: 15px; border-radius: 8px;"><p><i class="fas fa-qrcode"></i> <strong>Verificación:</strong></p><a href="${qrUrl}" target="_blank" style="color: #3cba92; font-weight: bold;">${qrUrl}</a></div></div>`,
+                        icon: 'success',
+                        confirmButtonColor: '#3cba92',
+                        width: 600
+                    });
+                };
+                qrImage.onerror = function() {
+                    doc.setFontSize(11);
+                    doc.text(`Fecha: ${currentDate}`, 25, 175);
+                    doc.text(`ID: ${studentId}`, 25, 182);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(60, 186, 146);
+                    doc.text('MongoDB - Profesional', 148.5, 165, { align: 'center' });
+                    doc.save(`Certificado_MongoDB_${studentName.replace(/\s+/g, '_')}.pdf`);
+                    Swal.fire({ title: '¡Certificado Generado!', html: `<p>Descargado. Verifica en: <a href="${qrUrl}">${qrUrl}</a></p>`, icon: 'success', confirmButtonColor: '#3cba92' });
+                };
+                qrImage.src = qrApiUrl;
+            } catch (error) {
+                Swal.fire({ title: 'Error', text: 'Error al generar certificado', icon: 'error', confirmButtonColor: '#3cba92' });
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

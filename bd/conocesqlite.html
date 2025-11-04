@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLite con Node.js - Curso Interactivo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .presentation-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: 600px;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-header {
+            border-bottom: 4px solid #4facfe;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .slide-title {
+            color: #4facfe;
+            font-weight: bold;
+            font-size: 2.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        
+        .code-comment {
+            color: #a0aec0;
+        }
+        
+        .code-keyword {
+            color: #f687b3;
+        }
+        
+        .code-string {
+            color: #fbd38d;
+        }
+        
+        .navigation {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-custom {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn-custom:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        
+        .quiz-option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: #edf2f7;
+            border-color: #4facfe;
+            transform: translateX(10px);
+        }
+        
+        .quiz-option.selected {
+            background: #4facfe;
+            color: white;
+            border-color: #4facfe;
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .icon-large {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+        
+        .highlight-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 10px 0;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .comparison-table {
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th {
+            background: #4facfe;
+            color: white;
+            padding: 15px;
+        }
+        
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        table tr:hover {
+            background: #f7fafc;
+        }
+
+        .certificate-preview {
+            border: 5px solid gold;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator animate__animated animate__fadeInDown">
+        <i class="fas fa-database"></i>
+        <strong>Diapositiva: <span id="currentSlide">1</span>/<span id="totalSlides">20</span></strong>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Portada -->
+        <div class="slide active animate__animated animate__fadeIn" data-slide="1">
+            <div class="text-center">
+                <i class="fas fa-database icon-large animate__animated animate__bounceIn" style="color: #4facfe;"></i>
+                <h1 class="slide-title animate__animated animate__fadeInUp">SQLite</h1>
+                <h3 class="mt-3">Base de Datos Embebida con Node.js</h3>
+                <p class="lead mt-4">Aprende a integrar SQLite en aplicaciones Node.js + Express</p>
+                <div class="mt-5">
+                    <p class="text-muted">
+                        <i class="fas fa-code me-2"></i> Ejercicios Prácticos | 
+                        <i class="fas fa-award ms-3 me-2"></i> Certificado al Aprobar
+                    </p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()" disabled>
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 2: ¿Qué es SQLite? -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>¿Qué es SQLite?</h2>
+            </div>
+            
+            <p class="lead">SQLite es una <strong>biblioteca de software</strong> que proporciona un sistema de gestión de bases de datos relacional <strong>sin servidor</strong>, <strong>autónomo</strong> y de <strong>configuración cero</strong>.</p>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-star me-2"></i>Características Únicas</h4>
+                        <ul class="mt-3">
+                            <li>BD completa en un solo archivo</li>
+                            <li>No requiere servidor separado</li>
+                            <li>Zero-configuration (no setup)</li>
+                            <li>Dominio público (100% libre)</li>
+                            <li>Multiplataforma</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-rocket me-2"></i>¿Por qué usar SQLite?</h4>
+                        <ul class="mt-3">
+                            <li>Perfecta para apps móviles</li>
+                            <li>Ideal para prototipos rápidos</li>
+                            <li>Excelente para desarrollo local</li>
+                            <li>La BD más usada del mundo</li>
+                            <li>Fácil integración con Node.js</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box mt-4">
+                <strong><i class="fas fa-info-circle me-2"></i>¿Sabías que...?</strong>
+                <p class="mb-0 mt-2">SQLite es usada por Android, iOS, Chrome, Firefox, y millones de aplicaciones. ¡Es probablemente la BD más desplegada en el mundo!</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Instalación con Node.js -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-download me-3"></i>Instalación con Node.js</h2>
+            </div>
+            
+            <p class="lead">SQLite es extremadamente fácil de usar en Node.js con el paquete <code>sqlite3</code>.</p>
+            
+            <h4 class="mt-4"><i class="fas fa-terminal me-2"></i>Paso 1: Instalar sqlite3</h4>
+            <div class="code-block">
+<span class="code-comment"># Instalar sqlite3 para Node.js</span>
+npm install sqlite3
+
+<span class="code-comment"># Si prefieres la versión moderna con Promises</span>
+npm install sqlite3
+npm install sqlite
+            </div>
+            
+            <h4 class="mt-4"><i class="fas fa-folder me-2"></i>Paso 2: Estructura del proyecto</h4>
+            <div class="code-block">
+my-project/
+├── server.js           <span class="code-comment"># Archivo principal</span>
+├── config/
+│   └── database.js     <span class="code-comment"># ⭐ Configuración de BD (BUENA PRÁCTICA)</span>
+├── routes/
+│   └── api.js          <span class="code-comment"># Rutas de la aplicación</span>
+├── database.db         <span class="code-comment"># Archivo de la base de datos (generado automático)</span>
+└── package.json
+            </div>
+            
+            <div class="success-box mt-4">
+                <strong><i class="fas fa-check-circle me-2"></i>Ventaja de SQLite:</strong>
+                <p class="mb-0 mt-2">¡No necesitas instalar ningún servidor de BD! Solo instala el paquete npm y listo. El archivo <code>database.db</code> se crea automáticamente.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Archivo de Configuración (database.js) -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-cog me-3"></i>Archivo de Configuración: database.js</h2>
+            </div>
+            
+            <p class="lead">⭐ <strong>BUENA PRÁCTICA:</strong> Crear un archivo separado para la configuración de la base de datos.</p>
+            
+            <h5 class="mt-4"><strong>config/database.js</strong> (Callback style)</h5>
+            <div class="code-block">
+<span class="code-comment">// config/database.js - Configuración centralizada de SQLite</span>
+<span class="code-keyword">const</span> sqlite3 = <span class="code-keyword">require</span>(<span class="code-string">'sqlite3'</span>).verbose();
+<span class="code-keyword">const</span> path = <span class="code-keyword">require</span>(<span class="code-string">'path'</span>);
+
+<span class="code-comment">// Ruta del archivo de BD</span>
+<span class="code-keyword">const</span> DB_PATH = path.join(__dirname, <span class="code-string">'../database.db'</span>);
+
+<span class="code-comment">// Crear/conectar a la BD</span>
+<span class="code-keyword">const</span> db = <span class="code-keyword">new</span> sqlite3.Database(DB_PATH, (err) => {
+  <span class="code-keyword">if</span> (err) {
+    console.error(<span class="code-string">'❌ Error al conectar a la BD:'</span>, err.message);
+  } <span class="code-keyword">else</span> {
+    console.log(<span class="code-string">'✅ Conectado a SQLite'</span>);
+  }
+});
+
+<span class="code-keyword">module.exports</span> = db;
+            </div>
+            
+            <h5 class="mt-4"><strong>Alternativa con Promises (mejor)</strong></h5>
+            <div class="code-block">
+<span class="code-comment">// config/database.js - Con soporte de Promises</span>
+<span class="code-keyword">const</span> sqlite3 = <span class="code-keyword">require</span>(<span class="code-string">'sqlite3'</span>).verbose();
+<span class="code-keyword">const</span> { open } = <span class="code-keyword">require</span>(<span class="code-string">'sqlite'</span>);
+<span class="code-keyword">const</span> path = <span class="code-keyword">require</span>(<span class="code-string">'path'</span>);
+
+<span class="code-keyword">const</span> DB_PATH = path.join(__dirname, <span class="code-string">'../database.db'</span>);
+
+<span class="code-comment">// Función para obtener conexión con async/await</span>
+<span class="code-keyword">async function</span> getDatabase() {
+  <span class="code-keyword">const</span> db = <span class="code-keyword">await</span> open({
+    filename: DB_PATH,
+    driver: sqlite3.Database
+  });
+  <span class="code-keyword">return</span> db;
+}
+
+<span class="code-keyword">module.exports</span> = { getDatabase };
+            </div>
+            
+            <div class="highlight-box mt-3">
+                <strong><i class="fas fa-star me-2"></i>¿Por qué separar la configuración?</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Fácil cambio de ubicación del archivo BD</li>
+                    <li>Reutilizable en toda la aplicación</li>
+                    <li>Facilita testing con BDs diferentes</li>
+                    <li>Código más limpio y mantenible</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 5: Server.js - Inicialización -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-server me-3"></i>Server.js - Aplicación Express</h2>
+            </div>
+            
+            <p>Usando la configuración de BD en nuestro servidor Express con async/await:</p>
+            
+            <div class="code-block">
+<span class="code-comment">// server.js</span>
+<span class="code-keyword">const</span> express = <span class="code-keyword">require</span>(<span class="code-string">'express'</span>);
+<span class="code-keyword">const</span> { getDatabase } = <span class="code-keyword">require</span>(<span class="code-string">'./config/database'</span>);
+
+<span class="code-keyword">const</span> app = express();
+<span class="code-keyword">const</span> PORT = 3000;
+
+app.use(express.json());
+
+<span class="code-comment">// Variable global para la BD</span>
+<span class="code-keyword">let</span> db;
+
+<span class="code-comment">// Inicializar base de datos y crear tabla</span>
+<span class="code-keyword">async function</span> initDatabase() {
+  <span class="code-keyword">try</span> {
+    db = <span class="code-keyword">await</span> getDatabase();
+    
+    <span class="code-comment">// Crear tabla usuarios si no existe</span>
+    <span class="code-keyword">await</span> db.exec(`
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        edad INTEGER
+      )
+    `);
+    
+    console.log(<span class="code-string">'✅ Tabla usuarios creada'</span>);
+    
+  } <span class="code-keyword">catch</span> (error) {
+    console.error(<span class="code-string">'❌ Error al inicializar BD:'</span>, error);
+  }
+}
+
+<span class="code-comment">// Iniciar servidor</span>
+app.listen(PORT, <span class="code-keyword">async</span> () => {
+  <span class="code-keyword">await</span> initDatabase();
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+});
+            </div>
+            
+            <div class="info-box mt-3">
+                <strong><i class="fas fa-lightbulb me-2"></i>Nota:</strong>
+                <p class="mb-0 mt-2">En SQLite, <code>INTEGER PRIMARY KEY AUTOINCREMENT</code> es similar a <code>AUTO_INCREMENT</code> en MySQL.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 6: CRUD - Crear (POST) -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-plus-circle me-3"></i>CRUD: Crear Usuario (POST)</h2>
+            </div>
+            
+            <p class="lead">Ruta para crear un nuevo usuario con Prepared Statements:</p>
+            
+            <div class="code-block">
+<span class="code-comment">// server.js (continuación)</span>
+
+<span class="code-comment">// POST: Crear nuevo usuario</span>
+app.post(<span class="code-string">'/api/usuarios'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> { nombre, email, edad } = req.body;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-comment">// Usar prepared statement para prevenir SQL injection</span>
+    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> db.run(
+      <span class="code-string">'INSERT INTO usuarios (nombre, email, edad) VALUES (?, ?, ?)'</span>,
+      [nombre, email, edad]
+    );
+    
+    res.status(201).json({ 
+      success: <span class="code-keyword">true</span>,
+      message: <span class="code-string">'Usuario creado exitosamente'</span>,
+      id: result.lastID
+    });
+    
+  } <span class="code-keyword">catch</span> (error) {
+    <span class="code-comment">// Manejar error de email duplicado (UNIQUE constraint)</span>
+    <span class="code-keyword">if</span> (error.message.includes(<span class="code-string">'UNIQUE constraint'</span>)) {
+      res.status(400).json({ 
+        success: <span class="code-keyword">false</span>,
+        error: <span class="code-string">'El email ya existe'</span>
+      });
+    } <span class="code-keyword">else</span> {
+      res.status(500).json({ 
+        success: <span class="code-keyword">false</span>,
+        error: error.message 
+      });
+    }
+  }
+});
+            </div>
+            
+            <div class="success-box mt-3">
+                <strong><i class="fas fa-shield-alt me-2"></i>Seguridad:</strong>
+                <p class="mb-0 mt-2">Usar <strong>placeholders (?)</strong> con parámetros separados previene SQL Injection. ¡Nunca concatenes strings directamente!</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 7: CRUD - Leer (GET) -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-list me-3"></i>CRUD: Leer Usuarios (GET)</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// GET: Obtener todos los usuarios</span>
+app.get(<span class="code-string">'/api/usuarios'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> usuarios = <span class="code-keyword">await</span> db.all(<span class="code-string">'SELECT * FROM usuarios'</span>);
+    
+    res.json({ 
+      success: <span class="code-keyword">true</span>, 
+      data: usuarios 
+    });
+    
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ 
+      success: <span class="code-keyword">false</span>, 
+      error: error.message 
+    });
+  }
+});
+
+<span class="code-comment">// GET: Obtener usuario por ID</span>
+app.get(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-comment">// db.get() retorna solo 1 resultado</span>
+    <span class="code-keyword">const</span> usuario = <span class="code-keyword">await</span> db.get(
+      <span class="code-string">'SELECT * FROM usuarios WHERE id = ?'</span>, 
+      [id]
+    );
+    
+    <span class="code-keyword">if</span> (usuario) {
+      res.json({ 
+        success: <span class="code-keyword">true</span>, 
+        data: usuario 
+      });
+    } <span class="code-keyword">else</span> {
+      res.status(404).json({ 
+        success: <span class="code-keyword">false</span>,
+        message: <span class="code-string">'Usuario no encontrado'</span> 
+      });
+    }
+    
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ 
+      success: <span class="code-keyword">false</span>, 
+      error: error.message 
+    });
+  }
+});
+            </div>
+            
+            <div class="info-box mt-3">
+                <strong><i class="fas fa-info-circle me-2"></i>Métodos de SQLite:</strong>
+                <ul class="mt-2 mb-0">
+                    <li><code>db.all()</code> - Retorna todos los resultados (array)</li>
+                    <li><code>db.get()</code> - Retorna solo 1 resultado (objeto)</li>
+                    <li><code>db.run()</code> - Ejecuta INSERT/UPDATE/DELETE</li>
+                    <li><code>db.exec()</code> - Ejecuta múltiples statements</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 8: CRUD - Actualizar y Eliminar -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-edit me-3"></i>CRUD: Actualizar y Eliminar</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// PUT: Actualizar usuario</span>
+app.put(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  <span class="code-keyword">const</span> { nombre, email, edad } = req.body;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> db.run(
+      <span class="code-string">'UPDATE usuarios SET nombre=?, email=?, edad=? WHERE id=?'</span>,
+      [nombre, email, edad, id]
+    );
+    
+    <span class="code-comment">// result.changes indica cuántas filas se modificaron</span>
+    <span class="code-keyword">if</span> (result.changes > 0) {
+      res.json({ 
+        success: <span class="code-keyword">true</span>,
+        message: <span class="code-string">'Usuario actualizado'</span> 
+      });
+    } <span class="code-keyword">else</span> {
+      res.status(404).json({ 
+        success: <span class="code-keyword">false</span>,
+        message: <span class="code-string">'Usuario no encontrado'</span> 
+      });
+    }
+    
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ 
+      success: <span class="code-keyword">false</span>, 
+      error: error.message 
+    });
+  }
+});
+
+<span class="code-comment">// DELETE: Eliminar usuario</span>
+app.delete(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> db.run(
+      <span class="code-string">'DELETE FROM usuarios WHERE id = ?'</span>,
+      [id]
+    );
+    
+    <span class="code-keyword">if</span> (result.changes > 0) {
+      res.json({ 
+        success: <span class="code-keyword">true</span>,
+        message: <span class="code-string">'Usuario eliminado'</span> 
+      });
+    } <span class="code-keyword">else</span> {
+      res.status(404).json({ 
+        success: <span class="code-keyword">false</span>,
+        message: <span class="code-string">'Usuario no encontrado'</span> 
+      });
+    }
+    
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ 
+      success: <span class="code-keyword">false</span>, 
+      error: error.message 
+    });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 9: Quiz 1 -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>Quiz 1: Conceptos Básicos</h2>
+            </div>
+            
+            <div id="quiz1">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Qué hace único a SQLite comparado con MySQL o PostgreSQL?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> No requiere servidor y toda la BD está en un solo archivo
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es más rápido que cualquier otra base de datos
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Soporta más tipos de datos que otras BDs
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Por qué es buena práctica tener un archivo config/database.js?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es obligatorio para que SQLite funcione
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Centraliza configuración y facilita mantenimiento
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Hace que la BD sea más rápida
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Qué método de SQLite retorna solo UN resultado?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> db.all()
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> db.get()
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> db.run()
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(1)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 10: Ejercicio Práctico 1 -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-code me-3"></i>Ejercicio Práctico 1</h2>
+            </div>
+            
+            <div class="highlight-box">
+                <h4><i class="fas fa-tasks me-2"></i>Tarea: API de Tareas (To-Do)</h4>
+                <p>Crea una aplicación Express con SQLite para gestionar tareas.</p>
+            </div>
+            
+            <h5 class="mt-4">Requisitos:</h5>
+            <ol>
+                <li>Crear archivo <code>config/database.js</code> con conexión a SQLite</li>
+                <li>Crear tabla <code>tareas</code> con campos:
+                    <ul>
+                        <li><code>id</code> (INTEGER PRIMARY KEY AUTOINCREMENT)</li>
+                        <li><code>titulo</code> (TEXT NOT NULL)</li>
+                        <li><code>descripcion</code> (TEXT)</li>
+                        <li><code>completada</code> (INTEGER DEFAULT 0) -- 0=false, 1=true</li>
+                        <li><code>fecha_creacion</code> (TEXT DEFAULT CURRENT_TIMESTAMP)</li>
+                    </ul>
+                </li>
+                <li>Implementar 5 rutas:
+                    <ul>
+                        <li><code>POST /api/tareas</code> - Crear tarea</li>
+                        <li><code>GET /api/tareas</code> - Listar todas</li>
+                        <li><code>GET /api/tareas/:id</code> - Obtener una</li>
+                        <li><code>PUT /api/tareas/:id/completar</code> - Marcar como completada</li>
+                        <li><code>DELETE /api/tareas/:id</code> - Eliminar</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="info-box mt-4">
+                <strong><i class="fas fa-lightbulb me-2"></i>Pista:</strong>
+                <p class="mb-0">En SQLite, los booleanos se guardan como INTEGER (0 o 1). Para marcar como completada: <code>UPDATE tareas SET completada = 1 WHERE id = ?</code></p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Ver Solución <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 11: Solución Ejercicio 1 -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-check-circle me-3"></i>Solución Ejercicio 1</h2>
+            </div>
+            
+            <div class="code-block" style="max-height: 500px; overflow-y: auto;">
+<span class="code-comment">// Inicialización de tabla tareas</span>
+<span class="code-keyword">await</span> db.exec(`
+  CREATE TABLE IF NOT EXISTS tareas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    descripcion TEXT,
+    completada INTEGER DEFAULT 0,
+    fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+<span class="code-comment">// POST: Crear tarea</span>
+app.post(<span class="code-string">'/api/tareas'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> { titulo, descripcion } = req.body;
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> db.run(
+      <span class="code-string">'INSERT INTO tareas (titulo, descripcion) VALUES (?, ?)'</span>,
+      [titulo, descripcion]
+    );
+    res.status(201).json({ success: <span class="code-keyword">true</span>, id: result.lastID });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// GET: Listar todas las tareas</span>
+app.get(<span class="code-string">'/api/tareas'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> tareas = <span class="code-keyword">await</span> db.all(<span class="code-string">'SELECT * FROM tareas'</span>);
+    res.json({ success: <span class="code-keyword">true</span>, data: tareas });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// PUT: Marcar tarea como completada</span>
+app.put(<span class="code-string">'/api/tareas/:id/completar'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> db.run(
+      <span class="code-string">'UPDATE tareas SET completada = 1 WHERE id = ?'</span>,
+      [id]
+    );
+    
+    <span class="code-keyword">if</span> (result.changes > 0) {
+      res.json({ success: <span class="code-keyword">true</span>, message: <span class="code-string">'Tarea completada'</span> });
+    } <span class="code-keyword">else</span> {
+      res.status(404).json({ success: <span class="code-keyword">false</span>, message: <span class="code-string">'Tarea no encontrada'</span> });
+    }
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// DELETE: Eliminar tarea</span>
+app.delete(<span class="code-string">'/api/tareas/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> db.run(
+      <span class="code-string">'DELETE FROM tareas WHERE id = ?'</span>,
+      [id]
+    );
+    
+    <span class="code-keyword">if</span> (result.changes > 0) {
+      res.json({ success: <span class="code-keyword">true</span>, message: <span class="code-string">'Tarea eliminada'</span> });
+    } <span class="code-keyword">else</span> {
+      res.status(404).json({ success: <span class="code-keyword">false</span>, message: <span class="code-string">'Tarea no encontrada'</span> });
+    }
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 12: Relaciones y JOINs -->
+        <div class="slide" data-slide="12">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-link me-3"></i>Relaciones y JOINs en SQLite</h2>
+            </div>
+            
+            <p class="lead">SQLite soporta claves foráneas y JOINs como cualquier BD relacional.</p>
+            
+            <h5 class="mt-4">Ejemplo: Categorías y Productos</h5>
+            <div class="code-block">
+<span class="code-comment">// Crear tabla categorías</span>
+<span class="code-keyword">await</span> db.exec(`
+  CREATE TABLE IF NOT EXISTS categorias (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL UNIQUE
+  )
+`);
+
+<span class="code-comment">// Crear tabla productos con FK</span>
+<span class="code-keyword">await</span> db.exec(`
+  CREATE TABLE IF NOT EXISTS productos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    precio REAL NOT NULL,
+    categoria_id INTEGER NOT NULL,
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id)
+  )
+`);
+
+<span class="code-comment">// IMPORTANTE: Habilitar foreign keys (deshabilitado por defecto)</span>
+<span class="code-keyword">await</span> db.run(<span class="code-string">'PRAGMA foreign_keys = ON'</span>);
+            </div>
+            
+            <h5 class="mt-4">Query con JOIN</h5>
+            <div class="code-block">
+<span class="code-comment">// GET: Productos con nombre de categoría</span>
+app.get(<span class="code-string">'/api/productos'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> productos = <span class="code-keyword">await</span> db.all(`
+      SELECT 
+        p.*,
+        c.nombre as categoria_nombre
+      FROM productos p
+      INNER JOIN categorias c ON p.categoria_id = c.id
+    `);
+    
+    res.json({ success: <span class="code-keyword">true</span>, data: productos });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="highlight-box mt-3">
+                <strong><i class="fas fa-exclamation-triangle me-2"></i>Importante:</strong>
+                <p class="mb-0 mt-2">Las Foreign Keys están <strong>deshabilitadas por defecto</strong> en SQLite. Debes ejecutar <code>PRAGMA foreign_keys = ON</code> al iniciar la conexión.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 13: Comparación SQLite vs Otras BDs -->
+        <div class="slide" data-slide="13">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-balance-scale me-3"></i>SQLite vs Otras Bases de Datos</h2>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th><i class="fas fa-database text-primary"></i> SQLite</th>
+                            <th><i class="fas fa-database text-info"></i> PostgreSQL</th>
+                            <th><i class="fas fa-database text-warning"></i> MySQL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Arquitectura</strong></td>
+                            <td>Sin servidor (embebida)</td>
+                            <td>Cliente-Servidor</td>
+                            <td>Cliente-Servidor</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Configuración</strong></td>
+                            <td>✅ Zero-config</td>
+                            <td>❌ Requiere instalación</td>
+                            <td>❌ Requiere instalación</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Concurrencia (escritura)</strong></td>
+                            <td>⚠️ Un escritor a la vez</td>
+                            <td>✅ Múltiples escritores</td>
+                            <td>✅ Múltiples escritores</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tamaño BD</strong></td>
+                            <td>Hasta 281 TB</td>
+                            <td>Ilimitado</td>
+                            <td>Muy grande</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mejor Para</strong></td>
+                            <td>Apps móviles, embebidas, desarrollo</td>
+                            <td>Aplicaciones empresariales</td>
+                            <td>Aplicaciones web</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Licencia</strong></td>
+                            <td>✅ Dominio público</td>
+                            <td>PostgreSQL License</td>
+                            <td>GPL / Comercial</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="success-box mt-4">
+                <strong><i class="fas fa-trophy me-2"></i>¿Cuándo usar SQLite?</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Aplicaciones móviles (iOS, Android)</li>
+                    <li>Aplicaciones de escritorio</li>
+                    <li>Desarrollo y testing local</li>
+                    <li>Apps embebidas o IoT</li>
+                    <li>Prototipos y MVPs rápidos</li>
+                    <li>Sitios web pequeños/medianos con baja concurrencia de escritura</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 14: Quiz 2 -->
+        <div class="slide" data-slide="14">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>Quiz 2: Avanzado</h2>
+            </div>
+            
+            <div id="quiz2">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Qué comando debes ejecutar para habilitar Foreign Keys en SQLite?</h5>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> ENABLE FOREIGN KEYS
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> PRAGMA foreign_keys = ON
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> SET FOREIGN_KEYS = TRUE
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Cuál es la principal limitación de SQLite comparada con PostgreSQL?</h5>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> No soporta JOINs ni relaciones
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Solo permite un escritor a la vez (concurrencia limitada)
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> El tamaño máximo de BD es 1GB
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Cómo se representan los valores booleanos en SQLite?</h5>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Con el tipo BOOLEAN (true/false)
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Como INTEGER (0 para false, 1 para true)
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Como TEXT ('true'/'false')
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(2)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 15: Mejores Prácticas -->
+        <div class="slide" data-slide="15">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-trophy me-3"></i>Mejores Prácticas con SQLite y Node.js</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="success-box">
+                        <h5><i class="fas fa-check-circle me-2"></i>✅ Hacer</h5>
+                        <ul>
+                            <li>Separar config de BD en archivo dedicado</li>
+                            <li>Usar placeholders (?) para prevenir SQL Injection</li>
+                            <li>Habilitar <code>PRAGMA foreign_keys = ON</code></li>
+                            <li>Cerrar la BD correctamente al terminar</li>
+                            <li>Usar transacciones para operaciones múltiples</li>
+                            <li>Validar datos antes de insertar</li>
+                            <li>Manejar errores con try-catch</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-times-circle me-2"></i>❌ Evitar</h5>
+                        <ul>
+                            <li>Concatenar SQL con strings del usuario</li>
+                            <li>Usar SQLite para apps con alta concurrencia de escritura</li>
+                            <li>No validar datos de entrada</li>
+                            <li>Dejar conexiones abiertas sin usar</li>
+                            <li>Ignorar errores de constraints</li>
+                            <li>Hardcodear rutas de archivos</li>
+                            <li>No usar índices en tablas grandes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box mt-4">
+                <h5><i class="fas fa-rocket me-2"></i>Optimizaciones de Rendimiento</h5>
+                <div class="code-block">
+<span class="code-comment">// Usar transacciones para operaciones múltiples</span>
+<span class="code-keyword">await</span> db.exec(<span class="code-string">'BEGIN TRANSACTION'</span>);
+<span class="code-keyword">try</span> {
+  <span class="code-keyword">await</span> db.run(<span class="code-string">'INSERT INTO usuarios ...'</span>);
+  <span class="code-keyword">await</span> db.run(<span class="code-string">'INSERT INTO usuarios ...'</span>);
+  <span class="code-keyword">await</span> db.run(<span class="code-string">'INSERT INTO usuarios ...'</span>);
+  <span class="code-keyword">await</span> db.exec(<span class="code-string">'COMMIT'</span>);
+} <span class="code-keyword">catch</span> (error) {
+  <span class="code-keyword">await</span> db.exec(<span class="code-string">'ROLLBACK'</span>);
+}
+
+<span class="code-comment">// Crear índices para búsquedas frecuentes</span>
+<span class="code-keyword">await</span> db.exec(<span class="code-string">'CREATE INDEX idx_email ON usuarios(email)'</span>);
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 16: Ejercicio Práctico 2 -->
+        <div class="slide" data-slide="16">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-code me-3"></i>Ejercicio Final: Blog API</h2>
+            </div>
+            
+            <div class="highlight-box">
+                <h4><i class="fas fa-rocket me-2"></i>Tarea: API completa de Blog</h4>
+                <p>Crea una API REST completa para un blog con usuarios, posts y comentarios.</p>
+            </div>
+            
+            <h5 class="mt-4">Requisitos:</h5>
+            <ol>
+                <li>Tres tablas relacionadas:
+                    <ul>
+                        <li><code>usuarios</code>: id, nombre, email</li>
+                        <li><code>posts</code>: id, titulo, contenido, usuario_id (FK), fecha</li>
+                        <li><code>comentarios</code>: id, texto, post_id (FK), usuario_id (FK), fecha</li>
+                    </ul>
+                </li>
+                <li>Rutas a implementar:
+                    <ul>
+                        <li><code>POST /api/usuarios</code> - Crear usuario</li>
+                        <li><code>POST /api/posts</code> - Crear post (validar que usuario existe)</li>
+                        <li><code>GET /api/posts</code> - Listar posts con nombre de autor (JOIN)</li>
+                        <li><code>GET /api/posts/:id</code> - Post con sus comentarios (JOIN)</li>
+                        <li><code>POST /api/comentarios</code> - Añadir comentario (validar post y usuario)</li>
+                    </ul>
+                </li>
+                <li>Validaciones:
+                    <ul>
+                        <li>Email único para usuarios</li>
+                        <li>No permitir crear post si usuario no existe</li>
+                        <li>No permitir comentario si post o usuario no existen</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="info-box mt-4">
+                <strong><i class="fas fa-database me-2"></i>Tip:</strong>
+                <p class="mb-0">Habilita Foreign Keys y usa <code>ON DELETE CASCADE</code> para que al eliminar un post, se eliminen sus comentarios automáticamente.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 17: Quiz Final -->
+        <div class="slide" data-slide="17">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-graduation-cap me-3"></i>Quiz Final</h2>
+            </div>
+            
+            <div id="quiz3">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Qué ventaja tiene separar la configuración en config/database.js?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Hace que SQLite sea más rápido
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Facilita mantenimiento y reutilización de código
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es obligatorio para que funcione Node.js
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Cuándo NO deberías usar SQLite?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> En aplicaciones móviles
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> En aplicaciones web con miles de escrituras concurrentes
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Para desarrollo local y testing
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Qué hace <code>result.changes</code> después de un UPDATE o DELETE?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Indica cuántas filas fueron afectadas
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Retorna el ID del registro modificado
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Muestra los cambios realizados en el registro
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 4:</strong> ¿Por qué usar prepared statements (placeholders ?)?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Para que el código sea más corto
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Para prevenir SQL Injection y mejorar seguridad
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es una característica exclusiva de SQLite
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(3)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 18: Recursos Adicionales -->
+        <div class="slide" data-slide="18">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-book-open me-3"></i>Recursos Adicionales</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-link me-2"></i>Documentación Oficial</h4>
+                        <ul class="mt-3">
+                            <li><a href="https://www.sqlite.org/docs.html" target="_blank" style="color: white;">SQLite Official Documentation</a></li>
+                            <li><a href="https://www.sqlite.org/lang.html" target="_blank" style="color: white;">SQL Syntax Reference</a></li>
+                            <li><a href="https://www.sqlite.org/faq.html" target="_blank" style="color: white;">SQLite FAQ</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-code me-2"></i>Node.js Resources</h4>
+                        <ul class="mt-3">
+                            <li><a href="https://www.npmjs.com/package/sqlite3" target="_blank" style="color: white;">sqlite3 npm package</a></li>
+                            <li><a href="https://www.npmjs.com/package/sqlite" target="_blank" style="color: white;">sqlite (wrapper con promises)</a></li>
+                            <li><a href="https://expressjs.com/" target="_blank" style="color: white;">Express.js Documentation</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box mt-4">
+                <h5><i class="fas fa-tools me-2"></i>Herramientas Útiles</h5>
+                <ul class="mt-2 mb-0">
+                    <li><strong>DB Browser for SQLite:</strong> GUI gratuita para explorar archivos .db</li>
+                    <li><strong>sqlite3 CLI:</strong> Herramienta de línea de comandos incluida con SQLite</li>
+                    <li><strong>VS Code SQLite Extension:</strong> Extensión para visualizar BDs en VSCode</li>
+                </ul>
+            </div>
+            
+            <div class="highlight-box mt-4">
+                <h5><i class="fas fa-graduation-cap me-2"></i>Siguientes Pasos</h5>
+                <ul class="mt-2 mb-0">
+                    <li>Practica creando APIs REST completas</li>
+                    <li>Aprende sobre ORMs como Sequelize o TypeORM</li>
+                    <li>Explora migraciones de BD con Knex.js</li>
+                    <li>Estudia optimización de queries y uso de índices</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 19: Resumen -->
+        <div class="slide" data-slide="19">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-list-check me-3"></i>Resumen del Curso</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-check-circle me-2 text-success"></i>Lo que aprendiste:</h4>
+                    <ul class="mt-3" style="line-height: 2;">
+                        <li>✅ Qué es SQLite y sus ventajas</li>
+                        <li>✅ Instalar y configurar SQLite con Node.js</li>
+                        <li>✅ Buenas prácticas: archivo database.js separado</li>
+                        <li>✅ CRUD completo con Express y SQLite</li>
+                        <li>✅ Uso de prepared statements (seguridad)</li>
+                        <li>✅ Relaciones (FK) y JOINs</li>
+                        <li>✅ Cuándo usar SQLite vs otras BDs</li>
+                        <li>✅ Transacciones y optimizaciones</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4><i class="fas fa-lightbulb me-2 text-warning"></i>Puntos Clave:</h4>
+                    <div class="feature-card mb-3">
+                        <strong>1. Zero-Configuration</strong>
+                        <p class="mb-0 small mt-2">No necesitas servidor, solo un archivo</p>
+                    </div>
+                    <div class="feature-card mb-3">
+                        <strong>2. Seguridad Primero</strong>
+                        <p class="mb-0 small mt-2">Siempre usa placeholders (?)</p>
+                    </div>
+                    <div class="feature-card mb-3">
+                        <strong>3. Configuración Separada</strong>
+                        <p class="mb-0 small mt-2">config/database.js para mejor mantenimiento</p>
+                    </div>
+                    <div class="feature-card">
+                        <strong>4. Conoce las Limitaciones</strong>
+                        <p class="mb-0 small mt-2">Concurrencia de escritura limitada</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-box mt-4 text-center">
+                <h4><i class="fas fa-trophy me-2"></i>¡Felicitaciones!</h4>
+                <p class="mb-0">Ahora dominas SQLite con Node.js y Express. ¡Estás listo para crear aplicaciones completas!</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Obtener Certificado <i class="fas fa-certificate ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 20: Certificado -->
+        <div class="slide" data-slide="20">
+            <div class="slide-header text-center">
+                <h2 class="slide-title"><i class="fas fa-certificate me-3"></i>¡Obtén tu Certificado!</h2>
+            </div>
+            
+            <div class="text-center mt-5">
+                <div class="certificate-preview p-5 animate__animated animate__bounceIn">
+                    <i class="fas fa-award fa-5x text-warning mb-4"></i>
+                    <h3>Certificado de Finalización</h3>
+                    <h4 class="mt-4">SQLite con Node.js y Express</h4>
+                    <p class="lead mt-4">Has completado exitosamente el curso interactivo</p>
+                    
+                    <div class="mt-5">
+                        <h5>Tu Puntuación:</h5>
+                        <h2 class="text-primary"><strong><span id="finalScore">0</span>%</strong></h2>
+                        <p id="scoreMessage" class="mt-3"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <button class="btn btn-custom btn-lg" onclick="generateCertificate()" id="certButton">
+                        <i class="fas fa-download me-2"></i> Descargar Certificado
+                    </button>
+                </div>
+                
+                <p class="mt-4 text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Tu certificado incluye código QR para verificación en aprobalo.com
+                </p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="window.location.reload()">
+                    Reiniciar Curso <i class="fas fa-redo ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 20;
+        let quizScores = {
+            1: 0,
+            2: 0,
+            3: 0
+        };
+        let quizCompleted = {
+            1: false,
+            2: false,
+            3: false
+        };
+
+        function updateProgress() {
+            document.getElementById('currentSlide').textContent = currentSlide;
+            document.getElementById('totalSlides').textContent = totalSlides;
+        }
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n > totalSlides) n = totalSlides;
+            if (n < 1) n = 1;
+            
+            currentSlide = n;
+            slides[n - 1].classList.add('active');
+            slides[n - 1].classList.add('animate__animated', 'animate__fadeIn');
+            
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Quiz functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('quiz-option')) {
+                const quizNum = e.target.getAttribute('data-quiz');
+                const question = e.target.closest('.mb-4');
+                
+                // Deselect other options in same question
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Select clicked option
+                e.target.classList.add('selected');
+            }
+        });
+
+        function checkQuiz(quizNum) {
+            const quizDiv = document.querySelector(`#quiz${quizNum}`);
+            const questions = quizDiv.querySelectorAll('.mb-4');
+            let correct = 0;
+            let total = questions.length;
+            let allAnswered = true;
+
+            questions.forEach(question => {
+                const selected = question.querySelector('.quiz-option.selected');
+                if (!selected) {
+                    allAnswered = false;
+                } else if (selected.getAttribute('data-answer') === 'correct') {
+                    correct++;
+                }
+            });
+
+            if (!allAnswered) {
+                Swal.fire({
+                    title: 'Atención',
+                    text: 'Por favor responde todas las preguntas antes de verificar.',
+                    icon: 'warning',
+                    confirmButtonColor: '#4facfe'
+                });
+                return;
+            }
+
+            const percentage = Math.round((correct / total) * 100);
+            quizScores[quizNum] = percentage;
+            quizCompleted[quizNum] = true;
+
+            let icon = percentage >= 70 ? 'success' : 'warning';
+            let title = percentage >= 70 ? '¡Excelente!' : '¡Bien hecho!';
+            let message = `Obtuviste ${correct} de ${total} respuestas correctas (${percentage}%)`;
+
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: icon,
+                confirmButtonColor: '#4facfe',
+                confirmButtonText: 'Continuar'
+            }).then(() => {
+                nextSlide();
+                
+                // Update final score if on last quiz
+                if (quizNum === 3) {
+                    updateFinalScore();
+                }
+            });
+        }
+
+        function updateFinalScore() {
+            const scores = Object.values(quizScores);
+            const totalScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+            
+            document.getElementById('finalScore').textContent = totalScore;
+            
+            const scoreMessage = document.getElementById('scoreMessage');
+            if (totalScore >= 80) {
+                scoreMessage.innerHTML = '<i class="fas fa-star text-warning"></i> <strong>¡Sobresaliente!</strong> Dominas SQLite';
+                scoreMessage.className = 'mt-3 text-success';
+            } else if (totalScore >= 60) {
+                scoreMessage.innerHTML = '<i class="fas fa-thumbs-up text-primary"></i> <strong>¡Aprobado!</strong> Buen conocimiento de SQLite';
+                scoreMessage.className = 'mt-3 text-primary';
+            } else {
+                scoreMessage.innerHTML = '<i class="fas fa-book-reader text-info"></i> <strong>Sigue practicando</strong> para mejorar';
+                scoreMessage.className = 'mt-3 text-info';
+            }
+
+            // Enable certificate button if passed
+            if (totalScore >= 60) {
+                document.getElementById('certButton').disabled = false;
+            }
+        }
+
+        async function generateCertificate() {
+            const { value: studentName } = await Swal.fire({
+                title: 'Genera tu Certificado',
+                html: `
+                    <p style="margin-bottom: 20px;">Ingresa tu nombre completo para generar el certificado:</p>
+                    <input id="swal-input-name" class="swal2-input" placeholder="Tu nombre completo" style="width: 80%; font-size: 1rem;">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonColor: '#4facfe',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Generar Certificado',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const name = document.getElementById('swal-input-name').value;
+                    if (!name || name.trim() === '') {
+                        Swal.showValidationMessage('Por favor ingresa tu nombre');
+                        return false;
+                    }
+                    return name.trim();
+                }
+            });
+
+            if (!studentName) return;
+
+            // Show loading
+            Swal.fire({
+                title: 'Generando certificado...',
+                html: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>',
+                allowOutsideClick: false,
+                showConfirmButton: false
+            });
+
+            try {
+                const scores = Object.values(quizScores);
+                const percentage = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+                
+                // Generate certificate ID
+                const studentId = 'SQL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                // Get current date
+                const currentDate = new Date().toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Create PDF using jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                // Background color
+                doc.setFillColor(248, 249, 250);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Border
+                doc.setDrawColor(79, 172, 254);
+                doc.setLineWidth(3);
+                doc.rect(10, 10, 277, 190);
+                
+                // Inner border
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(180, 180, 180);
+                doc.rect(15, 15, 267, 180);
+                
+                // Header decoration
+                doc.setFillColor(79, 172, 254);
+                doc.rect(0, 0, 297, 30, 'F');
+                
+                // Title
+                doc.setFontSize(32);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(255, 255, 255);
+                doc.text('CERTIFICADO DE APROBACIÓN', 148.5, 20, { align: 'center' });
+                
+                // Subtitle
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'italic');
+                doc.text('Se otorga el presente certificado a:', 148.5, 55, { align: 'center' });
+                
+                // Student name
+                doc.setFontSize(36);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(79, 172, 254);
+                doc.text(studentName, 148.5, 75, { align: 'center' });
+                
+                // Line under name
+                doc.setDrawColor(180, 180, 180);
+                doc.setLineWidth(0.3);
+                doc.line(70, 80, 227, 80);
+                
+                // Course description
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text('Por haber completado exitosamente el curso:', 148.5, 95, { align: 'center' });
+                
+                doc.setFontSize(22);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(79, 172, 254);
+                doc.text('SQLite con Node.js y Express', 148.5, 110, { align: 'center' });
+                
+                // Score with badge
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text('Calificación obtenida:', 148.5, 130, { align: 'center' });
+                
+                // Score badge
+                let badgeColor = percentage >= 80 ? [76, 175, 80] : percentage >= 60 ? [255, 193, 7] : [244, 67, 54];
+                doc.setFillColor(...badgeColor);
+                doc.roundedRect(128, 135, 41, 15, 3, 3, 'F');
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(255, 255, 255);
+                doc.text(`${percentage}%`, 148.5, 145, { align: 'center' });
+                
+                // Generate QR using API
+                const qrUrl = `https://aprobalo.com/ver.php?id=${studentId}`;
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrUrl)}`;
+                
+                // Load QR image
+                const qrImage = new Image();
+                qrImage.crossOrigin = 'anonymous';
+                qrImage.onload = function() {
+                    // QR Code with border
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(225, 135, 40, 40, 2, 2, 'F');
+                    doc.addImage(qrImage, 'PNG', 227, 137, 36, 36);
+                    
+                    // QR text
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('Escanea para verificar', 245, 180, { align: 'center' });
+                    
+                    // Additional info
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Fecha de emisión: ${currentDate}`, 25, 175);
+                    doc.text(`Certificado ID: ${studentId}`, 25, 182);
+                    
+                    // Signature/Seal
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(79, 172, 254);
+                    doc.text('Curso de SQLite - Nivel Profesional', 148.5, 165, { align: 'center' });
+                    
+                    // Download PDF
+                    doc.save(`Certificado_SQLite_${studentName.replace(/\s+/g, '_')}_${studentId}.pdf`);
+                    
+                    // Close loading and show success
+                    Swal.fire({
+                        title: '¡Certificado Generado!',
+                        html: `
+                            <div style="text-align: center;">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3" style="display: block; margin-bottom: 20px;"></i>
+                                <p class="lead" style="font-size: 1.1rem; margin-bottom: 20px;">Tu certificado ha sido descargado exitosamente.</p>
+                                <hr style="margin: 20px 0;">
+                                <div style="margin: 15px 0;">
+                                    <p style="margin: 8px 0;"><strong>Nombre:</strong> ${studentName}</p>
+                                    <p style="margin: 8px 0;"><strong>ID de Certificado:</strong> ${studentId}</p>
+                                    <p style="margin: 8px 0;"><strong>Calificación:</strong> ${percentage}%</p>
+                                </div>
+                                <hr style="margin: 20px 0;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">
+                                        <i class="fas fa-qrcode"></i> <strong>Verificación del Certificado:</strong>
+                                    </p>
+                                    <p style="margin: 10px 0; font-size: 0.85rem; color: #666;">
+                                        Escanea el código QR del certificado o visita:
+                                    </p>
+                                    <a href="${qrUrl}" target="_blank" style="color: #4facfe; text-decoration: none; font-weight: bold; word-break: break-all; display: inline-block; margin-top: 5px;">
+                                        ${qrUrl}
+                                    </a>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: '¡Perfecto!',
+                        confirmButtonColor: '#4facfe',
+                        width: 600
+                    });
+                };
+                
+                qrImage.onerror = function() {
+                    // If QR fails to load, generate certificate without QR
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('Verifica en:', 245, 155, { align: 'center' });
+                    doc.setFontSize(8);
+                    doc.text('aprobalo.com/', 245, 160, { align: 'center' });
+                    doc.text(`ver.php?id=${studentId}`, 245, 165, { align: 'center' });
+                    
+                    doc.setFontSize(11);
+                    doc.text(`Fecha de emisión: ${currentDate}`, 25, 175);
+                    doc.text(`Certificado ID: ${studentId}`, 25, 182);
+                    
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(79, 172, 254);
+                    doc.text('Curso de SQLite - Nivel Profesional', 148.5, 165, { align: 'center' });
+                    
+                    doc.save(`Certificado_SQLite_${studentName.replace(/\s+/g, '_')}_${studentId}.pdf`);
+                    
+                    Swal.fire({
+                        title: '¡Certificado Generado!',
+                        html: `
+                            <div style="text-align: center;">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                <p class="lead">Tu certificado ha sido descargado exitosamente.</p>
+                                <hr style="margin: 20px 0;">
+                                <div style="margin: 15px 0;">
+                                    <p><strong>Nombre:</strong> ${studentName}</p>
+                                    <p><strong>ID:</strong> ${studentId}</p>
+                                    <p><strong>Calificación:</strong> ${percentage}%</p>
+                                </div>
+                                <hr style="margin: 20px 0;">
+                                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                    <p><i class="fas fa-exclamation-triangle"></i> <strong>Nota:</strong> El QR no se pudo generar</p>
+                                    <p style="font-size: 0.85rem; color: #666;">Verifica tu certificado en:</p>
+                                    <a href="${qrUrl}" target="_blank" style="color: #4facfe; font-weight: bold;">${qrUrl}</a>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: '¡Perfecto!',
+                        confirmButtonColor: '#4facfe',
+                        width: 600
+                    });
+                };
+                
+                qrImage.src = qrApiUrl;
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al generar el certificado. Por favor, intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonColor: '#4facfe'
+                });
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

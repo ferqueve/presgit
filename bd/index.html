@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bases de Datos - Presentación Interactiva</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px auto;
+            max-width: 1200px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+        
+        .icon-box {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .icon-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .icon-box i {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .model-diagram {
+            background: #f8f9fa;
+            border-left: 4px solid var(--secondary-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .comparison-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn-question {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-question:hover {
+            background: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: var(--accent-color);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .entity-box {
+            border: 2px solid var(--secondary-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+            background: white;
+            text-align: center;
+        }
+        
+        .attribute {
+            background: #e8f4f8;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        
+        .relationship {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+        
+        .quiz-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .quiz-question {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .quiz-option {
+            background: #e9ecef;
+            padding: 12px 20px;
+            margin: 8px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .key-point {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: white;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-indicator" id="progressBar"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#inicio">
+                <i class="fas fa-database"></i> Bases de Datos
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#introduccion">Introducción</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#conceptos">Conceptos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#mer">MER</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#mr">MR</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#fisico">Físico</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#cuestionario">Cuestionario</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div style="height: 80px;"></div>
+    
+    <!-- Sección de Inicio -->
+    <section id="inicio" class="section animate__animated animate__fadeIn">
+        <div class="text-center">
+            <i class="fas fa-database fa-5x text-primary mb-4 animate__animated animate__bounceIn"></i>
+            <h1 class="display-3 fw-bold animate__animated animate__fadeInDown">Bases de Datos</h1>
+            <p class="lead animate__animated animate__fadeInUp">Un viaje completo desde los archivos hasta el modelo físico</p>
+            <button class="btn btn-question mt-4" onclick="iniciarPresentacion()">
+                <i class="fas fa-play"></i> Comenzar Presentación
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 1: ¿Por qué NO archivos? -->
+    <section id="introduccion" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-file-excel"></i> ¿Por qué NO usar archivos?
+        </h2>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="icon-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Redundancia de Datos</h4>
+                    <p>La misma información se repite en múltiples lugares, desperdiciando espacio y causando inconsistencias.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="icon-box">
+                    <i class="fas fa-ban"></i>
+                    <h4>Falta de Integridad</h4>
+                    <p>No hay mecanismos para garantizar que los datos sean válidos y consistentes.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="icon-box">
+                    <i class="fas fa-users-slash"></i>
+                    <h4>Concurrencia Limitada</h4>
+                    <p>Múltiples usuarios no pueden acceder simultáneamente sin riesgo de corrupción de datos.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="icon-box">
+                    <i class="fas fa-search-minus"></i>
+                    <h4>Consultas Ineficientes</h4>
+                    <p>Buscar información requiere leer todo el archivo secuencialmente.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="model-diagram mt-4">
+            <h5><i class="fas fa-code"></i> Ejemplo: Problema con Archivos</h5>
+            <div class="code-block">
+// Archivo: estudiantes.txt
+Juan Pérez, Ingeniería, Prof. García
+María López, Ingeniería, Prof. García  // Redundancia del profesor
+Carlos Ruiz, Medicina, Dra. Torres
+
+// Problemas:
+// 1. ¿Qué pasa si cambio el nombre del Prof. García?
+// 2. ¿Cómo busco todos los estudiantes de Ingeniería?
+// 3. ¿Qué pasa si dos personas modifican a la vez?
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta1()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 2: Conceptos Fundamentales -->
+    <section id="conceptos" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-lightbulb"></i> Conceptos Fundamentales de Bases de Datos
+        </h2>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="model-diagram">
+                    <h4><i class="fas fa-database"></i> ¿Qué es una Base de Datos?</h4>
+                    <p>Una <span class="highlight">base de datos</span> es una colección organizada de datos estructurados que se almacenan electrónicamente en un sistema informático, diseñada para ser accedida, gestionada y actualizada de manera eficiente.</p>
+                </div>
+                
+                <div class="model-diagram">
+                    <h4><i class="fas fa-cogs"></i> Sistema de Gestión de Base de Datos (SGBD)</h4>
+                    <p>Un <span class="highlight">SGBD</span> es el software que permite crear, mantener y manipular bases de datos. Ejemplos: MySQL, PostgreSQL, Oracle, SQL Server, MongoDB.</p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="icon-box">
+                                <i class="fas fa-shield-alt"></i>
+                                <h6>Seguridad</h6>
+                                <p>Control de acceso y permisos</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="icon-box">
+                                <i class="fas fa-sync"></i>
+                                <h6>Transacciones</h6>
+                                <p>ACID: Atomicidad, Consistencia, Aislamiento, Durabilidad</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="icon-box">
+                                <i class="fas fa-history"></i>
+                                <h6>Respaldo</h6>
+                                <p>Backup y recuperación</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="mt-4"><i class="fas fa-list-ol"></i> Conceptos Clave</h4>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h5>1. Datos vs Información</h5>
+                    <p><strong>Datos:</strong> Hechos crudos (Ej: "25", "Juan", "2024")</p>
+                    <p><strong>Información:</strong> Datos procesados con significado (Ej: "Juan tiene 25 años en 2024")</p>
+                </div>
+                
+                <div class="model-diagram">
+                    <h5>3. Abstracción de Datos</h5>
+                    <ul>
+                        <li><strong>Nivel Físico:</strong> Cómo se almacenan los datos</li>
+                        <li><strong>Nivel Lógico:</strong> Qué datos se almacenan</li>
+                        <li><strong>Nivel de Vista:</strong> Cómo los usuarios ven los datos</li>
+                    </ul>
+                </div>
+                
+                <div class="model-diagram">
+                    <h5>5. Independencia de Datos</h5>
+                    <p><strong>Física:</strong> Cambios en el almacenamiento no afectan las aplicaciones</p>
+                    <p><strong>Lógica:</strong> Cambios en la estructura no afectan las aplicaciones</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h5>2. Esquema vs Instancia</h5>
+                    <p><strong>Esquema:</strong> Estructura de la BD (diseño)</p>
+                    <p><strong>Instancia:</strong> Datos actuales en un momento dado</p>
+                </div>
+                
+                <div class="model-diagram">
+                    <h5>4. Integridad de Datos</h5>
+                    <p><strong>Entidad:</strong> Cada registro debe ser único</p>
+                    <p><strong>Referencial:</strong> Las referencias entre tablas deben ser válidas</p>
+                    <p><strong>Dominio:</strong> Los valores deben estar en rangos permitidos</p>
+                </div>
+                
+                <div class="model-diagram">
+                    <h5>6. Normalización</h5>
+                    <p>Proceso de organizar datos para reducir redundancia y mejorar integridad (1NF, 2NF, 3NF, BCNF)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta2()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 3: Modelo Entidad-Relación (MER) -->
+    <section id="mer" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-project-diagram"></i> Modelo Entidad-Relación (MER)
+        </h2>
+        
+        <div class="model-diagram">
+            <h4>¿Qué es el MER?</h4>
+            <p>El <span class="highlight">Modelo Entidad-Relación</span> es una herramienta de diseño conceptual que representa la estructura de una base de datos de forma visual mediante entidades, atributos y relaciones.</p>
+        </div>
+        
+        <h4 class="mt-4"><i class="fas fa-cube"></i> Componentes del MER</h4>
+        
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="entity-box">
+                    <i class="fas fa-cube fa-2x text-primary mb-2"></i>
+                    <h5>Entidades</h5>
+                    <p>Objetos o conceptos del mundo real</p>
+                    <p><small>Ej: Estudiante, Profesor, Curso</small></p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="entity-box">
+                    <i class="fas fa-tag fa-2x text-success mb-2"></i>
+                    <h5>Atributos</h5>
+                    <p>Características de las entidades</p>
+                    <p><small>Ej: nombre, edad, dirección</small></p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="entity-box">
+                    <i class="fas fa-link fa-2x text-warning mb-2"></i>
+                    <h5>Relaciones</h5>
+                    <p>Asociaciones entre entidades</p>
+                    <p><small>Ej: estudia, enseña, inscribe</small></p>
+                </div>
+            </div>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-star"></i> Tipos de Atributos</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="attribute"><i class="fas fa-key"></i> <strong>Clave:</strong> Identificador único</div>
+                <div class="attribute"><i class="fas fa-circle"></i> <strong>Simple:</strong> No divisible (Ej: edad)</div>
+                <div class="attribute"><i class="fas fa-layer-group"></i> <strong>Compuesto:</strong> Divisible (Ej: dirección)</div>
+            </div>
+            <div class="col-md-6">
+                <div class="attribute"><i class="fas fa-list"></i> <strong>Multivaluado:</strong> Múltiples valores (Ej: teléfonos)</div>
+                <div class="attribute"><i class="fas fa-calculator"></i> <strong>Derivado:</strong> Calculado (Ej: edad desde fecha_nacimiento)</div>
+                <div class="attribute"><i class="fas fa-circle-notch"></i> <strong>Opcional:</strong> Puede ser NULL</div>
+            </div>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-arrows-alt-h"></i> Cardinalidad de Relaciones</h5>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="relationship">
+                    <h6><i class="fas fa-arrow-right"></i> Uno a Uno (1:1)</h6>
+                    <p>Un estudiante tiene un único carnet</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="relationship">
+                    <h6><i class="fas fa-arrows-alt-h"></i> Uno a Muchos (1:N)</h6>
+                    <p>Un profesor enseña muchos cursos</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="relationship">
+                    <h6><i class="fas fa-exchange-alt"></i> Muchos a Muchos (N:M)</h6>
+                    <p>Estudiantes inscriben múltiples cursos</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="model-diagram mt-4">
+            <h5><i class="fas fa-diagram-project"></i> Ejemplo Completo: Sistema Universitario</h5>
+            <div class="code-block">
+ENTIDADES:
+┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│ ESTUDIANTE  │       │   CURSO     │       │  PROFESOR   │
+├─────────────┤       ├─────────────┤       ├─────────────┤
+│ *id_est     │       │ *id_curso   │       │ *id_prof    │
+│  nombre     │       │  nombre     │       │  nombre     │
+│  apellido   │       │  creditos   │       │  titulo     │
+│  email      │       │  nivel      │       │  email      │
+│  f_nacim    │       │  descripcion│       │  salario    │
+└─────────────┘       └─────────────┘       └─────────────┘
+
+RELACIONES:
+- ESTUDIANTE (N) --- INSCRIBE --- (M) CURSO
+  Atributos: fecha_inscripcion, calificacion
+  
+- PROFESOR (1) --- ENSEÑA --- (N) CURSO
+  Atributos: año, semestre
+
+* = Clave primaria
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta3()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 4: Modelo Relacional (MR) -->
+    <section id="mr" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-table"></i> Modelo Relacional (MR)
+        </h2>
+        
+        <div class="model-diagram">
+            <h4>¿Qué es el Modelo Relacional?</h4>
+            <p>El <span class="highlight">Modelo Relacional</span> representa los datos como tablas (relaciones) con filas (tuplas) y columnas (atributos). Fue propuesto por Edgar F. Codd en 1970.</p>
+        </div>
+        
+        <h4 class="mt-4"><i class="fas fa-th"></i> Componentes del Modelo Relacional</h4>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h5>Relación (Tabla)</h5>
+                    <p>Conjunto de tuplas con la misma estructura</p>
+                    <ul>
+                        <li><strong>Grado:</strong> Número de atributos</li>
+                        <li><strong>Cardinalidad:</strong> Número de tuplas</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h5>Tupla (Fila)</h5>
+                    <p>Cada registro de datos en la tabla</p>
+                    <p><small>Ejemplo: (101, "Juan", "Pérez", 20)</small></p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h5>Atributo (Columna)</h5>
+                    <p>Cada campo con un nombre y tipo de datos</p>
+                    <p><small>Ejemplo: nombre VARCHAR(50)</small></p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h5>Dominio</h5>
+                    <p>Conjunto de valores válidos para un atributo</p>
+                    <p><small>Ejemplo: edad ∈ {0, 1, 2, ..., 120}</small></p>
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="mt-4"><i class="fas fa-key"></i> Claves en el Modelo Relacional</h4>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="entity-box">
+                    <i class="fas fa-key fa-2x text-warning mb-2"></i>
+                    <h5>Clave Primaria (PK)</h5>
+                    <p>Atributo(s) que identifican únicamente cada tupla</p>
+                    <p><strong>Propiedades:</strong></p>
+                    <ul class="text-start">
+                        <li>Única</li>
+                        <li>No nula</li>
+                        <li>Inmutable</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="entity-box">
+                    <i class="fas fa-link fa-2x text-info mb-2"></i>
+                    <h5>Clave Foránea (FK)</h5>
+                    <p>Atributo que referencia la PK de otra tabla</p>
+                    <p><strong>Propósito:</strong></p>
+                    <ul class="text-start">
+                        <li>Establecer relaciones</li>
+                        <li>Mantener integridad referencial</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="entity-box">
+                    <i class="fas fa-star fa-2x text-success mb-2"></i>
+                    <h5>Clave Candidata</h5>
+                    <p>Cualquier atributo que podría ser PK</p>
+                    <p><small>Ej: email, DNI, matrícula</small></p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="entity-box">
+                    <i class="fas fa-layer-group fa-2x text-danger mb-2"></i>
+                    <h5>Clave Compuesta</h5>
+                    <p>PK formada por múltiples atributos</p>
+                    <p><small>Ej: (id_estudiante, id_curso)</small></p>
+                </div>
+            </div>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-exchange-alt"></i> Conversión de MER a MR</h5>
+        
+        <div class="model-diagram">
+            <h6>Reglas de Transformación:</h6>
+            <ol>
+                <li><strong>Entidades:</strong> Se convierten en tablas</li>
+                <li><strong>Atributos simples:</strong> Se convierten en columnas</li>
+                <li><strong>Atributos compuestos:</strong> Se descomponen en atributos simples</li>
+                <li><strong>Atributos multivaluados:</strong> Se crean tablas separadas</li>
+                <li><strong>Relaciones 1:1:</strong> FK en cualquiera de las dos tablas</li>
+                <li><strong>Relaciones 1:N:</strong> FK en el lado N</li>
+                <li><strong>Relaciones N:M:</strong> Se crea tabla intermedia con las PKs como FKs</li>
+            </ol>
+        </div>
+        
+        <div class="model-diagram mt-3">
+            <h5><i class="fas fa-code"></i> Ejemplo: Transformación a Tablas</h5>
+            <div class="code-block">
+-- TABLA: Estudiante
+CREATE TABLE Estudiante (
+    id_estudiante INT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    fecha_nacimiento DATE
+);
+
+-- TABLA: Curso
+CREATE TABLE Curso (
+    id_curso INT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    creditos INT CHECK (creditos > 0),
+    id_profesor INT,
+    FOREIGN KEY (id_profesor) REFERENCES Profesor(id_profesor)
+);
+
+-- TABLA: Inscripcion (N:M)
+CREATE TABLE Inscripcion (
+    id_estudiante INT,
+    id_curso INT,
+    fecha_inscripcion DATE,
+    calificacion DECIMAL(4,2),
+    PRIMARY KEY (id_estudiante, id_curso),
+    FOREIGN KEY (id_estudiante) REFERENCES Estudiante(id_estudiante),
+    FOREIGN KEY (id_curso) REFERENCES Curso(id_curso)
+);
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta4()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección 5: Modelo Físico -->
+    <section id="fisico" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-hdd"></i> Modelo Físico
+        </h2>
+        
+        <div class="model-diagram">
+            <h4>¿Qué es el Modelo Físico?</h4>
+            <p>El <span class="highlight">Modelo Físico</span> describe cómo se implementan y almacenan los datos en el hardware. Define estructuras de almacenamiento, índices, particiones y optimizaciones específicas del SGBD.</p>
+        </div>
+        
+        <h4 class="mt-4"><i class="fas fa-server"></i> Componentes del Modelo Físico</h4>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="icon-box">
+                    <i class="fas fa-database"></i>
+                    <h5>Tablespaces</h5>
+                    <p>Espacios de almacenamiento donde se guardan los datos físicamente</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="icon-box">
+                    <i class="fas fa-book"></i>
+                    <h5>Índices</h5>
+                    <p>Estructuras que aceleran las búsquedas y consultas</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="icon-box">
+                    <i class="fas fa-cut"></i>
+                    <h5>Particiones</h5>
+                    <p>División de tablas grandes en piezas más manejables</p>
+                </div>
+            </div>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-search"></i> Tipos de Índices</h5>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h6><i class="fas fa-tree"></i> Índice B-Tree</h6>
+                    <p>Estructura de árbol balanceado, ideal para búsquedas por rangos</p>
+                    <div class="code-block">
+CREATE INDEX idx_estudiante_apellido 
+ON Estudiante(apellido);
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h6><i class="fas fa-hashtag"></i> Índice Hash</h6>
+                    <p>Tabla hash, muy rápido para búsquedas exactas</p>
+                    <div class="code-block">
+CREATE INDEX idx_curso_codigo 
+ON Curso(codigo) USING HASH;
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h6><i class="fas fa-sort-amount-up"></i> Índice Compuesto</h6>
+                    <p>Índice sobre múltiples columnas</p>
+                    <div class="code-block">
+CREATE INDEX idx_inscripcion 
+ON Inscripcion(id_estudiante, id_curso);
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="model-diagram">
+                    <h6><i class="fas fa-star"></i> Índice Único</h6>
+                    <p>Garantiza valores únicos</p>
+                    <div class="code-block">
+CREATE UNIQUE INDEX idx_email 
+ON Estudiante(email);
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-tachometer-alt"></i> Optimización Física</h5>
+        
+        <div class="model-diagram">
+            <h6>Consideraciones de Diseño Físico:</h6>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="attribute"><i class="fas fa-compress"></i> <strong>Desnormalización:</strong> Agregar redundancia para mejorar rendimiento</div>
+                    <div class="attribute"><i class="fas fa-bolt"></i> <strong>Clustering:</strong> Organizar datos físicamente según acceso frecuente</div>
+                    <div class="attribute"><i class="fas fa-file-archive"></i> <strong>Compresión:</strong> Reducir espacio de almacenamiento</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="attribute"><i class="fas fa-th-large"></i> <strong>Buffering:</strong> Uso de memoria cache</div>
+                    <div class="attribute"><i class="fas fa-chart-line"></i> <strong>Estadísticas:</strong> Información para optimizador de consultas</div>
+                    <div class="attribute"><i class="fas fa-random"></i> <strong>Particionamiento:</strong> Horizontal o vertical</div>
+                </div>
+            </div>
+        </div>
+        
+        <h5 class="mt-4"><i class="fas fa-layer-group"></i> Ejemplo Completo: Implementación Física</h5>
+        
+        <div class="model-diagram">
+            <div class="code-block">
+-- CREACIÓN DE TABLESPACE
+CREATE TABLESPACE ts_universidad
+DATAFILE 'universidad.dbf' SIZE 500M
+AUTOEXTEND ON NEXT 100M MAXSIZE 2G;
+
+-- TABLA CON ESPECIFICACIONES FÍSICAS
+CREATE TABLE Estudiante (
+    id_estudiante INT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    fecha_nacimiento DATE,
+    ciudad VARCHAR(50)
+) TABLESPACE ts_universidad;
+
+-- ÍNDICES PARA OPTIMIZACIÓN
+CREATE INDEX idx_est_apellido ON Estudiante(apellido);
+CREATE INDEX idx_est_ciudad ON Estudiante(ciudad);
+
+-- PARTICIONAMIENTO POR RANGO
+CREATE TABLE Inscripcion (
+    id_inscripcion INT,
+    id_estudiante INT,
+    id_curso INT,
+    fecha_inscripcion DATE,
+    calificacion DECIMAL(4,2)
+)
+PARTITION BY RANGE (fecha_inscripcion) (
+    PARTITION p_2022 VALUES LESS THAN ('2023-01-01'),
+    PARTITION p_2023 VALUES LESS THAN ('2024-01-01'),
+    PARTITION p_2024 VALUES LESS THAN ('2025-01-01')
+);
+
+-- ESTADÍSTICAS PARA OPTIMIZADOR
+ANALYZE TABLE Estudiante COMPUTE STATISTICS;
+ANALYZE TABLE Inscripcion COMPUTE STATISTICS;
+            </div>
+        </div>
+        
+        <div class="comparison-table mt-4">
+            <h5 class="p-3 bg-light"><i class="fas fa-balance-scale"></i> Comparación: Conceptual vs Lógico vs Físico</h5>
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Aspecto</th>
+                        <th>Conceptual (MER)</th>
+                        <th>Lógico (MR)</th>
+                        <th>Físico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Objetivo</strong></td>
+                        <td>Qué información</td>
+                        <td>Cómo estructurar</td>
+                        <td>Cómo almacenar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Elementos</strong></td>
+                        <td>Entidades, relaciones</td>
+                        <td>Tablas, columnas, claves</td>
+                        <td>Archivos, índices, bloques</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Independencia</strong></td>
+                        <td>Totalmente independiente</td>
+                        <td>Independiente del SGBD</td>
+                        <td>Específico del SGBD</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Audiencia</strong></td>
+                        <td>Usuarios, analistas</td>
+                        <td>Diseñadores de BD</td>
+                        <td>Administradores BD (DBAs)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Detalles</strong></td>
+                        <td>Alto nivel</td>
+                        <td>Nivel medio</td>
+                        <td>Bajo nivel</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-question" onclick="pregunta5()">
+                <i class="fas fa-question-circle"></i> Verificar Conocimiento Final
+            </button>
+        </div>
+    </section>
+    
+    <!-- Sección de Cuestionario -->
+    <section id="cuestionario" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-clipboard-check"></i> Cuestionario Final
+        </h2>
+        
+        <div class="quiz-container">
+            <p class="lead text-center mb-4">Pon a prueba tus conocimientos con este cuestionario completo</p>
+            
+            <div class="quiz-question" id="q1">
+                <h5><i class="fas fa-1"></i> ¿Cuál NO es un problema de usar archivos para almacenar datos?</h5>
+                <div class="quiz-option" onclick="checkAnswer(1, 'a', false)">A) Redundancia de datos</div>
+                <div class="quiz-option" onclick="checkAnswer(1, 'b', false)">B) Dificultad para consultas complejas</div>
+                <div class="quiz-option" onclick="checkAnswer(1, 'c', true)">C) Almacenamiento en disco duro</div>
+                <div class="quiz-option" onclick="checkAnswer(1, 'd', false)">D) Falta de control de concurrencia</div>
+            </div>
+            
+            <div class="quiz-question" id="q2">
+                <h5><i class="fas fa-2"></i> En el modelo ACID, ¿qué significa la 'A'?</h5>
+                <div class="quiz-option" onclick="checkAnswer(2, 'a', true)">A) Atomicidad</div>
+                <div class="quiz-option" onclick="checkAnswer(2, 'b', false)">B) Autenticación</div>
+                <div class="quiz-option" onclick="checkAnswer(2, 'c', false)">C) Aplicación</div>
+                <div class="quiz-option" onclick="checkAnswer(2, 'd', false)">D) Actualización</div>
+            </div>
+            
+            <div class="quiz-question" id="q3">
+                <h5><i class="fas fa-3"></i> ¿Qué componente del MER representa objetos del mundo real?</h5>
+                <div class="quiz-option" onclick="checkAnswer(3, 'a', false)">A) Atributos</div>
+                <div class="quiz-option" onclick="checkAnswer(3, 'b', true)">B) Entidades</div>
+                <div class="quiz-option" onclick="checkAnswer(3, 'c', false)">C) Relaciones</div>
+                <div class="quiz-option" onclick="checkAnswer(3, 'd', false)">D) Dominios</div>
+            </div>
+            
+            <div class="quiz-question" id="q4">
+                <h5><i class="fas fa-4"></i> ¿Cómo se implementa una relación N:M en el modelo relacional?</h5>
+                <div class="quiz-option" onclick="checkAnswer(4, 'a', false)">A) Con una clave foránea en una de las tablas</div>
+                <div class="quiz-option" onclick="checkAnswer(4, 'b', true)">B) Con una tabla intermedia</div>
+                <div class="quiz-option" onclick="checkAnswer(4, 'c', false)">C) Con atributos multivaluados</div>
+                <div class="quiz-option" onclick="checkAnswer(4, 'd', false)">D) No se puede implementar</div>
+            </div>
+            
+            <div class="quiz-question" id="q5">
+                <h5><i class="fas fa-5"></i> ¿Cuál es la función principal de un índice en el modelo físico?</h5>
+                <div class="quiz-option" onclick="checkAnswer(5, 'a', false)">A) Garantizar integridad referencial</div>
+                <div class="quiz-option" onclick="checkAnswer(5, 'b', false)">B) Normalizar los datos</div>
+                <div class="quiz-option" onclick="checkAnswer(5, 'c', true)">C) Acelerar las búsquedas</div>
+                <div class="quiz-option" onclick="checkAnswer(5, 'd', false)">D) Crear respaldos automáticos</div>
+            </div>
+            
+            <div class="quiz-question" id="q6">
+                <h5><i class="fas fa-6"></i> ¿Qué característica NO es propia de una clave primaria?</h5>
+                <div class="quiz-option" onclick="checkAnswer(6, 'a', false)">A) Debe ser única</div>
+                <div class="quiz-option" onclick="checkAnswer(6, 'b', false)">B) No puede ser nula</div>
+                <div class="quiz-option" onclick="checkAnswer(6, 'c', true)">C) Puede cambiar frecuentemente</div>
+                <div class="quiz-option" onclick="checkAnswer(6, 'd', false)">D) Identifica cada tupla</div>
+            </div>
+            
+            <div class="quiz-question" id="q7">
+                <h5><i class="fas fa-7"></i> ¿Qué tipo de cardinalidad representa "Un profesor enseña muchos cursos"?</h5>
+                <div class="quiz-option" onclick="checkAnswer(7, 'a', false)">A) Muchos a Muchos (N:M)</div>
+                <div class="quiz-option" onclick="checkAnswer(7, 'b', true)">B) Uno a Muchos (1:N)</div>
+                <div class="quiz-option" onclick="checkAnswer(7, 'c', false)">C) Uno a Uno (1:1)</div>
+                <div class="quiz-option" onclick="checkAnswer(7, 'd', false)">D) Muchos a Uno (N:1)</div>
+            </div>
+            
+            <div class="quiz-question" id="q8">
+                <h5><i class="fas fa-8"></i> ¿Qué es el particionamiento en el modelo físico?</h5>
+                <div class="quiz-option" onclick="checkAnswer(8, 'a', false)">A) Dividir la base de datos en múltiples servidores</div>
+                <div class="quiz-option" onclick="checkAnswer(8, 'b', true)">B) Dividir tablas grandes en piezas más manejables</div>
+                <div class="quiz-option" onclick="checkAnswer(8, 'c', false)">C) Crear índices compuestos</div>
+                <div class="quiz-option" onclick="checkAnswer(8, 'd', false)">D) Normalizar las relaciones</div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button class="btn btn-question" onclick="mostrarResultados()">
+                    <i class="fas fa-chart-bar"></i> Ver Resultados
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Sección de Resumen -->
+    <section id="resumen" class="section animate__animated animate__fadeIn">
+        <h2 class="section-header">
+            <i class="fas fa-graduation-cap"></i> Resumen Final
+        </h2>
+        
+        <div class="summary-card">
+            <h3 class="text-center mb-4"><i class="fas fa-award"></i> ¡Conceptos Clave Aprendidos!</h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="key-point">
+                        <h5><i class="fas fa-file-excel"></i> Archivos vs Bases de Datos</h5>
+                        <p>Los archivos presentan problemas de redundancia, inconsistencia, concurrencia y dificultad para consultas. Las bases de datos solucionan estos problemas mediante SGBDs.</p>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h5><i class="fas fa-project-diagram"></i> Modelo Entidad-Relación</h5>
+                        <p>Representación conceptual mediante entidades, atributos y relaciones. Define ESTRUCTURA y SIGNIFICADO sin implementación.</p>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h5><i class="fas fa-hdd"></i> Modelo Físico</h5>
+                        <p>Implementación real con índices, particiones, tablespaces. Optimización del RENDIMIENTO y ALMACENAMIENTO.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="key-point">
+                        <h5><i class="fas fa-cogs"></i> Conceptos Fundamentales</h5>
+                        <p>SGBD, ACID, integridad, independencia de datos, abstracción de datos, normalización y transacciones.</p>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h5><i class="fas fa-table"></i> Modelo Relacional</h5>
+                        <p>Implementación lógica mediante tablas con claves primarias y foráneas. Transformación del MER a estructuras relacionales.</p>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h5><i class="fas fa-route"></i> Flujo de Diseño</h5>
+                        <p>MER (Conceptual) → MR (Lógico) → Físico (Implementación). Cada nivel agrega más detalles técnicos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="model-diagram mt-4">
+            <h4 class="text-center"><i class="fas fa-map-marked-alt"></i> Mapa Conceptual Completo</h4>
+            <div class="code-block">
+BASES DE DATOS
+│
+├── PROBLEMAS CON ARCHIVOS
+│   ├── Redundancia
+│   ├── Inconsistencia
+│   ├── Concurrencia limitada
+│   └── Consultas ineficientes
+│
+├── CONCEPTOS FUNDAMENTALES
+│   ├── SGBD (MySQL, PostgreSQL, Oracle)
+│   ├── ACID (Atomicidad, Consistencia, Aislamiento, Durabilidad)
+│   ├── Integridad (Entidad, Referencial, Dominio)
+│   ├── Independencia (Física, Lógica)
+│   └── Normalización (1NF, 2NF, 3NF, BCNF)
+│
+├── MODELO ENTIDAD-RELACIÓN (MER)
+│   ├── Entidades → Objetos del mundo real
+│   ├── Atributos → Características
+│   │   ├── Simple/Compuesto
+│   │   ├── Multivaluado
+│   │   └── Derivado
+│   └── Relaciones → Asociaciones
+│       ├── 1:1 (Uno a Uno)
+│       ├── 1:N (Uno a Muchos)
+│       └── N:M (Muchos a Muchos)
+│
+├── MODELO RELACIONAL (MR)
+│   ├── Tablas (Relaciones)
+│   ├── Tuplas (Filas)
+│   ├── Atributos (Columnas)
+│   └── Claves
+│       ├── Primaria (PK)
+│       ├── Foránea (FK)
+│       ├── Candidata
+│       └── Compuesta
+│
+└── MODELO FÍSICO
+    ├── Tablespaces
+    ├── Índices
+    │   ├── B-Tree
+    │   ├── Hash
+    │   └── Compuesto
+    ├── Particiones
+    └── Optimización
+        ├── Desnormalización
+        ├── Clustering
+        └── Compresión
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <h4><i class="fas fa-rocket"></i> ¡Siguiente Paso: Práctica!</h4>
+            <p class="lead">Ahora que dominas los conceptos, es momento de aplicarlos en proyectos reales.</p>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-code"></i>
+                        <h5>Practica SQL</h5>
+                        <p>Crea y manipula bases de datos reales</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-project-diagram"></i>
+                        <h5>Diseña Modelos</h5>
+                        <p>Crea MER para diferentes escenarios</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box">
+                        <i class="fas fa-chart-line"></i>
+                        <h5>Optimiza</h5>
+                        <p>Aprende técnicas avanzadas de performance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p><i class="fas fa-database"></i> Presentación Interactiva de Bases de Datos</p>
+        <p>Conceptos fundamentales desde archivos hasta modelo físico</p>
+        <p><small>© 2024 - Material Educativo</small></p>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript Personalizado -->
+    <script>
+        // Variables globales
+        let respuestasCorrectas = 0;
+        let respuestasCuestionario = {};
+        
+        // Función de inicio
+        function iniciarPresentacion() {
+            Swal.fire({
+                title: '¡Bienvenido!',
+                html: `
+                    <p>Esta presentación cubre:</p>
+                    <ul style="text-align: left;">
+                        <li>Por qué no usar archivos</li>
+                        <li>Conceptos fundamentales de BD</li>
+                        <li>Modelo Entidad-Relación (MER)</li>
+                        <li>Modelo Relacional (MR)</li>
+                        <li>Modelo Físico</li>
+                    </ul>
+                    <p><strong>Incluye preguntas interactivas para verificar tu aprendizaje.</strong></p>
+                `,
+                icon: 'info',
+                confirmButtonText: '¡Empecemos! <i class="fas fa-arrow-right"></i>',
+                confirmButtonColor: '#3498db'
+            });
+        }
+        
+        // Preguntas intermedias
+        function pregunta1() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: '¿Cuál es el principal problema al usar archivos para almacenar datos de una empresa?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Redundancia',
+                denyButtonText: 'Velocidad',
+                cancelButtonText: 'Espacio',
+                confirmButtonColor: '#27ae60',
+                denyButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Correcto!',
+                        html: 'La <strong>redundancia</strong> es uno de los mayores problemas. Los datos se repiten causando inconsistencias y desperdicio de espacio.',
+                        icon: 'success',
+                        confirmButtonColor: '#27ae60'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'No exactamente...',
+                        html: 'La respuesta correcta es <strong>redundancia</strong>. Los mismos datos se repiten en múltiples archivos.',
+                        icon: 'info',
+                        confirmButtonColor: '#3498db'
+                    });
+                }
+            });
+        }
+        
+        function pregunta2() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: '¿Qué garantiza ACID en las transacciones de bases de datos?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Confiabilidad',
+                denyButtonText: 'Velocidad',
+                cancelButtonText: 'Simplicidad',
+                confirmButtonColor: '#27ae60',
+                denyButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Excelente!',
+                        html: 'ACID garantiza la <strong>confiabilidad</strong> de las transacciones:<br><br>' +
+                              '<strong>A</strong>tomicidad: Todo o nada<br>' +
+                              '<strong>C</strong>onsistencia: Datos válidos<br>' +
+                              '<strong>I</strong>solation: Transacciones independientes<br>' +
+                              '<strong>D</strong>urabilidad: Cambios permanentes',
+                        icon: 'success',
+                        confirmButtonColor: '#27ae60'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Piénsalo de nuevo...',
+                        html: 'ACID garantiza la <strong>confiabilidad</strong> de las transacciones, no velocidad ni simplicidad.',
+                        icon: 'info',
+                        confirmButtonColor: '#3498db'
+                    });
+                }
+            });
+        }
+        
+        function pregunta3() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: 'En el MER, ¿cómo se representa una relación muchos a muchos?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Con dos líneas',
+                denyButtonText: 'Con un rombo',
+                cancelButtonText: 'Con un círculo',
+                confirmButtonColor: '#27ae60',
+                denyButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6'
+            }).then((result) => {
+                if (result.isDenied) {
+                    Swal.fire({
+                        title: '¡Correcto!',
+                        html: 'Las relaciones se representan con un <strong>rombo</strong> en el diagrama MER. La cardinalidad N:M se indica en las líneas.',
+                        icon: 'success',
+                        confirmButtonColor: '#27ae60'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Incorrecto',
+                        html: 'Las relaciones se representan con un <strong>rombo</strong>, no con líneas o círculos.',
+                        icon: 'error',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            });
+        }
+        
+        function pregunta4() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: '¿Qué es una clave foránea (Foreign Key)?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Referencia a otra tabla',
+                denyButtonText: 'Campo único',
+                cancelButtonText: 'Campo calculado',
+                confirmButtonColor: '#27ae60',
+                denyButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Perfecto!',
+                        html: 'Una clave foránea es un atributo que <strong>referencia la clave primaria de otra tabla</strong>, estableciendo relaciones entre tablas.',
+                        icon: 'success',
+                        confirmButtonColor: '#27ae60'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'No es correcto',
+                        html: 'Una clave foránea <strong>referencia a otra tabla</strong> para establecer relaciones.',
+                        icon: 'info',
+                        confirmButtonColor: '#3498db'
+                    });
+                }
+            });
+        }
+        
+        function pregunta5() {
+            Swal.fire({
+                title: 'Pregunta de Verificación',
+                text: '¿Para qué sirve un índice B-Tree en el modelo físico?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Acelerar búsquedas',
+                denyButtonText: 'Guardar datos',
+                cancelButtonText: 'Crear respaldos',
+                confirmButtonColor: '#27ae60',
+                denyButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '¡Excelente!',
+                        html: 'Los índices B-Tree <strong>aceleran las búsquedas</strong> organizando los datos en una estructura de árbol balanceado.',
+                        icon: 'success',
+                        confirmButtonColor: '#27ae60'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Incorrecto',
+                        html: 'Los índices B-Tree sirven para <strong>acelerar búsquedas</strong>, no para guardar datos ni crear respaldos.',
+                        icon: 'error',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            });
+        }
+        
+        // Sistema de cuestionario
+        function checkAnswer(questionNum, option, isCorrect) {
+            respuestasCuestionario[questionNum] = isCorrect;
+            
+            const questionElement = document.getElementById(`q${questionNum}`);
+            const options = questionElement.querySelectorAll('.quiz-option');
+            
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                opt.style.opacity = '0.6';
+            });
+            
+            if (isCorrect) {
+                event.target.style.background = '#27ae60';
+                event.target.style.color = 'white';
+                event.target.innerHTML += ' <i class="fas fa-check"></i>';
+            } else {
+                event.target.style.background = '#e74c3c';
+                event.target.style.color = 'white';
+                event.target.innerHTML += ' <i class="fas fa-times"></i>';
+            }
+        }
+        
+        function mostrarResultados() {
+            const total = Object.keys(respuestasCuestionario).length;
+            const correctas = Object.values(respuestasCuestionario).filter(v => v === true).length;
+            const porcentaje = (correctas / 8) * 100;
+            
+            let mensaje = '';
+            let icono = '';
+            
+            if (porcentaje >= 80) {
+                mensaje = '¡Excelente trabajo! Dominas los conceptos.';
+                icono = 'success';
+            } else if (porcentaje >= 60) {
+                mensaje = '¡Bien hecho! Hay algunos conceptos que podrías repasar.';
+                icono = 'info';
+            } else {
+                mensaje = 'Te recomiendo revisar el material nuevamente.';
+                icono = 'warning';
+            }
+            
+            Swal.fire({
+                title: 'Resultados del Cuestionario',
+                html: `
+                    <div style="font-size: 1.2em;">
+                        <p><strong>Respuestas correctas:</strong> ${correctas} de 8</p>
+                        <p><strong>Porcentaje:</strong> ${porcentaje.toFixed(1)}%</p>
+                        <hr>
+                        <p>${mensaje}</p>
+                    </div>
+                `,
+                icon: icono,
+                confirmButtonText: 'Ver Resumen Final',
+                confirmButtonColor: '#3498db'
+            }).then(() => {
+                document.getElementById('resumen').scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+        
+        // Barra de progreso al hacer scroll
+        window.addEventListener('scroll', function() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+        
+        // Smooth scroll para navegación
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Animaciones al hacer scroll
+        const observerOptions = {
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

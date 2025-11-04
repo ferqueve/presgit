@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H2 Database con Node.js - Curso Interactivo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .presentation-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: 600px;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-header {
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .slide-title {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 2.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        
+        .code-comment {
+            color: #a0aec0;
+        }
+        
+        .code-keyword {
+            color: #f687b3;
+        }
+        
+        .code-string {
+            color: #fbd38d;
+        }
+        
+        .navigation {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn-custom:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        
+        .quiz-option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+            transform: translateX(10px);
+        }
+        
+        .quiz-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .progress-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .icon-large {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+        
+        .highlight-box {
+            background: #fef5e7;
+            border-left: 5px solid #f39c12;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 10px 0;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .comparison-table {
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+        }
+        
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        table tr:hover {
+            background: #f7fafc;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator animate__animated animate__fadeInDown">
+        <i class="fas fa-database"></i>
+        <strong>Diapositiva: <span id="currentSlide">1</span>/<span id="totalSlides">22</span></strong>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Portada -->
+        <div class="slide active animate__animated animate__fadeIn" data-slide="1">
+            <div class="text-center">
+                <i class="fas fa-database icon-large animate__animated animate__bounceIn" style="color: #667eea;"></i>
+                <h1 class="slide-title animate__animated animate__fadeInUp">H2 Database</h1>
+                <h3 class="mt-3">Base de Datos en Memoria con Node.js</h3>
+                <p class="lead mt-4">Aprende a integrar H2 en aplicaciones Node.js + Express</p>
+                <div class="mt-5">
+                    <p class="text-muted">
+                        <i class="fas fa-code me-2"></i> Ejercicios Prácticos | 
+                        <i class="fas fa-award ms-3 me-2"></i> Certificado al Aprobar
+                    </p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()" disabled>
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 2: ¿Qué es H2? -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>¿Qué es H2 Database?</h2>
+            </div>
+            
+            <p class="lead">H2 es una base de datos relacional escrita en Java, <strong>rápida, de código abierto</strong> y que puede funcionar completamente <strong>en memoria o persistente en disco</strong>.</p>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-bolt me-2"></i>Características Principales</h4>
+                        <ul class="mt-3">
+                            <li>Base de datos embebida y servidor</li>
+                            <li>Muy rápida y liviana (2 MB)</li>
+                            <li>100% Java JDBC compatible</li>
+                            <li>Compatible con SQL estándar</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-check-circle me-2"></i>Ventajas</h4>
+                        <ul class="mt-3">
+                            <li>Modo in-memory ultra rápido</li>
+                            <li>Ideal para testing y desarrollo</li>
+                            <li>Consola web integrada</li>
+                            <li>Fácil integración con Node.js</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="highlight-box mt-4">
+                <strong><i class="fas fa-lightbulb me-2"></i>¿Cuándo usar H2?</strong>
+                <p class="mb-0 mt-2">Testing, prototipos rápidos, aplicaciones embebidas, desarrollo local, y aplicaciones que necesitan una BD ligera.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Modos de Operación -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-server me-3"></i>Modos de Operación</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-memory fa-3x mb-3"></i>
+                        <h4>In-Memory</h4>
+                        <p class="small">Base de datos almacenada completamente en RAM. Ultra rápida pero volátil.</p>
+                        <code style="background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">jdbc:h2:mem:testdb</code>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-hdd fa-3x mb-3"></i>
+                        <h4>Embedded</h4>
+                        <p class="small">Base de datos persistente en disco. Datos guardados entre reinicios.</p>
+                        <code style="background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">jdbc:h2:file:./data/mydb</code>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-network-wired fa-3x mb-3"></i>
+                        <h4>Servidor</h4>
+                        <p class="small">Modo cliente-servidor. Múltiples conexiones simultáneas.</p>
+                        <code style="background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">jdbc:h2:tcp://localhost/~/test</code>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box mt-4">
+                <strong><i class="fas fa-info-circle me-2"></i>Nota Importante:</strong>
+                <p class="mb-0 mt-2">El modo <strong>in-memory</strong> es perfecto para testing ya que cada ejecución comienza con una BD limpia. El modo <strong>embedded</strong> es ideal para desarrollo cuando necesitas persistir datos.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Instalación con Node.js -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-download me-3"></i>Instalación con Node.js</h2>
+            </div>
+            
+            <p class="lead">Para usar H2 en Node.js, necesitamos el driver JDBC y un puente Java-JavaScript.</p>
+            
+            <h4 class="mt-4"><i class="fas fa-terminal me-2"></i>Paso 1: Instalar dependencias</h4>
+            <div class="code-block">
+<span class="code-comment"># Instalar el módulo jdbc para Node.js</span>
+npm install jdbc h2-database-driver
+
+<span class="code-comment"># O usando la biblioteca más moderna</span>
+npm install node-java-bridge h2
+            </div>
+            
+            <h4 class="mt-4"><i class="fas fa-file-code me-2"></i>Paso 2: Estructura del proyecto</h4>
+            <div class="code-block">
+my-project/
+├── server.js           <span class="code-comment"># Archivo principal</span>
+├── config/
+│   └── database.js     <span class="code-comment"># ⭐ Configuración de BD (BUENA PRÁCTICA)</span>
+├── routes/
+│   └── users.js        <span class="code-comment"># Rutas de la aplicación</span>
+└── package.json
+            </div>
+            
+            <div class="success-box mt-4">
+                <strong><i class="fas fa-check-circle me-2"></i>Buena Práctica:</strong>
+                <p class="mb-0 mt-2">Siempre separa la configuración de la base de datos en un archivo independiente. Esto facilita el mantenimiento, cambios de entorno (dev/prod), y evita duplicación de código.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 5: Archivo de Configuración (database.js) -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-cog me-3"></i>Archivo de Configuración: database.js</h2>
+            </div>
+            
+            <p class="lead">⭐ <strong>BUENA PRÁCTICA:</strong> Crear un archivo separado para la configuración de la base de datos.</p>
+            
+            <h5 class="mt-4"><strong>config/database.js</strong></h5>
+            <div class="code-block">
+<span class="code-comment">// config/database.js - Configuración centralizada de H2</span>
+<span class="code-keyword">const</span> JDBC = <span class="code-keyword">require</span>(<span class="code-string">'jdbc'</span>);
+<span class="code-keyword">const</span> path = <span class="code-keyword">require</span>(<span class="code-string">'path'</span>);
+
+<span class="code-comment">// Configuración de H2</span>
+<span class="code-keyword">const</span> dbConfig = {
+  url: <span class="code-string">'jdbc:h2:mem:testdb'</span>,      <span class="code-comment">// In-memory mode</span>
+  drivername: <span class="code-string">'org.h2.Driver'</span>,
+  user: <span class="code-string">'sa'</span>,
+  password: <span class="code-string">''</span>,
+  minpoolsize: 2,
+  maxpoolsize: 10
+};
+
+<span class="code-comment">// Alternativa: Modo persistente (archivo en disco)</span>
+<span class="code-comment">// url: 'jdbc:h2:file:./data/mydb'</span>
+
+<span class="code-comment">// Inicializar JDBC</span>
+<span class="code-keyword">const</span> jdbc = <span class="code-keyword">new</span> JDBC(dbConfig);
+
+<span class="code-comment">// Función para obtener conexión</span>
+<span class="code-keyword">const</span> getConnection = <span class="code-keyword">async</span> () => {
+  <span class="code-keyword">return new Promise</span>((resolve, reject) => {
+    jdbc.initialize((err) => {
+      <span class="code-keyword">if</span> (err) {
+        reject(err);
+      } <span class="code-keyword">else</span> {
+        resolve(jdbc);
+      }
+    });
+  });
+};
+
+<span class="code-keyword">module.exports</span> = { getConnection, jdbc };
+            </div>
+            
+            <div class="highlight-box mt-3">
+                <strong><i class="fas fa-star me-2"></i>Ventajas de este enfoque:</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Fácil cambio entre modos (memoria/disco/servidor)</li>
+                    <li>Configuración centralizada en un solo lugar</li>
+                    <li>Reutilizable en toda la aplicación</li>
+                    <li>Facilita testing con diferentes configuraciones</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 6: Server.js - Aplicación Express -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-server me-3"></i>Server.js - Aplicación Express</h2>
+            </div>
+            
+            <p>Ahora usamos la configuración de BD en nuestro servidor Express:</p>
+            
+            <div class="code-block">
+<span class="code-comment">// server.js</span>
+<span class="code-keyword">const</span> express = <span class="code-keyword">require</span>(<span class="code-string">'express'</span>);
+<span class="code-keyword">const</span> { getConnection } = <span class="code-keyword">require</span>(<span class="code-string">'./config/database'</span>);
+
+<span class="code-keyword">const</span> app = express();
+<span class="code-keyword">const</span> PORT = 3000;
+
+app.use(express.json());
+
+<span class="code-comment">// Inicializar base de datos y crear tabla</span>
+<span class="code-keyword">async function</span> initDatabase() {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> db = <span class="code-keyword">await</span> getConnection();
+    
+    <span class="code-comment">// Crear tabla usuarios si no existe</span>
+    <span class="code-keyword">const</span> createTableSQL = `
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(100),
+        email VARCHAR(100),
+        edad INT
+      )
+    `;
+    
+    <span class="code-keyword">await</span> db.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">if</span> (err) <span class="code-keyword">throw</span> err;
+      
+      conn.conn.createStatement().execute(createTableSQL);
+      console.log(<span class="code-string">'✅ Tabla usuarios creada'</span>);
+    });
+    
+  } <span class="code-keyword">catch</span> (error) {
+    console.error(<span class="code-string">'❌ Error al inicializar BD:'</span>, error);
+  }
+}
+
+<span class="code-comment">// Iniciar servidor</span>
+app.listen(PORT, <span class="code-keyword">async</span> () => {
+  <span class="code-keyword">await</span> initDatabase();
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 7: CRUD - Crear (POST) -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-plus-circle me-3"></i>CRUD: Crear Usuario (POST)</h2>
+            </div>
+            
+            <p class="lead">Ruta para crear un nuevo usuario en la base de datos:</p>
+            
+            <div class="code-block">
+<span class="code-comment">// server.js (continuación)</span>
+<span class="code-keyword">const</span> { jdbc } = <span class="code-keyword">require</span>(<span class="code-string">'./config/database'</span>);
+
+<span class="code-comment">// POST: Crear nuevo usuario</span>
+app.post(<span class="code-string">'/api/usuarios'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> { nombre, email, edad } = req.body;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">if</span> (err) <span class="code-keyword">throw</span> err;
+      
+      <span class="code-keyword">const</span> sql = <span class="code-string">'INSERT INTO usuarios (nombre, email, edad) VALUES (?, ?, ?)'</span>;
+      <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(sql);
+      
+      stmt.setString(1, nombre);
+      stmt.setString(2, email);
+      stmt.setInt(3, edad);
+      
+      stmt.executeUpdate();
+      
+      res.status(201).json({ 
+        success: <span class="code-keyword">true</span>, 
+        message: <span class="code-string">'Usuario creado exitosamente'</span> 
+      });
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ 
+      success: <span class="code-keyword">false</span>, 
+      error: error.message 
+    });
+  }
+});
+            </div>
+            
+            <div class="info-box mt-3">
+                <strong><i class="fas fa-shield-alt me-2"></i>Seguridad:</strong>
+                <p class="mb-0 mt-2">Usar <strong>PreparedStatement</strong> con placeholders (?) previene ataques de SQL Injection.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 8: CRUD - Leer (GET) -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-list me-3"></i>CRUD: Leer Usuarios (GET)</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// GET: Obtener todos los usuarios</span>
+app.get(<span class="code-string">'/api/usuarios'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">if</span> (err) <span class="code-keyword">throw</span> err;
+      
+      <span class="code-keyword">const</span> sql = <span class="code-string">'SELECT * FROM usuarios'</span>;
+      <span class="code-keyword">const</span> stmt = conn.conn.createStatement();
+      <span class="code-keyword">const</span> resultSet = stmt.executeQuery(sql);
+      
+      <span class="code-keyword">const</span> usuarios = [];
+      <span class="code-keyword">while</span> (resultSet.next()) {
+        usuarios.push({
+          id: resultSet.getInt(<span class="code-string">'id'</span>),
+          nombre: resultSet.getString(<span class="code-string">'nombre'</span>),
+          email: resultSet.getString(<span class="code-string">'email'</span>),
+          edad: resultSet.getInt(<span class="code-string">'edad'</span>)
+        });
+      }
+      
+      res.json({ success: <span class="code-keyword">true</span>, data: usuarios });
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// GET: Obtener usuario por ID</span>
+app.get(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">if</span> (err) <span class="code-keyword">throw</span> err;
+      
+      <span class="code-keyword">const</span> sql = <span class="code-string">'SELECT * FROM usuarios WHERE id = ?'</span>;
+      <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(sql);
+      stmt.setInt(1, id);
+      
+      <span class="code-keyword">const</span> resultSet = stmt.executeQuery();
+      
+      <span class="code-keyword">if</span> (resultSet.next()) {
+        res.json({
+          success: <span class="code-keyword">true</span>,
+          data: {
+            id: resultSet.getInt(<span class="code-string">'id'</span>),
+            nombre: resultSet.getString(<span class="code-string">'nombre'</span>),
+            email: resultSet.getString(<span class="code-string">'email'</span>),
+            edad: resultSet.getInt(<span class="code-string">'edad'</span>)
+          }
+        });
+      } <span class="code-keyword">else</span> {
+        res.status(404).json({ success: <span class="code-keyword">false</span>, message: <span class="code-string">'Usuario no encontrado'</span> });
+      }
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 9: CRUD - Actualizar y Eliminar -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-edit me-3"></i>CRUD: Actualizar y Eliminar</h2>
+            </div>
+            
+            <div class="code-block">
+<span class="code-comment">// PUT: Actualizar usuario</span>
+app.put(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  <span class="code-keyword">const</span> { nombre, email, edad } = req.body;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">if</span> (err) <span class="code-keyword">throw</span> err;
+      
+      <span class="code-keyword">const</span> sql = <span class="code-string">'UPDATE usuarios SET nombre=?, email=?, edad=? WHERE id=?'</span>;
+      <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(sql);
+      
+      stmt.setString(1, nombre);
+      stmt.setString(2, email);
+      stmt.setInt(3, edad);
+      stmt.setInt(4, id);
+      
+      <span class="code-keyword">const</span> rowsAffected = stmt.executeUpdate();
+      
+      <span class="code-keyword">if</span> (rowsAffected > 0) {
+        res.json({ success: <span class="code-keyword">true</span>, message: <span class="code-string">'Usuario actualizado'</span> });
+      } <span class="code-keyword">else</span> {
+        res.status(404).json({ success: <span class="code-keyword">false</span>, message: <span class="code-string">'Usuario no encontrado'</span> });
+      }
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// DELETE: Eliminar usuario</span>
+app.delete(<span class="code-string">'/api/usuarios/:id'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> id = req.params.id;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">if</span> (err) <span class="code-keyword">throw</span> err;
+      
+      <span class="code-keyword">const</span> sql = <span class="code-string">'DELETE FROM usuarios WHERE id = ?'</span>;
+      <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(sql);
+      stmt.setInt(1, id);
+      
+      <span class="code-keyword">const</span> rowsAffected = stmt.executeUpdate();
+      
+      <span class="code-keyword">if</span> (rowsAffected > 0) {
+        res.json({ success: <span class="code-keyword">true</span>, message: <span class="code-string">'Usuario eliminado'</span> });
+      } <span class="code-keyword">else</span> {
+        res.status(404).json({ success: <span class="code-keyword">false</span>, message: <span class="code-string">'Usuario no encontrado'</span> });
+      }
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 10: Quiz 1 -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>Quiz 1: Conceptos Básicos</h2>
+            </div>
+            
+            <div id="quiz1">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Cuál es la principal ventaja del modo in-memory de H2?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Es extremadamente rápido ya que funciona completamente en RAM
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Los datos persisten entre reinicios del servidor
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Permite múltiples conexiones simultáneas desde diferentes servidores
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Por qué es una buena práctica separar la configuración de BD en un archivo database.js?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Para que el código sea más largo y complejo
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Facilita mantenimiento, cambios de entorno y reutilización
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es obligatorio por parte de Node.js
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Qué URL se usa para H2 en modo persistente (archivo en disco)?</h5>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> jdbc:h2:mem:testdb
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> jdbc:h2:file:./data/mydb
+                    </div>
+                    <div class="quiz-option" data-quiz="1" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> jdbc:h2:tcp://localhost/test
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(1)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 11: Ejercicio Práctico 1 -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-code me-3"></i>Ejercicio Práctico 1</h2>
+            </div>
+            
+            <div class="highlight-box">
+                <h4><i class="fas fa-tasks me-2"></i>Tarea: Crear una API REST completa</h4>
+                <p>Crea una aplicación Express con H2 que gestione una tabla de <strong>productos</strong>.</p>
+            </div>
+            
+            <h5 class="mt-4">Requisitos:</h5>
+            <ol>
+                <li>Crear archivo <code>config/database.js</code> con conexión H2 en modo in-memory</li>
+                <li>Crear tabla <code>productos</code> con campos:
+                    <ul>
+                        <li><code>id</code> (INT, AUTO_INCREMENT, PRIMARY KEY)</li>
+                        <li><code>nombre</code> (VARCHAR(100))</li>
+                        <li><code>precio</code> (DECIMAL(10,2))</li>
+                        <li><code>stock</code> (INT)</li>
+                    </ul>
+                </li>
+                <li>Implementar 4 rutas:
+                    <ul>
+                        <li><code>POST /api/productos</code> - Crear producto</li>
+                        <li><code>GET /api/productos</code> - Listar todos</li>
+                        <li><code>GET /api/productos/:id</code> - Obtener uno</li>
+                        <li><code>DELETE /api/productos/:id</code> - Eliminar</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="info-box mt-4">
+                <strong><i class="fas fa-lightbulb me-2"></i>Pista:</strong>
+                <p class="mb-0">Usa <code>PreparedStatement</code> para todas las operaciones que involucren datos del usuario.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Ver Solución <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 12: Solución Ejercicio 1 -->
+        <div class="slide" data-slide="12">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-check-circle me-3"></i>Solución Ejercicio 1</h2>
+            </div>
+            
+            <h5>config/database.js</h5>
+            <div class="code-block" style="max-height: 200px; overflow-y: auto;">
+<span class="code-keyword">const</span> JDBC = <span class="code-keyword">require</span>(<span class="code-string">'jdbc'</span>);
+
+<span class="code-keyword">const</span> dbConfig = {
+  url: <span class="code-string">'jdbc:h2:mem:productdb'</span>,
+  drivername: <span class="code-string">'org.h2.Driver'</span>,
+  user: <span class="code-string">'sa'</span>,
+  password: <span class="code-string">''</span>
+};
+
+<span class="code-keyword">const</span> jdbc = <span class="code-keyword">new</span> JDBC(dbConfig);
+<span class="code-keyword">module.exports</span> = { jdbc };
+            </div>
+            
+            <h5 class="mt-3">server.js (fragmento)</h5>
+            <div class="code-block" style="max-height: 300px; overflow-y: auto;">
+<span class="code-keyword">const</span> express = <span class="code-keyword">require</span>(<span class="code-string">'express'</span>);
+<span class="code-keyword">const</span> { jdbc } = <span class="code-keyword">require</span>(<span class="code-string">'./config/database'</span>);
+
+<span class="code-keyword">const</span> app = express();
+app.use(express.json());
+
+<span class="code-comment">// Inicializar BD</span>
+<span class="code-keyword">async function</span> initDB() {
+  <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+    <span class="code-keyword">const</span> sql = `
+      CREATE TABLE IF NOT EXISTS productos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(100),
+        precio DECIMAL(10,2),
+        stock INT
+      )
+    `;
+    conn.conn.createStatement().execute(sql);
+  });
+}
+
+<span class="code-comment">// POST: Crear producto</span>
+app.post(<span class="code-string">'/api/productos'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> { nombre, precio, stock } = req.body;
+  <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+    <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(
+      <span class="code-string">'INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)'</span>
+    );
+    stmt.setString(1, nombre);
+    stmt.setDouble(2, precio);
+    stmt.setInt(3, stock);
+    stmt.executeUpdate();
+    res.status(201).json({ success: <span class="code-keyword">true</span> });
+  });
+});
+
+app.listen(3000, <span class="code-keyword">async</span> () => {
+  <span class="code-keyword">await</span> initDB();
+  console.log(<span class="code-string">'✅ Servidor en puerto 3000'</span>);
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 13: Comparación H2 vs Otras BDs -->
+        <div class="slide" data-slide="13">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-balance-scale me-3"></i>Comparación: H2 vs Otras Bases de Datos</h2>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th><i class="fas fa-database text-primary"></i> H2</th>
+                            <th><i class="fas fa-database text-success"></i> SQLite</th>
+                            <th><i class="fas fa-database text-info"></i> PostgreSQL</th>
+                            <th><i class="fas fa-database text-warning"></i> MySQL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Tamaño</strong></td>
+                            <td>~2 MB</td>
+                            <td>~1 MB</td>
+                            <td>~15 MB</td>
+                            <td>~300 MB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Modo In-Memory</strong></td>
+                            <td>✅ Sí</td>
+                            <td>✅ Sí</td>
+                            <td>❌ No</td>
+                            <td>⚠️ Parcial</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mejor Para</strong></td>
+                            <td>Testing, Java apps</td>
+                            <td>Apps móviles, embebidas</td>
+                            <td>Producción, alta carga</td>
+                            <td>Web apps, CMS</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Configuración</strong></td>
+                            <td>Zero-config</td>
+                            <td>Zero-config</td>
+                            <td>Requiere instalación</td>
+                            <td>Requiere instalación</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Consola Web</strong></td>
+                            <td>✅ Integrada</td>
+                            <td>❌ No</td>
+                            <td>❌ No (externos)</td>
+                            <td>❌ No (phpMyAdmin)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Velocidad</strong></td>
+                            <td>⚡ Muy rápida (in-memory)</td>
+                            <td>⚡ Rápida</td>
+                            <td>🚀 Excelente</td>
+                            <td>🚀 Excelente</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="success-box mt-4">
+                <strong><i class="fas fa-trophy me-2"></i>Conclusión:</strong>
+                <p class="mb-0">H2 es perfecta para desarrollo, testing y prototipos. Para producción con alta carga, considera PostgreSQL o MySQL.</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 14: Quiz 2 -->
+        <div class="slide" data-slide="14">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-question-circle me-3"></i>Quiz 2: Node.js y Express</h2>
+            </div>
+            
+            <div id="quiz2">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Qué método HTTP se usa para crear un nuevo recurso?</h5>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> GET
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> POST
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> PUT
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Por qué usar PreparedStatement en lugar de concatenar strings en SQL?</h5>
+                    <div class="quiz-option" data-quiz="2" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Previene SQL Injection y mejora el rendimiento
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Es más rápido escribir el código
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> No hay diferencia de seguridad
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Cuál es la principal ventaja de H2 sobre PostgreSQL para testing?</h5>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Soporta más tipos de datos
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Zero-config y modo in-memory ultra rápido
+                    </div>
+                    <div class="quiz-option" data-quiz="2" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Mejor para producción con millones de usuarios
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(2)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 15: Ejercicio Práctico 2 -->
+        <div class="slide" data-slide="15">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-code me-3"></i>Ejercicio Práctico 2: Avanzado</h2>
+            </div>
+            
+            <div class="highlight-box">
+                <h4><i class="fas fa-rocket me-2"></i>Tarea: API con Relaciones y Validación</h4>
+                <p>Crea una API que gestione <strong>autores</strong> y sus <strong>libros</strong> (relación 1:N)</p>
+            </div>
+            
+            <h5 class="mt-4">Requisitos:</h5>
+            <ol>
+                <li>Tabla <code>autores</code>:
+                    <ul>
+                        <li><code>id</code>, <code>nombre</code>, <code>pais</code></li>
+                    </ul>
+                </li>
+                <li>Tabla <code>libros</code>:
+                    <ul>
+                        <li><code>id</code>, <code>titulo</code>, <code>año</code>, <code>autor_id</code> (FK)</li>
+                    </ul>
+                </li>
+                <li>Rutas a implementar:
+                    <ul>
+                        <li><code>POST /api/autores</code> - Crear autor</li>
+                        <li><code>POST /api/libros</code> - Crear libro (validar que autor existe)</li>
+                        <li><code>GET /api/autores/:id/libros</code> - Obtener libros de un autor</li>
+                        <li><code>GET /api/libros</code> - Listar todos con JOIN (incluir nombre del autor)</li>
+                    </ul>
+                </li>
+                <li>Validaciones:
+                    <ul>
+                        <li>No permitir crear libro si autor_id no existe</li>
+                        <li>Año debe ser > 1000 y <= año actual</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="info-box mt-4">
+                <strong><i class="fas fa-database me-2"></i>Consejo SQL:</strong>
+                <p class="mb-0">Para el JOIN: <code>SELECT l.*, a.nombre as autor_nombre FROM libros l INNER JOIN autores a ON l.autor_id = a.id</code></p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Ver Solución <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 16: Solución Ejercicio 2 (Parte 1) -->
+        <div class="slide" data-slide="16">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-check-circle me-3"></i>Solución Ejercicio 2 (1/2)</h2>
+            </div>
+            
+            <h5>Inicialización de tablas con FK</h5>
+            <div class="code-block" style="max-height: 400px; overflow-y: auto;">
+<span class="code-comment">// server.js - Inicialización</span>
+<span class="code-keyword">async function</span> initDB() {
+  <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+    <span class="code-comment">// Tabla autores</span>
+    conn.conn.createStatement().execute(`
+      CREATE TABLE IF NOT EXISTS autores (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(100) NOT NULL,
+        pais VARCHAR(50)
+      )
+    `);
+    
+    <span class="code-comment">// Tabla libros con FK</span>
+    conn.conn.createStatement().execute(`
+      CREATE TABLE IF NOT EXISTS libros (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        titulo VARCHAR(200) NOT NULL,
+        año INT NOT NULL,
+        autor_id INT NOT NULL,
+        FOREIGN KEY (autor_id) REFERENCES autores(id)
+      )
+    `);
+    
+    console.log(<span class="code-string">'✅ Tablas creadas con relaciones'</span>);
+  });
+}
+
+<span class="code-comment">// POST: Crear autor</span>
+app.post(<span class="code-string">'/api/autores'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> { nombre, pais } = req.body;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(
+        <span class="code-string">'INSERT INTO autores (nombre, pais) VALUES (?, ?)'</span>
+      );
+      stmt.setString(1, nombre);
+      stmt.setString(2, pais);
+      stmt.executeUpdate();
+      
+      res.status(201).json({ 
+        success: <span class="code-keyword">true</span>, 
+        message: <span class="code-string">'Autor creado'</span> 
+      });
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 17: Solución Ejercicio 2 (Parte 2) -->
+        <div class="slide" data-slide="17">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-check-circle me-3"></i>Solución Ejercicio 2 (2/2)</h2>
+            </div>
+            
+            <div class="code-block" style="max-height: 450px; overflow-y: auto;">
+<span class="code-comment">// POST: Crear libro con validaciones</span>
+app.post(<span class="code-string">'/api/libros'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> { titulo, año, autor_id } = req.body;
+  
+  <span class="code-comment">// Validar año</span>
+  <span class="code-keyword">const</span> añoActual = <span class="code-keyword">new</span> Date().getFullYear();
+  <span class="code-keyword">if</span> (año < 1000 || año > añoActual) {
+    <span class="code-keyword">return</span> res.status(400).json({ 
+      success: <span class="code-keyword">false</span>, 
+      error: <span class="code-string">'Año inválido'</span> 
+    });
+  }
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-comment">// Verificar que autor existe</span>
+      <span class="code-keyword">const</span> checkStmt = conn.conn.prepareStatement(
+        <span class="code-string">'SELECT id FROM autores WHERE id = ?'</span>
+      );
+      checkStmt.setInt(1, autor_id);
+      <span class="code-keyword">const</span> rs = checkStmt.executeQuery();
+      
+      <span class="code-keyword">if</span> (!rs.next()) {
+        <span class="code-keyword">return</span> res.status(404).json({ 
+          success: <span class="code-keyword">false</span>, 
+          error: <span class="code-string">'Autor no encontrado'</span> 
+        });
+      }
+      
+      <span class="code-comment">// Insertar libro</span>
+      <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(
+        <span class="code-string">'INSERT INTO libros (titulo, año, autor_id) VALUES (?, ?, ?)'</span>
+      );
+      stmt.setString(1, titulo);
+      stmt.setInt(2, año);
+      stmt.setInt(3, autor_id);
+      stmt.executeUpdate();
+      
+      res.status(201).json({ success: <span class="code-keyword">true</span>, message: <span class="code-string">'Libro creado'</span> });
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// GET: Libros de un autor específico</span>
+app.get(<span class="code-string">'/api/autores/:id/libros'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">const</span> autorId = req.params.id;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">const</span> stmt = conn.conn.prepareStatement(
+        <span class="code-string">'SELECT * FROM libros WHERE autor_id = ?'</span>
+      );
+      stmt.setInt(1, autorId);
+      <span class="code-keyword">const</span> rs = stmt.executeQuery();
+      
+      <span class="code-keyword">const</span> libros = [];
+      <span class="code-keyword">while</span> (rs.next()) {
+        libros.push({
+          id: rs.getInt(<span class="code-string">'id'</span>),
+          titulo: rs.getString(<span class="code-string">'titulo'</span>),
+          año: rs.getInt(<span class="code-string">'año'</span>)
+        });
+      }
+      
+      res.json({ success: <span class="code-keyword">true</span>, data: libros });
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+
+<span class="code-comment">// GET: Todos los libros con JOIN</span>
+app.get(<span class="code-string">'/api/libros'</span>, <span class="code-keyword">async</span> (req, res) => {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">await</span> jdbc.reserve(<span class="code-keyword">async</span> (err, conn) => {
+      <span class="code-keyword">const</span> sql = `
+        SELECT l.*, a.nombre as autor_nombre, a.pais as autor_pais
+        FROM libros l 
+        INNER JOIN autores a ON l.autor_id = a.id
+      `;
+      <span class="code-keyword">const</span> rs = conn.conn.createStatement().executeQuery(sql);
+      
+      <span class="code-keyword">const</span> libros = [];
+      <span class="code-keyword">while</span> (rs.next()) {
+        libros.push({
+          id: rs.getInt(<span class="code-string">'id'</span>),
+          titulo: rs.getString(<span class="code-string">'titulo'</span>),
+          año: rs.getInt(<span class="code-string">'año'</span>),
+          autor: {
+            nombre: rs.getString(<span class="code-string">'autor_nombre'</span>),
+            pais: rs.getString(<span class="code-string">'autor_pais'</span>)
+          }
+        });
+      }
+      
+      res.json({ success: <span class="code-keyword">true</span>, data: libros });
+    });
+  } <span class="code-keyword">catch</span> (error) {
+    res.status(500).json({ success: <span class="code-keyword">false</span>, error: error.message });
+  }
+});
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 18: Mejores Prácticas -->
+        <div class="slide" data-slide="18">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-trophy me-3"></i>Mejores Prácticas con H2 y Node.js</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="success-box">
+                        <h5><i class="fas fa-check-circle me-2"></i>✅ Hacer</h5>
+                        <ul>
+                            <li>Separar config de BD en archivo dedicado</li>
+                            <li>Usar PreparedStatement siempre</li>
+                            <li>Modo in-memory para tests</li>
+                            <li>Cerrar conexiones correctamente</li>
+                            <li>Manejo de errores con try-catch</li>
+                            <li>Validar datos antes de BD</li>
+                            <li>Usar transacciones para operaciones críticas</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-times-circle me-2"></i>❌ Evitar</h5>
+                        <ul>
+                            <li>Concatenar SQL con strings del usuario</li>
+                            <li>Hardcodear credenciales en código</li>
+                            <li>Usar H2 en producción sin análisis</li>
+                            <li>Ignorar manejo de errores</li>
+                            <li>No validar datos de entrada</li>
+                            <li>Dejar conexiones abiertas</li>
+                            <li>Duplicar código de BD en múltiples archivos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box mt-4">
+                <h5><i class="fas fa-book me-2"></i>Estructura de Proyecto Recomendada</h5>
+                <div class="code-block">
+my-app/
+├── config/
+│   └── database.js      <span class="code-comment"># ⭐ Configuración centralizada</span>
+├── models/
+│   ├── user.js          <span class="code-comment"># Lógica de negocio Usuario</span>
+│   └── product.js       <span class="code-comment"># Lógica de negocio Producto</span>
+├── routes/
+│   ├── users.js         <span class="code-comment"># Rutas de usuarios</span>
+│   └── products.js      <span class="code-comment"># Rutas de productos</span>
+├── middleware/
+│   └── validation.js    <span class="code-comment"># Validaciones</span>
+├── server.js            <span class="code-comment"># Punto de entrada</span>
+└── .env                 <span class="code-comment"># Variables de entorno</span>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 19: Quiz Final -->
+        <div class="slide" data-slide="19">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-graduation-cap me-3"></i>Quiz Final</h2>
+            </div>
+            
+            <div id="quiz3">
+                <div class="mb-4">
+                    <h5><strong>Pregunta 1:</strong> ¿Qué archivo debe contener la configuración de conexión a H2 según las mejores prácticas?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> server.js
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> config/database.js
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> routes/api.js
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 2:</strong> ¿Cuál es la sintaxis correcta para una clave foránea en H2?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> FK (columna) REF tabla(id)
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> FOREIGN KEY (columna) REFERENCES tabla(id)
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> REFERENCE tabla.id ON columna
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 3:</strong> ¿Por qué es importante validar datos ANTES de enviarlos a la BD?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Previene errores, mejora UX y protege integridad de datos
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> La BD siempre rechaza datos incorrectos automáticamente
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> No es importante, la BD se encarga de todo
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><strong>Pregunta 4:</strong> ¿Cuándo deberías usar H2 en producción?</h5>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Siempre, es la mejor opción para cualquier caso
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="correct">
+                        <i class="fas fa-circle me-2"></i> Solo en apps embebidas o con baja concurrencia tras análisis
+                    </div>
+                    <div class="quiz-option" data-quiz="3" data-answer="wrong">
+                        <i class="fas fa-circle me-2"></i> Nunca, solo para desarrollo y testing
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="checkQuiz(3)">
+                    Verificar Respuestas <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 20: Recursos Adicionales -->
+        <div class="slide" data-slide="20">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-book-open me-3"></i>Recursos Adicionales</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-link me-2"></i>Documentación Oficial</h4>
+                        <ul class="mt-3">
+                            <li><a href="https://www.h2database.com" target="_blank" style="color: white;">H2 Database Official Site</a></li>
+                            <li><a href="https://www.h2database.com/html/tutorial.html" target="_blank" style="color: white;">H2 Tutorial</a></li>
+                            <li><a href="https://www.h2database.com/html/grammar.html" target="_blank" style="color: white;">H2 SQL Grammar</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-code me-2"></i>Node.js Resources</h4>
+                        <ul class="mt-3">
+                            <li><a href="https://www.npmjs.com/package/jdbc" target="_blank" style="color: white;">JDBC npm package</a></li>
+                            <li><a href="https://expressjs.com/" target="_blank" style="color: white;">Express.js Docs</a></li>
+                            <li><a href="https://nodejs.org/docs" target="_blank" style="color: white;">Node.js Documentation</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="highlight-box mt-4">
+                <h5><i class="fas fa-terminal me-2"></i>Comandos Útiles H2 Console</h5>
+                <div class="code-block">
+<span class="code-comment">-- Ver todas las tablas</span>
+SHOW TABLES;
+
+<span class="code-comment">-- Ver estructura de una tabla</span>
+SHOW COLUMNS FROM tabla_nombre;
+
+<span class="code-comment">-- Ver índices</span>
+SHOW INDEX FROM tabla_nombre;
+
+<span class="code-comment">-- Información de la BD</span>
+SELECT * FROM INFORMATION_SCHEMA.TABLES;
+                </div>
+            </div>
+            
+            <div class="info-box mt-4">
+                <h5><i class="fas fa-flask me-2"></i>Testing con H2</h5>
+                <p>H2 es perfecta para testing porque:</p>
+                <ul>
+                    <li>Cada test puede tener su propia BD en memoria</li>
+                    <li>No necesita limpieza entre tests (se borra automáticamente)</li>
+                    <li>Ejecución ultra rápida</li>
+                    <li>Compatible con frameworks como Jest, Mocha</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 21: Resumen -->
+        <div class="slide" data-slide="21">
+            <div class="slide-header">
+                <h2 class="slide-title"><i class="fas fa-list-check me-3"></i>Resumen del Curso</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-check-circle me-2 text-success"></i>Lo que aprendiste:</h4>
+                    <ul class="mt-3" style="line-height: 2;">
+                        <li>✅ Qué es H2 Database y sus modos de operación</li>
+                        <li>✅ Instalar y configurar H2 con Node.js</li>
+                        <li>✅ Buenas prácticas: archivo database.js separado</li>
+                        <li>✅ Implementar CRUD completo con Express</li>
+                        <li>✅ Usar PreparedStatement para seguridad</li>
+                        <li>✅ Trabajar con relaciones (FK) y JOINs</li>
+                        <li>✅ Validaciones antes de BD</li>
+                        <li>✅ Cuándo usar H2 vs otras BDs</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4><i class="fas fa-lightbulb me-2 text-warning"></i>Puntos Clave:</h4>
+                    <div class="feature-card mb-3">
+                        <strong>1. Configuración Centralizada</strong>
+                        <p class="mb-0 small mt-2">Siempre en config/database.js</p>
+                    </div>
+                    <div class="feature-card mb-3">
+                        <strong>2. Seguridad Primero</strong>
+                        <p class="mb-0 small mt-2">PreparedStatement previene SQL Injection</p>
+                    </div>
+                    <div class="feature-card mb-3">
+                        <strong>3. H2 para Dev/Test</strong>
+                        <p class="mb-0 small mt-2">In-memory es perfecta para desarrollo</p>
+                    </div>
+                    <div class="feature-card">
+                        <strong>4. Validar Siempre</strong>
+                        <p class="mb-0 small mt-2">Validar datos antes de insertar en BD</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-box mt-4 text-center">
+                <h4><i class="fas fa-trophy me-2"></i>¡Felicitaciones!</h4>
+                <p class="mb-0">Ahora dominas H2 Database con Node.js y Express. ¡Estás listo para construir APIs robustas!</p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="nextSlide()">
+                    Finalizar <i class="fas fa-flag-checkered ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide 22: Certificado -->
+        <div class="slide" data-slide="22">
+            <div class="slide-header text-center">
+                <h2 class="slide-title"><i class="fas fa-certificate me-3"></i>¡Obtén tu Certificado!</h2>
+            </div>
+            
+            <div class="text-center mt-5">
+                <div class="certificate-preview p-5 animate__animated animate__bounceIn">
+                    <i class="fas fa-award fa-5x text-warning mb-4"></i>
+                    <h3>Certificado de Finalización</h3>
+                    <h4 class="mt-4">H2 Database con Node.js y Express</h4>
+                    <p class="lead mt-4">Has completado exitosamente el curso interactivo</p>
+                    
+                    <div class="mt-5">
+                        <h5>Tu Puntuación:</h5>
+                        <h2 class="text-primary"><strong><span id="finalScore">0</span>%</strong></h2>
+                        <p id="scoreMessage" class="mt-3"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <button class="btn btn-custom btn-lg" onclick="generateCertificate()" id="certButton">
+                        <i class="fas fa-download me-2"></i> Descargar Certificado
+                    </button>
+                </div>
+                
+                <p class="mt-4 text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Tu certificado incluye código QR para verificación en aprobalo.com
+                </p>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-custom" onclick="previousSlide()">
+                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                </button>
+                <button class="btn btn-custom" onclick="window.location.reload()">
+                    Reiniciar Curso <i class="fas fa-redo ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 22;
+        let quizScores = {
+            1: 0,
+            2: 0,
+            3: 0
+        };
+        let quizCompleted = {
+            1: false,
+            2: false,
+            3: false
+        };
+
+        function updateProgress() {
+            document.getElementById('currentSlide').textContent = currentSlide;
+            document.getElementById('totalSlides').textContent = totalSlides;
+        }
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n > totalSlides) n = totalSlides;
+            if (n < 1) n = 1;
+            
+            currentSlide = n;
+            slides[n - 1].classList.add('active');
+            slides[n - 1].classList.add('animate__animated', 'animate__fadeIn');
+            
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Quiz functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('quiz-option')) {
+                const quizNum = e.target.getAttribute('data-quiz');
+                const parentDiv = e.target.closest(`#quiz${quizNum}`);
+                const question = e.target.closest('.mb-4');
+                
+                // Deselect other options in same question
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Select clicked option
+                e.target.classList.add('selected');
+            }
+        });
+
+        function checkQuiz(quizNum) {
+            const quizDiv = document.querySelector(`#quiz${quizNum}`);
+            const questions = quizDiv.querySelectorAll('.mb-4');
+            let correct = 0;
+            let total = questions.length;
+            let allAnswered = true;
+
+            questions.forEach(question => {
+                const selected = question.querySelector('.quiz-option.selected');
+                if (!selected) {
+                    allAnswered = false;
+                } else if (selected.getAttribute('data-answer') === 'correct') {
+                    correct++;
+                }
+            });
+
+            if (!allAnswered) {
+                Swal.fire({
+                    title: 'Atención',
+                    text: 'Por favor responde todas las preguntas antes de verificar.',
+                    icon: 'warning',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            const percentage = Math.round((correct / total) * 100);
+            quizScores[quizNum] = percentage;
+            quizCompleted[quizNum] = true;
+
+            let icon = percentage >= 70 ? 'success' : 'warning';
+            let title = percentage >= 70 ? '¡Excelente!' : '¡Bien hecho!';
+            let message = `Obtuviste ${correct} de ${total} respuestas correctas (${percentage}%)`;
+
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: icon,
+                confirmButtonColor: '#667eea',
+                confirmButtonText: 'Continuar'
+            }).then(() => {
+                nextSlide();
+                
+                // Update final score if on last quiz
+                if (quizNum === 3) {
+                    updateFinalScore();
+                }
+            });
+        }
+
+        function updateFinalScore() {
+            const scores = Object.values(quizScores);
+            const totalScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+            
+            document.getElementById('finalScore').textContent = totalScore;
+            
+            const scoreMessage = document.getElementById('scoreMessage');
+            if (totalScore >= 80) {
+                scoreMessage.innerHTML = '<i class="fas fa-star text-warning"></i> <strong>¡Sobresaliente!</strong> Dominas H2 Database';
+                scoreMessage.className = 'mt-3 text-success';
+            } else if (totalScore >= 60) {
+                scoreMessage.innerHTML = '<i class="fas fa-thumbs-up text-primary"></i> <strong>¡Aprobado!</strong> Buen conocimiento de H2';
+                scoreMessage.className = 'mt-3 text-primary';
+            } else {
+                scoreMessage.innerHTML = '<i class="fas fa-book-reader text-info"></i> <strong>Sigue practicando</strong> para mejorar';
+                scoreMessage.className = 'mt-3 text-info';
+            }
+
+            // Enable certificate button if passed
+            if (totalScore >= 60) {
+                document.getElementById('certButton').disabled = false;
+            }
+        }
+
+        async function generateCertificate() {
+            const { value: studentName } = await Swal.fire({
+                title: 'Genera tu Certificado',
+                html: `
+                    <p style="margin-bottom: 20px;">Ingresa tu nombre completo para generar el certificado:</p>
+                    <input id="swal-input-name" class="swal2-input" placeholder="Tu nombre completo" style="width: 80%; font-size: 1rem;">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Generar Certificado',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const name = document.getElementById('swal-input-name').value;
+                    if (!name || name.trim() === '') {
+                        Swal.showValidationMessage('Por favor ingresa tu nombre');
+                        return false;
+                    }
+                    return name.trim();
+                }
+            });
+
+            if (!studentName) return;
+
+            // Show loading
+            Swal.fire({
+                title: 'Generando certificado...',
+                html: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>',
+                allowOutsideClick: false,
+                showConfirmButton: false
+            });
+
+            try {
+                const scores = Object.values(quizScores);
+                const percentage = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+                
+                // Generate certificate ID
+                const studentId = 'H2-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                // Get current date
+                const currentDate = new Date().toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Create PDF using jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                // Background color
+                doc.setFillColor(248, 249, 250);
+                doc.rect(0, 0, 297, 210, 'F');
+                
+                // Border
+                doc.setDrawColor(102, 126, 234);
+                doc.setLineWidth(3);
+                doc.rect(10, 10, 277, 190);
+                
+                // Inner border
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(180, 180, 180);
+                doc.rect(15, 15, 267, 180);
+                
+                // Header decoration
+                doc.setFillColor(102, 126, 234);
+                doc.rect(0, 0, 297, 30, 'F');
+                
+                // Title
+                doc.setFontSize(32);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(255, 255, 255);
+                doc.text('CERTIFICADO DE APROBACIÓN', 148.5, 20, { align: 'center' });
+                
+                // Subtitle
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'italic');
+                doc.text('Se otorga el presente certificado a:', 148.5, 55, { align: 'center' });
+                
+                // Student name
+                doc.setFontSize(36);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(102, 126, 234);
+                doc.text(studentName, 148.5, 75, { align: 'center' });
+                
+                // Line under name
+                doc.setDrawColor(180, 180, 180);
+                doc.setLineWidth(0.3);
+                doc.line(70, 80, 227, 80);
+                
+                // Course description
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text('Por haber completado exitosamente el curso:', 148.5, 95, { align: 'center' });
+                
+                doc.setFontSize(22);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(102, 126, 234);
+                doc.text('H2 Database con Node.js y Express', 148.5, 110, { align: 'center' });
+                
+                // Score with badge
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text('Calificación obtenida:', 148.5, 130, { align: 'center' });
+                
+                // Score badge
+                let badgeColor = percentage >= 80 ? [76, 175, 80] : percentage >= 60 ? [255, 193, 7] : [244, 67, 54];
+                doc.setFillColor(...badgeColor);
+                doc.roundedRect(128, 135, 41, 15, 3, 3, 'F');
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(255, 255, 255);
+                doc.text(`${percentage}%`, 148.5, 145, { align: 'center' });
+                
+                // Generate QR using API
+                const qrUrl = `https://aprobalo.com/ver.php?id=${studentId}`;
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrUrl)}`;
+                
+                // Load QR image
+                const qrImage = new Image();
+                qrImage.crossOrigin = 'anonymous';
+                qrImage.onload = function() {
+                    // QR Code with border
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(225, 135, 40, 40, 2, 2, 'F');
+                    doc.addImage(qrImage, 'PNG', 227, 137, 36, 36);
+                    
+                    // QR text
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('Escanea para verificar', 245, 180, { align: 'center' });
+                    
+                    // Additional info
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Fecha de emisión: ${currentDate}`, 25, 175);
+                    doc.text(`Certificado ID: ${studentId}`, 25, 182);
+                    
+                    // Signature/Seal
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(102, 126, 234);
+                    doc.text('Curso de H2 Database - Nivel Profesional', 148.5, 165, { align: 'center' });
+                    
+                    // Download PDF
+                    doc.save(`Certificado_H2_${studentName.replace(/\s+/g, '_')}_${studentId}.pdf`);
+                    
+                    // Close loading and show success
+                    Swal.fire({
+                        title: '¡Certificado Generado!',
+                        html: `
+                            <div style="text-align: center;">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3" style="display: block; margin-bottom: 20px;"></i>
+                                <p class="lead" style="font-size: 1.1rem; margin-bottom: 20px;">Tu certificado ha sido descargado exitosamente.</p>
+                                <hr style="margin: 20px 0;">
+                                <div style="margin: 15px 0;">
+                                    <p style="margin: 8px 0;"><strong>Nombre:</strong> ${studentName}</p>
+                                    <p style="margin: 8px 0;"><strong>ID de Certificado:</strong> ${studentId}</p>
+                                    <p style="margin: 8px 0;"><strong>Calificación:</strong> ${percentage}%</p>
+                                </div>
+                                <hr style="margin: 20px 0;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">
+                                        <i class="fas fa-qrcode"></i> <strong>Verificación del Certificado:</strong>
+                                    </p>
+                                    <p style="margin: 10px 0; font-size: 0.85rem; color: #666;">
+                                        Escanea el código QR del certificado o visita:
+                                    </p>
+                                    <a href="${qrUrl}" target="_blank" style="color: #667eea; text-decoration: none; font-weight: bold; word-break: break-all; display: inline-block; margin-top: 5px;">
+                                        ${qrUrl}
+                                    </a>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: '¡Perfecto!',
+                        confirmButtonColor: '#667eea',
+                        width: 600
+                    });
+                };
+                
+                qrImage.onerror = function() {
+                    // If QR fails to load, generate certificate without QR
+                    console.log('Could not load QR, generating certificate without QR');
+                    
+                    // Alternative text instead of QR
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('Verifica en:', 245, 155, { align: 'center' });
+                    doc.setFontSize(8);
+                    doc.text('aprobalo.com/', 245, 160, { align: 'center' });
+                    doc.text(`ver.php?id=${studentId}`, 245, 165, { align: 'center' });
+                    
+                    // Additional info
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Fecha de emisión: ${currentDate}`, 25, 175);
+                    doc.text(`Certificado ID: ${studentId}`, 25, 182);
+                    
+                    // Signature/Seal
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'italic');
+                    doc.setTextColor(102, 126, 234);
+                    doc.text('Curso de H2 Database - Nivel Profesional', 148.5, 165, { align: 'center' });
+                    
+                    // Download PDF
+                    doc.save(`Certificado_H2_${studentName.replace(/\s+/g, '_')}_${studentId}.pdf`);
+                    
+                    // Close loading and show success
+                    Swal.fire({
+                        title: '¡Certificado Generado!',
+                        html: `
+                            <div style="text-align: center;">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3" style="display: block; margin-bottom: 20px;"></i>
+                                <p class="lead" style="font-size: 1.1rem; margin-bottom: 20px;">Tu certificado ha sido descargado exitosamente.</p>
+                                <hr style="margin: 20px 0;">
+                                <div style="margin: 15px 0;">
+                                    <p style="margin: 8px 0;"><strong>Nombre:</strong> ${studentName}</p>
+                                    <p style="margin: 8px 0;"><strong>ID de Certificado:</strong> ${studentId}</p>
+                                    <p style="margin: 8px 0;"><strong>Calificación:</strong> ${percentage}%</p>
+                                </div>
+                                <hr style="margin: 20px 0;">
+                                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffc107;">
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">
+                                        <i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i> <strong>Nota:</strong> El código QR no se pudo generar
+                                    </p>
+                                    <p style="margin: 10px 0; font-size: 0.85rem; color: #666;">
+                                        Puedes verificar tu certificado visitando:
+                                    </p>
+                                    <a href="${qrUrl}" target="_blank" style="color: #667eea; text-decoration: none; font-weight: bold; word-break: break-all; display: inline-block; margin-top: 5px;">
+                                        ${qrUrl}
+                                    </a>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: '¡Perfecto!',
+                        confirmButtonColor: '#667eea',
+                        width: 600
+                    });
+                };
+                
+                // Start loading the image
+                qrImage.src = qrApiUrl;
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al generar el certificado PDF. Por favor, intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación: JSON Web Tokens y Middleware en Express</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            background: #f0f2f5;
+            padding-top: 40px;
+        }
+        .slide {
+            display: none;
+        }
+        .active-slide {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card shadow p-4">
+        <h1 class="text-center mb-4"><i class="fa-solid fa-key"></i> JSON Web Token (JWT) & Middleware en Express</h1>
+
+        <!-- Slide 1 -->
+        <div class="slide active-slide animate__animated animate__fadeIn" id="slide1">
+            <h3><i class="fa-solid fa-circle-info"></i> ¿Qué es JSON Web Token?</h3>
+            <p>JWT es un estándar para enviar información de forma segura entre dos partes como un objeto JSON firmado.</p>
+            <ul>
+                <li>Se utiliza para autenticación.</li>
+                <li>Es auto-contenido: incluye datos del usuario.</li>
+                <li>Puede verificarse sin acceder a la base de datos.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide animate__animated animate__fadeIn" id="slide2">
+            <h3><i class="fa-solid fa-layer-group"></i> Estructura de un JWT</h3>
+            <pre><code>{
+header: {
+   "alg": "HS256",
+   "typ": "JWT"
+},
+payload: {
+   "id": 123,
+   "nombre": "Fernando"
+},
+firma: "hash-generado"
+}
+</code></pre>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide animate__animated animate__fadeIn" id="slide3">
+            <h3><i class="fa-solid fa-code"></i> Generar un JWT en Express</h3>
+            <pre><code>const jwt = require('jsonwebtoken');
+
+app.post('/login', (req, res) => {
+    const user = { id: 1, name: 'Fernando' };
+
+    const token = jwt.sign(user, 'secreto123', {
+        expiresIn: '1h'
+    });
+
+    res.json({ token });
+});
+</code></pre>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide animate__animated animate__fadeIn" id="slide4">
+            <h3><i class="fa-solid fa-shield-halved"></i> ¿Qué es un Middleware?</h3>
+            <p>Es una función que se ejecuta <strong>antes</strong> de llegar a las rutas finales, pudiendo:</p>
+            <ul>
+                <li>Validar datos</li>
+                <li>Comprobar permisos</li>
+                <li>Gestionar errores</li>
+            </ul>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide animate__animated animate__fadeIn" id="slide5">
+            <h3><i class="fa-solid fa-lock"></i> Middleware para verificar JWT</h3>
+            <pre><code>function verificarToken(req, res, next) {
+   const token = req.headers['authorization'];
+
+   if (!token) return res.status(403).json({ mensaje: 'Token requerido' });
+
+   jwt.verify(token, 'secreto123', (err, decoded) => {
+       if (err) return res.status(401).json({ mensaje: 'Token inválido' });
+
+       req.user = decoded;
+       next();
+   });
+}
+
+app.get('/perfil', verificarToken, (req, res) => {
+   res.json({ mensaje: 'Bienvenido!', datos: req.user });
+});
+</code></pre>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide animate__animated animate__fadeIn" id="slide6">
+            <h3><i class="fa-solid fa-diagram-project"></i> Flujo simplificado</h3>
+            <ul>
+                <li>Usuario envía credenciales</li>
+                <li>Servidor genera JWT</li>
+                <li>Cliente almacena token</li>
+                <li>Cliente envía token en headers</li>
+                <li>Middleware verifica el token</li>
+                <li>Acceso autorizado</li>
+            </ul>
+        </div>
+
+        <!-- Botones navegación -->
+        <div class="mt-4 text-center">
+            <button class="btn btn-secondary me-2" id="prevBtn"><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+            <button class="btn btn-primary" id="nextBtn">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let current = 1;
+const total = 6;
+
+function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active-slide'));
+    document.getElementById('slide' + n).classList.add('active-slide');
+}
+
+// Navegación
+nextBtn.onclick = () => {
+    if (current < total) {
+        current++;
+        showSlide(current);
+    } else {
+        Swal.fire('¡Fin!', 'Has completado la presentación', 'success');
+    }
+};
+
+prevBtn.onclick = () => {
+    if (current > 1) {
+        current--;
+        showSlide(current);
+    }
+};
+</script>
+
+</body>
+</html>

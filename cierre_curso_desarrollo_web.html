@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Qué Puedes Aprender Ahora? - Cierre de Curso</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .slide {
+            display: none;
+            min-height: 90vh;
+            padding: 40px 20px;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: none;
+        }
+        
+        .main-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: #f0f0f0;
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-demo {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        .btn-demo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tech-card {
+            transition: transform 0.3s;
+            cursor: pointer;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tech-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .icon-big {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            margin: 0 10px;
+        }
+        
+        .slide-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+        
+        .path-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+        
+        .path-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .voice-status {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 15px;
+            border-left: 5px solid #2196F3;
+        }
+        
+        .voice-status.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="slide-indicator">
+        <i class="fas fa-layer-group"></i> 
+        <span id="slideNumber">1/6</span>
+    </div>
+
+    <!-- SLIDE 1: PORTADA -->
+    <div class="slide active animate__animated animate__fadeIn" id="slide1">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="main-title animate__animated animate__bounceInDown">
+                    <i class="fas fa-rocket"></i> ¡Tu Viaje Apenas Comienza!
+                </h1>
+                <p class="subtitle animate__animated animate__fadeInUp animate__delay-1s">
+                    Descubre las tecnologías que puedes aprender ahora
+                </p>
+                <div class="mt-5 animate__animated animate__zoomIn animate__delay-2s">
+                    <i class="fas fa-code icon-big text-white"></i>
+                    <i class="fas fa-database icon-big text-white mx-4"></i>
+                    <i class="fas fa-mobile-alt icon-big text-white"></i>
+                </div>
+                <div class="mt-5">
+                    <button class="btn btn-light btn-lg btn-demo animate__animated animate__pulse animate__infinite" onclick="nextSlide()">
+                        Comenzar <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: GEOLOCALIZACIÓN -->
+    <div class="slide" id="slide2">
+        <div class="container">
+            <div class="card p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-map-marked-alt text-primary"></i> 
+                    Geolocalización y Mapas
+                </h2>
+                <p class="lead text-center mb-4">
+                    Con Leaflet puedes crear mapas interactivos increíbles
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id="map"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-info-circle text-info"></i> ¿Qué puedes hacer?</h4>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Mostrar ubicaciones en el mapa
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Obtener tu ubicación actual
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Calcular rutas y distancias
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Crear aplicaciones de delivery
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Sistemas de rastreo GPS
+                            </li>
+                        </ul>
+                        
+                        <button class="btn btn-primary btn-demo mt-4 w-100" onclick="showMyLocation()">
+                            <i class="fas fa-location-arrow"></i> Ver Mi Ubicación
+                        </button>
+                        
+                        <div class="alert alert-info mt-3">
+                            <strong><i class="fas fa-graduation-cap"></i> Aprende más:</strong><br>
+                            • Leaflet.js<br>
+                            • Google Maps API<br>
+                            • Mapbox
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: RECONOCIMIENTO DE VOZ -->
+    <div class="slide" id="slide3">
+        <div class="container">
+            <div class="card p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-microphone text-danger"></i> 
+                    Reconocimiento de Voz
+                </h2>
+                <p class="lead text-center mb-4">
+                    Dale voz a tus aplicaciones con Web Speech API
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="text-center p-4">
+                            <i class="fas fa-microphone-alt icon-big text-danger animate__animated animate__pulse animate__infinite"></i>
+                            <h4 class="mt-4">Prueba el reconocimiento de voz</h4>
+                            <p class="text-muted">Haz clic en el botón y di un comando como "hola", "qué hora es" o "chiste"</p>
+                        </div>
+                        
+                        <button class="btn btn-danger btn-demo w-100 mb-3" id="startVoiceBtn" onclick="startVoiceRecognition()">
+                            <i class="fas fa-microphone"></i> Activar Reconocimiento de Voz
+                        </button>
+                        
+                        <button class="btn btn-secondary btn-demo w-100" id="stopVoiceBtn" onclick="stopVoiceRecognition()" style="display:none;">
+                            <i class="fas fa-stop"></i> Detener
+                        </button>
+                        
+                        <div class="voice-status" id="voiceStatus">
+                            <h5><i class="fas fa-ear-listen"></i> Escuchando...</h5>
+                            <p id="recognizedText" class="mb-0"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-lightbulb text-warning"></i> ¿Qué puedes crear?</h4>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Asistentes virtuales
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Aplicaciones de accesibilidad
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Transcripción de audio
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Comandos por voz
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> Dictado de texto
+                            </li>
+                        </ul>
+                        
+                        <div class="alert alert-warning mt-4">
+                            <strong><i class="fas fa-robot"></i> Tecnologías similares:</strong><br>
+                            • Web Speech API (Nativa)<br>
+                            • SpeechRecognition API<br>
+                            • annyang.js<br>
+                            • Google Cloud Speech-to-Text
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: DOCKER -->
+    <div class="slide" id="slide4">
+        <div class="container">
+            <div class="card p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fab fa-docker text-primary"></i> 
+                    Docker: Empaqueta tu Aplicación
+                </h2>
+                <p class="lead text-center mb-4">
+                    Crea, despliega y ejecuta aplicaciones en cualquier lugar
+                </p>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="text-center p-4 bg-light rounded">
+                            <div style="font-size: 6rem; line-height: 1;">
+                                <i class="fab fa-docker text-primary"></i>
+                            </div>
+                            <h4 class="mt-3">¿Qué es Docker?</h4>
+                            <p class="text-start">
+                                Docker es una plataforma que te permite <strong>empaquetar tu aplicación con todas sus dependencias</strong> 
+                                en un contenedor. Es como crear una caja que contiene todo lo necesario para que tu app funcione.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-lightbulb"></i> Analogía Simple:</h5>
+                            <p class="mb-0">
+                                Imagina que tu aplicación es un plato de comida. Sin Docker, tienes que enviar la receta 
+                                y esperar que quien la prepare tenga todos los ingredientes exactos. 
+                                <strong>Con Docker, envías el plato ya preparado en un contenedor especial</strong> que mantiene 
+                                todo fresco y listo para servir, sin importar dónde esté.
+                            </p>
+                        </div>
+                        
+                        <div class="alert alert-success mt-3">
+                            <h5><i class="fas fa-quote-left"></i> El Problema que Resuelve:</h5>
+                            <p class="mb-0">
+                                <em>"En mi máquina funciona..."</em> 🤷‍♂️<br>
+                                Con Docker, <strong>¡funcionará en todas las máquinas!</strong> ✅
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="tech-card text-center">
+                            <i class="fas fa-box icon-big text-primary"></i>
+                            <h5>Contenedores</h5>
+                            <p class="text-muted">
+                                Empaqueta tu app con todo lo necesario: código, librerías, configuración
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="tech-card text-center">
+                            <i class="fas fa-image icon-big text-info"></i>
+                            <h5>Imágenes</h5>
+                            <p class="text-muted">
+                                Plantillas para crear contenedores. Como un "molde" de tu aplicación
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="tech-card text-center">
+                            <i class="fas fa-layer-group icon-big text-success"></i>
+                            <h5>Docker Compose</h5>
+                            <p class="text-muted">
+                                Maneja múltiples contenedores (app + base de datos + más)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-check-circle text-success"></i> ¿Por qué aprenderlo?</h4>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="fas fa-rocket text-primary"></i> 
+                                <strong>Portabilidad:</strong> Tu app funcionará igual en desarrollo, staging y producción
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-tachometer-alt text-warning"></i> 
+                                <strong>Eficiencia:</strong> Contenedores ligeros que arrancan en segundos
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-users text-info"></i> 
+                                <strong>Trabajo en equipo:</strong> Todo el equipo usa el mismo entorno
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-shield-alt text-success"></i> 
+                                <strong>Aislamiento:</strong> Cada app en su propio contenedor, sin conflictos
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-briefcase text-danger"></i> 
+                                <strong>Industria:</strong> Las empresas lo usan MUCHO. Es casi un estándar
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-laptop-code text-primary"></i> Casos de Uso:</h4>
+                        <div class="alert alert-secondary">
+                            <strong>1. Desarrollo Local:</strong><br>
+                            <code>docker-compose up</code><br>
+                            <small>Levanta tu app + MySQL + Redis en segundos</small>
+                        </div>
+                        
+                        <div class="alert alert-secondary">
+                            <strong>2. Testing:</strong><br>
+                            Prueba tu app en diferentes versiones de Node.js o PHP sin instalar nada
+                        </div>
+                        
+                        <div class="alert alert-secondary">
+                            <strong>3. Deploy:</strong><br>
+                            Sube la misma imagen que probaste localmente a producción
+                        </div>
+                        
+                        <div class="alert alert-secondary">
+                            <strong>4. Microservicios:</strong><br>
+                            Cada servicio en su contenedor, escalan independientemente
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-primary text-white rounded">
+                    <h5 class="text-center mb-3">
+                        <i class="fas fa-graduation-cap"></i> Ejemplo Simple: Dockerfile
+                    </h5>
+                    <pre class="bg-dark p-3 rounded text-white" style="overflow-x: auto;"><code># Usa una imagen base de Node.js
+FROM node:18
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Copia los archivos de tu proyecto
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+# Expone el puerto 3000
+EXPOSE 3000
+
+# Comando para iniciar la app
+CMD ["npm", "start"]</code></pre>
+                    <p class="text-center mb-0 mt-3">
+                        <button class="btn btn-light" onclick="showDockerDemo()">
+                            <i class="fas fa-play"></i> ¿Cómo funciona esto?
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: DEPLOY -->
+    <div class="slide" id="slide5">
+        <div class="container">
+            <div class="card p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-cloud-upload-alt text-success"></i> 
+                    Publica Tus Proyectos
+                </h2>
+                <p class="lead text-center mb-4">
+                    Lleva tus aplicaciones al mundo real
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="tech-card text-center" onclick="showDeployInfo('github')">
+                            <i class="fab fa-github icon-big text-dark"></i>
+                            <h4>GitHub Pages</h4>
+                            <p class="text-muted">Gratis • Fácil • Ideal para sitios estáticos</p>
+                            <span class="badge bg-success">Recomendado</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="tech-card text-center" onclick="showDeployInfo('netlify')">
+                            <i class="fas fa-globe icon-big text-info"></i>
+                            <h4>Netlify</h4>
+                            <p class="text-muted">Gratis • CI/CD • Funciones serverless</p>
+                            <span class="badge bg-info">Popular</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="tech-card text-center" onclick="showDeployInfo('vercel')">
+                            <i class="fas fa-bolt icon-big text-warning"></i>
+                            <h4>Vercel</h4>
+                            <p class="text-muted">Gratis • Next.js • Super rápido</p>
+                            <span class="badge bg-warning text-dark">Moderno</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-rocket text-primary"></i> Pasos básicos:</h4>
+                        <ol class="list-group list-group-numbered">
+                            <li class="list-group-item">
+                                <strong>1. Sube tu código a GitHub</strong>
+                                <code class="d-block mt-2 p-2 bg-light">git push origin main</code>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>2. Conecta con el servicio</strong>
+                                <p class="mb-0 text-muted">Autoriza el acceso a tu repositorio</p>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>3. Configura y despliega</strong>
+                                <p class="mb-0 text-muted">¡Tu sitio estará en línea en minutos!</p>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-server text-danger"></i> Otras opciones:</h4>
+                        <div class="alert alert-secondary">
+                            <strong>Para aplicaciones con Backend:</strong><br>
+                            • Heroku<br>
+                            • Railway<br>
+                            • Render<br>
+                            • DigitalOcean<br>
+                            • AWS / Google Cloud / Azure
+                        </div>
+                        
+                        <div class="alert alert-primary">
+                            <strong><i class="fas fa-info-circle"></i> Tip:</strong> 
+                            Empieza con servicios gratuitos para practicar. 
+                            GitHub Pages es perfecto para tu portafolio!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: CAMINO DEL DESARROLLADOR -->
+    <div class="slide" id="slide6">
+        <div class="container">
+            <div class="card p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-road text-warning"></i> 
+                    Tu Camino Como Desarrollador
+                </h2>
+                <p class="lead text-center mb-4">
+                    Múltiples caminos, infinitas posibilidades
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="path-card animate__animated animate__fadeInLeft">
+                            <h4><i class="fas fa-palette"></i> Frontend Developer</h4>
+                            <p>Crea interfaces hermosas e interactivas</p>
+                            <hr class="bg-white">
+                            <strong>Aprende:</strong>
+                            <ul>
+                                <li>React / Vue / Angular</li>
+                                <li>TypeScript</li>
+                                <li>Tailwind CSS / Sass</li>
+                                <li>Responsive Design avanzado</li>
+                                <li>Animaciones y UX</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="path-card animate__animated animate__fadeInRight" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <h4><i class="fas fa-server"></i> Backend Developer</h4>
+                            <p>Construye la lógica y los datos</p>
+                            <hr class="bg-white">
+                            <strong>Aprende:</strong>
+                            <ul>
+                                <li>Node.js / Python / PHP / Java</li>
+                                <li>APIs RESTful / GraphQL</li>
+                                <li>Bases de datos (SQL y NoSQL)</li>
+                                <li>Autenticación y seguridad</li>
+                                <li>Cloud computing</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="path-card animate__animated animate__fadeInLeft animate__delay-1s" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <h4><i class="fas fa-layer-group"></i> Full Stack Developer</h4>
+                            <p>Lo mejor de ambos mundos</p>
+                            <hr class="bg-white">
+                            <strong>Aprende:</strong>
+                            <ul>
+                                <li>MERN/MEAN Stack</li>
+                                <li>Next.js / Nuxt.js</li>
+                                <li>DevOps básico</li>
+                                <li>Testing (Jest, Cypress)</li>
+                                <li>Git avanzado</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="path-card animate__animated animate__fadeInRight animate__delay-1s" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <h4><i class="fas fa-mobile-alt"></i> Mobile Developer</h4>
+                            <p>Apps para millones de usuarios</p>
+                            <hr class="bg-white">
+                            <strong>Aprende:</strong>
+                            <ul>
+                                <li>React Native / Flutter</li>
+                                <li>Swift / Kotlin</li>
+                                <li>App Store optimization</li>
+                                <li>Push notifications</li>
+                                <li>Mobile UI/UX</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light mt-4 text-center">
+                    <h5><i class="fas fa-star text-warning"></i> <strong>Recuerda:</strong></h5>
+                    <p class="mb-0">No tienes que elegir solo uno. Muchos desarrolladores exitosos combinan estas especialidades. 
+                    ¡Explora, experimenta y encuentra tu pasión!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: CIERRE MOTIVACIONAL -->
+    <div class="slide" id="slide7">
+        <div class="container">
+            <div class="text-center">
+                <div class="card p-5 animate__animated animate__zoomIn">
+                    <h1 class="mb-4">
+                        <i class="fas fa-trophy text-warning" style="font-size: 5rem;"></i>
+                    </h1>
+                    <h2 class="mb-4">¡Felicitaciones por Llegar Hasta Aquí!</h2>
+                    <p class="lead mb-4">
+                        Han aprendido las bases fundamentales del desarrollo web. 
+                        Ahora el mundo de la programación está a tu alcance.
+                    </p>
+                    
+                    <div class="row mt-5">
+                        <div class="col-md-4">
+                            <i class="fas fa-book-open icon-big text-primary"></i>
+                            <h4>Sigue Aprendiendo</h4>
+                            <p>La tecnología evoluciona constantemente. Dedica tiempo cada día a aprender algo nuevo.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-code icon-big text-success"></i>
+                            <h4>Practica Siempre</h4>
+                            <p>La práctica hace al maestro. Construye proyectos, experimenta, rompe cosas y arreglalas.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-users icon-big text-info"></i>
+                            <h4>Únete a la Comunidad</h4>
+                            <p>Conecta con otros desarrolladores. Comparte, aprende y crece junto a otros.</p>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-5">
+                    
+                    <h3 class="mb-4"><i class="fas fa-link"></i> Recursos Útiles:</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success"></i> <strong>MDN Web Docs</strong> - Documentación oficial</li>
+                                <li><i class="fas fa-check text-success"></i> <strong>freeCodeCamp</strong> - Cursos gratuitos</li>
+                                <li><i class="fas fa-check text-success"></i> <strong>GitHub</strong> - Comparte tu código</li>
+                                <li><i class="fas fa-check text-success"></i> <strong>Stack Overflow</strong> - Resuelve dudas</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success"></i> <strong>Frontend Mentor</strong> - Desafíos prácticos</li>
+                                <li><i class="fas fa-check text-success"></i> <strong>CSS-Tricks</strong> - Tips y trucos</li>
+                                <li><i class="fas fa-check text-success"></i> <strong>Dev.to</strong> - Comunidad de devs</li>
+                                <li><i class="fas fa-check text-success"></i> <strong>YouTube</strong> - Tutoriales visuales</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-5 p-4">
+                        <h4><i class="fas fa-rocket"></i> El futuro es tuyo</h4>
+                        <p class="mb-0">
+                            Cada línea de código que escribas es un paso hacia tus sueños. 
+                            No importa cuánto tiempo tome, ¡nunca dejes de construir!
+                        </p>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-demo mt-4" onclick="showFinalMessage()">
+                        <i class="fas fa-heart"></i> Mensaje Final
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <div class="navigation">
+        <button class="btn btn-light nav-btn" onclick="prevSlide()" id="prevBtn">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="btn btn-light nav-btn" onclick="nextSlide()" id="nextBtn">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 7;
+        let map;
+        let recognition;
+        let synthesis = window.speechSynthesis;
+        
+        // Inicializar al cargar
+        window.onload = function() {
+            updateSlideIndicator();
+            Swal.fire({
+                title: '¡Bienvenidos! 🎉',
+                text: 'Esta es una presentación interactiva. Usa las flechas para navegar.',
+                icon: 'info',
+                confirmButtonText: '¡Vamos!',
+                confirmButtonColor: '#667eea'
+            });
+        };
+        
+        // NAVEGACIÓN
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                document.getElementById('slide' + currentSlide).classList.remove('active');
+                currentSlide++;
+                const nextSlideEl = document.getElementById('slide' + currentSlide);
+                nextSlideEl.classList.add('active');
+                nextSlideEl.classList.add('animate__animated', 'animate__fadeIn');
+                updateSlideIndicator();
+                
+                // Inicializar mapa cuando llegue al slide 2
+                if (currentSlide === 2 && !map) {
+                    setTimeout(initMap, 300);
+                }
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 1) {
+                document.getElementById('slide' + currentSlide).classList.remove('active');
+                currentSlide--;
+                const prevSlideEl = document.getElementById('slide' + currentSlide);
+                prevSlideEl.classList.add('active');
+                prevSlideEl.classList.add('animate__animated', 'animate__fadeIn');
+                updateSlideIndicator();
+            }
+        }
+        
+        function updateSlideIndicator() {
+            document.getElementById('slideNumber').textContent = currentSlide + '/' + totalSlides;
+        }
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+        
+        // MAPA
+        function initMap() {
+            // Coordenadas del Parque Central, Montevideo
+            const parqueCentral = [-34.8906, -56.1538];
+            
+            map = L.map('map').setView(parqueCentral, 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Marcador en Parque Central
+            const marker = L.marker(parqueCentral).addTo(map);
+            marker.bindPopup('<b>Parque Central</b><br>Estadio Centenario<br>Montevideo, Uruguay').openPopup();
+            
+            // Círculo decorativo
+            L.circle(parqueCentral, {
+                color: '#667eea',
+                fillColor: '#764ba2',
+                fillOpacity: 0.2,
+                radius: 500
+            }).addTo(map);
+        }
+        
+        function showMyLocation() {
+            if ("geolocation" in navigator) {
+                Swal.fire({
+                    title: 'Obteniendo ubicación...',
+                    html: 'Esto puede tardar unos segundos',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        map.setView([lat, lng], 15);
+                        
+                        const myMarker = L.marker([lat, lng]).addTo(map);
+                        myMarker.bindPopup('<b>¡Estás aquí!</b>').openPopup();
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Ubicación encontrada!',
+                            text: `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`,
+                            confirmButtonColor: '#667eea'
+                        });
+                    },
+                    function(error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'No se pudo obtener la ubicación',
+                            text: 'Asegúrate de dar permisos de ubicación',
+                            confirmButtonColor: '#667eea'
+                        });
+                    }
+                );
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Geolocalización no disponible',
+                    text: 'Tu navegador no soporta geolocalización',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        }
+        
+        // VOZ - Web Speech API
+        function startVoiceRecognition() {
+            // Verificar compatibilidad del navegador
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No compatible',
+                    text: 'Tu navegador no soporta reconocimiento de voz. Prueba con Chrome o Edge.',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+            
+            if (!recognition) {
+                recognition = new SpeechRecognition();
+                recognition.lang = 'es-ES';
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    document.getElementById('voiceStatus').classList.add('active');
+                    document.getElementById('startVoiceBtn').style.display = 'none';
+                    document.getElementById('stopVoiceBtn').style.display = 'block';
+                    showRecognizedText('Escuchando...');
+                };
+                
+                recognition.onresult = function(event) {
+                    const last = event.results.length - 1;
+                    const text = event.results[last][0].transcript.toLowerCase().trim();
+                    
+                    showRecognizedText(`Dijiste: "${text}"`);
+                    
+                    // Procesar comandos
+                    let response = '';
+                    
+                    if (text.includes('hola') || text.includes('buenos días') || text.includes('buenas tardes')) {
+                        response = '¡Hola! ¿Cómo estás?';
+                    } else if (text.includes('qué hora') || text.includes('hora es')) {
+                        const ahora = new Date().toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' });
+                        response = `Son las ${ahora}`;
+                    } else if (text.includes('chiste') || text.includes('cuéntame')) {
+                        response = '¿Por qué los programadores prefieren el modo oscuro? Porque la luz atrae a los bugs!';
+                    } else if (text.includes('gracias')) {
+                        response = '¡De nada! Sigue aprendiendo.';
+                    } else if (text.includes('cómo estás')) {
+                        response = 'Estoy genial, gracias por preguntar. Listo para ayudarte a aprender.';
+                    } else if (text.includes('adiós') || text.includes('chau')) {
+                        response = '¡Hasta luego! Que sigas aprendiendo mucho.';
+                    } else {
+                        response = `Escuché "${text}". Intenta decir: hola, qué hora es, o chiste.`;
+                    }
+                    
+                    // Mostrar y hablar la respuesta
+                    showRecognizedText(`<strong>Respuesta:</strong> ${response}`);
+                    speak(response);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Error:', event.error);
+                    if (event.error === 'no-speech') {
+                        showRecognizedText('No detecté nada. Intenta hablar más claro.');
+                    } else if (event.error === 'not-allowed') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Permiso denegado',
+                            text: 'Necesitas dar permisos de micrófono para usar esta función.',
+                            confirmButtonColor: '#667eea'
+                        });
+                        stopVoiceRecognition();
+                    } else {
+                        showRecognizedText(`Error: ${event.error}`);
+                    }
+                };
+                
+                recognition.onend = function() {
+                    if (document.getElementById('stopVoiceBtn').style.display === 'block') {
+                        // Reiniciar si no fue detenido manualmente
+                        recognition.start();
+                    }
+                };
+            }
+            
+            try {
+                recognition.start();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Reconocimiento activado',
+                    text: 'Di "hola", "qué hora es" o "chiste"',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                console.error('Error al iniciar:', err);
+            }
+        }
+        
+        function stopVoiceRecognition() {
+            if (recognition) {
+                recognition.stop();
+                document.getElementById('voiceStatus').classList.remove('active');
+                document.getElementById('startVoiceBtn').style.display = 'block';
+                document.getElementById('stopVoiceBtn').style.display = 'none';
+            }
+        }
+        
+        function speak(text) {
+            if (synthesis.speaking) {
+                synthesis.cancel();
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            
+            synthesis.speak(utterance);
+        }
+        
+        function showRecognizedText(text) {
+            document.getElementById('recognizedText').innerHTML = text;
+        }
+        
+        // DOCKER DEMO
+        function showDockerDemo() {
+            Swal.fire({
+                title: 'Cómo funciona este Dockerfile',
+                html: `
+                    <div class="text-start">
+                        <p><strong>1. FROM node:18</strong><br>
+                        <small>Empieza con una imagen que ya tiene Node.js 18 instalado</small></p>
+                        
+                        <p><strong>2. WORKDIR /app</strong><br>
+                        <small>Crea y establece /app como directorio de trabajo</small></p>
+                        
+                        <p><strong>3. COPY & RUN npm install</strong><br>
+                        <small>Copia package.json e instala las dependencias</small></p>
+                        
+                        <p><strong>4. COPY . .</strong><br>
+                        <small>Copia todo tu código al contenedor</small></p>
+                        
+                        <p><strong>5. EXPOSE 3000</strong><br>
+                        <small>Indica que la app usa el puerto 3000</small></p>
+                        
+                        <p><strong>6. CMD ["npm", "start"]</strong><br>
+                        <small>Comando que se ejecuta al iniciar el contenedor</small></p>
+                        
+                        <hr>
+                        
+                        <p><strong>Para usar este Dockerfile:</strong></p>
+                        <code>docker build -t mi-app .</code><br>
+                        <code>docker run -p 3000:3000 mi-app</code>
+                    </div>
+                `,
+                icon: 'info',
+                width: 700,
+                confirmButtonText: '¡Entendido!',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        
+        // DEPLOY INFO
+        function showDeployInfo(platform) {
+            const info = {
+                github: {
+                    title: 'GitHub Pages',
+                    text: 'Perfecto para sitios estáticos. Solo necesitas subir tu código a GitHub y activar Pages en la configuración del repositorio.',
+                    url: 'https://pages.github.com/'
+                },
+                netlify: {
+                    title: 'Netlify',
+                    text: 'Deploy automático desde Git. Perfecto para proyectos con build process. Incluye formularios, funciones serverless y más.',
+                    url: 'https://www.netlify.com/'
+                },
+                vercel: {
+                    title: 'Vercel',
+                    text: 'Especializado en frameworks modernos como Next.js. Deploy instantáneo y optimización automática de rendimiento.',
+                    url: 'https://vercel.com/'
+                }
+            };
+            
+            const platform_info = info[platform];
+            
+            Swal.fire({
+                title: platform_info.title,
+                text: platform_info.text,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Visitar sitio',
+                cancelButtonText: 'Cerrar',
+                confirmButtonColor: '#667eea'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.open(platform_info.url, '_blank');
+                }
+            });
+        }
+        
+        // MENSAJE FINAL
+        function showFinalMessage() {
+            Swal.fire({
+                title: '¡Gracias por participar!',
+                html: `
+                    <p style="font-size: 1.2rem; margin: 20px 0;">
+                        Han sido unos estudiantes increíbles. 🌟
+                    </p>
+                    <p>
+                        Recuerden: cada gran desarrollador fue una vez un principiante. 
+                        La diferencia es que nunca dejaron de aprender.
+                    </p>
+                    <p style="font-weight: bold; margin-top: 20px;">
+                        ¡El código los espera! 💻✨
+                    </p>
+                `,
+                icon: 'success',
+                confirmButtonText: '¡Gracias por todo!',
+                confirmButtonColor: '#667eea',
+                backdrop: `
+                    rgba(102,126,234,0.4)
+                    url("https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif")
+                    left top
+                    no-repeat
+                `
+            });
+        }
+    </script>
+</body>
+</html>

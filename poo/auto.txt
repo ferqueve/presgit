@@ -1,0 +1,38 @@
+// Crear objeto automovil
+let automovil = {
+    marca: "Toyota",
+    modelo: "Corolla",
+    anio: 2022,
+    velocidad: 0,
+
+    // Método para acelerar
+    acelerar: function() {
+        this.velocidad += 10;
+        console.log("El automóvil aceleró. Velocidad actual: " + this.velocidad + " km/h");
+    },
+
+    // Método para frenar
+    frenar: function() {
+        this.velocidad -= 10;
+
+        if(this.velocidad < 0){
+            this.velocidad = 0;
+        }
+
+        console.log("El automóvil frenó. Velocidad actual: " + this.velocidad + " km/h");
+    },
+
+    // Método para mostrar información
+    mostrarInfo: function() {
+        console.log("Marca: " + this.marca);
+        console.log("Modelo: " + this.modelo);
+        console.log("Año: " + this.anio);
+        console.log("Velocidad actual: " + this.velocidad + " km/h");
+    }
+};
+
+// Usar los métodos
+automovil.mostrarInfo();
+automovil.acelerar();
+automovil.acelerar();
+automovil.frenar();

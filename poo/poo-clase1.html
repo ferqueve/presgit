@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1.3 Guías para distribuir responsabilidades — POO</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --card: #1a2235;
+  --border: #1e3a5f;
+  --accent: #00d4ff;
+  --accent2: #7c3aed;
+  --accent3: #10b981;
+  --gold: #f59e0b;
+  --danger: #ef4444;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --code-bg: #0d1117;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── STARS BACKGROUND ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(0,212,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 70%, rgba(124,58,237,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 10%, rgba(0,212,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 50%, rgba(124,58,237,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 90%, rgba(16,185,129,0.3) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── SLIDES ENGINE ─── */
+#app { position: relative; z-index: 1; }
+
+.slide {
+  display: none;
+  min-height: 100vh;
+  padding: 60px 40px 100px;
+  position: relative;
+}
+.slide.active { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+/* ─── PROGRESS BAR ─── */
+#progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 0.4s ease;
+  z-index: 9999;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* ─── NAV ─── */
+#nav-controls {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 12px; align-items: center;
+  background: rgba(17,24,39,0.9);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  padding: 10px 20px;
+  border-radius: 50px;
+  z-index: 9998;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.nav-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); transform: scale(1.1); }
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+#slide-counter {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-family: 'Fira Code', monospace;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ─── HERO ─── */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.3);
+  color: var(--accent);
+  padding: 6px 16px; border-radius: 50px;
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 1px;
+  margin-bottom: 24px;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.hero-sub {
+  font-size: 1.2rem;
+  color: var(--muted);
+  text-align: center;
+  max-width: 600px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ─── SECTION TITLE ─── */
+.slide-label {
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: 'Fira Code', monospace;
+  margin-bottom: 12px;
+}
+.slide-title {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.slide-title span { color: var(--accent); }
+
+/* ─── CARDS ─── */
+.concept-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s;
+}
+.concept-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.concept-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+
+.icon-circle {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+}
+.icon-cyan { background: rgba(0,212,255,0.15); color: var(--accent); }
+.icon-purple { background: rgba(124,58,237,0.15); color: var(--accent2); }
+.icon-green { background: rgba(16,185,129,0.15); color: var(--accent3); }
+.icon-gold { background: rgba(245,158,11,0.15); color: var(--gold); }
+
+/* ─── CODE BLOCK ─── */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid #21262d;
+  border-radius: 12px;
+  padding: 20px 24px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  position: relative;
+}
+.code-block::before {
+  content: 'C#';
+  position: absolute; top: 10px; right: 14px;
+  font-size: 0.65rem;
+  color: var(--muted);
+  background: rgba(255,255,255,0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.kw { color: #ff7b72; }
+.cl { color: #79c0ff; }
+.fn { color: #d2a8ff; }
+.pr { color: #ffa657; }
+.cm { color: #8b949e; font-style: italic; }
+.st { color: #a5d6ff; }
+.nb { color: var(--accent3); }
+
+/* ─── HIGHLIGHT BOX ─── */
+.highlight-box {
+  background: rgba(0,212,255,0.05);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  padding: 16px 20px;
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+.highlight-box.purple { background: rgba(124,58,237,0.08); border-color: var(--accent2); }
+.highlight-box.green { background: rgba(16,185,129,0.08); border-color: var(--accent3); }
+
+/* ─── PILL ─── */
+.tag-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.25);
+  color: var(--accent);
+  padding: 4px 14px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ─── COMPARISON TABLE ─── */
+.vs-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+.vs-badge {
+  width: 40px; height: 40px;
+  background: var(--accent2);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 0.8rem;
+}
+.vs-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+.vs-card.good { border-color: var(--accent3); }
+.vs-card.bad { border-color: var(--danger); }
+
+/* ─── STEP ─── */
+.step-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.step-num {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700; color: var(--bg);
+}
+
+/* ─── QUIZ ─── */
+#quiz-section {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+}
+.quiz-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.q-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+  transition: border-color 0.3s;
+}
+.q-card:hover { border-color: rgba(0,212,255,0.3); }
+.q-num {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.q-text { font-size: 1rem; font-weight: 500; margin-bottom: 18px; line-height: 1.5; }
+.option-label {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.option-label:hover { border-color: var(--accent); background: rgba(0,212,255,0.05); }
+.option-label input[type="radio"] { display: none; }
+.option-label.selected { border-color: var(--accent); background: rgba(0,212,255,0.08); }
+
+/* RESULTS */
+.result-correct .option-label.selected,
+.result-correct .option-label.correct-ans { border-color: var(--accent3)!important; background: rgba(16,185,129,0.1)!important; }
+.result-incorrect .option-label.selected { border-color: var(--danger)!important; background: rgba(239,68,68,0.1)!important; }
+.result-incorrect .option-label.correct-ans { border-color: var(--accent3)!important; background: rgba(16,185,129,0.08)!important; }
+.result-icon { font-size: 1rem; margin-left: auto; }
+
+/* SCORE CARD */
+.score-hero {
+  background: linear-gradient(135deg, var(--card), #0d1b2e);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.score-hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+}
+.score-number {
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.score-label { color: var(--muted); font-size: 1rem; margin-top: 8px; }
+
+/* CHART */
+#perf-chart { max-width: 460px; margin: 0 auto; }
+
+/* SUBMIT BTN */
+.btn-submit {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 14px 48px;
+  border-radius: 50px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  box-shadow: 0 0 30px rgba(0,212,255,0.25);
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,212,255,0.4); }
+
+/* SCROLLABLE INNER */
+.slide-inner { width: 100%; max-width: 860px; }
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .slide { padding: 40px 20px 100px; }
+  .hero-title { font-size: 2.2rem; }
+  .vs-grid { grid-template-columns: 1fr; }
+  .vs-badge { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="app">
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 0 — PORTADA
+═══════════════════════════════════════════ -->
+<div class="slide active" id="slide-0">
+  <div class="text-center animate__animated animate__fadeInDown">
+    <div class="hero-badge animate__animated animate__fadeIn animate__delay-1s">
+      <i class="fas fa-cubes"></i> Programación Orientada a Objetos
+    </div>
+    <h1 class="hero-title">Guías para distribuir<br>responsabilidades</h1>
+    <p class="hero-sub">Unidad 1.3 · Objetos, Clases y Mensajes<br>Expert Pattern · Principio de Responsabilidad Única</p>
+    <div class="mt-5 d-flex gap-3 justify-content-center flex-wrap animate__animated animate__fadeInUp animate__delay-1s">
+      <span class="tag-pill"><i class="fas fa-star"></i> Expert Pattern</span>
+      <span class="tag-pill" style="background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.3);color:var(--accent2)"><i class="fas fa-shield-halved"></i> SRP</span>
+      <span class="tag-pill" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:var(--accent3)"><i class="fas fa-code"></i> C#</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 1 — ¿Qué son responsabilidades?
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-1">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// concepto base</p>
+    <h2 class="slide-title">¿Qué son las <span>responsabilidades</span>?</h2>
+    <p class="text-muted mb-4" style="font-weight:300;font-size:1.05rem;line-height:1.7">
+      En POO, cada objeto tiene dos tipos de responsabilidades que deben distribuirse cuidadosamente entre las clases del sistema.
+    </p>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="concept-card h-100">
+          <div class="icon-circle icon-cyan"><i class="fas fa-database"></i></div>
+          <h5 class="fw-bold mb-2">Responsabilidades de <span style="color:var(--accent)">Conocer</span></h5>
+          <p class="text-muted small mb-0">El objeto conoce y gestiona su parte de los datos del sistema. Cada clase "sabe" ciertos atributos que le corresponden.</p>
+          <div class="mt-3 code-block" style="font-size:0.78rem">
+<span class="kw">public</span> <span class="kw">int</span> <span class="pr">Age</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+<span class="kw">public</span> <span class="kw">string</span> <span class="pr">Name</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="concept-card h-100">
+          <div class="icon-circle icon-purple"><i class="fas fa-gears"></i></div>
+          <h5 class="fw-bold mb-2">Responsabilidades de <span style="color:var(--accent2)">Hacer</span></h5>
+          <p class="text-muted small mb-0">El objeto ejecuta comportamientos y acciones. Cada clase "hace" ciertas operaciones que le corresponden según los datos que posee.</p>
+          <div class="mt-3 code-block" style="font-size:0.78rem">
+<span class="kw">public</span> <span class="kw">bool</span> <span class="fn">IsAdult</span>()
+{
+  <span class="kw">return</span> <span class="kw">this</span>.<span class="pr">Age</span> >= <span class="nb">18</span>;
+}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box mt-4">
+      <i class="fas fa-lightbulb me-2" style="color:var(--gold)"></i>
+      <strong>Clave:</strong> La distribución de responsabilidades determina la calidad del diseño. Un mal reparto genera acoplamiento y código difícil de mantener.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 2 — Expert: Problema
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-2">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// patrón expert</p>
+    <h2 class="slide-title">El patrón <span>Expert</span></h2>
+    <div class="row g-4 align-items-center">
+      <div class="col-md-5">
+        <div class="concept-card" style="border-color:rgba(0,212,255,0.4)">
+          <div class="icon-circle icon-gold mb-3"><i class="fas fa-question"></i></div>
+          <h5 class="fw-bold mb-3" style="color:var(--gold)">Problema</h5>
+          <p class="text-muted" style="font-size:0.95rem;line-height:1.7">¿Cuál es el <strong style="color:var(--text)">principio básico</strong> para asignar responsabilidades a las clases de un sistema?</p>
+        </div>
+      </div>
+      <div class="col-md-2 text-center d-none d-md-block">
+        <div style="width:2px;height:120px;background:linear-gradient(180deg,var(--accent),var(--accent2));margin:0 auto;border-radius:2px"></div>
+        <i class="fas fa-arrow-right fa-2x" style="color:var(--accent);margin:8px 0"></i>
+        <div style="width:2px;height:120px;background:linear-gradient(180deg,var(--accent2),var(--accent3));margin:0 auto;border-radius:2px"></div>
+      </div>
+      <div class="col-md-5">
+        <div class="concept-card" style="border-color:rgba(16,185,129,0.4)">
+          <div class="icon-circle icon-green mb-3"><i class="fas fa-check"></i></div>
+          <h5 class="fw-bold mb-3" style="color:var(--accent3)">Solución</h5>
+          <p style="font-size:0.95rem;line-height:1.7">Asignar la responsabilidad al <strong style="color:var(--accent)">experto en los datos</strong>, es decir, a la clase que tiene los datos necesarios para cumplirla.</p>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box mt-4">
+      <i class="fas fa-user-tie me-2" style="color:var(--accent)"></i>
+      <strong>Expert</strong> es uno de los patrones GRASP (General Responsibility Assignment Software Patterns) más fundamentales en el diseño OO.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 3 — Expert: Ejemplo Person.Age
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-3">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// expert en acción</p>
+    <h2 class="slide-title">Expert: clase <span>Person</span></h2>
+    <p class="text-muted mb-4" style="font-size:0.95rem">Paso a paso, aplicamos Expert para asignar la responsabilidad de determinar si una persona es mayor de edad.</p>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div>
+            <strong>Identificar los datos necesarios</strong>
+            <p class="text-muted small mt-1 mb-0">Para saber si alguien es mayor de edad necesitamos su <strong style="color:var(--accent)">edad</strong>.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div>
+            <strong>Encontrar al experto en esos datos</strong>
+            <p class="text-muted small mt-1 mb-0">La clase <code style="color:var(--accent2)">Person</code> ya tiene la propiedad <code style="color:var(--accent)">Age</code>: es la experta.</p>
+          </div>
+        </div>
+        <div class="step-item" style="border:none">
+          <div class="step-num">3</div>
+          <div>
+            <strong>Asignar la responsabilidad</strong>
+            <p class="text-muted small mt-1 mb-0">Agregamos <code style="color:var(--accent)">IsAdult()</code> a la clase <code style="color:var(--accent2)">Person</code>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="code-block">
+<span class="kw">public class</span> <span class="cl">Person</span>
+{
+  <span class="cm">// Responsabilidad de CONOCER</span>
+  <span class="kw">public int</span> <span class="pr">Age</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+  <span class="cm">// Responsabilidad de HACER</span>
+  <span class="cm">// Expert: Person tiene Age ✔</span>
+  <span class="kw">public bool</span> <span class="fn">IsAdult</span>()
+  {
+    <span class="kw">return this</span>.<span class="pr">Age</span> >= <span class="nb">18</span>;
+  }
+}
+        </div>
+        <div class="highlight-box mt-3 green">
+          <i class="fas fa-circle-check me-2" style="color:var(--accent3)"></i>
+          La responsabilidad queda donde están los datos. Esto reduce acoplamiento y mejora cohesión.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 4 — SRP Introducción
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-4">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// principio srp</p>
+    <h2 class="slide-title">Principio de <span>Responsabilidad Única</span></h2>
+    <div class="row g-4 align-items-start">
+      <div class="col-md-7">
+        <div class="concept-card" style="border-color:rgba(124,58,237,0.5)">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="icon-circle icon-purple"><i class="fas fa-shield-halved"></i></div>
+            <div>
+              <span class="tag-pill" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.3);color:var(--accent2)">SRP</span>
+              <p class="text-muted small mb-0 mt-1">Single Responsibility Principle</p>
+            </div>
+          </div>
+          <blockquote class="highlight-box purple" style="font-size:1.05rem;font-style:italic">
+            "Nunca debería haber <strong style="color:var(--accent2)">más de una razón</strong> para que una clase cambie."
+          </blockquote>
+          <p class="text-muted mt-3 small" style="line-height:1.7">
+            Una clase con múltiples responsabilidades tiene múltiples razones para cambiar. Cada cambio en una responsabilidad puede afectar a las demás, generando fragilidad en el sistema.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="concept-card">
+          <h6 class="fw-bold mb-3"><i class="fas fa-exclamation-triangle me-2" style="color:var(--gold)"></i>¿Cuándo aplicarlo?</h6>
+          <div class="step-item">
+            <div class="step-num" style="background:var(--accent2)">!</div>
+            <div class="small text-muted">Cuando una clase mezcla lógica de negocio con persistencia</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num" style="background:var(--accent2)">!</div>
+            <div class="small text-muted">Cuando los cambios en una funcionalidad rompen otra</div>
+          </div>
+          <div class="step-item" style="border:none">
+            <div class="step-num" style="background:var(--accent2)">!</div>
+            <div class="small text-muted">Cuando el algoritmo de cálculo puede variar independientemente de la entidad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 5 — SRP: El problema con Person
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-5">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// srp · análisis del problema</p>
+    <h2 class="slide-title"><span>Person</span> con sobrepeso: tensión</h2>
+    <p class="text-muted mb-4" style="font-size:0.95rem">Agregamos peso y altura a <code style="color:var(--accent2)">Person</code>. Ahora queremos calcular si tiene sobrepeso usando el IMC. ¿La lógica va en <code style="color:var(--accent2)">Person</code>?</p>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="code-block">
+<span class="kw">public class</span> <span class="cl">Person</span>
+{
+  <span class="kw">public double</span> <span class="pr">Weight</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+  <span class="kw">public double</span> <span class="pr">Height</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+  <span class="cm">// ¿Debería ir aquí?</span>
+  <span class="kw">public bool</span> <span class="fn">HasOverweight</span>()
+  {
+    <span class="kw">double</span> imc = <span class="kw">this</span>.<span class="pr">Height</span>
+      / Math.<span class="fn">Pow</span>(<span class="kw">this</span>.<span class="pr">Weight</span>, <span class="nb">2</span>);
+    <span class="kw">return</span> imc > <span class="nb">25</span>;
+  }
+}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="concept-card" style="border-color:rgba(245,158,11,0.4)">
+          <h6 class="fw-bold mb-3"><i class="fas fa-triangle-exclamation me-2" style="color:var(--gold)"></i>Problema de diseño</h6>
+          <p class="small text-muted mb-3" style="line-height:1.6">
+            Expert dice: los datos están en <code style="color:var(--accent2)">Person</code>, entonces ahí va la lógica. <strong style="color:var(--text)">Pero...</strong>
+          </p>
+          <div class="highlight-box" style="background:rgba(245,158,11,0.08);border-color:var(--gold);font-size:0.88rem">
+            Si el criterio para determinar sobrepeso cambia (otro índice, otra fórmula), <strong>la clase Person debe cambiar</strong> por razones ajenas a la persona como entidad.
+          </div>
+          <p class="small text-muted mt-3">
+            <i class="fas fa-arrow-right me-1" style="color:var(--accent)"></i>
+            Esto viola el <strong style="color:var(--accent2)">SRP</strong>: Person tendría dos razones para cambiar.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 6 — SRP: La solución OverweightCalc
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-6">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// srp · solución</p>
+    <h2 class="slide-title">Solución: <span>OverweightCalculator</span></h2>
+    <p class="text-muted mb-4" style="font-size:0.95rem">Extraemos la lógica de cálculo a una clase separada. Cada clase tiene ahora una única razón para cambiar.</p>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="code-block">
+<span class="cm">// Person: solo datos de identidad</span>
+<span class="kw">public class</span> <span class="cl">Person</span>
+{
+  <span class="kw">public double</span> <span class="pr">Weight</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+  <span class="kw">public double</span> <span class="pr">Height</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+  <span class="cm">// sin lógica IMC ✔</span>
+}
+
+<span class="cm">// Nueva clase: algoritmo IMC</span>
+<span class="kw">public static class</span> <span class="cl">OverweightCalculator</span>
+{
+  <span class="kw">public static bool</span> <span class="fn">HasOverweight</span>(
+    <span class="cl">Person</span> person)
+  {
+    <span class="kw">double</span> imc = person.<span class="pr">Height</span>
+      / Math.<span class="fn">Pow</span>(person.<span class="pr">Weight</span>, <span class="nb">2</span>);
+    <span class="kw">return</span> imc > <span class="nb">25</span>;
+  }
+}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="concept-card">
+          <h6 class="fw-bold mb-3"><i class="fas fa-split me-2" style="color:var(--accent3)"></i>Beneficios del diseño</h6>
+          <div class="step-item">
+            <div class="step-num" style="background:var(--accent3)"><i class="fas fa-check fa-xs"></i></div>
+            <div class="small"><strong style="color:var(--accent3)">Person</strong> cambia solo si la entidad persona cambia (nuevos atributos, etc.)</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num" style="background:var(--accent3)"><i class="fas fa-check fa-xs"></i></div>
+            <div class="small"><strong style="color:var(--accent3)">OverweightCalculator</strong> cambia solo si el algoritmo IMC cambia</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num" style="background:var(--accent3)"><i class="fas fa-check fa-xs"></i></div>
+            <div class="small">Podemos cambiar la fórmula sin tocar la clase Person</div>
+          </div>
+          <div class="step-item" style="border:none">
+            <div class="step-num" style="background:var(--accent3)"><i class="fas fa-check fa-xs"></i></div>
+            <div class="small">Fácil de testear por separado y reutilizar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 7 — Expert vs SRP: Cuando hay tensión
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-7">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// análisis comparativo</p>
+    <h2 class="slide-title">Expert <span>vs</span> SRP: tensión de principios</h2>
+    <p class="text-muted mb-4" style="font-size:0.95rem">Ambos principios coexisten pero a veces generan tensión. Saber cuándo priorizar uno sobre el otro es clave.</p>
+    <div class="vs-grid">
+      <div class="vs-card good">
+        <div class="icon-circle icon-cyan mx-auto mb-2"><i class="fas fa-star fa-sm"></i></div>
+        <h6 class="fw-bold mb-2">Expert dice...</h6>
+        <p class="text-muted small mb-0">Asigna a quien <strong style="color:var(--accent)">tiene los datos</strong>.<br>Person tiene Weight/Height → HasOverweight va en Person.</p>
+      </div>
+      <div class="d-flex flex-column align-items-center justify-content-center gap-2">
+        <div class="vs-badge">VS</div>
+      </div>
+      <div class="vs-card" style="border-color:rgba(124,58,237,0.5)">
+        <div class="icon-circle icon-purple mx-auto mb-2"><i class="fas fa-shield-halved fa-sm"></i></div>
+        <h6 class="fw-bold mb-2">SRP dice...</h6>
+        <p class="text-muted small mb-0">No mezcles razones de cambio.<br>El algoritmo IMC es ajeno a la entidad → extrae a <strong style="color:var(--accent2)">OverweightCalculator</strong>.</p>
+      </div>
+    </div>
+    <div class="highlight-box mt-4" style="background:rgba(16,185,129,0.06);border-color:var(--accent3)">
+      <i class="fas fa-trophy me-2" style="color:var(--accent3)"></i>
+      <strong>Regla práctica:</strong> Si la responsabilidad de hacer puede cambiar <em>independientemente</em> de la entidad, aplica SRP y extrae esa lógica. Expert es el punto de partida, SRP es el refinamiento.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 8 — Cohesión y Acoplamiento
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-8">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// conceptos relacionados</p>
+    <h2 class="slide-title">Cohesión y <span>Acoplamiento</span></h2>
+    <p class="text-muted mb-4" style="font-size:0.95rem">Aplicar Expert y SRP correctamente mejora estos dos indicadores clave de calidad del diseño.</p>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="concept-card h-100" style="border-color:rgba(16,185,129,0.4)">
+          <div class="icon-circle icon-green"><i class="fas fa-layer-group"></i></div>
+          <h5 class="fw-bold" style="color:var(--accent3)">Alta Cohesión</h5>
+          <p class="text-muted small mt-2 mb-3" style="line-height:1.6">Una clase con alta cohesión tiene responsabilidades estrechamente relacionadas. Cada método contribuye a un propósito central.</p>
+          <div class="highlight-box green" style="font-size:0.85rem">
+            <i class="fas fa-check-circle me-1"></i>
+            <code style="color:var(--accent2)">Person</code> solo gestiona datos de persona → alta cohesión.<br>
+            <code style="color:var(--accent2)">OverweightCalculator</code> solo calcula IMC → alta cohesión.
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="concept-card h-100" style="border-color:rgba(239,68,68,0.4)">
+          <div class="icon-circle" style="background:rgba(239,68,68,0.15);color:var(--danger)"><i class="fas fa-link-slash"></i></div>
+          <h5 class="fw-bold" style="color:var(--danger)">Bajo Acoplamiento</h5>
+          <p class="text-muted small mt-2 mb-3" style="line-height:1.6">Un acoplamiento bajo significa que los cambios en una clase no fuerzan cambios en otras. Las clases son independientes.</p>
+          <div class="highlight-box" style="background:rgba(239,68,68,0.07);border-color:var(--danger);font-size:0.85rem">
+            <i class="fas fa-exclamation-circle me-1" style="color:var(--danger)"></i>
+            Sin SRP, cambiar el cálculo de IMC obliga a modificar <code style="color:var(--accent2)">Person</code>, creando acoplamiento no deseado.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box mt-4">
+      <i class="fas fa-bullseye me-2" style="color:var(--accent)"></i>
+      <strong>Objetivo de diseño:</strong> Maximizar la cohesión y minimizar el acoplamiento en cada clase del sistema.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 9 — Resumen visual
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-9">
+  <div class="slide-inner animate__animated animate__fadeInUp">
+    <p class="slide-label">// resumen</p>
+    <h2 class="slide-title">Mapa de <span>principios</span></h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="concept-card text-center h-100">
+          <div class="icon-circle icon-gold mx-auto"><i class="fas fa-star"></i></div>
+          <h5 class="fw-bold mt-2">Expert</h5>
+          <p class="text-muted small mt-2">Asigna la responsabilidad a quien tiene los datos.</p>
+          <div class="mt-3" style="height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)"></div>
+          <p class="small mt-3"><code style="color:var(--accent)">IsAdult()</code> → en <code style="color:var(--accent2)">Person</code> porque tiene <code style="color:var(--accent)">Age</code></p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="concept-card text-center h-100">
+          <div class="icon-circle icon-purple mx-auto"><i class="fas fa-shield-halved"></i></div>
+          <h5 class="fw-bold mt-2">SRP</h5>
+          <p class="text-muted small mt-2">Una sola razón para cambiar por clase.</p>
+          <div class="mt-3" style="height:2px;background:linear-gradient(90deg,transparent,var(--accent2),transparent)"></div>
+          <p class="small mt-3">Lógica IMC → <code style="color:var(--accent2)">OverweightCalculator</code> separada</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="concept-card text-center h-100">
+          <div class="icon-circle icon-cyan mx-auto"><i class="fas fa-diagram-project"></i></div>
+          <h5 class="fw-bold mt-2">Resultado</h5>
+          <p class="text-muted small mt-2">Alta cohesión + Bajo acoplamiento.</p>
+          <div class="mt-3" style="height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)"></div>
+          <p class="small mt-3">Código mantenible, testeable y extensible</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <div class="d-inline-flex align-items-center gap-3 px-4 py-3 rounded-pill" style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2)">
+        <i class="fas fa-arrow-right" style="color:var(--accent)"></i>
+        <span class="fw-bold">¿Listo para el cuestionario?</span>
+        <i class="fas fa-pen-to-square" style="color:var(--accent2)"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 10 — CUESTIONARIO
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-10">
+  <div id="quiz-section" style="padding-bottom:20px">
+    <div class="quiz-header">
+      <p class="slide-label">// evaluación</p>
+      <h2 class="slide-title">Cuestionario de <span>Evaluación</span></h2>
+      <p class="text-muted" style="font-size:0.95rem">20 preguntas · Selección múltiple · Distribución de responsabilidades en POO</p>
+    </div>
+
+    <div id="quiz-questions"></div>
+    <div id="quiz-results" style="display:none"></div>
+
+    <div class="text-center mt-4" id="submit-area">
+      <button class="btn-submit" onclick="submitQuiz()">
+        <i class="fas fa-paper-plane me-2"></i>Evaluar respuestas
+      </button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #app -->
+
+<!-- ─── NAV CONTROLS ─── -->
+<div id="nav-controls">
+  <button class="nav-btn" id="btn-prev" onclick="goSlide(-1)" disabled><i class="fas fa-chevron-left"></i></button>
+  <span id="slide-counter">01 / 11</span>
+  <button class="nav-btn" id="btn-next" onclick="goSlide(1)"><i class="fas fa-chevron-right"></i></button>
+  <button class="nav-btn" onclick="toggleFullscreen()" title="Pantalla completa"><i class="fas fa-expand"></i></button>
+</div>
+
+<!-- ─── SCRIPTS ─── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<script>
+// ══════════════════════════════
+// QUIZ DATA — 20 preguntas
+// ══════════════════════════════
+const questions = [
+  {
+    q: "¿Cuál es el principio básico del patrón Expert para asignar responsabilidades?",
+    opts: [
+      "Asignar la responsabilidad a la clase con más métodos",
+      "Asignar la responsabilidad al experto en los datos necesarios para cumplirla",
+      "Asignar la responsabilidad siempre a la clase principal",
+      "Asignar la responsabilidad al objeto que primero la solicite"
+    ],
+    ans: 1
+  },
+  {
+    q: "Según el principio Expert, ¿en qué clase debe estar el método IsAdult()?",
+    opts: [
+      "En una clase utilitaria estática genérica",
+      "En la clase Program o Main",
+      "En la clase Person, porque posee el atributo Age",
+      "En cualquier clase que necesite usar la funcionalidad"
+    ],
+    ans: 2
+  },
+  {
+    q: "¿Qué significa SRP en su sigla en inglés?",
+    opts: [
+      "Simple Refactoring Pattern",
+      "Single Responsibility Principle",
+      "Shared Responsibility Protocol",
+      "Software Reuse Paradigm"
+    ],
+    ans: 1
+  },
+  {
+    q: "¿Cuál es la definición correcta del Principio de Responsabilidad Única?",
+    opts: [
+      "Una clase debe implementar únicamente una interfaz",
+      "Nunca debería haber más de una razón para que una clase cambie",
+      "Cada método debe tener una sola línea de código",
+      "Una clase solo puede tener un atributo"
+    ],
+    ans: 1
+  },
+  {
+    q: "¿Por qué el cálculo de sobrepeso (IMC) no debería estar en la clase Person según el SRP?",
+    opts: [
+      "Porque el código sería demasiado largo",
+      "Porque Person ya tiene muchos métodos",
+      "Porque el criterio para determinar sobrepeso podría cambiar por razones ajenas a la entidad persona",
+      "Porque el IMC es un número y Person no trabaja con números"
+    ],
+    ans: 2
+  },
+  {
+    q: "¿Cuál de las siguientes afirmaciones describe correctamente la tensión entre Expert y SRP?",
+    opts: [
+      "Expert y SRP siempre se complementan sin conflicto",
+      "Expert puede indicar asignar a quien tiene los datos, pero SRP puede indicar separar si hay otra razón de cambio",
+      "SRP siempre tiene prioridad sobre Expert",
+      "Expert siempre tiene prioridad sobre SRP"
+    ],
+    ans: 1
+  },
+  {
+    q: "En el ejemplo del código, ¿cómo se declara la clase OverweightCalculator?",
+    opts: [
+      "public class OverweightCalculator",
+      "private static class OverweightCalculator",
+      "public static class OverweightCalculator",
+      "abstract class OverweightCalculator"
+    ],
+    ans: 2
+  },
+  {
+    q: "¿Qué tipo de responsabilidades tiene un objeto en POO?",
+    opts: [
+      "Solo responsabilidades de ejecución",
+      "Responsabilidades de conocer (datos) y de hacer (comportamiento)",
+      "Responsabilidades heredadas y polimórficas",
+      "Solo responsabilidades de almacenamiento"
+    ],
+    ans: 1
+  },
+  {
+    q: "Según Expert, si para calcular el descuento de un producto necesito su precio y categoría, ¿dónde debería estar ese método?",
+    opts: [
+      "En la clase cliente que compra el producto",
+      "En una clase de configuración global",
+      "En la clase Producto, que posee precio y categoría",
+      "En la clase principal Main"
+    ],
+    ans: 2
+  },
+  {
+    q: "¿Cuál es el objetivo de diseño al aplicar correctamente Expert y SRP?",
+    opts: [
+      "Minimizar el número de clases del sistema",
+      "Maximizar la cohesión y minimizar el acoplamiento",
+      "Maximizar el acoplamiento para mayor reutilización",
+      "Reducir la cantidad de métodos por clase"
+    ],
+    ans: 1
+  },
+  {
+    q: "¿Qué ocurre cuando una clase tiene múltiples responsabilidades no relacionadas?",
+    opts: [
+      "El código se vuelve más eficiente",
+      "Aumenta la cohesión de la clase",
+      "La clase tiene múltiples razones para cambiar, generando fragilidad",
+      "Se reduce el número de archivos del proyecto"
+    ],
+    ans: 2
+  },
+  {
+    q: "¿Qué propiedad de diseño mejora cuando una clase tiene responsabilidades estrechamente relacionadas?",
+    opts: [
+      "Acoplamiento",
+      "Herencia",
+      "Cohesión",
+      "Polimorfismo"
+    ],
+    ans: 2
+  },
+  {
+    q: "En el método HasOverweight de OverweightCalculator, ¿qué recibe como parámetro?",
+    opts: [
+      "Dos valores double: weight y height",
+      "Un objeto de tipo Person",
+      "Un valor double imc ya calculado",
+      "No recibe parámetros, usa atributos estáticos"
+    ],
+    ans: 1
+  },
+  {
+    q: "¿Con qué valor de IMC se determina sobrepeso en el ejemplo del código?",
+    opts: ["20", "30", "18.5", "25"],
+    ans: 3
+  },
+  {
+    q: "¿Cuál es la fórmula usada en OverweightCalculator para calcular el IMC?",
+    opts: [
+      "weight / Math.Pow(height, 2)",
+      "height * weight",
+      "height / Math.Pow(weight, 2)",
+      "Math.Sqrt(height * weight)"
+    ],
+    ans: 2
+  },
+  {
+    q: "¿A qué conjunto de patrones pertenece Expert?",
+    opts: [
+      "Patrones de diseño Gang of Four (GoF)",
+      "GRASP (General Responsibility Assignment Software Patterns)",
+      "Patrones de arquitectura MVC",
+      "Patrones de integración empresarial"
+    ],
+    ans: 1
+  },
+  {
+    q: "Una clase con alta cohesión es aquella que...",
+    opts: [
+      "Tiene muchos atributos y métodos variados",
+      "Tiene responsabilidades estrechamente relacionadas y un propósito central claro",
+      "Hereda de muchas clases padre",
+      "No tiene dependencias externas"
+    ],
+    ans: 1
+  },
+  {
+    q: "¿Qué ventaja tiene extraer la lógica IMC a OverweightCalculator?",
+    opts: [
+      "Reduce el tamaño del archivo Person.cs",
+      "Permite cambiar el algoritmo IMC sin modificar la clase Person",
+      "Mejora el rendimiento del cálculo matemático",
+      "Permite usar herencia múltiple en Person"
+    ],
+    ans: 1
+  },
+  {
+    q: "¿Cuándo deben coexistir Expert y SRP en la toma de decisiones de diseño?",
+    opts: [
+      "Nunca, se deben usar por separado",
+      "Expert es el punto de partida; SRP es el refinamiento cuando hay razones de cambio independientes",
+      "Solo en sistemas grandes con más de 100 clases",
+      "Solo cuando se aplican también patrones GoF"
+    ],
+    ans: 1
+  },
+  {
+    q: "Si en el futuro queremos usar otro índice diferente al IMC para calcular sobrepeso, ¿qué clase deberíamos modificar?",
+    opts: [
+      "La clase Person",
+      "La clase Main",
+      "La clase OverweightCalculator",
+      "No habría que modificar ninguna clase"
+    ],
+    ans: 2
+  }
+];
+
+// ══════════════════════════════
+// SLIDE NAVIGATION
+// ══════════════════════════════
+const TOTAL = document.querySelectorAll('.slide').length;
+let current = 0;
+let quizSubmitted = false;
+
+function goSlide(dir) {
+  const slides = document.querySelectorAll('.slide');
+  slides[current].classList.remove('active');
+  current = Math.max(0, Math.min(TOTAL - 1, current + dir));
+  const s = slides[current];
+  s.classList.add('active');
+  s.querySelectorAll('[class*="animate__"]').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+  updateNav();
+}
+
+function updateNav() {
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === TOTAL - 1;
+  document.getElementById('slide-counter').textContent =
+    String(current + 1).padStart(2,'0') + ' / ' + String(TOTAL).padStart(2,'0');
+  document.getElementById('progress-bar').style.width = ((current + 1) / TOTAL * 100) + '%';
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+// ══════════════════════════════
+// BUILD QUIZ
+// ══════════════════════════════
+function buildQuiz() {
+  const container = document.getElementById('quiz-questions');
+  questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = 'qcard-' + qi;
+    card.innerHTML = `
+      <div class="q-num">
+        <span class="tag-pill" style="font-size:0.7rem">Q${String(qi+1).padStart(2,'0')}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="options-wrap">
+        ${q.opts.map((opt, oi) => `
+          <label class="option-label" id="opt-${qi}-${oi}" onclick="selectOpt(${qi}, ${oi})">
+            <input type="radio" name="q${qi}" value="${oi}">
+            <span class="opt-letter" style="
+              flex-shrink:0;width:24px;height:24px;border-radius:50%;
+              background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);
+              color:var(--accent);display:flex;align-items:center;justify-content:center;
+              font-size:0.7rem;font-weight:700">${String.fromCharCode(65+oi)}</span>
+            <span>${opt}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (quizSubmitted) return;
+  document.querySelectorAll(`#qcard-${qi} .option-label`).forEach(l => l.classList.remove('selected'));
+  document.getElementById(`opt-${qi}-${oi}`).classList.add('selected');
+}
+
+// ══════════════════════════════
+// SUBMIT & GRADE
+// ══════════════════════════════
+function submitQuiz() {
+  const unanswered = questions.filter((_, i) =>
+    !document.querySelector(`input[name="q${i}"]:checked`) &&
+    !document.querySelector(`#qcard-${i} .selected`)
+  ).length;
+
+  if (unanswered > 0) {
+    Swal.fire({
+      background: '#111827',
+      color: '#e2e8f0',
+      icon: 'warning',
+      iconColor: '#f59e0b',
+      title: 'Preguntas sin responder',
+      text: `Faltan ${unanswered} pregunta(s) por responder. ¿Deseas enviar de todas formas?`,
+      showCancelButton: true,
+      confirmButtonText: 'Enviar igual',
+      cancelButtonText: 'Volver',
+      confirmButtonColor: '#7c3aed',
+      cancelButtonColor: '#1a2235',
+    }).then(r => { if (r.isConfirmed) gradeQuiz(); });
+    return;
+  }
+  gradeQuiz();
+}
+
+function gradeQuiz() {
+  quizSubmitted = true;
+  document.getElementById('submit-area').style.display = 'none';
+
+  let correct = 0;
+  const results = [];
+
+  questions.forEach((q, qi) => {
+    const selected = document.querySelector(`#qcard-${qi} .selected`);
+    let userAns = -1;
+    if (selected) {
+      const id = selected.id; // opt-qi-oi
+      userAns = parseInt(id.split('-')[2]);
+    }
+    const isCorrect = userAns === q.ans;
+    if (isCorrect) correct++;
+    results.push({ qi, userAns, isCorrect });
+
+    const card = document.getElementById('qcard-' + qi);
+    card.classList.add(isCorrect ? 'result-correct' : 'result-incorrect');
+    card.querySelector('#opt-' + qi + '-' + q.ans).classList.add('correct-ans');
+
+    // icon
+    const qnum = card.querySelector('.q-num');
+    const icon = document.createElement('span');
+    icon.className = 'result-icon ms-auto';
+    icon.innerHTML = isCorrect
+      ? '<i class="fas fa-circle-check" style="color:var(--accent3)"></i>'
+      : '<i class="fas fa-circle-xmark" style="color:var(--danger)"></i>';
+    qnum.appendChild(icon);
+
+    // correction note
+    if (!isCorrect) {
+      const note = document.createElement('div');
+      note.className = 'highlight-box green mt-3';
+      note.style.fontSize = '0.83rem';
+      note.innerHTML = `<i class="fas fa-graduation-cap me-2" style="color:var(--accent3)"></i>
+        <strong>Respuesta correcta:</strong> ${q.opts[q.ans]}`;
+      card.appendChild(note);
+    }
+  });
+
+  showResults(correct, results);
+  renderChart(correct, questions.length - correct);
+
+  const pct = Math.round(correct / questions.length * 100);
+  const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🎯' : pct >= 50 ? '📚' : '💪';
+
+  Swal.fire({
+    background: '#111827',
+    color: '#e2e8f0',
+    title: `${emoji} Evaluación completada`,
+    html: `<span style="font-size:3rem;font-weight:900;background:linear-gradient(135deg,#00d4ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${correct}/${questions.length}</span>
+           <br><span style="color:#94a3b8">${pct}% de respuestas correctas</span>`,
+    confirmButtonText: 'Ver resultados detallados',
+    confirmButtonColor: '#00d4ff',
+    iconColor: '#00d4ff',
+  });
+}
+
+function showResults(correct, results) {
+  const pct = Math.round(correct / questions.length * 100);
+  let grade, gradeColor;
+  if (pct >= 90) { grade = 'Excelente'; gradeColor = 'var(--accent3)'; }
+  else if (pct >= 75) { grade = 'Muy bueno'; gradeColor = 'var(--accent)'; }
+  else if (pct >= 60) { grade = 'Suficiente'; gradeColor = 'var(--gold)'; }
+  else { grade = 'Necesita refuerzo'; gradeColor = 'var(--danger)'; }
+
+  const resDiv = document.getElementById('quiz-results');
+  resDiv.style.display = 'block';
+  resDiv.innerHTML = `
+    <div class="score-hero mt-4">
+      <div class="score-number">${pct}%</div>
+      <div class="score-label">${correct} de ${questions.length} respuestas correctas</div>
+      <div class="mt-3"><span class="tag-pill" style="background:transparent;border-color:${gradeColor};color:${gradeColor};font-size:1rem">${grade}</span></div>
+      <div class="row g-3 mt-3 justify-content-center">
+        <div class="col-auto text-center">
+          <div style="font-size:1.8rem;font-weight:800;color:var(--accent3)">${correct}</div>
+          <div class="small text-muted">Correctas</div>
+        </div>
+        <div class="col-auto text-center">
+          <div style="font-size:1.8rem;font-weight:800;color:var(--danger)">${questions.length - correct}</div>
+          <div class="small text-muted">Incorrectas</div>
+        </div>
+        <div class="col-auto text-center">
+          <div style="font-size:1.8rem;font-weight:800;color:var(--gold)">${questions.length}</div>
+          <div class="small text-muted">Total</div>
+        </div>
+      </div>
+    </div>
+    <div id="perf-chart">
+      <canvas id="myChart"></canvas>
+    </div>
+    <div class="text-center mt-4">
+      <p class="text-muted small">↓ Revisa cada pregunta a continuación para ver respuestas correctas e incorrectas</p>
+    </div>
+  `;
+
+  // scroll to top of quiz
+  document.getElementById('quiz-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderChart(correct, incorrect) {
+  setTimeout(() => {
+    const ctx = document.getElementById('myChart');
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Correctas', 'Incorrectas'],
+        datasets: [{
+          data: [correct, incorrect],
+          backgroundColor: ['rgba(16,185,129,0.85)', 'rgba(239,68,68,0.75)'],
+          borderColor: ['#10b981', '#ef4444'],
+          borderWidth: 2,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#94a3b8', font: { family: 'Outfit', size: 13 }, padding: 20 }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.label}: ${ctx.raw} preguntas (${Math.round(ctx.raw/questions.length*100)}%)`
+            }
+          }
+        }
+      }
+    });
+  }, 400);
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+buildQuiz();
+updateNav();
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goSlide(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goSlide(-1);
+});
+</script>
+</body>
+</html>

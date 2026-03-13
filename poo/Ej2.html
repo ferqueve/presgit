@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C# Message Bus - Comunicación entre Objetos</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap/5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        :root {
+            --primary-color: #9b59b6; /* Un morado más suave para diferenciar */
+            --secondary-color: #3498db;
+            --bg-dark: #1e1e1e;
+            --text-light: #d4d4d4;
+            --success: #2ecc71;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .arena-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Layout Principal */
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar de Niveles */
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .level-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .level-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 25px;
+        }
+
+        .level-item.active {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--secondary-color);
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .level-item.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
+
+        .level-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        .status-done { color: var(--success); }
+        .status-current { color: var(--secondary-color); }
+        .status-locked { color: #ccc; }
+
+        /* Area de Trabajo */
+        .workspace {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .exercise-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .exercise-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            gap: 20px;
+        }
+
+        .instruction-panel {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            overflow-y: auto;
+        }
+
+        .code-panel {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Editor Simulado */
+        .editor-container {
+            background-color: var(--bg-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .editor-toolbar {
+            background: #252526;
+            padding: 8px 15px;
+            color: #ccc;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        textarea.code-editor {
+            flex: 1;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .btn-run {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 6px rgba(46, 204, 113, 0.3);
+        }
+        .btn-run:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .hint-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            color: #856404;
+            border-radius: 6px;
+            display: none;
+            border-left: 4px solid #ffc107;
+        }
+
+        .diagram-box {
+            background: white;
+            border: 2px dashed #ccc;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        
+        .arrow-anim {
+            display: inline-block;
+            animation: bounceRight 1s infinite;
+        }
+
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; height: 150px; }
+            .exercise-body { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="arena-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0"><i class="fa-solid fa-comments"></i> C# Message Bus</h3>
+                <small>Entrenamiento en Comunicación entre Objetos</small>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark p-2">Misión: <span id="current-level-display">1</span>/6</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar" id="sidebar-list">
+            <!-- Se llena con JS -->
+        </div>
+
+        <!-- Workspace -->
+        <div class="workspace">
+            <div class="exercise-card" id="exercise-container">
+                <!-- El contenido se inyecta con JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // --- DATA DE LOS EJERCICIOS DE COMUNICACIÓN ---
+        const exercises = [
+            {
+                id: 1,
+                title: "El Primer Saludo",
+                desc: "Tienes dos clases: <code>Persona</code> y <code>Saludador</code>. <br>En el <code>Main</code>, debes crear una instancia de <code>Saludador</code> y hacer que la persona salude.",
+                diagram: "Main --> new Saludador() --> .DecirHola()",
+                hint: "Primero instancia: <code>Saludador s = new Saludador();</code>. Luego llama al método: <code>s.DecirHola();</code>",
+                template: `using System;
+
+class Saludador {
+    public void DecirHola() {
+        Console.WriteLine("¡Hola Mundo!");
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        // 1. Crea el objeto saludador aquí
+        
+        // 2. Haz que salude aquí
+        
+    }
+}`,
+                check: (code) => /Saludador\s+\w+\s*=\s*new\s+Saludador\s*\(\s*\)\s*;/.test(code) && /\.DecirHola\s*\(\s*\)\s*;/.test(code),
+                successMsg: "¡Conexión establecida! Has enviado el primer mensaje a un objeto."
+            },
+            {
+                id: 2,
+                title: "Pasando Parámetros",
+                desc: "La clase <code>Robot</code> puede hablar, pero necesita saber <strong>qué</strong> decir. El método <code>Hablar</code> recibe un string.",
+                diagram: "Main --> new Robot() --> .Hablar(\"Mensaje\")",
+                hint: "Al llamar al método, pasa el texto entre paréntesis: <code>robot.Hablar(\"Hola\");</code>",
+                template: `using System;
+
+class Robot {
+    public void Hablar(string mensaje) {
+        Console.WriteLine("Robot dice: " + mensaje);
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        Robot miRobot = new Robot();
+        
+        // Haz que el robot diga "Soy una IA"
+        
+    }
+}`,
+                check: (code) => /\.Hablar\s*\(\s*["']Soy una IA["']\s*\)\s*;/.test(code),
+                successMsg: "¡Mensaje entregado! El objeto recibió la información correctamente."
+            },
+            {
+                id: 3,
+                title: "La Respuesta (Return)",
+                desc: "Ahora la comunicación es bidireccional. La clase <code>Calculadora</code> no imprime, sino que <strong>devuelve</strong> un resultado. Debes guardarlo en una variable.",
+                diagram: "Main --> .Sumar(5, 5) --> [Resultado] --> Main",
+                hint: "Usa una variable para recibir el retorno: <code>int resultado = calc.Sumar(5, 5);</code>",
+                template: `using System;
+
+class Calculadora {
+    public int Sumar(int a, int b) {
+        return a + b;
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        Calculadora calc = new Calculadora();
+        
+        // 1. Llama a Sumar(10, 20) y guarda el resultado en 'total'
+        
+        // 2. Imprime total
+        Console.WriteLine(total);
+    }
+}`,
+                check: (code) => /int\s+total\s*=\s*calc\.Sumar\s*\(\s*10\s*,\s*20\s*\)\s*;/.test(code),
+                successMsg: "¡Respuesta recibida! Has capturado el retorno del método."
+            },
+            {
+                id: 4,
+                title: "Inyección de Dependencia (Básico)",
+                desc: "La clase <code>Auto</code> necesita un <code>Motor</code> para funcionar. El constructor de Auto recibe un Motor. Debes crear el motor y pasárselo al auto.",
+                diagram: "new Motor() --> new Auto(motor) --> .Encender()",
+                hint: "Crea el motor primero. Luego: <code>Auto miAuto = new Auto(miMotor);</code>",
+                template: `using System;
+
+class Motor {
+    public void Arrancar() { Console.WriteLine("Motor rugiendo..."); }
+}
+
+class Auto {
+    private Motor _motor;
+    public Auto(Motor motor) {
+        _motor = motor;
+    }
+    public void Encender() {
+        _motor.Arrancar();
+        Console.WriteLine("Auto en marcha");
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        // 1. Crea un objeto Motor llamado 'm'
+        
+        // 2. Crea un objeto Auto pasando 'm' al constructor
+        
+        // 3. Enciende el auto
+        
+    }
+}`,
+                check: (code) => /Motor\s+m\s*=\s*new\s+Motor/.test(code) && /new\s+Auto\s*\(\s*m\s*\)/.test(code) && /\.Encender\s*\(\s*\)/.test(code),
+                successMsg: "¡Dependencia inyectada! El Auto ahora tiene acceso al Motor."
+            },
+            {
+                id: 5,
+                title: "El Sistema de Chat",
+                desc: "Crea una simulación de chat. Tienes la clase <code>Usuario</code>. El Usuario A debe enviar un mensaje al Usuario B usando el método <code>RecibirMensaje</code>.",
+                diagram: "UsuarioA --> .EnviarMensaje(UsuarioB, \"Hola\")",
+                hint: "Dentro del método EnviarMensaje de UsuarioA, debes llamar a <code>destinatario.RecibirMensaje(...)</code>",
+                template: `using System;
+
+class Usuario {
+    public string Nombre;
+    public Usuario(string nombre) { Nombre = nombre; }
+
+    public void RecibirMensaje(string texto) {
+        Console.WriteLine(Nombre + " recibió: " + texto);
+    }
+
+    // Completa este método para enviar mensaje a otro usuario
+    public void EnviarMensaje(Usuario destinatario, string texto) {
+        // Escribe la línea que llama al método del destinatario
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        Usuario ana = new Usuario("Ana");
+        Usuario luis = new Usuario("Luis");
+        
+        ana.EnviarMensaje(luis, "¿Qué tal?");
+    }
+}`,
+                check: (code) => /destinatario\.RecibirMensaje\s*\(\s*texto\s*\)\s*;/.test(code),
+                successMsg: "¡Chat funcional! Los objetos se están comunicando entre sí."
+            },
+            {
+                id: 6,
+                title: "Desafío Final: La Tienda",
+                desc: "Crea el método <code>Comprar</code> en la clase <code>Cliente</code>. Debe verificar si hay stock en el <code>Producto</code>. Si hay, resta 1 al stock e imprime 'Compra realizada'.",
+                diagram: "Cliente --> Producto.Stock --> (Si > 0) --> Producto.Stock--",
+                hint: "Accede al stock así: <code>producto.Stock</code>. Usa un if.",
+                template: `using System;
+
+class Producto {
+    public string Nombre;
+    public int Stock;
+    public Producto(string n, int s) { Nombre = n; Stock = s; }
+}
+
+class Cliente {
+    public string Nombre;
+    public Cliente(string n) { Nombre = n; }
+
+    public void Comprar(Producto producto) {
+        // Escribe la lógica aquí:
+        // 1. Si producto.Stock > 0
+        // 2. Restar 1 a producto.Stock
+        // 3. Imprimir "Compra realizada"
+        // 4. Si no, imprimir "Sin stock"
+        
+    }
+}
+
+class Program {
+    static void Main(string[] args) {
+        Producto p = new Producto("Laptop", 5);
+        Cliente c = new Cliente("Juan");
+        c.Comprar(p);
+    }
+}`,
+                check: (code) => /if\s*\(\s*producto\.Stock\s*>\s*0\s*\)/.test(code) && /producto\.Stock--/.test(code) && /Compra realizada/.test(code),
+                successMsg: "¡MAESTRO DE LA POO! Has completado el sistema de comunicación de objetos."
+            }
+        ];
+
+        let currentLevel = 0;
+        let completedLevels = [];
+
+        // --- FUNCIONES DE LA UI ---
+
+        function init() {
+            renderSidebar();
+            loadExercise(0);
+        }
+
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar-list');
+            sidebar.innerHTML = '';
+
+            exercises.forEach((ex, index) => {
+                const isLocked = index > 0 && !completedLevels.includes(index - 1) && index !== currentLevel;
+                const isDone = completedLevels.includes(index);
+                const isActive = index === currentLevel;
+
+                let iconClass = 'fa-lock';
+                let statusClass = 'status-locked';
+                let statusText = '<i class="fa-solid fa-lock"></i>';
+
+                if (isDone) {
+                    iconClass = 'fa-check-circle';
+                    statusClass = 'status-done';
+                    statusText = '<i class="fa-solid fa-check-circle"></i>';
+                } else if (isActive) {
+                    iconClass = 'fa-play-circle';
+                    statusClass = 'status-current';
+                    statusText = '<i class="fa-solid fa-play-circle"></i>';
+                }
+
+                const div = document.createElement('div');
+                div.className = `level-item ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`;
+                div.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="level-icon ${statusClass}">${statusText}</div>
+                        <div>
+                            <div class="small text-muted">Misión ${index + 1}</div>
+                            <div>${ex.title}</div>
+                        </div>
+                    </div>
+                `;
+                
+                if (!isLocked) {
+                    div.onclick = () => loadExercise(index);
+                }
+
+                sidebar.appendChild(div);
+            });
+            
+            document.getElementById('current-level-display').innerText = currentLevel + 1;
+        }
+
+        function loadExercise(index) {
+            currentLevel = index;
+            const ex = exercises[index];
+            const container = document.getElementById('exercise-container');
+
+            container.classList.remove('animate__fadeIn');
+            void container.offsetWidth; 
+            container.classList.add('animate__fadeIn');
+
+            container.innerHTML = `
+                <div class="exercise-header">
+                    <h4 class="mb-0">${ex.title}</h4>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleHint()">
+                        <i class="fa-regular fa-lightbulb"></i> Ver Pista
+                    </button>
+                </div>
+                <div class="exercise-body">
+                    <div class="instruction-panel">
+                        <h5>Objetivo:</h5>
+                        <p>${ex.desc}</p>
+                        
+                        <div class="diagram-box">
+                            <strong>Flujo de Mensaje:</strong><br>
+                            ${ex.diagram}
+                        </div>
+
+                        <div id="hint-box" class="hint-box">
+                            <strong>Pista:</strong> ${ex.hint}
+                        </div>
+                        <hr>
+                        <p class="text-muted small"><i class="fa-solid fa-info-circle"></i> Completa el código para que los objetos interactúen correctamente.</p>
+                    </div>
+                    <div class="code-panel">
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <span>Program.cs</span>
+                                <span><i class="fa-brands fa-microsoft"></i> C#</span>
+                            </div>
+                            <textarea id="code-input" class="code-editor" spellcheck="false">${ex.template}</textarea>
+                        </div>
+                        <div class="mt-3 text-end">
+                            <button class="btn btn-run" onclick="validateCode()">
+                                <i class="fa-solid fa-paper-plane"></i> Enviar Mensaje (Validar)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            renderSidebar();
+        }
+
+        function toggleHint() {
+            const box = document.getElementById('hint-box');
+            box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function validateCode() {
+            const code = document.getElementById('code-input').value;
+            const ex = exercises[currentLevel];
+
+            const btn = document.querySelector('.btn-run');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+                if (ex.check(code)) {
+                    completedLevels.push(currentLevel);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Mensaje Entregado!',
+                        text: ex.successMsg,
+                        confirmButtonColor: '#2ecc71',
+                        confirmButtonText: 'Siguiente Misión'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            if (currentLevel < exercises.length - 1) {
+                                loadExercise(currentLevel + 1);
+                            } else {
+                                Swal.fire({
+                                    title: '¡SISTEMA COMPLETADO!',
+                                    text: 'Dominas la comunicación entre objetos en C#. ¡Excelente trabajo!',
+                                    icon: 'success',
+                                    imageUrl: 'https://cdn-icons-png.flaticon.com/512/2921/2921226.png',
+                                    imageWidth: 100,
+                                    imageHeight: 100
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Comunicación',
+                        text: 'El mensaje no llegó a su destino. Revisa la sintaxis y la lógica.',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            }, 800);
+        }
+
+        init();
+    </script>
+</body>
+</html>

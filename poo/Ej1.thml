@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C# Code Arena - Práctica Intensiva</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        :root {
+            --primary-color: #68217a; /* Morado VS/Rider */
+            --secondary-color: #007acc; /* Azul VS/Rider */
+            --bg-dark: #1e1e1e;
+            --text-light: #d4d4d4;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .arena-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Layout Principal */
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar de Niveles */
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .level-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .level-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 25px;
+        }
+
+        .level-item.active {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--secondary-color);
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .level-item.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
+
+        .level-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        .status-done { color: #28a745; }
+        .status-current { color: var(--secondary-color); }
+        .status-locked { color: #ccc; }
+
+        /* Area de Trabajo */
+        .workspace {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .exercise-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .exercise-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            gap: 20px;
+        }
+
+        .instruction-panel {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .code-panel {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Editor Simulado */
+        .editor-container {
+            background-color: var(--bg-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .editor-toolbar {
+            background: #252526;
+            padding: 8px 15px;
+            color: #ccc;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        textarea.code-editor {
+            flex: 1;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        /* Syntax Highlighting Simulado (Colores básicos) */
+        .hl-kw { color: #569cd6; } /* Keyword */
+        .hl-str { color: #ce9178; } /* String */
+        .hl-num { color: #b5cea8; } /* Number */
+        .hl-com { color: #6a9955; } /* Comment */
+        .hl-class { color: #4ec9b0; } /* Class */
+
+        .btn-run {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .btn-run:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .hint-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            color: #856404;
+            border-radius: 6px;
+            display: none;
+            border-left: 4px solid #ffc107;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; height: 150px; }
+            .exercise-body { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="arena-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0"><i class="fa-solid fa-code"></i> C# Code Arena</h3>
+                <small>Entrenamiento práctico para desarrolladores</small>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark p-2">Nivel Actual: <span id="current-level-display">1</span>/10</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar" id="sidebar-list">
+            <!-- Se llena con JS -->
+        </div>
+
+        <!-- Workspace -->
+        <div class="workspace">
+            <div class="exercise-card" id="exercise-container">
+                <!-- El contenido se inyecta con JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // --- DATA DE LOS EJERCICIOS ---
+        const exercises = [
+            {
+                id: 1,
+                title: "Hola Mundo",
+                desc: "Bienvenido a C#. Tu primera tarea es imprimir el texto 'Hola C#' en la consola.",
+                hint: "Usa <code>Console.WriteLine(\"Texto\");</code>. No olvides el punto y coma.",
+                template: `using System;\n\nclass Program {\n    static void Main(string[] args) {\n        // Escribe tu código aquí\n        \n    }\n}`,
+                check: (code) => code.includes('Console.WriteLine') && code.includes('"Hola C#"'),
+                successMsg: "¡Excelente inicio! Has dominado la salida de consola."
+            },
+            {
+                id: 2,
+                title: "Variables y Tipos",
+                desc: "Declara una variable entera llamada <code>edad</code> y asígnale el valor 25. Luego imprímela.",
+                hint: "En C# es: <code>int nombre = valor;</code>",
+                template: `using System;\n\nclass Program {\n    static void Main(string[] args) {\n        // Declara la variable edad aquí\n        \n        Console.WriteLine(edad);\n    }\n}`,
+                check: (code) => /int\s+edad\s*=\s*25\s*;/.test(code),
+                successMsg: "¡Correcto! Has declarado una variable tipada correctamente."
+            },
+            {
+                id: 3,
+                title: "Suma de Variables",
+                desc: "Tienes dos variables <code>a = 10</code> y <code>b = 20</code>. Crea una tercera variable <code>suma</code> que guarde el resultado de a + b.",
+                hint: "Simplemente usa el operador +.",
+                template: `using System;\n\nclass Program {\n    static void Main(string[] args) {\n        int a = 10;\n        int b = 20;\n        \n        // Crea la variable suma aquí\n        \n        Console.WriteLine(suma);\n    }\n}`,
+                check: (code) => /int\s+suma\s*=\s*a\s*\+\s*b\s*;/.test(code) || /var\s+suma\s*=\s*a\s*\+\s*b\s*;/.test(code),
+                successMsg: "¡Muy bien! La aritmética en C# es igual que en otros lenguajes."
+            },
+            {
+                id: 4,
+                title: "Condicionales (If/Else)",
+                desc: "Crea un <code>if</code> que verifique si la variable <code>nota</code> es mayor o igual a 6. Si es así, imprime 'Aprobado'.",
+                hint: "La sintaxis es: <code>if (condicion) { codigo }</code>",
+                template: `using System;\n\nclass Program {\n    static void Main(string[] args) {\n        int nota = 8;\n        \n        // Escribe el if aquí\n        \n    }\n}`,
+                check: (code) => /if\s*\(\s*nota\s*>=?\s*6\s*\)/.test(code) && code.includes('"Aprobado"'),
+                successMsg: "¡Lógica correcta! Los condicionales son vitales."
+            },
+            {
+                id: 5,
+                title: "Bucle For",
+                desc: "Imprime los números del 1 al 5 usando un bucle <code>for</code>.",
+                hint: "<code>for (int i = 1; i <= 5; i++) { ... }</code>",
+                template: `using System;\n\nclass Program {\n    static void Main(string[] args) {\n        // Escribe el bucle for aquí\n        \n    }\n}`,
+                check: (code) => /for\s*\(\s*int\s+i\s*=\s*1\s*;\s*i\s*<=?\s*5\s*;\s*i\+\+\s*\)/.test(code) && code.includes('Console.WriteLine(i)'),
+                successMsg: "¡Bucle completado! Dominas la iteración."
+            },
+            {
+                id: 6,
+                title: "Arrays",
+                desc: "Crea un array de strings llamado <code>nombres</code> con 3 elementos: \"Ana\", \"Luis\", \"Sofia\".",
+                hint: "<code>string[] nombres = new string[] { ... };</code> o usa la sintaxis simplificada.",
+                template: `using System;\n\nclass Program {\n    static void Main(string[] args) {\n        // Crea el array aquí\n        \n        Console.WriteLine(nombres[0]);\n    }\n}`,
+                check: (code) => /string\[\]\s+nombres\s*=/.test(code) && (code.includes('"Ana"') || code.includes("'Ana'")),
+                successMsg: "¡Arrays creados! Las colecciones son fundamentales."
+            },
+            {
+                id: 7,
+                title: "Foreach",
+                desc: "Itera sobre el array <code>frutas</code> (ya creado) e imprime cada fruta.",
+                hint: "<code>foreach (string f in frutas) { ... }</code>",
+                template: `using System;\n\nclass Program {\n    static void Main(string[] args) {\n        string[] frutas = { "Manzana", "Pera", "Uva" };\n        \n        // Escribe el foreach aquí\n        \n    }\n}`,
+                check: (code) => /foreach\s*\(\s*string\s+\w+\s+in\s+frutas\s*\)/.test(code) && code.includes('Console.WriteLine'),
+                successMsg: "¡Excelente! Foreach es la forma más limpia de iterar."
+            },
+            {
+                id: 8,
+                title: "Clase Simple",
+                desc: "Define una clase llamada <code>Perro</code> fuera del Main. Debe tener un atributo público <code>string Raza</code>.",
+                hint: "La clase va fuera de Program. <code>public class Perro { public string Raza; }</code>",
+                template: `using System;\n\n// Define tu clase Perro aquí abajo\n\n\nclass Program {\n    static void Main(string[] args) {\n        Perro p = new Perro();\n        p.Raza = "Labrador";\n    }\n}`,
+                check: (code) => /class\s+Perro/.test(code) && /public\s+string\s+Raza\s*;/.test(code),
+                successMsg: "¡POO Iniciada! Has creado tu primera clase."
+            },
+            {
+                id: 9,
+                title: "Métodos",
+                desc: "Dentro de la clase <code>Calculadora</code>, crea un método público llamado <code>Sumar</code> que reciba dos ints y retorne un int.",
+                hint: "<code>public int Sumar(int a, int b) { return a + b; }</code>",
+                template: `using System;\n\nclass Calculadora {\n    // Crea el método Sumar aquí\n    \n}\n\nclass Program {\n    static void Main(string[] args) { }\n}`,
+                check: (code) => /public\s+int\s+Sumar\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/.test(code) && code.includes('return'),
+                successMsg: "¡Método creado! Ahora tu clase tiene comportamiento."
+            },
+            {
+                id: 10,
+                title: "Desafío Final: Constructor",
+                desc: "Agrega un constructor a la clase <code>Persona</code> que reciba un nombre y lo asigne al atributo <code>Nombre</code>.",
+                hint: "El constructor se llama igual que la clase y no tiene tipo de retorno.",
+                template: `using System;\n\nclass Persona {\n    public string Nombre;\n    \n    // Crea el constructor aquí\n    \n}\n\nclass Program {\n    static void Main(string[] args) {\n        Persona p = new Persona("Juan");\n    }\n}`,
+                check: (code) => /public\s+Persona\s*\(\s*string\s+nombre\s*\)/.test(code) && /Nombre\s*=\s*nombre/.test(code),
+                successMsg: "¡FELICIDADES! Has completado todo el bootcamp. ¡Eres un desarrollador C#!"
+            }
+        ];
+
+        let currentLevel = 0;
+        let completedLevels = [];
+
+        // --- FUNCIONES DE LA UI ---
+
+        function init() {
+            renderSidebar();
+            loadExercise(0);
+        }
+
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar-list');
+            sidebar.innerHTML = '';
+
+            exercises.forEach((ex, index) => {
+                const isLocked = index > 0 && !completedLevels.includes(index - 1) && index !== currentLevel;
+                const isDone = completedLevels.includes(index);
+                const isActive = index === currentLevel;
+
+                let iconClass = 'fa-lock';
+                let statusClass = 'status-locked';
+                let statusText = '<i class="fa-solid fa-lock"></i>';
+
+                if (isDone) {
+                    iconClass = 'fa-check-circle';
+                    statusClass = 'status-done';
+                    statusText = '<i class="fa-solid fa-check-circle"></i>';
+                } else if (isActive) {
+                    iconClass = 'fa-play-circle';
+                    statusClass = 'status-current';
+                    statusText = '<i class="fa-solid fa-play-circle"></i>';
+                }
+
+                const div = document.createElement('div');
+                div.className = `level-item ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`;
+                div.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="level-icon ${statusClass}">${statusText}</div>
+                        <div>
+                            <div class="small text-muted">Nivel ${index + 1}</div>
+                            <div>${ex.title}</div>
+                        </div>
+                    </div>
+                `;
+                
+                if (!isLocked) {
+                    div.onclick = () => loadExercise(index);
+                }
+
+                sidebar.appendChild(div);
+            });
+            
+            document.getElementById('current-level-display').innerText = currentLevel + 1;
+        }
+
+        function loadExercise(index) {
+            currentLevel = index;
+            const ex = exercises[index];
+            const container = document.getElementById('exercise-container');
+
+            // Animación de entrada
+            container.classList.remove('animate__fadeIn');
+            void container.offsetWidth; // trigger reflow
+            container.classList.add('animate__fadeIn');
+
+            container.innerHTML = `
+                <div class="exercise-header">
+                    <h4 class="mb-0">${ex.title}</h4>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleHint()">
+                        <i class="fa-regular fa-lightbulb"></i> Ver Pista
+                    </button>
+                </div>
+                <div class="exercise-body">
+                    <div class="instruction-panel">
+                        <h5>Instrucciones:</h5>
+                        <p>${ex.desc}</p>
+                        <div id="hint-box" class="hint-box">
+                            <strong>Pista:</strong> ${ex.hint}
+                        </div>
+                        <hr>
+                        <p class="text-muted small"><i class="fa-solid fa-info-circle"></i> Escribe el código en el editor de la derecha y presiona "Ejecutar y Validar".</p>
+                    </div>
+                    <div class="code-panel">
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <span>Program.cs</span>
+                                <span><i class="fa-brands fa-microsoft"></i> C#</span>
+                            </div>
+                            <textarea id="code-input" class="code-editor" spellcheck="false">${ex.template}</textarea>
+                        </div>
+                        <div class="mt-3 text-end">
+                            <button class="btn btn-run" onclick="validateCode()">
+                                <i class="fa-solid fa-play"></i> Ejecutar y Validar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            renderSidebar();
+        }
+
+        function toggleHint() {
+            const box = document.getElementById('hint-box');
+            box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function validateCode() {
+            const code = document.getElementById('code-input').value;
+            const ex = exercises[currentLevel];
+
+            // Simulación de "compilación"
+            const btn = document.querySelector('.btn-run');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Compilando...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+                if (ex.check(code)) {
+                    // Éxito
+                    completedLevels.push(currentLevel);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Código Correcto!',
+                        text: ex.successMsg,
+                        confirmButtonColor: '#28a745',
+                        confirmButtonText: 'Siguiente Nivel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            if (currentLevel < exercises.length - 1) {
+                                loadExercise(currentLevel + 1);
+                            } else {
+                                // Fin del juego
+                                Swal.fire({
+                                    title: '¡BOOTCAMP COMPLETADO!',
+                                    text: 'Has dominado los conceptos básicos de C#. ¡Gran trabajo!',
+                                    icon: 'success',
+                                    imageUrl: 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png',
+                                    imageWidth: 100,
+                                    imageHeight: 100
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    // Error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Compilación/Lógica',
+                        text: 'El código no cumple con los requisitos. Revisa la pista e inténtalo de nuevo.',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            }, 800);
+        }
+
+        // Iniciar app
+        init();
+
+    </script>
+</body>
+</html>

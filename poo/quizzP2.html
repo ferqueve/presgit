@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transición a C# - Guía para Estudiantes</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 80px 0;
+            margin-bottom: 40px;
+        }
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-left: 5px solid #2575fc;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #2575fc;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+        }
+        .quiz-option {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .quiz-option:hover {
+            background-color: #e9ecef;
+        }
+        .quiz-option.selected {
+            background-color: #dbeafe;
+            border-color: #2575fc;
+            color: #2575fc;
+        }
+        .step-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .step-number {
+            background-color: #2575fc;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <div class="hero-section text-center animate__animated animate__fadeInDown">
+        <div class="container">
+            <h1 class="display-4 fw-bold"><i class="fa-brands fa-microsoft"></i> Bienvenido a C#</h1>
+            <p class="lead">Guía de transición desde Python y C++ para dominar .NET</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills nav-fill mb-4 animate__animated animate__fadeIn" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-concepts-tab" data-bs-toggle="pill" data-bs-target="#pills-concepts" type="button" role="tab">Conceptos Clave</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-rider-tab" data-bs-toggle="pill" data-bs-target="#pills-rider" type="button" role="tab">JetBrains Rider</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-quiz-tab" data-bs-toggle="pill" data-bs-target="#pills-quiz" type="button" role="tab">Cuestionario</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="pills-tabContent">
+            
+            <!-- Concepts Section -->
+            <div class="tab-pane fade show active" id="pills-concepts" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4 mb-4 animate__animated animate__fadeInLeft">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="fa-solid fa-cube fa-3x text-primary mb-3"></i>
+                                <h3 class="card-title">La Clase</h3>
+                                <p class="card-text">Es el "molde" o plano. En C#, a diferencia de Python, todo debe estar dentro de una clase y los archivos deben coincidir con el nombre de la clase pública.</p>
+                                <div class="code-block text-start" style="font-size: 0.8em;">
+// C#
+public class Persona {
+    // Cuerpo
+}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4 animate__animated animate__fadeInUp">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="fa-solid fa-list-ul fa-3x text-success mb-3"></i>
+                                <h3 class="card-title">Atributos (Campos)</h3>
+                                <p class="card-text">Son las variables dentro de la clase. En C# usamos modificadores de acceso (public, private) y tipos de datos estrictos (int, string).</p>
+                                <div class="code-block text-start" style="font-size: 0.8em;">
+// C#
+public string Nombre;
+private int _edad;
+
+// Python: self.nombre
+// C++: this->nombre
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4 animate__animated animate__fadeInRight">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="fa-solid fa-comments fa-3x text-warning mb-3"></i>
+                                <h3 class="card-title">Mensajes (Métodos)</h3>
+                                <p class="card-text">Son las acciones que el objeto puede realizar. Se definen con un tipo de retorno (o void) y parámetros tipados.</p>
+                                <div class="code-block text-start" style="font-size: 0.8em;">
+// C#
+public void Saludar() {
+    Console.WriteLine("Hola");
+}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 animate__animated animate__fadeIn">
+                    <h4><i class="fa-solid fa-lightbulb"></i> Diferencias Clave</h4>
+                    <ul>
+                        <li><strong>Tipado Estático:</strong> Debes declarar el tipo de variable (<code>int x = 5;</code>) a diferencia de Python.</li>
+                        <li><strong>Punto y Coma:</strong> Cada instrucción termina con <code>;</code> como en C++.</li>
+                        <li><strong>Main:</strong> El punto de entrada es un método <code>static void Main(string[] args)</code>.</li>
+                        <li><strong>Console:</strong> Para imprimir usamos <code>Console.WriteLine()</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rider Section -->
+            <div class="tab-pane fade" id="pills-rider" role="tabpanel">
+                <h2 class="mb-4 text-primary">Creando tu primer proyecto en Rider</h2>
+                
+                <div class="card step-card animate__animated animate__fadeInUp">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h5 class="mb-0">Abrir Rider y Crear Nuevo Proyecto</h5>
+                            <p class="mb-0 text-muted">Al iniciar, selecciona <strong>"Create New Project"</strong> o ve a <em>File > New Project</em>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card step-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="step-number">2</div>
+                        <div>
+                            <h5 class="mb-0">Seleccionar la Plantilla</h5>
+                            <p class="mb-0 text-muted">Busca en la barra lateral izquierda <strong>.NET</strong> y selecciona <strong>Console App</strong>. Asegúrate de que diga "C#" y no "F#" o "VB".</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card step-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="step-number">3</div>
+                        <div>
+                            <h5 class="mb-0">Configurar Nombre y Ubicación</h5>
+                            <p class="mb-0 text-muted">Ponle nombre a tu proyecto (ej: <code>MiPrimerCSharp</code>). Rider creará una carpeta con ese nombre y un archivo <code>Program.cs</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card step-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="step-number">4</div>
+                        <div>
+                            <h5 class="mb-0">Entendiendo Program.cs</h5>
+                            <p class="mb-0 text-muted">Verás algo así:</p>
+                            <div class="code-block mt-2" style="font-size: 0.85em;">
+namespace MiPrimerCSharp; // Espacio de nombres (como carpetas lógicas)
+
+class Program // Clase principal
+{
+    static void Main(string[] args) // Punto de entrada
+    {
+        Console.WriteLine("Hello, World!");
+    }
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card step-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="step-number">5</div>
+                        <div>
+                            <h5 class="mb-0">Ejecutar</h5>
+                            <p class="mb-0 text-muted">Presiona el botón de <i class="fa-solid fa-play text-success"></i> "Run" en la parte superior o usa <strong>Ctrl+F5</strong> (Windows) / <strong>Cmd+F5</strong> (Mac).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="tab-pane fade" id="pills-quiz" role="tabpanel">
+                <div class="text-center mb-4">
+                    <h2>Evaluación de Conocimientos</h2>
+                    <p>Responde las 20 preguntas para validar tu aprendizaje.</p>
+                    <button class="btn btn-primary btn-lg" onclick="startQuiz()">Comenzar Cuestionario</button>
+                </div>
+
+                <div id="quiz-container" class="d-none">
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div id="quiz-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h4 id="question-text" class="mb-4">Pregunta aquí...</h4>
+                            <div id="options-container" class="d-grid gap-2">
+                                <!-- Options generated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-end">
+                        <span id="question-counter" class="text-muted">Pregunta 1 de 20</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <p class="mb-0">Desarrollado para estudiantes de programación &copy; 2023</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Quiz Data
+        const questions = [
+            { q: "¿Qué palabra clave se usa para definir una clase en C#?", options: ["class", "struct", "def", "interface"], a: 0 },
+            { q: "¿Cuál es el modificador de acceso por defecto en una clase de C#?", options: ["public", "private", "internal", "protected"], a: 2 },
+            { q: "¿Cómo se declara una variable entera en C#?", options: ["var x = 5;", "int x = 5;", "integer x = 5;", "dim x as integer"], a: 1 },
+            { q: "¿Qué método se usa para imprimir texto en consola?", options: ["print()", "cout <<", "Console.WriteLine()", "System.out.println()"], a: 2 },
+            { q: "¿Qué símbolo debe terminar cada instrucción en C#?", options: [".", ":", ";", ","], a: 2 },
+            { q: "¿Cómo se llama el método principal donde inicia la ejecución?", options: ["start()", "begin()", "Main()", "init()"], a: 2 },
+            { q: "¿Qué tipo de dato se usa para texto en C#?", options: ["char", "text", "String", "str"], a: 2 },
+            { q: "¿Cuál es la diferencia principal entre 'var' y un tipo explícito?", options: ["var es dinámico", "var infiere el tipo en compilación", "var es más lento", "No hay diferencia"], a: 1 },
+            { q: "¿Cómo se accede a un miembro estático de una clase?", options: ["Creando un objeto", "Usando el nombre de la clase", "Usando 'this'", "No se puede"], a: 1 },
+            { q: "¿Qué significa la palabra clave 'void' en un método?", options: ["Retorna cero", "Retorna null", "No retorna ningún valor", "Es un error"], a: 2 },
+            { q: "¿Cómo se crea un objeto de la clase 'Persona'?", options: ["Persona p = new Persona();", "Persona p = Persona();", "var p = Persona;", "new p = Persona()"], a: 0 },
+            { q: "¿Qué es un 'Namespace'?", options: ["Una clase especial", "Un contenedor lógico para organizar clases", "Una variable global", "Un tipo de bucle"], a: 1 },
+            { q: "¿Cuál es el equivalente de 'self' en Python o 'this' en C++ dentro de un método de instancia?", options: ["me", "self", "this", "base"], a: 2 },
+            { q: "¿Qué operador se usa para comparar igualdad de valores?", options: ["=", "==", "===", "equals"], a: 1 },
+            { q: "¿Cómo se define un constructor en C#?", options: ["__init__", "Constructor()", "NombreDeLaClase()", "new()"], a: 2 },
+            { q: "¿Qué colección es dinámica y tipada en C# (similar a lista en Python)?", options: ["Array", "List<T>", "Vector", "ArrayList"], a: 1 },
+            { q: "¿Qué hace la palabra clave 'static'?", options: ["Hace que el miembro pertenezca al tipo, no a la instancia", "Congela la variable", "Hace que sea privada", "Es para métodos matemáticos"], a: 0 },
+            { q: "¿Cómo se comenta una sola línea en C#?", options: ["<!-- -->", "//", "/* */", "#"], a: 1 },
+            { q: "¿Qué estructura se usa para iterar sobre una colección (foreach)?", options: ["for each x in list", "foreach (var x in list)", "for (x : list)", "loop list"], a: 1 },
+            { q: "¿Qué archivo contiene la configuración del proyecto .NET?", options: ["pom.xml", "package.json", ".csproj", "Makefile"], a: 2 }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        function startQuiz() {
+            document.getElementById('quiz-container').classList.remove('d-none');
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = [];
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question-text').innerText = `${currentQuestion + 1}. ${q.q}`;
+            document.getElementById('question-counter').innerText = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            
+            // Update Progress Bar
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progress}%`;
+
+            const optionsDiv = document.getElementById('options-container');
+            optionsDiv.innerHTML = '';
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-secondary quiz-option text-start p-3';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(index, btn);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function selectOption(index, btnElement) {
+            // Remove selected class from all
+            document.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('selected'));
+            // Add to clicked
+            btnElement.classList.add('selected');
+
+            // Save answer temporarily
+            userAnswers[currentQuestion] = index;
+
+            // Small delay before next question or finish
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 400);
+        }
+
+        function finishQuiz() {
+            // Calculate Score
+            score = 0;
+            let reviewHTML = '<ul class="list-group list-group-flush">';
+
+            questions.forEach((q, index) => {
+                const userAns = userAnswers[index];
+                const isCorrect = userAns === q.a;
+                if (isCorrect) score++;
+
+                const statusIcon = isCorrect ? '<i class="fa-solid fa-check text-success"></i>' : '<i class="fa-solid fa-xmark text-danger"></i>';
+                const statusClass = isCorrect ? 'list-group-item-success' : 'list-group-item-danger';
+                
+                reviewHTML += `
+                    <li class="list-group-item ${statusClass}">
+                        <strong>${index + 1}. ${q.q}</strong><br>
+                        ${statusIcon} Tu respuesta: ${q.options[userAns]} <br>
+                        ${!isCorrect ? `<span class="text-success">Correcta: ${q.options[q.a]}</span>` : ''}
+                    </li>
+                `;
+            });
+            reviewHTML += '</ul>';
+
+            // Update Progress Bar to 100%
+            document.getElementById('quiz-progress').style.width = `100%`;
+
+            // Show SweetAlert with Score
+            Swal.fire({
+                title: score >= 14 ? '¡Excelente Trabajo!' : 'Sigue Practicando',
+                text: `Obtuviste ${score} de ${questions.length} puntos.`,
+                icon: score >= 14 ? 'success' : 'warning',
+                confirmButtonText: 'Ver Detalle de Respuestas',
+                confirmButtonColor: '#2575fc'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show detailed review in a modal or new swal
+                    Swal.fire({
+                        title: 'Revisión del Cuestionario',
+                        html: reviewHTML,
+                        width: '800px',
+                        confirmButtonText: 'Cerrar',
+                        customClass: {
+                            htmlContainer: 'text-start'
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

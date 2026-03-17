@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=800, initial-scale=1">
+<title>El Refactorizador — POO II</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #06090f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Courier New', monospace;
+}
+#wrap {
+  position: relative;
+  width: 800px;
+  height: 500px;
+  border: 1px solid #1a3a5c;
+  box-shadow: 0 0 40px #1a5fa844;
+}
+/* ===== QUESTION OVERLAY ===== */
+#q-overlay {
+  display: none;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(6, 9, 15, 0.82);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+#q-panel {
+  background: #0e1826;
+  border: 2px solid #1a5fa8;
+  border-radius: 14px;
+  padding: 22px 24px;
+  width: 580px;
+  max-width: 96%;
+  box-shadow: 0 0 30px #1a5fa855, 0 0 60px #0066aa22;
+}
+#q-timer-bar {
+  background: #0a1020;
+  border-radius: 4px;
+  height: 6px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  border: 1px solid #1a2a3a;
+}
+#q-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff3333, #ff9900);
+  border-radius: 4px;
+  width: 100%;
+  transition: width 10s linear;
+}
+#q-bug-code {
+  background: #080d14;
+  border: 1px solid #ff444477;
+  border-left: 4px solid #ff4444;
+  border-radius: 5px;
+  padding: 9px 13px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #ff9999;
+  margin-bottom: 13px;
+  white-space: pre;
+  line-height: 1.5;
+}
+#q-text {
+  font-size: 16px;
+  color: #d8e8f8;
+  margin-bottom: 14px;
+  line-height: 1.45;
+  font-family: 'Courier New', monospace;
+}
+#q-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.q-opt {
+  background: #121e2e;
+  border: 1px solid #1f3d60;
+  border-radius: 8px;
+  color: #a8c0da;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.14s;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  line-height: 1.4;
+}
+.q-opt:hover:not(:disabled) {
+  background: #162a44;
+  border-color: #3d88d4;
+  color: #e0efff;
+  transform: translateY(-1px);
+}
+.q-opt:disabled { cursor: default; }
+.q-opt.correct { background: #071c0f; border-color: #00cc66; color: #00ff88; }
+.q-opt.wrong   { background: #1c0707; border-color: #cc2222; color: #ff7777; }
+.opt-ltr {
+  background: #1f3a5c;
+  border-radius: 4px;
+  min-width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.q-opt.correct .opt-ltr { background: #00882255; }
+.q-opt.wrong   .opt-ltr { background: #88000055; }
+#q-feedback {
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: 'Courier New', monospace;
+  display: none;
+}
+#q-feedback.ok  { background: #071c0f; border: 1px solid #00aa55; color: #88ffbb; }
+#q-feedback.bad { background: #1c0707; border: 1px solid #aa2222; color: #ffaaaa; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="q-overlay">
+    <div id="q-panel">
+      <div id="q-timer-bar"><div id="q-timer-fill"></div></div>
+      <div id="q-bug-code"></div>
+      <div id="q-text"></div>
+      <div id="q-options"></div>
+      <div id="q-feedback"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   PREGUNTAS — basadas en POO II Semana 2
+   ================================================================ */
+const QUESTIONS = [
+  {
+    bugCode: 'public int saldo = 0;',
+    label: 'Atributo público',
+    question: '¿Qué principio OO viola exponer "saldo" como campo público?',
+    opts: ['Abstracción', 'Encapsulación', 'Responsabilidad Única', 'Herencia'],
+    ok: 1,
+    exp: 'Encapsulación: los atributos internos deben ser privados. Se acceden mediante propiedades (get/set) controladas.'
+  },
+  {
+    bugCode: 'class Pedido {\n  void EnviarEmail() { ... }\n}',
+    label: 'Clase con responsabilidades extra',
+    question: 'La clase Pedido tiene EnviarEmail(). ¿Qué principio viola?',
+    opts: ['Encapsulación', 'Abstracción', 'SRP — Una Sola Responsabilidad', 'Patrón Expert'],
+    ok: 2,
+    exp: 'SRP: Pedido debe gestionar solo pedidos. El envío de correos es responsabilidad de otra clase (ej: EmailService).'
+  },
+  {
+    bugCode: 'if (obj1 == obj2) {\n  // ¿Tienen el mismo estado?\n}',
+    label: 'Comparación con ==',
+    question: 'Al comparar objetos con == en C#, ¿qué se verifica realmente?',
+    opts: ['Igualdad de estado (valores)', 'Identidad (misma referencia en memoria)', 'Mismo tipo de clase', 'Mismo constructor'],
+    ok: 1,
+    exp: '== compara identidad (referencias de memoria). Para comparar estado (igualdad) se usa Equals() o se sobreescribe.'
+  },
+  {
+    bugCode: 'int x = 42; // ¿En el Heap?',
+    label: '¿Stack o Heap?',
+    question: '¿Dónde se almacena un campo de tipo int en C#?',
+    opts: ['En el Heap (como objetos)', 'En el Stack (tipo de valor)', 'En el Registro del CPU', 'En la Base de Datos'],
+    ok: 1,
+    exp: 'Los tipos de valor (int, bool, struct) se almacenan en el Stack. Las instancias de clases van al Heap.'
+  },
+  {
+    bugCode: 'cuenta.Depositar(500);',
+    label: '¿Qué es esto?',
+    question: '"cuenta.Depositar(500)" es un ejemplo de...',
+    opts: ['Una declaración de clase', 'Un mensaje entre objetos', 'Una relación de herencia', 'Un constructor'],
+    ok: 1,
+    exp: 'Es un mensaje: "cuenta" es el receptor, "Depositar" es el selector, y 500 es el argumento. Así se comunican los objetos.'
+  },
+  {
+    bugCode: 'class Factura {\n  decimal CalcularIVA() { ... }\n}',
+    label: '¿Cuál patrón aplica?',
+    question: 'Factura tiene los datos de venta y calcula el IVA. ¿Qué patrón sugiere esto?',
+    opts: ['SRP (solo una responsabilidad)', 'Patrón Expert (GRASP)', 'Singleton', 'Factory Method'],
+    ok: 1,
+    exp: 'Patrón Expert: la responsabilidad se asigna a quien posee la información necesaria. Factura tiene los datos → calcula el IVA.'
+  },
+  {
+    bugCode: 'class Persona {\n  // Sin constructor definido\n}',
+    label: 'Constructor implícito',
+    question: '¿Qué hace C# si no definís ningún constructor en tu clase?',
+    opts: ['Error de compilación', 'Provee un constructor por defecto (sin parámetros)', 'No permite instanciar', 'Llama al de object'],
+    ok: 1,
+    exp: 'C# provee automáticamente un constructor sin parámetros. Al definir uno propio con parámetros, el automático desaparece.'
+  },
+  {
+    bugCode: 'var a = miObjeto;\na.Nombre = "Test"; // ¿Afecta a miObjeto?',
+    label: 'Asignación de objeto',
+    question: 'Si miObjeto está en el heap, ¿qué contiene "a" al hacer var a = miObjeto?',
+    opts: ['Una copia independiente del objeto', 'La misma referencia que miObjeto', 'Un objeto vacío del mismo tipo', 'El tipo (Type) del objeto'],
+    ok: 1,
+    exp: 'Los tipos referencia se asignan por referencia: "a" y "miObjeto" apuntan al mismo objeto en el heap. Cambiar a.Nombre afecta a ambos.'
+  },
+  {
+    bugCode: 'public string Nombre { get; }',
+    label: 'Propiedad sin set',
+    question: 'Esta propiedad solo tiene "get". ¿Qué implica desde fuera de la clase?',
+    opts: ['Es de solo lectura externamente', 'Es de solo escritura', 'No compila sin set', 'Es igual a un campo público'],
+    ok: 0,
+    exp: 'Solo get = solo lectura externa: puede consultarse pero no modificarse desde afuera. El valor se puede asignar en el constructor.'
+  },
+  {
+    bugCode: 'MathUtils.Sumar(5, 3);\n// Sin crear instancia',
+    label: 'Método sin instancia',
+    question: 'Se llama sin crear instancia. ¿A qué tipo de método corresponde?',
+    opts: ['Método de instancia (normal)', 'Método estático (static)', 'Método abstracto', 'Método virtual'],
+    ok: 1,
+    exp: 'Los métodos static pertenecen a la clase, no a instancias. Se llaman como NombreClase.Metodo(). Útiles para utilidades sin estado.'
+  },
+];
+
+/* ================================================================
+   SCENE: MENU
+   ================================================================ */
+class MenuScene extends Phaser.Scene {
+  constructor() { super({ key: 'Menu' }); }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    this.add.graphics().fillStyle(0x06090f, 1).fillRect(0, 0, W, H);
+
+    // Falling code rain
+    this.rain = [];
+    const words = ['class', 'void', 'public', '{ }', 'new', '()', '=>', 'int', 'static', 'private', 'return', 'get', 'set'];
+    for (let i = 0; i < 28; i++) {
+      const obj = this.add.text(
+        Phaser.Math.Between(5, W - 5),
+        Phaser.Math.Between(-H, H),
+        words[i % words.length],
+        { fontSize: '10px', color: '#00448830', fontFamily: 'Courier New' }
+      );
+      this.rain.push({ obj, spd: Phaser.Math.Between(22, 65) });
+    }
+
+    // Header
+    this.add.graphics().fillStyle(0x0a0e1a, 1).fillRect(0, 0, W, 48);
+    this.add.text(W / 2, 24, '⚙️  EL REFACTORIZADOR  ⚙️', {
+      fontSize: '24px', color: '#58d4ff', fontFamily: 'Courier New', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    this.add.text(W / 2, 64, 'POO II — Objetos, Clases y Mensajes', {
+      fontSize: '13px', color: '#4d6888', fontFamily: 'Courier New'
+    }).setOrigin(0.5);
+
+    // --- Diagram row ---
+    const midY = 215;
+
+    // BugBot mini
+    const bG = this.add.graphics();
+    this.drawBotMini(bG, 105, midY);
+    this.tweens.add({ targets: bG, y: '+=8', duration: 850, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.add.text(105, midY + 58, 'BugBot', { fontSize: '10px', color: '#ff6666', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+    this.add.text(162, midY - 5, '→', { fontSize: '22px', color: '#ff444488' }).setOrigin(0.5);
+
+    // Bubble preview
+    const bub = this.add.graphics();
+    bub.fillStyle(0x3d0000, 0.92); bub.fillCircle(210, midY, 35);
+    bub.lineStyle(2, 0xff4444, 0.85); bub.strokeCircle(210, midY, 35);
+    this.add.text(210, midY - 10, '🐛', { fontSize: '17px' }).setOrigin(0.5);
+    this.add.text(210, midY + 10, 'BUG', { fontSize: '9px', color: '#ff8888', fontFamily: 'Courier New' }).setOrigin(0.5);
+    this.add.text(210, midY + 52, 'Burbuja de bug', { fontSize: '10px', color: '#bb6655', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+    this.add.text(268, midY - 5, '→', { fontSize: '22px', color: '#ffffff44' }).setOrigin(0.5);
+
+    // Click action
+    const clickBox = this.add.graphics();
+    clickBox.fillStyle(0x1a3050, 0.8); clickBox.fillRoundedRect(290, midY - 35, 90, 70, 8);
+    this.add.text(335, midY - 14, '🖱️', { fontSize: '18px' }).setOrigin(0.5);
+    this.add.text(335, midY + 12, 'CLICK', { fontSize: '9px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(335, midY + 52, 'Respondé bien', { fontSize: '10px', color: '#cc9900', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+    this.add.text(404, midY - 14, '✅', { fontSize: '20px' }).setOrigin(0.5);
+    this.add.text(404, midY + 8, '→', { fontSize: '22px', color: '#00ff8888' }).setOrigin(0.5);
+    this.add.text(404, midY + 52, '¡Destruida!', { fontSize: '10px', color: '#00cc66', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+    const exp = this.add.graphics();
+    exp.fillStyle(0x00ff88, 0.12); exp.fillCircle(460, midY, 35);
+    this.add.text(460, midY, '💥', { fontSize: '22px' }).setOrigin(0.5);
+    this.add.text(460, midY + 52, '+Puntos', { fontSize: '10px', color: '#00aa55', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+    this.add.text(520, midY + 8, '/', { fontSize: '22px', color: '#ff444466' }).setOrigin(0.5);
+    this.add.text(520, midY - 8, '❌', { fontSize: '16px' }).setOrigin(0.5);
+    this.add.text(520, midY + 52, 'Fallás/tiempo', { fontSize: '10px', color: '#aa4444', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+    // Base mini
+    const baseG = this.add.graphics();
+    this.drawBaseMini(baseG, 590, midY);
+    this.add.text(590, midY + 52, 'Daña base', { fontSize: '10px', color: '#ee4444', fontFamily: 'Courier New' }).setOrigin(0.5);
+
+    // Arrow to base
+    this.add.text(553, midY - 5, '→', { fontSize: '22px', color: '#ff444488' }).setOrigin(0.5);
+
+    // Info strip
+    const strip = this.add.graphics();
+    strip.fillStyle(0x0e1826, 0.95);
+    strip.fillRoundedRect(W / 2 - 295, 308, 590, 50, 8);
+    strip.lineStyle(1, 0x1a3a5c, 0.7);
+    strip.strokeRoundedRect(W / 2 - 295, 308, 590, 50, 8);
+
+    const infos = [
+      { x: W / 2 - 210, icon: '⚙️', label: '5 Oleadas' },
+      { x: W / 2 - 60, icon: '🐛', label: '10 Preguntas' },
+      { x: W / 2 + 85, icon: '❤️', label: '5 Vidas' },
+      { x: W / 2 + 220, icon: '⏱️', label: '10 seg/preg' },
+    ];
+    infos.forEach(info => {
+      this.add.text(info.x, 323, info.icon, { fontSize: '14px' }).setOrigin(0.5);
+      this.add.text(info.x, 342, info.label, { fontSize: '11px', color: '#5577aa', fontFamily: 'Courier New' }).setOrigin(0.5);
+    });
+
+    // START BUTTON
+    const btnY = 418, btnW = 270, btnH = 54;
+    const btnG = this.add.graphics();
+    const drawBtn = c => { btnG.clear(); btnG.fillStyle(c, 1); btnG.fillRoundedRect(W / 2 - btnW / 2, btnY - btnH / 2, btnW, btnH, 11); };
+    drawBtn(0x1a5fa8);
+
+    const btnT = this.add.text(W / 2, btnY, '▶  INICIAR MISIÓN', {
+      fontSize: '21px', color: '#fff', fontFamily: 'Courier New', fontStyle: 'bold'
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: btnT, scaleX: 1.04, scaleY: 1.04, duration: 700, yoyo: true, repeat: -1 });
+
+    const z = this.add.zone(W / 2, btnY, btnW, btnH).setInteractive({ useHandCursor: true });
+    z.on('pointerover', () => drawBtn(0x2475c8));
+    z.on('pointerout', () => drawBtn(0x1a5fa8));
+    z.on('pointerdown', () => this.scene.start('Game'));
+  }
+
+  drawBotMini(g, x, y) {
+    g.fillStyle(0x5a0000, 1); g.fillRoundedRect(x - 20, y - 28, 40, 50, 5);
+    g.fillStyle(0x7a1010, 1); g.fillRoundedRect(x - 16, y - 46, 32, 22, 4);
+    g.fillStyle(0xff0000, 1); g.fillCircle(x - 6, y - 37, 5); g.fillCircle(x + 6, y - 37, 5);
+    g.fillStyle(0xff7700, 0.9); g.fillCircle(x - 6, y - 37, 2.5); g.fillCircle(x + 6, y - 37, 2.5);
+    g.fillStyle(0x888888, 1); g.fillRect(x - 2, y - 58, 3, 13);
+    g.fillStyle(0xff2200, 1); g.fillCircle(x, y - 60, 5);
+    g.fillStyle(0x440000, 1); g.fillRect(x - 14, y - 18, 28, 16);
+    g.fillStyle(0x4a0000, 1);
+    g.fillRoundedRect(x - 32, y - 20, 12, 28, 3); g.fillRoundedRect(x + 20, y - 20, 12, 28, 3);
+    g.fillStyle(0x666666, 1);
+    g.fillRect(x - 15, y + 22, 9, 12); g.fillRect(x + 6, y + 22, 9, 12);
+  }
+
+  drawBaseMini(g, x, y) {
+    g.fillStyle(0x091a2e, 1); g.fillRoundedRect(x - 22, y - 38, 44, 76, 5);
+    g.lineStyle(1, 0x1a5fa8, 0.8); g.strokeRoundedRect(x - 22, y - 38, 44, 76, 5);
+    [0x00cc66, 0x0066ff, 0x0066ff].forEach((c, i) => {
+      g.fillStyle(0x0d2035, 1); g.fillRoundedRect(x - 16, y - 30 + i * 24, 32, 17, 3);
+      g.fillStyle(c, 1); g.fillCircle(x - 8, y - 22 + i * 24, 3);
+    });
+  }
+
+  update(_, dt) {
+    this.rain.forEach(r => {
+      r.obj.y += r.spd * dt / 1000;
+      if (r.obj.y > this.scale.height + 12) {
+        r.obj.y = -14;
+        r.obj.x = Phaser.Math.Between(5, this.scale.width - 5);
+      }
+    });
+  }
+}
+
+/* ================================================================
+   SCENE: GAME
+   ================================================================ */
+class GameScene extends Phaser.Scene {
+  constructor() { super({ key: 'Game' }); }
+
+  init() {
+    this.score = 0;
+    this.wave = 1;
+    this.baseHP = 5;
+    this.bubbles = [];
+    this.qActive = false;
+    this.spawnTimer = null;
+    this.qTimer = null;
+    this.resolved = 0;
+    this.totalBugs = 0;
+    this.usedQ = [];
+    this.ended = false;
+    this.transitioning = false;
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    document.getElementById('q-overlay').style.display = 'none';
+    this.events.on('shutdown', () => { document.getElementById('q-overlay').style.display = 'none'; });
+
+    // Background
+    const bg = this.add.graphics();
+    bg.fillStyle(0x06090f, 1); bg.fillRect(0, 0, W, H);
+    bg.lineStyle(1, 0x0d1726, 1);
+    for (let y = 58; y < H - 28; y += 36) bg.lineBetween(0, y, W, y);
+    for (let x = 145; x < W - 105; x += 72) bg.lineBetween(x, 58, x, H - 28);
+
+    // Track line
+    this.add.graphics()
+      .lineStyle(1, 0x112233, 0.6)
+      .lineBetween(140, H / 2, W - 110, H / 2);
+
+    // BugBot
+    this.botG = this.add.graphics();
+    this.drawBot(this.botG, 0, 0);
+    this.botG.setPosition(72, H / 2 + 8);
+    this.tweens.add({ targets: this.botG, y: '+= 12', duration: 850, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    this.add.text(72, H / 2 + 72, 'BugBot', {
+      fontSize: '10px', color: '#cc4444', fontFamily: 'Courier New'
+    }).setOrigin(0.5);
+
+    // BugBot antenna blink
+    this.antG = this.add.graphics();
+    this.antOn = true;
+    this.drawAnt();
+    this.time.addEvent({ delay: 480, loop: true, callback: () => { this.antOn = !this.antOn; this.drawAnt(); } });
+
+    // Base
+    this.baseG = this.add.graphics();
+    this.drawBase(this.baseG, 0, 0);
+    this.baseG.setPosition(W - 66, H / 2);
+    this.add.text(W - 66, H / 2 + 72, 'Base\nde Código', {
+      fontSize: '10px', color: '#3388cc', fontFamily: 'Courier New', align: 'center'
+    }).setOrigin(0.5);
+
+    // HP bar (above base)
+    this.add.graphics()
+      .fillStyle(0x0a1220, 1)
+      .fillRoundedRect(W - 108, H / 2 - 78, 84, 11, 4);
+    this.hpBar = this.add.graphics();
+    this.drawHPBar();
+
+    // TOP BAR
+    this.add.graphics()
+      .fillStyle(0x070b11, 1).fillRect(0, 0, W, 50)
+      .lineStyle(1, 0x122033, 1).lineBetween(0, 50, W, 50);
+
+    this.add.text(12, 13, '⚡ PUNTOS:', { fontSize: '12px', color: '#3d5a77', fontFamily: 'Courier New' });
+    this.scoreT = this.add.text(96, 13, '0', { fontSize: '17px', color: '#58d4ff', fontFamily: 'Courier New', fontStyle: 'bold' });
+
+    this.waveT = this.add.text(W / 2, 15, '⚙️  OLEADA 1 / 5', {
+      fontSize: '14px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold'
+    }).setOrigin(0.5, 0);
+
+    this.hearts = [];
+    for (let i = 0; i < 5; i++) {
+      this.hearts.push(this.add.text(W - 178 + i * 32, 12, '❤️', { fontSize: '18px' }));
+    }
+
+    // BOTTOM BAR
+    this.add.graphics().fillStyle(0x070b11, 1).fillRect(0, H - 26, W, 26);
+    this.add.text(9, H - 18, 'Oleada:', { fontSize: '9px', color: '#334455', fontFamily: 'Courier New' });
+    this.add.graphics().fillStyle(0x0d1726, 1).fillRoundedRect(65, H - 22, W - 74, 12, 4);
+    this.progF = this.add.graphics();
+
+    this.startWave();
+  }
+
+  drawAnt() {
+    const H = this.scale.height;
+    this.antG.clear();
+    this.antG.fillStyle(this.antOn ? 0xff2200 : 0x550000, 1);
+    this.antG.fillCircle(72, H / 2 + 8 - 85, this.antOn ? 5 : 3.5);
+  }
+
+  drawBot(g, x, y) {
+    g.fillStyle(0x5a0000, 1); g.fillRoundedRect(x - 30, y - 40, 60, 68, 7);
+    g.fillStyle(0x7a1010, 1); g.fillRoundedRect(x - 24, y - 64, 48, 30, 6);
+    g.fillStyle(0xff0000, 1); g.fillCircle(x - 9, y - 52, 8); g.fillCircle(x + 9, y - 52, 8);
+    g.fillStyle(0xff7700, 0.9); g.fillCircle(x - 9, y - 52, 4); g.fillCircle(x + 9, y - 52, 4);
+    g.fillStyle(0xffffff, 0.4); g.fillCircle(x - 6, y - 55, 2); g.fillCircle(x + 12, y - 55, 2);
+    g.fillStyle(0x777777, 1); g.fillRect(x - 2, y - 84, 4, 22);
+    g.fillStyle(0x220000, 1); g.fillRoundedRect(x - 20, y - 26, 40, 28, 4);
+    g.lineStyle(1, 0xff3300, 0.35);
+    for (let i = 0; i < 3; i++) g.lineBetween(x - 15, y - 18 + i * 8, x + 15, y - 18 + i * 8);
+    g.fillStyle(0x4a0000, 1);
+    g.fillRoundedRect(x - 46, y - 30, 16, 38, 4); g.fillRoundedRect(x + 30, y - 30, 16, 38, 4);
+    g.fillStyle(0x999999, 1);
+    g.fillRect(x - 51, y + 10, 6, 9); g.fillRect(x - 44, y + 10, 6, 9);
+    g.fillRect(x + 38, y + 10, 6, 9); g.fillRect(x + 45, y + 10, 6, 9);
+    g.fillStyle(0x4a0000, 1);
+    g.fillRect(x - 20, y + 28, 13, 17); g.fillRect(x + 7, y + 28, 13, 17);
+    g.fillStyle(0x888888, 1);
+    g.fillRoundedRect(x - 25, y + 44, 19, 8, 3); g.fillRoundedRect(x + 6, y + 44, 19, 8, 3);
+  }
+
+  drawBase(g, x, y) {
+    g.fillStyle(0x080f1e, 1); g.fillRoundedRect(x - 28, y - 52, 56, 98, 6);
+    g.lineStyle(2, 0x1a5fa8, 0.7); g.strokeRoundedRect(x - 28, y - 52, 56, 98, 6);
+    const cols = [0x00cc66, 0x0066ff, 0x0066ff, 0x00cc66];
+    for (let i = 0; i < 4; i++) {
+      g.fillStyle(0x0c1e33, 1); g.fillRoundedRect(x - 20, y - 44 + i * 23, 40, 17, 3);
+      g.fillStyle(cols[i], 1); g.fillCircle(x - 12, y - 35 + i * 23, 3); g.fillCircle(x - 4, y - 35 + i * 23, 3);
+      g.fillStyle(0x162a40, 1); g.fillRect(x + 3, y - 37 + i * 23, 13, 4);
+    }
+    g.fillStyle(0x050810, 1); g.fillRoundedRect(x - 33, y + 46, 66, 10, 3);
+  }
+
+  drawHPBar() {
+    const W = this.scale.width, H = this.scale.height;
+    const pct = this.baseHP / 5;
+    const color = pct > 0.6 ? 0x00bb55 : pct > 0.3 ? 0xee8800 : 0xff2200;
+    this.hpBar.clear();
+    this.hpBar.fillStyle(color, 1);
+    this.hpBar.fillRoundedRect(W - 106, H / 2 - 76, 80 * pct, 7, 3);
+  }
+
+  pickQ() {
+    if (this.usedQ.length >= QUESTIONS.length) this.usedQ = [];
+    let idx;
+    do { idx = Phaser.Math.Between(0, QUESTIONS.length - 1); } while (this.usedQ.includes(idx));
+    this.usedQ.push(idx);
+    return idx;
+  }
+
+  startWave() {
+    this.resolved = 0;
+    this.totalBugs = 5 + (this.wave - 1) * 2;
+    this.usedQ = [];
+    this.waveT.setText(`⚙️  OLEADA ${this.wave} / 5`);
+    this.drawProg();
+    this.showBanner(() => {
+      this.transitioning = false;
+      const delay = Math.max(1800, 3400 - this.wave * 280);
+      this.spawnBubble();
+      this.spawnTimer = this.time.addEvent({
+        delay, callback: this.spawnBubble, callbackScope: this, repeat: this.totalBugs - 2
+      });
+    });
+  }
+
+  showBanner(cb) {
+    this.transitioning = true;
+    const W = this.scale.width, H = this.scale.height;
+    const ov = this.add.graphics().fillStyle(0, 0.6).fillRect(0, 50, W, H - 76);
+    const msgs = ['¡A refactorizar!', '¡Más velocidad!', '¡Oleada difícil!', '¡Casi experto!', '🔥 ¡OLEADA FINAL!'];
+    const t1 = this.add.text(W / 2, H / 2 - 32, `⚙️  OLEADA ${this.wave}`, {
+      fontSize: '46px', color: '#ffcc44', fontFamily: 'Courier New',
+      fontStyle: 'bold', stroke: '#7a4f00', strokeThickness: 3
+    }).setOrigin(0.5).setAlpha(0);
+    const t2 = this.add.text(W / 2, H / 2 + 36, msgs[this.wave - 1] || '', {
+      fontSize: '16px', color: '#aabbcc', fontFamily: 'Courier New'
+    }).setOrigin(0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: [t1, t2], alpha: 1, duration: 320, onComplete: () => {
+        this.time.delayedCall(1000, () => {
+          this.tweens.add({
+            targets: [t1, t2, ov], alpha: 0, duration: 320, onComplete: () => {
+              [t1, t2, ov].forEach(o => o.destroy()); cb();
+            }
+          });
+        });
+      }
+    });
+  }
+
+  spawnBubble() {
+    if (this.ended) return;
+    const H = this.scale.height;
+    const qIdx = this.pickQ();
+    const q = QUESTIONS[qIdx];
+    const y = Phaser.Math.Between(72, H - 40);
+    const spd = 58 + this.wave * 17;
+
+    const cont = this.add.container(148, y);
+
+    const glow = this.add.graphics();
+    glow.fillStyle(0xff2200, 0.1); glow.fillCircle(0, 0, 50);
+
+    const body = this.add.graphics();
+    body.fillStyle(0x3a0000, 0.93); body.fillCircle(0, 0, 40);
+    body.lineStyle(2.5, 0xff4444, 0.9); body.strokeCircle(0, 0, 40);
+
+    const icon = this.add.text(0, -12, '🐛', { fontSize: '17px' }).setOrigin(0.5);
+    const lbl = this.add.text(0, 7, q.label.substring(0, 16), {
+      fontSize: '7.5px', color: '#ffaaaa', fontFamily: 'Courier New',
+      wordWrap: { width: 70 }, align: 'center'
+    }).setOrigin(0.5);
+
+    cont.add([glow, body, icon, lbl]);
+    cont.setSize(80, 80).setInteractive({ useHandCursor: true });
+
+    const bData = {
+      cont, spd, qIdx, active: true, slowed: false,
+      wobble: Phaser.Math.FloatBetween(0, Math.PI * 2)
+    };
+    this.bubbles.push(bData);
+
+    this.tweens.add({ targets: glow, scaleX: 1.3, scaleY: 1.3, alpha: 0.2, duration: 520, yoyo: true, repeat: -1 });
+
+    cont.on('pointerdown', () => { if (!this.qActive && bData.active) this.showQ(bData); });
+    cont.on('pointerover', () => this.tweens.add({ targets: cont, scaleX: 1.14, scaleY: 1.14, duration: 110 }));
+    cont.on('pointerout', () => this.tweens.add({ targets: cont, scaleX: 1, scaleY: 1, duration: 110 }));
+
+    // spawn flash
+    const fl = this.add.graphics();
+    fl.fillStyle(0xff2200, 0.35); fl.fillCircle(120, H / 2, 18);
+    this.tweens.add({ targets: fl, scaleX: 2, scaleY: 2, alpha: 0, duration: 280, onComplete: () => fl.destroy() });
+  }
+
+  showQ(bData) {
+    this.qActive = true;
+    this.bubbles.forEach(b => { if (b !== bData) b.slowed = true; });
+    const q = QUESTIONS[bData.qIdx];
+
+    document.getElementById('q-bug-code').textContent = q.bugCode;
+    document.getElementById('q-text').textContent = q.question;
+
+    const od = document.getElementById('q-options');
+    od.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'q-opt';
+      btn.innerHTML = `<span class="opt-ltr">${'ABCD'[i]}</span>${opt}`;
+      btn.onclick = () => { if (this.qActive) this.resolveQ(i, bData); };
+      od.appendChild(btn);
+    });
+
+    document.getElementById('q-feedback').style.display = 'none';
+    document.getElementById('q-overlay').style.display = 'flex';
+
+    const fill = document.getElementById('q-timer-fill');
+    fill.style.transition = 'none'; fill.style.width = '100%';
+    void fill.offsetWidth;
+    fill.style.transition = 'width 10s linear'; fill.style.width = '0%';
+
+    this.qTimer = this.time.delayedCall(10000, () => this.resolveQ(-1, bData));
+  }
+
+  resolveQ(sel, bData) {
+    if (!this.qActive) return;
+    const q = QUESTIONS[bData.qIdx];
+    const correct = sel === q.ok;
+    if (this.qTimer) { this.qTimer.remove(); this.qTimer = null; }
+
+    const btns = document.querySelectorAll('.q-opt');
+    btns.forEach(b => b.disabled = true);
+    if (sel >= 0) btns[sel].classList.add(correct ? 'correct' : 'wrong');
+    btns[q.ok].classList.add('correct');
+
+    const fb = document.getElementById('q-feedback');
+    fb.style.display = 'block';
+    fb.className = correct ? 'ok' : 'bad';
+    const pre = sel === -1 ? '⏱️ <strong>¡Tiempo agotado!</strong>' : correct ? '✅ <strong>¡Correcto!</strong>' : '❌ <strong>Incorrecto.</strong>';
+    fb.innerHTML = `${pre} ${q.exp}`;
+
+    this.time.delayedCall(1900, () => {
+      document.getElementById('q-overlay').style.display = 'none';
+      this.bubbles.forEach(b => b.slowed = false);
+      this.qActive = false;
+
+      if (correct) {
+        const pts = 100 + (this.wave - 1) * 50;
+        this.score += pts;
+        this.scoreT.setText(this.score.toString());
+        this.destroyBubble(bData, pts);
+      } else {
+        bData.spd *= 2.8;
+      }
+    });
+  }
+
+  destroyBubble(bData, pts) {
+    if (!bData.active) return;
+    bData.active = false;
+    const px = bData.cont.x, py = bData.cont.y;
+
+    // Explosion
+    [0x00ff88, 0x55ffaa].forEach((c, i) => {
+      const r = this.add.graphics();
+      r.lineStyle(3 - i, c, 1); r.strokeCircle(px, py, 40);
+      this.tweens.add({ targets: r, scaleX: 2.6, scaleY: 2.6, alpha: 0, duration: 380 + i * 100, onComplete: () => r.destroy() });
+    });
+    const fl = this.add.graphics();
+    fl.fillStyle(0x00ff88, 0.28); fl.fillCircle(px, py, 50);
+    this.tweens.add({ targets: fl, scaleX: 2.2, scaleY: 2.2, alpha: 0, duration: 300, onComplete: () => fl.destroy() });
+
+    if (pts) {
+      const pt = this.add.text(px, py - 12, `+${pts}`, {
+        fontSize: '16px', color: '#00ff88', fontFamily: 'Courier New', fontStyle: 'bold',
+        stroke: '#003a1a', strokeThickness: 3
+      }).setOrigin(0.5);
+      this.tweens.add({ targets: pt, y: py - 72, alpha: 0, duration: 880, onComplete: () => pt.destroy() });
+    }
+
+    bData.cont.destroy();
+    this.bubbles = this.bubbles.filter(b => b !== bData);
+    this.resolved++;
+    this.drawProg();
+    this.checkWaveEnd();
+  }
+
+  hitBase(bData) {
+    if (!bData.active || this.ended) return;
+    bData.active = false;
+    bData.cont.destroy();
+    this.bubbles = this.bubbles.filter(b => b !== bData);
+    this.resolved++;
+    this.drawProg();
+
+    this.baseHP--;
+    this.drawHPBar();
+    this.hearts.forEach((h, i) => h.setText(i < this.baseHP ? '❤️' : '🖤'));
+
+    const W = this.scale.width, H = this.scale.height;
+    this.cameras.main.shake(160, 0.013);
+    const fl = this.add.graphics().fillStyle(0xff0000, 0.22).fillRect(0, 0, W, H);
+    this.tweens.add({ targets: fl, alpha: 0, duration: 260, onComplete: () => fl.destroy() });
+
+    const dmg = this.add.text(W - 66, H / 2 - 72, '-1 HP', {
+      fontSize: '16px', color: '#ff3333', fontFamily: 'Courier New', fontStyle: 'bold',
+      stroke: '#550000', strokeThickness: 3
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: dmg, y: H / 2 - 125, alpha: 0, duration: 850, onComplete: () => dmg.destroy() });
+
+    const laugh = this.add.text(120, H / 2 - 54, '😈 JA!', {
+      fontSize: '13px', color: '#ff4444', fontFamily: 'Courier New', fontStyle: 'bold'
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: laugh, y: H / 2 - 90, alpha: 0, duration: 900, onComplete: () => laugh.destroy() });
+
+    if (this.baseHP <= 0) { this.endGame(false); return; }
+    this.checkWaveEnd();
+  }
+
+  drawProg() {
+    const W = this.scale.width, H = this.scale.height;
+    const pct = Math.min(this.resolved / Math.max(this.totalBugs, 1), 1);
+    this.progF.clear();
+    this.progF.fillStyle(0x1a5fa8, 1);
+    this.progF.fillRoundedRect(65, H - 22, (W - 74) * pct, 12, 4);
+  }
+
+  checkWaveEnd() {
+    if (this.resolved >= this.totalBugs && this.bubbles.length === 0 && !this.qActive && !this.ended && !this.transitioning) {
+      this.transitioning = true;
+      if (this.spawnTimer) { this.spawnTimer.remove(); this.spawnTimer = null; }
+
+      const W = this.scale.width, H = this.scale.height;
+      const ding = this.add.text(W / 2, H / 2, '⚙️ Oleada superada', {
+        fontSize: '22px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold',
+        stroke: '#7a4f00', strokeThickness: 2
+      }).setOrigin(0.5).setAlpha(0);
+      this.tweens.add({ targets: ding, alpha: 1, yoyo: true, duration: 400, hold: 600, onComplete: () => ding.destroy() });
+
+      if (this.wave >= 5) {
+        this.time.delayedCall(1200, () => this.endGame(true));
+      } else {
+        this.wave++;
+        this.time.delayedCall(1200, () => this.startWave());
+      }
+    }
+  }
+
+  endGame(won) {
+    if (this.ended) return;
+    this.ended = true;
+    if (this.spawnTimer) this.spawnTimer.remove();
+    if (this.qTimer) this.qTimer.remove();
+    document.getElementById('q-overlay').style.display = 'none';
+    this.bubbles.forEach(b => b.cont.destroy()); this.bubbles = [];
+    this.time.delayedCall(700, () => this.scene.start('GameOver', { score: this.score, won, wave: this.wave }));
+  }
+
+  update(time, delta) {
+    const dt = delta / 1000;
+    const W = this.scale.width;
+
+    // Keep antenna synced to bot
+    const H = this.scale.height;
+    this.antG.setPosition(0, this.botG.y - (H / 2 + 8));
+
+    ;[...this.bubbles].forEach(b => {
+      if (!b.active) return;
+      const s = b.slowed ? b.spd * 0.12 : b.spd;
+      b.cont.x += s * dt;
+      b.cont.y += Math.sin(time * 0.0022 + b.wobble) * 0.45;
+      if (b.cont.x > W - 105) this.hitBase(b);
+    });
+  }
+}
+
+/* ================================================================
+   SCENE: GAME OVER
+   ================================================================ */
+class GameOverScene extends Phaser.Scene {
+  constructor() { super({ key: 'GameOver' }); }
+
+  init(data) {
+    this.finalScore = data.score || 0;
+    this.won = data.won;
+    this.wave = data.wave;
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    this.add.graphics().fillStyle(0x06090f, 1).fillRect(0, 0, W, H);
+
+    if (this.won) {
+      for (let i = 0; i < 18; i++) {
+        const p = this.add.text(
+          Phaser.Math.Between(0, W), Phaser.Math.Between(0, H),
+          ['✅', '⭐', '🏆', '💡', '⚙️'][Phaser.Math.Between(0, 4)],
+          { fontSize: `${Phaser.Math.Between(12, 24)}px` }
+        );
+        this.tweens.add({ targets: p, y: '-=180', alpha: 0, duration: Phaser.Math.Between(1800, 3800), repeat: -1, delay: Phaser.Math.Between(0, 2000) });
+      }
+    }
+
+    const pW = 530, pH = 370, px = W / 2 - pW / 2, py = H / 2 - pH / 2;
+    const panel = this.add.graphics();
+    panel.fillStyle(0x0b1120, 0.97); panel.fillRoundedRect(px, py, pW, pH, 14);
+    panel.lineStyle(2, this.won ? 0x00bb55 : 0xdd2222, 1);
+    panel.strokeRoundedRect(px, py, pW, pH, 14);
+
+    this.add.text(W / 2, py + 38, this.won ? '🎉 ¡MISIÓN CUMPLIDA!' : '💥 BASE DESTRUIDA', {
+      fontSize: '28px', color: this.won ? '#00ff88' : '#ff4444',
+      fontFamily: 'Courier New', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // Score box
+    const sb = this.add.graphics();
+    sb.fillStyle(0x080f1e, 1); sb.fillRoundedRect(W / 2 - 155, py + 78, 310, 60, 8);
+    this.add.text(W / 2, py + 98, 'PUNTUACIÓN FINAL', { fontSize: '10px', color: '#334455', fontFamily: 'Courier New' }).setOrigin(0.5);
+    this.add.text(W / 2, py + 115, this.finalScore.toString(), { fontSize: '26px', color: '#58d4ff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5);
+
+    this.add.text(W / 2, py + 160, this.won
+      ? '✅ Completaste las 5 oleadas'
+      : `📊 Llegaste hasta la oleada ${this.wave} de 5`, {
+      fontSize: '14px', color: '#6688aa', fontFamily: 'Courier New'
+    }).setOrigin(0.5);
+
+    const { label, color, msg } = this.grade();
+    this.add.text(W / 2, py + 198, label, { fontSize: '20px', color, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(W / 2, py + 230, msg, {
+      fontSize: '12px', color: '#6688aa', fontFamily: 'Courier New', align: 'center', wordWrap: { width: 480 }
+    }).setOrigin(0.5);
+
+    // Buttons
+    this.mkBtn(W / 2 - 105, py + 300, 210, '🔄 Jugar de nuevo', 0x1a5fa8, () => this.scene.start('Game'));
+    this.mkBtn(W / 2 + 110, py + 300, 130, '🏠 Menú', 0x112233, () => this.scene.start('Menu'));
+  }
+
+  mkBtn(x, y, w, label, col, fn) {
+    const h = 42;
+    const g = this.add.graphics();
+    const draw = c => { g.clear(); g.fillStyle(c, 1); g.fillRoundedRect(x - w / 2, y - h / 2, w, h, 8); };
+    draw(col);
+    this.add.text(x, y, label, { fontSize: '13px', color: '#fff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5);
+    const z = this.add.zone(x, y, w, h).setInteractive({ useHandCursor: true });
+    z.on('pointerover', () => draw(col + 0x222222));
+    z.on('pointerout', () => draw(col));
+    z.on('pointerdown', fn);
+  }
+
+  grade() {
+    const s = this.finalScore;
+    if (s >= 700) return { label: '🏆 Maestro del Refactoring', color: '#ffd700', msg: 'Dominas encapsulación, SRP, Expert y mensajes. ¡BugBot derrotado!' };
+    if (s >= 400) return { label: '⭐ Buen Refactorizador', color: '#00ff88', msg: 'Buen manejo de los principios OO. ¡Seguí practicando!' };
+    if (s >= 180) return { label: '💡 Aprendiz en progreso', color: '#58d4ff', msg: 'Vas bien. Repasá Stack/Heap, encapsulación y SRP.' };
+    return { label: '🔧 Necesitás más práctica', color: '#ffaa44', msg: 'Revisá el material de clase y volvé a intentarlo. ¡Vas a poder!' };
+  }
+}
+
+/* ================================================================
+   PHASER CONFIG
+   ================================================================ */
+new Phaser.Game({
+  type: Phaser.AUTO,
+  width: 800,
+  height: 500,
+  parent: 'wrap',
+  backgroundColor: '#06090f',
+  scene: [MenuScene, GameScene, GameOverScene]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+boss-zeus     → assets/images/characters/gods/zeus/sprite-sheet.png   (ya existe)
+boss-artemisa → assets/images/characters/gods/artemisa/sprite-sheet.png
+boss-poseidon → assets/images/characters/gods/poseidon/sprite-sheet.png
+boss-athena   → assets/images/characters/gods/athena/sprite-sheet.png
+boss-ares     → assets/images/characters/gods/ares/sprite-sheet.png
+boss-hefesto  → assets/images/characters/gods/hefesto/sprite-sheet.png
+boss-afrodita → assets/images/characters/gods/afrodita/sprite-sheet.png
+boss-apolo    → assets/images/characters/gods/apolo/sprite-sheet.png
+boss-hades    → assets/images/characters/gods/hades/sprite-sheet.png
+assets/images/characters/gods/artemisa/sprite-sheet.png
+assets/images/characters/gods/ares/sprite-sheet.png
+assets/images/characters/gods/apolo/sprite-sheet.png
+assets/images/characters/gods/hefesto/sprite-sheet.png
+assets/images/characters/gods/afrodita/sprite-sheet.png

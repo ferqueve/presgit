@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POO II Arena - Semana 2: Objetos y Clases en C#</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        :root {
+            --primary-color: #9b59b6;
+            --secondary-color: #8e44ad;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --bg-light: #f5f6fa;
+            --code-bg: #1e1e1e;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .arena-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .concept-category {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            font-weight: bold;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .level-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .level-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 25px;
+        }
+
+        .level-item.active {
+            background: linear-gradient(90deg, #e8f4fd, #ffffff);
+            border-left: 5px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .level-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
+
+        .level-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            margin-right: 12px;
+        }
+
+        .status-done { color: var(--success-color); background: #d5f5e3; }
+        .status-current { color: var(--primary-color); background: #e8daef; }
+        .status-locked { color: #95a5a6; background: #f4f6f7; }
+
+        .workspace {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .exercise-header {
+            padding: 25px;
+            border-bottom: 2px solid var(--bg-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .exercise-body {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            gap: 25px;
+        }
+
+        .instruction-panel {
+            flex: 1;
+            background: var(--bg-light);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary-color);
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .interaction-panel {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-validate {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-validate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-validate:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-hint {
+            background: var(--warning-color);
+            color: #2c3e50;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .hint-box {
+            margin-top: 15px;
+            padding: 20px;
+            background: #fef9e7;
+            border-left: 5px solid var(--warning-color);
+            border-radius: 6px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 3px;
+        }
+
+        .tag-abstraction { background: #d6eaf8; color: #2980b9; }
+        .tag-encapsulation { background: #f5eef8; color: #8e44ad; }
+        .tag-lifecycle { background: #fef5e7; color: #f39c12; }
+        .tag-memory { background: #d5f5e3; color: #27ae60; }
+        .tag-grasp { background: #fadbd8; color: #e74c3c; }
+
+        /* Code Editor */
+        .code-editor-container {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .code-toolbar {
+            background: #252526;
+            padding: 8px 15px;
+            color: #ccc;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-editor {
+            flex: 1;
+            background: var(--code-bg);
+            color: #d4d4d4;
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            min-height: 250px;
+        }
+
+        /* Memory Diagram */
+        .memory-diagram {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .memory-section {
+            flex: 1;
+            border: 3px solid;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .memory-stack {
+            border-color: #e74c3c;
+            background: #fdedec;
+        }
+
+        .memory-heap {
+            border-color: #3498db;
+            background: #ebf5fb;
+        }
+
+        .memory-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+        }
+
+        .memory-item {
+            background: white;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .memory-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .memory-item.correct {
+            border-color: var(--success-color);
+            background: #d5f5e3;
+        }
+
+        .memory-item.wrong {
+            border-color: var(--accent-color);
+            background: #fadbd8;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* CRC Card */
+        .crc-card {
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .crc-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .crc-body {
+            display: flex;
+            min-height: 200px;
+        }
+
+        .crc-section {
+            flex: 1;
+            padding: 15px;
+            border-right: 1px solid #ddd;
+        }
+
+        .crc-section:last-child {
+            border-right: none;
+        }
+
+        .crc-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .crc-item {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .crc-item:hover {
+            background: #e8daef;
+        }
+
+        .crc-item.selected {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Progress */
+        .progress-container {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar-container {
+            height: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            transition: width 0.5s ease;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .status-message.info {
+            background: #d6eaf8;
+            color: #2980b9;
+            display: block;
+        }
+
+        .status-message.error {
+            background: #fadbd8;
+            color: #c0392b;
+            display: block;
+        }
+
+        .status-message.success {
+            background: #d5f5e3;
+            color: #27ae60;
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse-animation {
+            animation: pulse 1s infinite;
+        }
+
+        /* Ordering */
+        .order-item {
+            background: white;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 8px 0;
+            cursor: move;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .order-item:hover {
+            border-color: var(--primary-color);
+            background: #f5eef8;
+        }
+
+        .order-item i {
+            margin-right: 10px;
+            color: #95a5a6;
+        }
+
+        /* True/False Cards */
+        .tf-card {
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tf-card:hover {
+            border-color: var(--primary-color);
+            background: #f5eef8;
+        }
+
+        .tf-card.selected-true {
+            border-color: var(--success-color);
+            background: #d5f5e3;
+        }
+
+        .tf-card.selected-false {
+            border-color: var(--accent-color);
+            background: #fadbd8;
+        }
+
+        @media (max-width: 992px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; height: 200px; }
+            .exercise-body { flex-direction: column; }
+            .memory-diagram { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="arena-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0"><i class="fa-solid fa-cube"></i> POO II Arena</h3>
+                <small>Semana 2: Objetos, Clases y Mensajes en C#</small>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark p-2">Nivel: <span id="current-level-display">1</span>/15</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar" id="sidebar-list"></div>
+        
+        <div class="workspace">
+            <div class="exercise-card" id="exercise-container"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const exercises = [
+            {
+                category: "Fundamentos POO",
+                id: 1,
+                title: "Abstracción vs Encapsulamiento",
+                concept: "abstraction",
+                desc: "Selecciona las afirmaciones CORRECTAS sobre abstracción y encapsulamiento.",
+                theory: "Abstracción: eliminar lo irrelevante y amplificar lo esencial. Encapsulamiento: ocultar los detalles de implementación.",
+                interactionType: "multiple-choice",
+                options: [
+                    { text: "La abstracción me permite pensar en una 'casa' sin considerar los ladrillos", correct: true },
+                    { text: "El encapsulamiento impide acceder directamente a los atributos privados", correct: true },
+                    { text: "La abstracción oculta los detalles de implementación", correct: false },
+                    { text: "El encapsulamiento permite que cualquier objeto modifique mis atributos", correct: false }
+                ],
+                hint: "Abstracción = qué es importante. Encapsulamiento = qué está oculto/protegido.",
+                successMsg: "¡Perfecto! Comprendes la diferencia entre abstracción y encapsulamiento."
+            },
+            {
+                id: 2,
+                title: "Estado vs Comportamiento",
+                concept: "abstraction",
+                desc: "Para cada elemento de la clase Person, indica si es ESTADO (atributo) o COMPORTAMIENTO (método).",
+                theory: "Estado: datos que el objeto conoce (atributos). Comportamiento: cosas que el objeto hace (métodos).",
+                interactionType: "true-false",
+                statements: [
+                    { text: "Name (string) es un atributo que representa estado", correct: true },
+                    { text: "SayHiTo(Person) es un método que representa comportamiento", correct: true },
+                    { text: "Age (int) es un método que representa comportamiento", correct: false },
+                    { text: "IsAdult() es un atributo que representa estado", correct: false }
+                ],
+                hint: "Los atributos guardan datos (sustantivos). Los métodos realizan acciones (verbos).",
+                successMsg: "¡Correcto! Distingues claramente entre estado y comportamiento."
+            },
+            {
+                id: 3,
+                title: "Mensaje y Selector",
+                concept: "encapsulation",
+                desc: "Completa el código para que el objeto envíe el mensaje correcto.",
+                theory: "Los objetos se comunican enviando mensajes. El selector es el nombre del método que se ejecuta.",
+                interactionType: "code-completion",
+                template: `public class Program {
+    public static void Main() {
+        Person lucho = new Person("Luis", "Suárez");
+        Person chino = new Person("Sergio", "Rochet");
+        
+        // Envía el mensaje para que chino salude a lucho
+        ________.________(________);
+    }
+}`,
+                correctAnswer: "chino.SayHiTo(lucho)",
+                hint: "El emisor es 'chino', el selector es 'SayHiTo', el receptor como parámetro es 'lucho'.",
+                successMsg: "¡Excelente! Has enviado correctamente el mensaje entre objetos."
+            },
+            {
+                category: "Ciclo de Vida de Objetos",
+                id: 4,
+                title: "Creación de Objetos (new)",
+                concept: "lifecycle",
+                desc: "Ordena los pasos que ocurren cuando se ejecuta 'new Person()'.",
+                theory: "Cuando usas 'new': 1) Se asigna memoria en heap, 2) Se invoca el constructor, 3) Se retorna la referencia.",
+                interactionType: "ordering",
+                items: [
+                    { text: "Se crea bloque de memoria en heap para el objeto", level: 0 },
+                    { text: "Se invoca el constructor de la clase", level: 1 },
+                    { text: "Se retorna la dirección de memoria a la variable", level: 2 },
+                    { text: "La variable en stack apunta al objeto en heap", level: 3 }
+                ],
+                hint: "Primero se necesita memoria, luego se inicializa, finalmente se asigna la referencia.",
+                successMsg: "¡Correcto! Entiendes el proceso de creación de objetos."
+            },
+            {
+                id: 5,
+                title: "Stack vs Heap",
+                concept: "memory",
+                desc: "Arrastra cada elemento a su ubicación correcta de memoria (Stack o Heap).",
+                theory: "Stack: variables locales y parámetros. Heap: objetos creados con new.",
+                interactionType: "memory-sort",
+                elements: [
+                    { name: "Variable 'lucho' (referencia)", correct: "stack" },
+                    { name: "Objeto Person()", correct: "heap" },
+                    { name: "Parámetro 'person'", correct: "stack" },
+                    { name: "Objeto String 'Luis'", correct: "heap" },
+                    { name: "Variable local 'int edad'", correct: "stack" }
+                ],
+                hint: "Las variables van al stack. Los objetos van al heap.",
+                successMsg: "¡Perfecto! Comprendes cómo se distribuye la memoria en C#."
+            },
+            {
+                id: 6,
+                title: "Referencias y Null",
+                concept: "memory",
+                desc: "Selecciona las afirmaciones CORRECTAS sobre referencias y null en C#.",
+                theory: "Una variable puede ser null (no apunta a ningún objeto). Dos variables pueden apuntar al mismo objeto.",
+                interactionType: "multiple-choice",
+                options: [
+                    { text: "Person p = null; → p no referencia ningún objeto", correct: true },
+                    { text: "Person p1 = new Person(); Person p2 = p1; → p1 y p2 apuntan al mismo objeto", correct: true },
+                    { text: "Person p1 = new Person(); Person p2 = new Person(); → p1 == p2 es true", correct: false },
+                    { text: "p = null; → El objeto se destruye inmediatamente", correct: false }
+                ],
+                hint: "Recuerda: == compara referencias, no contenido. Null significa 'sin referencia'.",
+                successMsg: "¡Bien! Entiendes cómo funcionan las referencias en C#."
+            },
+            {
+                id: 7,
+                title: "Garbage Collection",
+                concept: "lifecycle",
+                desc: "Selecciona las afirmaciones CORRECTAS sobre el Garbage Collector.",
+                theory: "El GC libera memoria automáticamente cuando no hay referencias a un objeto. El destructor se llama antes de liberar.",
+                interactionType: "multiple-choice",
+                options: [
+                    { text: "Se ejecuta automáticamente cuando no hay referencias al objeto", correct: true },
+                    { text: "El programador debe llamar manualmente al GC siempre", correct: false },
+                    { text: "El destructor (~ClassName) se invoca antes de liberar memoria", correct: true },
+                    { text: "Los recursos como archivos deben cerrarse en el destructor", correct: true }
+                ],
+                hint: "El GC es automático, pero los recursos externos deben liberarse explícitamente.",
+                successMsg: "¡Correcto! Comprendes el ciclo de vida y la gestión de memoria."
+            },
+            {
+                category: "Constructores y Destructores",
+                id: 8,
+                title: "Constructor Personalizado",
+                concept: "lifecycle",
+                desc: "Completa el constructor para que siempre se cree una Persona con nombre y apellido.",
+                theory: "El constructor tiene el mismo nombre que la clase. Cuando defines uno, el predeterminado deja de existir.",
+                interactionType: "code-completion",
+                template: `public class Person {
+    public string Name { get; set; }
+    public string FamilyName { get; set; }
+    
+    // Completa el constructor
+    public Person(________ __________, ________ __________) {
+        this.Name = ________;
+        this.________ = familyName;
+    }
+}`,
+                correctAnswer: "string name, string familyName, name, FamilyName",
+                hint: "Los parámetros deben tener tipo y nombre. Usa 'this' para diferenciar atributo de parámetro.",
+                successMsg: "¡Excelente! Has creado un constructor que garantiza el estado inicial."
+            },
+            {
+                id: 9,
+                title: "Destructor en C#",
+                concept: "lifecycle",
+                desc: "¿Cuál es la sintaxis CORRECTA del destructor en C#?",
+                theory: "El destructor en C# se define con ~ antes del nombre de la clase. Se llama antes de que el GC libere la memoria.",
+                interactionType: "single-choice",
+                options: [
+                    { text: "~Person() { }", correct: true },
+                    { text: "Person.Destroy() { }", correct: false },
+                    { text: "void Finalize() { }", correct: false },
+                    { text: "public void Dispose() { }", correct: false }
+                ],
+                hint: "El destructor usa el símbolo ~ antes del nombre de la clase.",
+                successMsg: "¡Correcto! Conoces la sintaxis del destructor en C#."
+            },
+            {
+                category: "Identidad e Igualdad",
+                id: 10,
+                title: "Identidad vs Igualdad",
+                concept: "abstraction",
+                desc: "Analiza el código y responde las preguntas sobre identidad e igualdad.",
+                theory: "Identidad: existencia separada en memoria. Igualdad: mismos valores de atributos. == compara identidad por defecto.",
+                interactionType: "analysis",
+                scenario: `Person chino = new Person("Sergio", "Rochet");
+Person arquero = new Person("Sergio", "Rochet");
+
+// Preguntas:`,
+                questions: [
+                    { text: "¿chino == arquero retorna true?", answer: "false", explanation: "Son objetos diferentes en memoria" },
+                    { text: "¿chino.Equals(arquero) retorna true?", answer: "false", explanation: "Equals compara identidad por defecto" },
+                    { text: "¿Tienen la misma identidad?", answer: "no", explanation: "Cada new crea un objeto único" }
+                ],
+                hint: "Cada 'new' crea un objeto diferente en el heap, aunque los datos sean iguales.",
+                successMsg: "¡Perfecto! Comprendes la diferencia entre identidad e igualdad."
+            },
+            {
+                id: 11,
+                title: "Sobrescribir Equals",
+                concept: "abstraction",
+                desc: "¿Qué métodos debes sobrescribir para que dos objetos con mismos datos sean considerados iguales?",
+                theory: "Para comparar por contenido (no por referencia), debes sobrescribir Equals() y el operador ==.",
+                interactionType: "single-choice",
+                options: [
+                    { text: "Equals(object?) y operador ==", correct: true },
+                    { text: "Solo el constructor", correct: false },
+                    { text: "Solo los getters", correct: false },
+                    { text: "GetHashCode() y ToString()", correct: false }
+                ],
+                hint: "Necesitas cambiar cómo se compara la igualdad, no cómo se crea o muestra el objeto.",
+                successMsg: "¡Correcto! Sabes cómo implementar igualdad por contenido."
+            },
+            {
+                category: "Diseño con CRC y UML",
+                id: 12,
+                title: "Tarjeta CRC - Person",
+                concept: "grasp",
+                desc: "Selecciona las responsabilidades CORRECTAS para la clase Person en su tarjeta CRC.",
+                theory: "CRC: Class (nombre), Responsibilities (conocer/hacer), Collaborations (clases con las que interactúa).",
+                interactionType: "crc-builder",
+                className: "Person",
+                responsibilities: [
+                    { text: "Conocer el nombre", correct: true },
+                    { text: "Conocer el apellido", correct: true },
+                    { text: "Presentarse a otra persona", correct: true },
+                    { text: "Conectar a base de datos", correct: false },
+                    { text: "Imprimir en consola", correct: false }
+                ],
+                collaborations: ["Person"],
+                hint: "Las responsabilidades deben estar relacionadas con lo que una Persona ES y HACE.",
+                successMsg: "¡Excelente! Has diseñado correctamente la tarjeta CRC."
+            },
+            {
+                id: 13,
+                title: "Diagrama UML - Person",
+                concept: "grasp",
+                desc: "Selecciona los elementos CORRECTOS del diagrama UML para la clase Person.",
+                theory: "UML: Nombre arriba, atributos en medio (nombre: tipo), métodos abajo (nombre(param): retorno). + significa público.",
+                interactionType: "multiple-choice",
+                options: [
+                    { text: "+ Name: string", correct: true },
+                    { text: "+ SayHiTo(person: Person): void", correct: true },
+                    { text: "- Name = 'Luis'", correct: false },
+                    { text: "SayHiTo() { Console.WriteLine... }", correct: false }
+                ],
+                hint: "UML muestra la estructura, no la implementación. Usa notación nombre: tipo.",
+                successMsg: "¡Correcto! Lees correctamente diagramas UML de clases."
+            },
+            {
+                category: "Patrones GRASP",
+                id: 14,
+                title: "Principio Expert",
+                concept: "grasp",
+                desc: "¿A qué clase asignas la responsabilidad de determinar si una persona es mayor de edad?",
+                theory: "Expert: asigna la responsabilidad a la clase que tiene la información necesaria para cumplirla.",
+                interactionType: "single-choice",
+                options: [
+                    { text: "Person (porque tiene el atributo Age)", correct: true },
+                    { text: "Program (porque tiene el Main)", correct: false },
+                    { text: "AgeValidator (clase separada)", correct: false },
+                    { text: "Cualquiera, da igual", correct: false }
+                ],
+                hint: "¿Qué clase conoce la edad de la persona? Esa es la experta.",
+                successMsg: "¡Perfecto! Aplicaste correctamente el principio Expert."
+            },
+            {
+                id: 15,
+                title: "Single Responsibility Principle",
+                concept: "grasp",
+                desc: "La clase Person tiene métodos para calcular IMC, enviar emails y guardar en BD. ¿Qué principio viola y cómo lo solucionas?",
+                theory: "SRP: Una clase debe tener una sola razón para cambiar. Si hace demasiadas cosas, es difícil de mantener.",
+                interactionType: "code-refactor",
+                badCode: `public class Person {
+    public double Weight { get; set; }
+    public double Height { get; set; }
+    
+    public bool HasOverweight() { /* calcula IMC */ }
+    public void SendEmail() { /* envía email */ }
+    public void SaveToDatabase() { /* guarda en BD */ }
+}`,
+                solutions: [
+                    { text: "Crear OverweightCalculator para el IMC", correct: true },
+                    { text: "Crear EmailService para emails", correct: true },
+                    { text: "Crear PersonRepository para BD", correct: true },
+                    { text: "Mantener todo en Person para que sea más simple", correct: false }
+                ],
+                hint: "Cada responsabilidad diferente debería estar en una clase diferente.",
+                successMsg: "¡FELICIDADES! Has completado toda la Semana 2 de POO. ¡Eres un maestro de objetos y clases!"
+            }
+        ];
+
+        let currentLevel = 0;
+        let completedLevels = [];
+        let memorySortState = { placed: [] };
+        let crcState = { selected: [] };
+        let tfState = { answers: {} };
+
+        function init() {
+            renderSidebar();
+            loadExercise(0);
+        }
+
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar-list');
+            sidebar.innerHTML = '';
+            
+            let currentCategory = '';
+            
+            exercises.forEach((ex, index) => {
+                if (ex.category !== currentCategory) {
+                    currentCategory = ex.category;
+                    const catDiv = document.createElement('div');
+                    catDiv.className = 'concept-category';
+                    catDiv.innerHTML = `<i class="fa-solid fa-folder-open"></i> ${currentCategory}`;
+                    sidebar.appendChild(catDiv);
+                }
+                
+                const isLocked = index > 0 && !completedLevels.includes(index - 1) && index !== currentLevel;
+                const isDone = completedLevels.includes(index);
+                const isActive = index === currentLevel;
+                
+                let iconClass = 'fa-lock';
+                let statusClass = 'status-locked';
+                
+                if (isDone) {
+                    iconClass = 'fa-check';
+                    statusClass = 'status-done';
+                } else if (isActive) {
+                    iconClass = 'fa-play';
+                    statusClass = 'status-current';
+                }
+                
+                const div = document.createElement('div');
+                div.className = `level-item ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`;
+                div.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="level-icon ${statusClass}">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted">Nivel ${index + 1}</div>
+                            <div>${ex.title}</div>
+                            <span class="concept-tag tag-${ex.concept}">${ex.concept}</span>
+                        </div>
+                    </div>
+                `;
+                
+                if (!isLocked) {
+                    div.onclick = () => loadExercise(index);
+                }
+                
+                sidebar.appendChild(div);
+            });
+            
+            document.getElementById('current-level-display').innerText = currentLevel + 1;
+        }
+
+        function loadExercise(index) {
+            currentLevel = index;
+            const ex = exercises[index];
+            const container = document.getElementById('exercise-container');
+            
+            // Reset states
+            memorySortState = { placed: [] };
+            crcState = { selected: [] };
+            tfState = { answers: {} };
+            
+            container.classList.remove('animate__fadeIn');
+            void container.offsetWidth;
+            container.classList.add('animate__fadeIn');
+            
+            let interactionHTML = '';
+            
+            switch(ex.interactionType) {
+                case 'multiple-choice': interactionHTML = generateMultipleChoice(ex); break;
+                case 'single-choice': interactionHTML = generateSingleChoice(ex); break;
+                case 'true-false': interactionHTML = generateTrueFalse(ex); break;
+                case 'ordering': interactionHTML = generateOrdering(ex); break;
+                case 'code-completion': interactionHTML = generateCodeCompletion(ex); break;
+                case 'memory-sort': interactionHTML = generateMemorySort(ex); break;
+                case 'analysis': interactionHTML = generateAnalysis(ex); break;
+                case 'crc-builder': interactionHTML = generateCRCBuilder(ex); break;
+                case 'code-refactor': interactionHTML = generateCodeRefactor(ex); break;
+            }
+            
+            container.innerHTML = `
+                <div class="exercise-header">
+                    <div>
+                        <h4 class="mb-1">${ex.title}</h4>
+                        <span class="concept-tag tag-${ex.concept}">${ex.concept.toUpperCase()}</span>
+                    </div>
+                    <button class="btn btn-hint" onclick="toggleHint()">
+                        <i class="fa-regular fa-lightbulb"></i> Pista
+                    </button>
+                </div>
+                <div class="exercise-body">
+                    <div class="instruction-panel">
+                        <h5><i class="fa-solid fa-book-open"></i> Objetivo</h5>
+                        <p>${ex.desc}</p>
+                        
+                        <div class="progress-container">
+                            <div><i class="fa-solid fa-chart-line"></i> Progreso del nivel</div>
+                            <div class="progress-bar-container">
+                                <div class="progress-fill" id="level-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <h6><i class="fa-solid fa-graduation-cap"></i> Teoría</h6>
+                            <p class="mb-0">${ex.theory}</p>
+                        </div>
+                        
+                        <div id="hint-box" class="hint-box">
+                            <strong><i class="fa-solid fa-lightbulb"></i> Pista:</strong> ${ex.hint}
+                        </div>
+                    </div>
+                    
+                    <div class="interaction-panel">
+                        ${interactionHTML}
+                    </div>
+                </div>
+            `;
+            
+            renderSidebar();
+        }
+
+        function generateMultipleChoice(ex) {
+            let html = '<div class="card h-100"><div class="card-body">';
+            ex.options.forEach((opt, idx) => {
+                html += `<div class="form-check mb-3 p-3 border rounded"><input class="form-check-input" type="checkbox" id="opt${idx}" data-correct="${opt.correct}"><label class="form-check-label" for="opt${idx}">${opt.text}</label></div>`;
+            });
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateMultipleChoice('${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar</button></div></div>`;
+            return html;
+        }
+
+        function generateSingleChoice(ex) {
+            let html = '<div class="card h-100"><div class="card-body">';
+            ex.options.forEach((opt, idx) => {
+                html += `<div class="form-check mb-3 p-3 border rounded"><input class="form-check-input" type="radio" name="singlechoice" id="opt${idx}" data-correct="${opt.correct}"><label class="form-check-label" for="opt${idx}">${opt.text}</label></div>`;
+            });
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateSingleChoice('${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar</button></div></div>`;
+            return html;
+        }
+
+        function generateTrueFalse(ex) {
+            tfState = { answers: {} };
+            let html = '<div class="card h-100"><div class="card-body">';
+            ex.statements.forEach((stmt, idx) => {
+                html += `<div class="tf-card" id="tf-${idx}" data-correct="${stmt.correct}" onclick="toggleTF(${idx}, '${stmt.correct}')">
+                    <p class="mb-2">${stmt.text}</p>
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="selectTF(${idx}, true, event)">Verdadero</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="selectTF(${idx}, false, event)">Falso</button>
+                    </div>
+                </div>`;
+            });
+            html += `<div class="status-message info" id="tf-status"><i class="fa-solid fa-info-circle"></i> Responde todas las afirmaciones</div>`;
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateTrueFalse(${ex.statements.length}, '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar</button></div></div>`;
+            return html;
+        }
+
+        function toggleTF(idx, correct) {
+            // Just for display, actual selection is via buttons
+        }
+
+        function selectTF(idx, isTrue, event) {
+            event.stopPropagation();
+            const card = document.getElementById(`tf-${idx}`);
+            
+            // Remove previous selection
+            card.classList.remove('selected-true', 'selected-false');
+            
+            // Add new selection
+            if (isTrue) {
+                card.classList.add('selected-true');
+            } else {
+                card.classList.add('selected-false');
+            }
+            
+            tfState.answers[idx] = isTrue;
+            
+            // Update status
+            const answered = Object.keys(tfState.answers).length;
+            const total = exercises[currentLevel].statements.length;
+            document.getElementById('tf-status').innerHTML = `<i class="fa-solid fa-circle-info"></i> Respondidas: ${answered} / ${total}`;
+        }
+
+        function validateTrueFalse(total, successMsg) {
+            const ex = exercises[currentLevel];
+            let correct = 0;
+            
+            ex.statements.forEach((stmt, idx) => {
+                const userAnswer = tfState.answers[idx];
+                const expectedAnswer = stmt.correct;
+                
+                if (userAnswer === expectedAnswer) {
+                    correct++;
+                    document.getElementById(`tf-${idx}`).style.borderColor = 'var(--success-color)';
+                } else {
+                    document.getElementById(`tf-${idx}`).style.borderColor = 'var(--accent-color)';
+                }
+            });
+            
+            handleValidation(correct === total, successMsg);
+        }
+
+        function generateOrdering(ex) {
+            let html = '<div class="card h-100"><div class="card-body">';
+            html += '<div id="order-container">';
+            ex.items.forEach((item, idx) => {
+                html += `<div class="order-item" id="order${idx}" data-level="${item.level}" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)"><i class="fa-solid fa-grip-lines"></i>${item.text}</div>`;
+            });
+            html += '</div>';
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateOrdering(${ex.items.length}, '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Orden</button></div></div>`;
+            return html;
+        }
+
+        let draggedItem = null;
+        function dragStart(ev) { draggedItem = ev.target; ev.dataTransfer.effectAllowed = 'move'; }
+        function dragOver(ev) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'move'; }
+        function drop(ev) {
+            ev.preventDefault();
+            if (ev.target.classList.contains('order-item') && ev.target !== draggedItem) {
+                const parent = ev.target.parentNode;
+                const items = Array.from(parent.children);
+                const draggedIndex = items.indexOf(draggedItem);
+                const targetIndex = items.indexOf(ev.target);
+                if (draggedIndex < targetIndex) { parent.insertBefore(draggedItem, ev.target.nextSibling); }
+                else { parent.insertBefore(draggedItem, ev.target); }
+            }
+        }
+
+        function validateOrdering(totalItems, successMsg) {
+            const items = document.querySelectorAll('[id^="order"]');
+            let correct = true;
+            items.forEach((item, idx) => { if (idx !== parseInt(item.dataset.level)) correct = false; });
+            handleValidation(correct, successMsg);
+        }
+
+        function generateCodeCompletion(ex) {
+            let html = '<div class="code-editor-container">';
+            html += '<div class="code-toolbar"><span>Program.cs</span><span><i class="fa-brands fa-microsoft"></i> C#</span></div>';
+            html += `<textarea id="code-input" class="code-editor">${ex.template}</textarea></div>`;
+            html += `<div class="status-message info" id="code-status"><i class="fa-solid fa-info-circle"></i> Completá los espacios en blanco</div>`;
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateCodeCompletion('${ex.correctAnswer}', '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Código</button>`;
+            return html;
+        }
+
+        function validateCodeCompletion(correctAnswer, successMsg) {
+            const code = document.getElementById('code-input').value;
+            const hasContent = !code.includes('________');
+            
+            if (hasContent) {
+                handleValidation(true, successMsg);
+            } else {
+                document.getElementById('code-status').className = 'status-message error';
+                document.getElementById('code-status').innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Completá todos los espacios en blanco';
+            }
+        }
+
+        function generateMemorySort(ex) {
+            memorySortState = { placed: [] };
+            
+            let html = '<div class="memory-diagram">';
+            
+            html += '<div class="memory-section memory-stack" id="stack-zone" ondrop="dropMemoryItem(event, \'stack\')" ondragover="allowDrop(event)">';
+            html += '<div class="memory-title" style="border-color: #e74c3c; color: #e74c3c;"><i class="fa-solid fa-layer-group"></i> STACK</div>';
+            html += '<div class="memory-items-container" id="stack-items"></div></div>';
+            
+            html += '<div class="memory-section memory-heap" id="heap-zone" ondrop="dropMemoryItem(event, \'heap\')" ondragover="allowDrop(event)">';
+            html += '<div class="memory-title" style="border-color: #3498db; color: #3498db;"><i class="fa-solid fa-cube"></i> HEAP</div>';
+            html += '<div class="memory-items-container" id="heap-items"></div></div></div>';
+            
+            html += '<div class="card mt-3"><div class="card-body">';
+            html += '<h6 class="mb-3"><i class="fa-solid fa-hand-pointer"></i> Arrastrá cada elemento a su zona:</h6>';
+            html += '<div class="d-flex flex-wrap gap-2" id="memory-source">';
+            ex.elements.forEach((elem, idx) => {
+                html += `<div class="memory-item" id="mem-item-${idx}" draggable="true" ondragstart="dragMemoryItem(event, '${elem.correct}', '${idx}')" data-correct="${elem.correct}">${elem.name}</div>`;
+            });
+            html += '</div>';
+            html += `<div class="status-message info" id="memory-status"><i class="fa-solid fa-info-circle"></i> Colocados: <span id="memory-count">0</span> / ${ex.elements.length}</div>`;
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateMemorySort(${ex.elements.length}, '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Memoria</button></div></div>`;
+            
+            return html;
+        }
+
+        let draggedMemoryItem = null;
+        function dragMemoryItem(ev, correct, idx) { draggedMemoryItem = { correct, idx }; ev.dataTransfer.effectAllowed = 'move'; }
+        function allowDrop(ev) { ev.preventDefault(); }
+        function dropMemoryItem(ev, zone) {
+            ev.preventDefault();
+            if (!draggedMemoryItem) return;
+            
+            const item = document.getElementById(`mem-item-${draggedMemoryItem.idx}`);
+            const targetContainer = document.getElementById(`${zone}-items`);
+            
+            if (item.classList.contains('correct') || item.classList.contains('wrong')) return;
+            
+            targetContainer.appendChild(item);
+            
+            if (draggedMemoryItem.correct === zone) {
+                item.classList.add('correct');
+                memorySortState.placed.push(true);
+            } else {
+                item.classList.add('wrong');
+                memorySortState.placed.push(false);
+                setTimeout(() => { item.classList.remove('wrong'); }, 1000);
+            }
+            
+            document.getElementById('memory-count').innerText = memorySortState.placed.length;
+            document.getElementById('memory-status').className = `status-message ${memorySortState.placed.every(p => p) ? 'success' : 'info'}`;
+            
+            draggedMemoryItem = null;
+        }
+
+        function validateMemorySort(totalElements, successMsg) {
+            const correct = memorySortState.placed.length === totalElements && memorySortState.placed.every(p => p);
+            handleValidation(correct, successMsg);
+        }
+
+        function generateAnalysis(ex) {
+            let html = '<div class="card h-100"><div class="card-body">';
+            html += `<pre class="bg-dark text-light p-3 rounded">${ex.scenario}</pre>`;
+            ex.questions.forEach((q, idx) => {
+                html += `<div class="mb-4 mt-4"><label class="form-label fw-bold">${q.text}</label><input type="text" class="form-control" id="ans${idx}" placeholder="true/false/sí/no"></div>`;
+            });
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateAnalysis(${ex.questions.length}, '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Análisis</button></div></div>`;
+            return html;
+        }
+
+        function validateAnalysis(totalQuestions, successMsg) {
+            let correct = 0;
+            const ex = exercises[currentLevel];
+            ex.questions.forEach((q, idx) => {
+                const ans = document.getElementById(`ans${idx}`).value.trim().toLowerCase();
+                if (ans === q.answer.toLowerCase()) correct++;
+            });
+            handleValidation(correct === totalQuestions, successMsg);
+        }
+
+        function generateCRCBuilder(ex) {
+            crcState = { selected: [] };
+            
+            let html = '<div class="crc-card">';
+            html += `<div class="crc-header">${ex.className}</div>`;
+            html += '<div class="crc-body">';
+            
+            html += '<div class="crc-section">';
+            html += '<div class="crc-title"><i class="fa-solid fa-list-check"></i> Responsabilidades</div>';
+            ex.responsibilities.forEach((resp, idx) => {
+                html += `<div class="crc-item" id="crc-resp-${idx}" data-correct="${resp.correct}" onclick="toggleCRCItem(this)">${resp.text}</div>`;
+            });
+            html += '</div>';
+            
+            html += '<div class="crc-section">';
+            html += '<div class="crc-title"><i class="fa-solid fa-handshake"></i> Colaboraciones</div>';
+            ex.collaborations.forEach((collab, idx) => {
+                html += `<div class="crc-item" id="crc-collab-${idx}" data-correct="true" onclick="toggleCRCItem(this)">${collab}</div>`;
+            });
+            html += '</div></div></div>';
+            
+            html += `<div class="status-message info" id="crc-status"><i class="fa-solid fa-info-circle"></i> Seleccioná las responsabilidades correctas</div>`;
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateCRC(${ex.responsibilities.filter(r => r.correct).length}, '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar CRC</button>`;
+            
+            return html;
+        }
+
+        function toggleCRCItem(item) {
+            item.classList.toggle('selected');
+        }
+
+        function validateCRC(expectedCorrect, successMsg) {
+            const selected = document.querySelectorAll('.crc-item.selected');
+            const correctSelected = document.querySelectorAll('.crc-item.selected[data-correct="true"]');
+            const incorrectSelected = document.querySelectorAll('.crc-item.selected[data-correct="false"]');
+            
+            const allCorrectSelected = correctSelected.length === expectedCorrect;
+            const noIncorrectSelected = incorrectSelected.length === 0;
+            
+            handleValidation(allCorrectSelected && noIncorrectSelected, successMsg);
+        }
+
+        function generateCodeRefactor(ex) {
+            let html = '<div class="card h-100"><div class="card-body">';
+            html += '<h6>Código que viola SRP:</h6>';
+            html += `<pre class="bg-dark text-light p-3 rounded" style="font-size: 0.8em;"><code>${ex.badCode}</code></pre>`;
+            
+            html += '<h6 class="mt-4">Soluciones para mejorar:</h6>';
+            ex.solutions.forEach((sol, idx) => {
+                html += `<div class="form-check mb-3 p-3 border rounded"><input class="form-check-input" type="checkbox" id="sol${idx}" data-correct="${sol.correct}"><label class="form-check-label" for="sol${idx}">${sol.text}</label></div>`;
+            });
+            
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateCodeRefactor('${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Refactor</button></div></div>`;
+            return html;
+        }
+
+        function validateCodeRefactor(successMsg) {
+            const inputs = document.querySelectorAll('input[type="checkbox"]');
+            let allCorrect = true;
+            inputs.forEach(input => {
+                if (input.checked !== (input.dataset.correct === 'true')) allCorrect = false;
+            });
+            handleValidation(allCorrect, successMsg);
+        }
+
+        function validateMultipleChoice(successMsg) {
+            const inputs = document.querySelectorAll('input[type="checkbox"]');
+            let allCorrect = true, hasSelection = false;
+            inputs.forEach(input => {
+                if (input.checked) hasSelection = true;
+                if (input.checked !== (input.dataset.correct === 'true')) allCorrect = false;
+            });
+            if (!hasSelection) { Swal.fire('Atención', 'Selecciona al menos una opción', 'warning'); return; }
+            handleValidation(allCorrect, successMsg);
+        }
+
+        function validateSingleChoice(successMsg) {
+            const selected = document.querySelector('input[name="singlechoice"]:checked');
+            if (!selected) {
+                Swal.fire('Atención', 'Selecciona una opción', 'warning');
+                return;
+            }
+            const isCorrect = selected.dataset.correct === 'true';
+            handleValidation(isCorrect, successMsg);
+        }
+
+        function handleValidation(isCorrect, successMsg) {
+            if (isCorrect) {
+                if (!completedLevels.includes(currentLevel)) { completedLevels.push(currentLevel); }
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Correcto!',
+                    text: successMsg,
+                    confirmButtonColor: '#27ae60',
+                    confirmButtonText: currentLevel < exercises.length - 1 ? 'Siguiente Nivel' : '¡Completado!'
+                }).then((result) => {
+                    if (result.isConfirmed && currentLevel < exercises.length - 1) {
+                        loadExercise(currentLevel + 1);
+                    } else if (result.isConfirmed) {
+                        Swal.fire({
+                            title: '🎉 ¡SEMANA 2 COMPLETADA!',
+                            text: 'Has dominado Objetos, Clases, Mensajes, Ciclo de Vida, Memoria y GRASP. ¡Excelente trabajo!',
+                            icon: 'success',
+                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/3159/3159066.png',
+                            imageWidth: 100,
+                            imageHeight: 100
+                        });
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Incorrecto',
+                    text: 'Revisá los conceptos e intentá de nuevo. Usá la pista si lo necesitas.',
+                    confirmButtonColor: '#e74c3c'
+                });
+            }
+        }
+
+        function toggleHint() {
+            const box = document.getElementById('hint-box');
+            box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        }
+
+        init();
+    </script>
+</body>
+</html>

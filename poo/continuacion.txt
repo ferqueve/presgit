@@ -1,0 +1,17 @@
+Muy simple — en la nueva conversación empezás con algo como:
+"Continuamos el desarrollo de Guerreros de la Mitología. Por favor cargá los archivos actualizados."
+Y adjuntás los archivos principales:
+
+script.js
+index.html
+style.css
+armors.json
+skills.json
+quests.json
+zones.json
+merchants.json
+enemies.json
+
+Yo voy a leer el contexto de mis memorias sobre el proyecto y con los archivos en mano retomamos desde donde estamos.
+También podés decirme en ese primer mensaje qué querés trabajar ese día — por ejemplo "Quiero trabajar en el sistema de personalización de perfil" o "Sigamos con los quest givers" — así arrancamos directo sin perder tiempo.
+¡Hasta la próxima, Fernando! Fue una sesión muy productiva. 🏛️⚔️

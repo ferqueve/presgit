@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>POO II – Semana 2 · Objetos, Clases y Mensajes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+
+<style>
+  :root {
+    --navy:    #0d2d4e;
+    --blue:    #1a5fa8;
+    --mid:     #2980d9;
+    --sky:     #5eb3f0;
+    --pale:    #cce8fc;
+    --white:   #f7fbff;
+    --card-bg: #eaf4fd;
+    --border:  #b3d6f5;
+    --code-bg: #e3f0fb;
+    --text:    #1a2e45;
+    --muted:   #5a7a9a;
+    --correct: #1a7a4a;
+    --wrong:   #c0392b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--white);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ─── DECK WRAPPER ─── */
+  #deck { width:100%; height:100vh; position:relative; }
+
+  /* ─── SLIDE BASE ─── */
+  .slide {
+    display: none;
+    position: absolute;
+    inset: 0;
+    flex-direction: column;
+    background: var(--white);
+  }
+  .slide.active { display: flex; }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.6rem;
+    height: 52px;
+    flex-shrink: 0;
+    border-bottom: 3px solid var(--sky);
+  }
+  .topbar .course-tag {
+    font-size:.75rem; font-weight:700; letter-spacing:.08em;
+    background: var(--mid); border-radius:4px; padding:2px 10px;
+    text-transform:uppercase;
+  }
+  .topbar .slide-counter { font-size:.8rem; color:var(--sky); font-weight:700; }
+
+  /* ─── CONTENT AREA ─── */
+  .slide-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 3rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .slide-body::-webkit-scrollbar { width:6px; }
+  .slide-body::-webkit-scrollbar-thumb { background:var(--pale); border-radius:3px; }
+
+  /* ─── TITLE SLIDE ─── */
+  .slide-title .slide-body {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 60%, var(--mid) 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    gap: 1.2rem;
+  }
+  .title-badge {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 20px;
+    padding: 4px 18px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sky);
+  }
+  .title-main { font-size: clamp(2rem,4vw,3.2rem); font-weight:900; line-height:1.1; }
+  .title-sub  { font-size: clamp(.9rem,1.8vw,1.2rem); color: var(--pale); font-weight:600; }
+  .title-icons { display:flex; gap:1.4rem; margin-top:.4rem; }
+  .title-icons i { font-size:2rem; color: var(--sky); opacity:.8; }
+
+  /* ─── SECTION HEADER ─── */
+  .sec-header {
+    background: linear-gradient(90deg, var(--blue), var(--mid));
+    color: #fff;
+    border-radius: 10px;
+    padding: .7rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+  }
+  .sec-header i { font-size:1.3rem; }
+  .sec-header h2 { font-size:1.3rem; font-weight:800; margin:0; }
+  .sec-header small { font-size:.75rem; opacity:.8; }
+
+  /* ─── DEFINITION CARD ─── */
+  .def-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-left: 5px solid var(--mid);
+    border-radius: 10px;
+    padding: 1rem 1.4rem;
+  }
+  .def-card .def-title {
+    font-size:.72rem; font-weight:800; text-transform:uppercase;
+    letter-spacing:.1em; color:var(--mid); margin-bottom:.35rem;
+  }
+  .def-card p { font-size:.95rem; margin:0; line-height:1.6; }
+
+  /* ─── CODE BLOCK ─── */
+  pre.code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sky);
+    border-radius: 8px;
+    padding: .9rem 1.2rem;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .82rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    margin: 0;
+    color: var(--navy);
+  }
+  .kw  { color: var(--blue); font-weight:700; }
+  .tp  { color: #1a7a6e; }
+  .cm  { color: var(--muted); font-style:italic; }
+  .str { color: #7a3e00; }
+
+  /* ─── INFO BOXES ─── */
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+  .info-box {
+    background: var(--card-bg);
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    padding:.9rem 1.1rem;
+  }
+  .info-box .ib-title {
+    font-size:.7rem; font-weight:800; text-transform:uppercase;
+    letter-spacing:.09em; margin-bottom:.3rem;
+  }
+  .info-box p { font-size:.88rem; margin:0; line-height:1.5; }
+  .ib-blue  { border-left:4px solid var(--blue);  .ib-title{ color:var(--blue); } }
+  .ib-sky   { border-left:4px solid var(--sky);  }
+  .ib-navy  { border-left:4px solid var(--navy); }
+  .ib-mid   { border-left:4px solid var(--mid);  }
+  .ib-title-blue  { color:var(--blue);  }
+  .ib-title-sky   { color:var(--sky);   }
+  .ib-title-navy  { color:var(--navy);  }
+  .ib-title-mid   { color:var(--mid);   }
+
+  /* ─── ANALOGY BOX ─── */
+  .analogy {
+    background: linear-gradient(90deg,#e8f4fd,#f0f8ff);
+    border:1px solid var(--pale);
+    border-radius:10px;
+    padding:.85rem 1.2rem;
+    display:flex; gap:.9rem; align-items:flex-start;
+  }
+  .analogy i { font-size:1.6rem; color:var(--sky); flex-shrink:0; margin-top:.1rem; }
+  .analogy p { font-size:.88rem; margin:0; line-height:1.55; }
+
+  /* ─── QUESTION SLIDE ─── */
+  .slide-question .slide-body {
+    background: linear-gradient(135deg, #e8f4fd 0%, #d0eafa 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1.4rem;
+  }
+  .q-icon { font-size:4rem; color:var(--mid); }
+  .q-title { font-size:1.7rem; font-weight:900; color:var(--navy); }
+  .q-text  { font-size:1.05rem; color:var(--text); max-width:680px; line-height:1.6; }
+  .q-hint  { font-size:.85rem; color:var(--muted); font-style:italic; }
+  .q-badge {
+    background:var(--mid); color:#fff;
+    border-radius:20px; padding:5px 20px;
+    font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em;
+  }
+
+  /* ─── ANSWER SLIDE ─── */
+  .slide-answer .slide-body {
+    background: linear-gradient(135deg, #d4edda 0%, #e8f4fd 100%);
+  }
+  .answer-badge {
+    background:var(--correct); color:#fff;
+    border-radius:20px; padding:5px 20px;
+    font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em;
+    display:inline-block; margin-bottom:.5rem;
+  }
+  .answer-highlight {
+    background: #fff;
+    border:2px solid var(--correct);
+    border-left:6px solid var(--correct);
+    border-radius:10px;
+    padding:1rem 1.4rem;
+  }
+  .answer-highlight p { font-size:.97rem; margin:0; line-height:1.6; }
+
+  /* ─── MEMORY DIAGRAM ─── */
+  .mem-diagram {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    justify-content: center;
+    padding: .5rem;
+  }
+  .mem-box {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 180px;
+    box-shadow: 0 2px 12px rgba(26,95,168,.1);
+  }
+  .mem-box-title {
+    background: var(--blue);
+    color: #fff;
+    text-align: center;
+    padding: .4rem;
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .mem-row {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    font-size: .8rem;
+  }
+  .mem-row:last-child { border-bottom: none; }
+  .mem-label { background:var(--card-bg); padding:.4rem .7rem; min-width:90px; font-weight:700; border-right:1px solid var(--border); }
+  .mem-val   { padding:.4rem .7rem; color:var(--mid); font-family:'Source Code Pro',monospace; }
+
+  /* ─── CRC CARD ─── */
+  .crc-wrap { display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; }
+  .crc-card {
+    border:2px solid var(--blue);
+    border-radius:10px;
+    overflow:hidden;
+    min-width:220px;
+    box-shadow:0 4px 16px rgba(26,95,168,.12);
+  }
+  .crc-name {
+    background:var(--blue); color:#fff;
+    text-align:center; padding:.5rem 1rem;
+    font-weight:800; font-size:1rem;
+  }
+  .crc-body { display:flex; }
+  .crc-resp {
+    flex:1; padding:.7rem .9rem;
+    border-right:1px solid var(--border);
+    background:var(--card-bg);
+  }
+  .crc-collab { padding:.7rem .9rem; background:var(--white); min-width:90px; }
+  .crc-sub { font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:.35rem; }
+  .crc-item { font-size:.8rem; line-height:1.6; }
+
+  /* ─── UML BOX ─── */
+  .uml-class {
+    border:2px solid var(--blue);
+    border-radius:8px;
+    overflow:hidden;
+    min-width:200px;
+    font-size:.8rem;
+    box-shadow:0 3px 12px rgba(26,95,168,.1);
+  }
+  .uml-name { background:var(--navy); color:#fff; text-align:center; padding:.45rem; font-weight:800; }
+  .uml-section { padding:.5rem .8rem; border-top:1px solid var(--border); background:var(--card-bg); }
+  .uml-section p { margin:0; line-height:1.7; font-family:'Source Code Pro',monospace; }
+
+  /* ─── QUIZ ─── */
+  #quiz-section { display:flex; flex-direction:column; height:100%; }
+  .quiz-topbar { background:var(--navy); color:#fff; padding:.7rem 1.5rem; display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid var(--sky); flex-shrink:0; }
+  .quiz-body { flex:1; overflow-y:auto; padding:1.5rem 3rem; display:flex; flex-direction:column; gap:1.2rem; }
+  .qcard {
+    background:#fff; border:1.5px solid var(--border);
+    border-radius:12px; padding:1.2rem 1.5rem;
+    box-shadow:0 2px 10px rgba(26,95,168,.07);
+  }
+  .qcard .qnum { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--mid); margin-bottom:.4rem; }
+  .qcard .qtext { font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:.9rem; }
+  .opt-btn {
+    display:block; width:100%; text-align:left;
+    background:var(--card-bg); border:1.5px solid var(--border);
+    border-radius:8px; padding:.55rem 1rem;
+    margin-bottom:.5rem; cursor:pointer;
+    font-size:.9rem; font-family:'Nunito',sans-serif; font-weight:600;
+    color:var(--text); transition:all .18s;
+  }
+  .opt-btn:hover:not(:disabled) { background:var(--pale); border-color:var(--sky); }
+  .opt-btn.correct { background:#d4edda; border-color:var(--correct); color:var(--correct); }
+  .opt-btn.wrong   { background:#fde8e8; border-color:var(--wrong);   color:var(--wrong);   }
+  .opt-btn:disabled { cursor:default; opacity:.85; }
+  .qfeedback { font-size:.83rem; margin-top:.3rem; font-weight:700; display:none; }
+  .qfeedback.show { display:block; }
+  .qfeedback.ok  { color:var(--correct); }
+  .qfeedback.bad { color:var(--wrong); }
+
+  /* ─── RESULT ─── */
+  .result-wrap { text-align:center; padding:1.5rem; }
+  .result-score { font-size:3.5rem; font-weight:900; color:var(--blue); }
+  .result-label { font-size:1rem; color:var(--muted); font-weight:600; }
+  .result-summary { background:var(--card-bg); border:1.5px solid var(--border); border-radius:12px; padding:1.2rem; margin-top:1rem; text-align:left; }
+  .rs-item { display:flex; align-items:center; gap:.6rem; margin-bottom:.5rem; font-size:.88rem; }
+  .rs-item i { font-size:1rem; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar-outer {
+    background: rgba(255,255,255,.2);
+    border-radius:3px; height:4px;
+    width:200px;
+  }
+  .progress-bar-inner {
+    background:var(--sky); height:100%;
+    border-radius:3px; transition:width .3s;
+  }
+
+  /* ─── BOTTOM NAV ─── */
+  .bottomnav {
+    background: var(--navy);
+    border-top: 2px solid var(--sky);
+    padding: .6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    background: rgba(255,255,255,.1);
+    border: 1.5px solid rgba(255,255,255,.25);
+    color: #fff;
+    border-radius: 8px;
+    padding: .45rem 1.3rem;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .18s;
+    font-family:'Nunito',sans-serif;
+    display:flex; align-items:center; gap:.5rem;
+  }
+  .nav-btn:hover { background:var(--mid); border-color:var(--mid); }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .slide-dots { display:flex; gap:.4rem; flex-wrap:wrap; max-width:400px; justify-content:center; }
+  .dot {
+    width:8px; height:8px; border-radius:50%;
+    background:rgba(255,255,255,.25); cursor:pointer;
+    transition:background .2s;
+  }
+  .dot.active { background:var(--sky); }
+  .dot.question-dot { background:rgba(94,179,240,.4); }
+  .dot.quiz-dot     { background:rgba(41,128,217,.4); }
+
+  /* ─── TOOLTIP HIGHLIGHT ─── */
+  .hl { background:var(--pale); border-radius:3px; padding:1px 5px; font-weight:700; color:var(--navy); }
+
+  /* ─── LIST STYLED ─── */
+  ul.sl { list-style:none; padding:0; margin:0; }
+  ul.sl li { padding:.28rem 0 .28rem 1.5rem; position:relative; font-size:.9rem; line-height:1.5; }
+  ul.sl li::before { content:"▸"; position:absolute; left:0; color:var(--mid); font-size:.8rem; top:.35rem; }
+
+  /* ─── PRINCIPLE BOX ─── */
+  .principle-box {
+    background: linear-gradient(90deg,var(--navy),var(--blue));
+    color:#fff; border-radius:12px; padding:1rem 1.5rem;
+  }
+  .principle-box .pb-q { font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.09em; color:var(--sky); margin-bottom:.3rem; }
+  .principle-box .pb-a { font-size:1rem; font-weight:700; }
+
+  /* ─── SCROLLBAR FIX ─── */
+  .quiz-body::-webkit-scrollbar { width:6px; }
+  .quiz-body::-webkit-scrollbar-thumb { background:var(--pale); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 1 – TÍTULO
+════════════════════════════════════════════════ -->
+<div class="slide slide-title active" id="s0">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-code me-1"></i>POO II</span>
+    <span class="slide-counter">Semana 2</span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeIn">
+    <div class="title-badge"><i class="fa fa-layer-group me-1"></i>Programación Orientada a Objetos II</div>
+    <h1 class="title-main">Objetos, Clases<br>y Mensajes</h1>
+    <p class="title-sub">Abstracción · Encapsulación · Estado · Comportamiento<br>Mensajes · Ciclo de vida · Patrones Expert y SRP</p>
+    <div class="title-icons">
+      <i class="fa fa-cube"></i>
+      <i class="fa fa-envelope"></i>
+      <i class="fa fa-diagram-project"></i>
+      <i class="fa fa-memory"></i>
+      <i class="fa fa-shield-halved"></i>
+    </div>
+    <p style="font-size:.78rem;color:var(--pale);margin-top:.5rem;">Basado en el material de la semana 2 · C# como lenguaje de referencia</p>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" disabled><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots" id="dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 2 – ABSTRACCIÓN (concepto)
+════════════════════════════════════════════════ -->
+<div class="slide" id="s1">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-filter me-1"></i>Abstracción</span>
+    <span class="slide-counter">2 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-filter"></i>
+      <div><h2>Abstracción</h2><small>El arte de simplificar la complejidad</small></div>
+    </div>
+    <div class="def-card">
+      <div class="def-title"><i class="fa fa-bookmark me-1"></i>Definición</div>
+      <p>Una <strong>abstracción</strong> expresa las <strong>características esenciales</strong> de un objeto, que lo distinguen de todos los demás tipos de objetos, y que provee límites conceptuales claramente definidos, relativos a la <strong>perspectiva del usuario</strong>.</p>
+    </div>
+    <div class="analogy">
+      <i class="fa fa-map"></i>
+      <p>Pensá en <strong>Google Maps</strong>: tiene un mapa de tráfico, uno aéreo y uno de terreno. Ninguno tiene <em>todos</em> los detalles del mundo real, pero cada uno resalta los aspectos relevantes para su propósito. Eso es exactamente la abstracción en software.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-eye me-1"></i>¿Para qué sirve?</div>
+        <p>Para manejar la complejidad del mundo real, seleccionando sólo las propiedades relevantes para el problema que queremos resolver.</p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-lightbulb me-1"></i>Clave</div>
+        <p>La misma entidad (ej. una persona) puede tener abstracciones <em>diferentes</em> según el sistema: una app de RRHH y una app médica abstraen cosas distintas de una persona.</p>
+      </div>
+    </div>
+    <ul class="sl">
+      <li>El mundo real es complejo —como un fractal: cuanto más lo analizas, más detalle encontrás.</li>
+      <li>La abstracción <strong>filtra</strong>: nos quedamos con lo que importa y descartamos lo que no.</li>
+      <li>Es el fundamento del modelado orientado a objetos.</li>
+    </ul>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots" id="dots1"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 3 – ABSTRACCIÓN (ejemplo)
+════════════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-filter me-1"></i>Abstracción</span>
+    <span class="slide-counter">3 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-person"></i>
+      <div><h2>Abstracción en Código</h2><small>Ejemplo: clase Person</small></div>
+    </div>
+    <p style="font-size:.93rem;">De una persona nos podemos quedar con lo que importa para <em>nuestro</em> sistema. Aquí elegimos: <span class="hl">nombre</span>, <span class="hl">apellido</span> y la capacidad de <span class="hl">saludar a otra persona</span>.</p>
+    <pre class="code-block"><span class="cm">// Abstracción de una persona para nuestro sistema</span>
+<span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="kw">public string</span> Name       { <span class="kw">get</span>; <span class="kw">set</span>; }  <span class="cm">// ← característica esencial elegida</span>
+    <span class="kw">public string</span> FamilyName { <span class="kw">get</span>; <span class="kw">set</span>; }  <span class="cm">// ← característica esencial elegida</span>
+
+    <span class="cm">// Comportamiento relevante para nuestro modelo</span>
+    <span class="kw">public void</span> SayHiTo(<span class="tp">Person</span> person)
+    {
+        Console.WriteLine(<span class="str">"Hola "</span> + person.Name + <span class="str">", soy "</span> + <span class="kw">this</span>.Name);
+    }
+}</pre>
+    <div class="info-grid">
+      <div class="info-box ib-mid">
+        <div class="ib-title ib-title-mid"><i class="fa fa-check-circle me-1"></i>Lo que SÍ incluimos</div>
+        <ul class="sl" style="margin-top:.2rem;">
+          <li>Nombre y apellido</li>
+          <li>Capacidad de saludar</li>
+        </ul>
+      </div>
+      <div class="info-box ib-navy">
+        <div class="ib-title ib-title-navy"><i class="fa fa-xmark me-1"></i>Lo que NO incluimos</div>
+        <ul class="sl" style="margin-top:.2rem;">
+          <li>Altura, color de ojos</li>
+          <li>Historia clínica, domicilio…</li>
+          <li>(no relevantes para este sistema)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="analogy">
+      <i class="fa fa-scissors"></i>
+      <p><strong>Regla práctica:</strong> una buena abstracción incluye <em>lo mínimo necesario</em> para que los objetos puedan cumplir sus responsabilidades. Ni más, ni menos.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 4 – ENCAPSULACIÓN
+════════════════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-lock me-1"></i>Encapsulación</span>
+    <span class="slide-counter">4 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-lock"></i>
+      <div><h2>Encapsulación</h2><small>Ocultar los detalles que no importan</small></div>
+    </div>
+    <div class="def-card">
+      <div class="def-title"><i class="fa fa-bookmark me-1"></i>Definición</div>
+      <p>La <strong>encapsulación</strong> es el proceso de <strong>ocultar todos los detalles de un objeto</strong> que no contribuyen a sus características esenciales. Es sinónimo de <strong>escondimiento de información</strong>.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-shield me-1"></i>¿Qué oculta?</div>
+        <p>Los <strong>atributos privados</strong> y la <strong>implementación interna</strong> de los métodos. Otros objetos no saben <em>cómo</em> está implementado algo, solo saben <em>qué</em> pueden pedirle.</p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-plug me-1"></i>¿Qué expone?</div>
+        <p>Solo la <strong>interfaz pública</strong>: los métodos y propiedades que otros objetos necesitan usar. El "contrato" que la clase ofrece al mundo.</p>
+      </div>
+    </div>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="kw">private string</span> name;         <span class="cm">// ← privado, nadie accede directamente</span>
+    <span class="kw">private string</span> familyName;   <span class="cm">// ← privado</span>
+
+    <span class="kw">public string</span> Name {           <span class="cm">// ← público: acceso controlado</span>
+        <span class="kw">get</span> { <span class="kw">return this</span>.name; }
+        <span class="kw">set</span> { <span class="kw">this</span>.name = value; }
+    }
+}</pre>
+    <div class="analogy">
+      <i class="fa fa-tv"></i>
+      <p>Con el televisor usás el <strong>control remoto</strong> (interfaz pública) sin necesidad de saber nada sobre los circuitos internos (implementación encapsulada). Si el fabricante cambia los circuitos, seguís usando el mismo control.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 5 – PROGRAMA OO / ESTADO / COMPORTAMIENTO
+════════════════════════════════════════════════ -->
+<div class="slide" id="s4">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-cubes me-1"></i>Estado y Comportamiento</span>
+    <span class="slide-counter">5 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-cubes"></i>
+      <div><h2>Programa OO · Estado · Comportamiento</h2><small>Cómo vive un objeto</small></div>
+    </div>
+    <div class="def-card" style="border-left-color:var(--navy)">
+      <div class="def-title"><i class="fa fa-diagram-project me-1"></i>Programa Orientado a Objetos</div>
+      <p>En un programa OO los <strong>datos y la lógica</strong> están distribuidos en forma <strong>razonablemente equilibrada</strong> entre un conjunto de objetos que <strong>colaboran</strong> solicitándose y prestándose servicios mediante el <strong>envío de mensajes</strong>.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-database me-1"></i>Estado</div>
+        <p>Los <strong>datos</strong> que un objeto conoce, almacenados en sus <strong>atributos</strong>. Cada dato conocido = un atributo.<br><br>Ejemplo: <code style="font-size:.83rem;">Name = "Luis"</code>, <code style="font-size:.83rem;">Age = 37</code></p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-bolt me-1"></i>Comportamiento</div>
+        <p>Las <strong>acciones</strong> que un objeto puede realizar, implementadas en sus <strong>métodos</strong>.<br><br>Ejemplo: <code style="font-size:.83rem;">SayHiTo()</code>, <code style="font-size:.83rem;">IsAdult()</code></p>
+      </div>
+    </div>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="cm">// ── Estado ──</span>
+    <span class="kw">public string</span> Name       { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> FamilyName { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>    Age        { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// ── Comportamiento ──</span>
+    <span class="kw">public bool</span> IsAdult()  => <span class="kw">this</span>.Age >= 18;
+    <span class="kw">public void</span> SayHiTo(<span class="tp">Person</span> p) => Console.WriteLine(<span class="str">$"Hola {p.Name}, soy {this.Name}"</span>);
+}</pre>
+    <div class="analogy">
+      <i class="fa fa-balance-scale"></i>
+      <p>En un buen diseño OO <strong>ningún objeto carga solo</strong> con todos los datos y toda la lógica. La distribución equilibrada hace el sistema más <em>mantenible</em> y <em>extensible</em>.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 6 – MENSAJES Y SELECTORES
+════════════════════════════════════════════════ -->
+<div class="slide" id="s5">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-envelope me-1"></i>Mensajes</span>
+    <span class="slide-counter">6 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-envelope"></i>
+      <div><h2>Mensajes y Selectores</h2><small>La única forma de comunicación entre objetos</small></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-paper-plane me-1"></i>Mensaje</div>
+        <p>Los objetos se comunican <strong>exclusivamente</strong> mediante mensajes. El <strong>emisor</strong> quiere consultar/cambiar el estado o activar cierto comportamiento del <strong>receptor</strong>.</p>
+      </div>
+      <div class="info-box ib-mid">
+        <div class="ib-title ib-title-mid"><i class="fa fa-tag me-1"></i>Selector</div>
+        <p>El <strong>selector</strong> es el nombre del método que el emisor desea que el receptor ejecute. En <code style="font-size:.83rem;">lucho.SayHiTo(chino)</code> el selector es <span class="hl">SayHiTo</span>.</p>
+      </div>
+    </div>
+    <pre class="code-block"><span class="tp">Person</span> lucho = <span class="kw">new</span> <span class="tp">Person</span>(<span class="str">"Luis"</span>, <span class="str">"Suárez"</span>);
+<span class="tp">Person</span> chino  = <span class="kw">new</span> <span class="tp">Person</span>(<span class="str">"Sergio"</span>, <span class="str">"Rochet"</span>);
+
+<span class="cm">// Emisor: chino  |  Receptor: lucho  |  Selector: SayHiTo</span>
+chino.SayHiTo(lucho);   <span class="cm">// → "Hola Luis, soy Sergio"</span>
+
+<span class="cm">// El emisor no sabe CÓMO está implementado SayHiTo en lucho</span>
+<span class="cm">// Solo sabe QUÉ pedirle → eso es encapsulación</span></pre>
+    <div class="info-grid">
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-eye-slash me-1"></i>Estado no accesible directamente</div>
+        <p>Para conocer un atributo de otro objeto, debés enviarle un mensaje. El receptor puede devolver un valor guardado <em>o calcularlo</em> — el emisor no sabe la diferencia.</p>
+      </div>
+      <div class="info-box ib-navy">
+        <div class="ib-title ib-title-navy"><i class="fa fa-keyboard me-1"></i>this</div>
+        <p>Dentro de un método, la palabra clave <code>this</code> referencia al <strong>objeto que está ejecutando</strong> ese método en ese momento.</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 7 – PÚBLICO/PRIVADO · CLASE · IDENTIDAD/IGUALDAD
+════════════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-users me-1"></i>Clase e Identidad</span>
+    <span class="slide-counter">7 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-users"></i>
+      <div><h2>Clase · Público/Privado · Identidad · Igualdad</h2></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-shapes me-1"></i>Clase</div>
+        <p>Una clase es una <strong>plantilla o molde</strong> para un conjunto de objetos que comparten los mismos atributos, métodos, relaciones y semántica.<br>Un objeto es una <strong>instancia</strong> de una clase.</p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-unlock me-1"></i>Público / Privado</div>
+        <p><strong>public</strong>: accesible a cualquier objeto de cualquier clase.<br><strong>private</strong>: accesible solo a objetos de la misma clase en que se define.</p>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-mid">
+        <div class="ib-title ib-title-mid"><i class="fa fa-equals me-1"></i>Igualdad</div>
+        <p>Dos objetos son <strong>iguales</strong> cuando son de la misma clase y tienen los <strong>mismos valores de atributos</strong>.<br><small style="color:var(--muted)">En C# se implementa sobrescribiendo Equals()</small></p>
+      </div>
+      <div class="info-box ib-navy">
+        <div class="ib-title ib-title-navy"><i class="fa fa-fingerprint me-1"></i>Identidad</div>
+        <p>Cada objeto tiene una <strong>existencia separada</strong> de los demás, aunque tenga los mismos atributos. Dos objetos iguales no son el mismo objeto.</p>
+      </div>
+    </div>
+    <pre class="code-block"><span class="tp">Person</span> chino   = <span class="kw">new</span> <span class="tp">Person</span>(<span class="str">"Sergio"</span>, <span class="str">"Rochet"</span>);
+<span class="tp">Person</span> arquero = <span class="kw">new</span> <span class="tp">Person</span>(<span class="str">"Sergio"</span>, <span class="str">"Rochet"</span>);
+
+Console.WriteLine(chino == arquero);          <span class="cm">// false  ← distinta identidad</span>
+Console.WriteLine(chino.Equals(arquero));     <span class="cm">// false  (sin sobrescribir)</span>
+
+<span class="tp">Person</span> goleador = chino;    <span class="cm">// misma referencia</span>
+Console.WriteLine(chino == goleador);         <span class="cm">// true   ← mismo objeto</span></pre>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 8 – PREGUNTA 1
+════════════════════════════════════════════════ -->
+<div class="slide slide-question" id="s7">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-question me-1"></i>Reflexión</span>
+    <span class="slide-counter">8 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__bounceIn">
+    <div class="q-badge"><i class="fa fa-lightbulb me-1"></i>Pregunta para el estudiante</div>
+    <div class="q-icon"><i class="fa fa-comments"></i></div>
+    <div class="q-title">¿Abstracción vs Encapsulación?</div>
+    <div class="q-text">
+      Tenemos una clase <code style="font-size:1rem;background:var(--pale);padding:2px 8px;border-radius:4px;">BankAccount</code>.<br><br>
+      <strong>¿Cuál de estas decisiones corresponde a la abstracción<br>y cuál a la encapsulación?</strong><br><br>
+      <em>a)</em> Decidir que la cuenta tiene <code>balance</code>, <code>owner</code> y puede <code>withdraw()</code><br>
+      <em>b)</em> Hacer que el campo <code>balance</code> sea <code>private</code> y solo sea modificable a través de métodos
+    </div>
+    <div class="q-hint"><i class="fa fa-hourglass-half me-1"></i>Pensá antes de pasar a la siguiente diapositiva</div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Ver respuesta <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 9 – RESPUESTA 1
+════════════════════════════════════════════════ -->
+<div class="slide slide-answer" id="s8">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-check me-1"></i>Respuesta</span>
+    <span class="slide-counter">9 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header" style="background:linear-gradient(90deg,var(--correct),#27ae60)">
+      <i class="fa fa-check-circle"></i>
+      <div><h2>Respuesta</h2><small>Abstracción vs Encapsulación</small></div>
+    </div>
+    <span class="answer-badge"><i class="fa fa-check me-1"></i>Respuesta</span>
+    <div class="answer-highlight">
+      <p><strong>a) Abstracción:</strong> decidir qué características esenciales incluir en la clase (<code>balance</code>, <code>owner</code>, <code>withdraw()</code>) es una decisión de <em>abstracción</em>. Estamos filtrando el mundo real y eligiendo lo relevante para nuestro sistema.</p>
+    </div>
+    <div style="height:.5rem;"></div>
+    <div class="answer-highlight">
+      <p><strong>b) Encapsulación:</strong> hacer <code>balance</code> privado y controlarlo con métodos es <em>encapsulación</em>. Ocultamos el detalle de implementación y exponemos solo la interfaz necesaria.</p>
+    </div>
+    <div class="analogy" style="margin-top:.5rem;">
+      <i class="fa fa-lightbulb"></i>
+      <p><strong>Regla nemotécnica:</strong> la abstracción responde <em>"¿qué existe?"</em> y la encapsulación responde <em>"¿quién puede ver qué?"</em>. Trabajan en conjunto pero son conceptos distintos.</p>
+    </div>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">BankAccount</span>  <span class="cm">// ← abstracción: elegimos estas características</span>
+{
+    <span class="kw">private decimal</span> balance;  <span class="cm">// ← encapsulación: ocultamos el saldo directo</span>
+    <span class="kw">public string</span>  Owner  { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public void</span> Withdraw(<span class="kw">decimal</span> amount)  <span class="cm">// ← interfaz pública controlada</span>
+    {
+        <span class="kw">if</span> (amount <= balance) balance -= amount;
+    }
+}</pre>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 10 – CONSTRUCTOR Y CICLO DE VIDA
+════════════════════════════════════════════════ -->
+<div class="slide" id="s9">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-recycle me-1"></i>Ciclo de Vida</span>
+    <span class="slide-counter">10 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-recycle"></i>
+      <div><h2>Constructor y Ciclo de Vida</h2><small>Nacer, vivir y desaparecer</small></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-hammer me-1"></i>Constructor</div>
+        <p>Método especial para <strong>crear e inicializar</strong> nuevas instancias de una clase. En C# tiene el mismo nombre que la clase. Si definimos uno propio, el predeterminado desaparece.</p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-hourglass me-1"></i>Ciclo de vida</div>
+        <p>Va desde que se <strong>asigna memoria</strong> al objeto (con <code>new</code>) hasta que esa memoria <strong>se libera</strong> cuando el garbage collector actúa.</p>
+      </div>
+    </div>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="cm">// Constructor propio: obliga a tener nombre y apellido desde el inicio</span>
+    <span class="kw">public</span> <span class="tp">Person</span>(<span class="kw">string</span> name, <span class="kw">string</span> familyName)
+    {
+        <span class="kw">this</span>.Name       = name;
+        <span class="kw">this</span>.FamilyName = familyName;
+    }
+    <span class="kw">public string</span> Name       { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> FamilyName { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="cm">// Uso: ya no se puede crear una Person sin nombre</span>
+<span class="tp">Person</span> lucho = <span class="kw">new</span> <span class="tp">Person</span>(<span class="str">"Luis"</span>, <span class="str">"Suárez"</span>);
+<span class="cm">// new Person(); ← ERROR: el constructor predeterminado ya no existe</span></pre>
+    <div class="info-grid">
+      <div class="info-box ib-navy">
+        <div class="ib-title ib-title-navy"><i class="fa fa-trash me-1"></i>Destructor / Finalizador</div>
+        <p>En C# el destructor se llama <code>~Person()</code>. Libera recursos (archivos, conexiones) que el objeto abrió en el constructor.</p>
+      </div>
+      <div class="info-box ib-mid">
+        <div class="ib-title ib-title-mid"><i class="fa fa-robot me-1"></i>Garbage Collector</div>
+        <p>El runtime libera automáticamente la memoria de objetos cuando ninguna variable los referencia. En general es transparente para el programador.</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 11 – STACK Y HEAP
+════════════════════════════════════════════════ -->
+<div class="slide" id="s10">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-memory me-1"></i>Memoria</span>
+    <span class="slide-counter">11 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-memory"></i>
+      <div><h2>Stack y Heap</h2><small>Dónde viven variables y objetos</small></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-layer-group me-1"></i>Stack (Pila)</div>
+        <p>Almacena las <strong>variables locales</strong> de cada método y sus parámetros. Las variables existen solo mientras el método se ejecuta; al terminar el método, el espacio se libera automáticamente.</p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-box me-1"></i>Heap (Montículo)</div>
+        <p>Almacena los <strong>objetos creados</strong> con <code>new</code>. Los objetos viven hasta que ninguna variable los referencia. El Garbage Collector los elimina.</p>
+      </div>
+    </div>
+    <div class="mem-diagram">
+      <div class="mem-box">
+        <div class="mem-box-title">Stack</div>
+        <div class="mem-row"><div class="mem-label">lucho</div><div class="mem-val">0xA4F2 →</div></div>
+        <div class="mem-row"><div class="mem-label">goleador</div><div class="mem-val">0xA4F2 →</div></div>
+        <div class="mem-row"><div class="mem-label">colo</div><div class="mem-val">0xB8C1 →</div></div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:2rem;color:var(--sky);"><i class="fa fa-arrow-right"></i></div>
+      <div class="mem-box">
+        <div class="mem-box-title">Heap</div>
+        <div class="mem-row"><div class="mem-label">0xA4F2</div><div class="mem-val">Person "Luis Suárez"</div></div>
+        <div class="mem-row"><div class="mem-label">0xB8C1</div><div class="mem-val">Person "Juan I. Ramírez"</div></div>
+      </div>
+    </div>
+    <pre class="code-block"><span class="tp">Person</span> lucho;              <span class="cm">// variable en stack, valor: null</span>
+lucho = <span class="kw">new</span> <span class="tp">Person</span>(...);   <span class="cm">// objeto en heap, dirección guardada en lucho</span>
+
+<span class="tp">Person</span> goleador = lucho;   <span class="cm">// goleador apunta al MISMO objeto en heap</span>
+Console.WriteLine(lucho == goleador); <span class="cm">// true</span>
+
+lucho = <span class="kw">null</span>;              <span class="cm">// lucho ya no referencia al objeto</span>
+<span class="cm">// goleador sigue referenciando → objeto NO se destruye todavía</span></pre>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 12 – PREGUNTA 2
+════════════════════════════════════════════════ -->
+<div class="slide slide-question" id="s11">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-question me-1"></i>Reflexión</span>
+    <span class="slide-counter">12 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__bounceIn">
+    <div class="q-badge"><i class="fa fa-lightbulb me-1"></i>Pregunta para el estudiante</div>
+    <div class="q-icon"><i class="fa fa-memory"></i></div>
+    <div class="q-title">Stack vs Heap</div>
+    <div class="q-text">
+      Dado el siguiente código, respondé:<br><br>
+      <code style="background:var(--pale);padding:6px 14px;border-radius:6px;font-size:.95rem;display:inline-block;text-align:left;">Person a = new Person("Ana", "López");<br>Person b = a;<br>b.Name = "Beatriz";<br>Console.WriteLine(a.Name);</code><br><br>
+      <strong>¿Qué imprime? ¿Por qué?</strong><br>
+      <em>¿Cuántos objetos Person existen en el heap?</em>
+    </div>
+    <div class="q-hint"><i class="fa fa-hourglass-half me-1"></i>Pensá antes de pasar a la siguiente diapositiva</div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Ver respuesta <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 13 – RESPUESTA 2
+════════════════════════════════════════════════ -->
+<div class="slide slide-answer" id="s12">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-check me-1"></i>Respuesta</span>
+    <span class="slide-counter">13 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header" style="background:linear-gradient(90deg,var(--correct),#27ae60)">
+      <i class="fa fa-check-circle"></i>
+      <div><h2>Respuesta</h2><small>Stack vs Heap – referencias</small></div>
+    </div>
+    <span class="answer-badge"><i class="fa fa-check me-1"></i>Respuesta</span>
+    <div class="answer-highlight">
+      <p>Imprime <strong>"Beatriz"</strong>. Existe <strong>un solo objeto</strong> en el heap.<br><br>
+      <code>b = a</code> <em>no copia el objeto</em>, copia la <strong>dirección de memoria</strong> del objeto. Tanto <code>a</code> como <code>b</code> apuntan al mismo objeto. Cuando <code>b.Name = "Beatriz"</code> modifica ese objeto, el cambio es visible también desde <code>a</code>.</p>
+    </div>
+    <div class="mem-diagram" style="margin-top:.5rem;">
+      <div class="mem-box">
+        <div class="mem-box-title">Stack</div>
+        <div class="mem-row"><div class="mem-label">a</div><div class="mem-val">0xC200 →</div></div>
+        <div class="mem-row"><div class="mem-label">b</div><div class="mem-val">0xC200 →</div></div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:2rem;color:var(--sky);"><i class="fa fa-arrow-right"></i></div>
+      <div class="mem-box">
+        <div class="mem-box-title">Heap</div>
+        <div class="mem-row"><div class="mem-label">0xC200</div><div class="mem-val">Name: "Beatriz"</div></div>
+      </div>
+    </div>
+    <div class="analogy">
+      <i class="fa fa-key"></i>
+      <p>Las variables de referencia son como <strong>llaves de una casa</strong>. <code>b = a</code> hace una copia de la llave, no construye una casa nueva. Los dos tienen acceso a la misma casa.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 14 – PROPIEDADES Y GETTERS/SETTERS
+════════════════════════════════════════════════ -->
+<div class="slide" id="s13">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-sliders me-1"></i>Propiedades</span>
+    <span class="slide-counter">14 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-sliders"></i>
+      <div><h2>Propiedades, Getters y Setters</h2><small>Acceso controlado al estado</small></div>
+    </div>
+    <p style="font-size:.92rem;">Las propiedades son una forma cómoda de declarar el estado. Internamente usan variables de instancia privadas. Los <strong>getters</strong> leen el valor; los <strong>setters</strong> lo escriben.</p>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="cm">// Propiedad automática (getter y setter implícitos)</span>
+    <span class="kw">public string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// Propiedad calculada: solo getter, no tiene setter</span>
+    <span class="kw">public string</span> FullName
+    {
+        <span class="kw">get</span> { <span class="kw">return this</span>.Name + <span class="str">" "</span> + <span class="kw">this</span>.FamilyName; }
+    }
+
+    <span class="cm">// Variable de instancia + getter/setter explícitos</span>
+    <span class="kw">private string</span> familyName;
+    <span class="kw">public string</span> FamilyName {
+        <span class="kw">get</span> { <span class="kw">return this</span>.familyName; }
+        <span class="kw">set</span> { <span class="kw">this</span>.familyName = value; }
+    }
+}</pre>
+    <div class="info-grid">
+      <div class="info-box ib-mid">
+        <div class="ib-title ib-title-mid"><i class="fa fa-eye me-1"></i>Solo getter (read-only)</div>
+        <p>Una propiedad sin setter no puede ser modificada desde afuera. <code>FullName</code> es calculado: combina <code>Name</code> y <code>FamilyName</code>.</p>
+      </div>
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-pencil me-1"></i>null check</div>
+        <p>Antes de usar un objeto recibido como parámetro, siempre verificar <code>if (person != null)</code> para evitar excepciones de referencia nula.</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 15 – MÉTODOS DE CLASE vs INSTANCIA
+════════════════════════════════════════════════ -->
+<div class="slide" id="s14">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-code me-1"></i>Métodos</span>
+    <span class="slide-counter">15 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-code"></i>
+      <div><h2>Métodos de Instancia vs Métodos de Clase</h2></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-cube me-1"></i>Método de instancia</div>
+        <p>Se ejecuta en el contexto de <strong>un objeto concreto</strong>. Tiene acceso a <code>this</code> y puede leer/modificar el estado de ese objeto.<br><br><code>lucho.SayHiTo(chino)</code></p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-shapes me-1"></i>Método de clase (static)</div>
+        <p>Está asociado a la <strong>clase</strong>, no a ningún objeto. No tiene acceso a <code>this</code> ni puede acceder directamente al estado de instancias.<br><br><code>Person.Create("Luis")</code></p>
+      </div>
+    </div>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="cm">// Método de instancia: necesita un objeto Person para ejecutarse</span>
+    <span class="kw">public bool</span> IsAdult() => <span class="kw">this</span>.Age >= 18;
+
+    <span class="cm">// Método de clase (static): se ejecuta sin objeto, para crear uno</span>
+    <span class="kw">public static</span> <span class="tp">Person</span> Create(<span class="kw">string</span> name, <span class="kw">string</span> fn)
+        => <span class="kw">new</span> <span class="tp">Person</span>(name, fn);
+}
+
+<span class="cm">// Uso:</span>
+<span class="tp">Person</span> p = <span class="tp">Person</span>.Create(<span class="str">"Luis"</span>, <span class="str">"Suárez"</span>);  <span class="cm">// método de clase</span>
+<span class="kw">bool</span> adult = p.IsAdult();                      <span class="cm">// método de instancia</span></pre>
+    <div class="analogy">
+      <i class="fa fa-industry"></i>
+      <p>El constructor es el <strong>método de clase más importante</strong>: no puede ser de instancia porque el objeto todavía no existe cuando se lo llama. La <em>fábrica crea el producto</em>; el producto no se crea a sí mismo.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 16 – TARJETAS CRC Y UML
+════════════════════════════════════════════════ -->
+<div class="slide" id="s15">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-diagram-project me-1"></i>CRC y UML</span>
+    <span class="slide-counter">16 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-diagram-project"></i>
+      <div><h2>Tarjetas CRC y Diagramas UML</h2><small>Herramientas de modelado</small></div>
+    </div>
+    <p style="font-size:.88rem;">Las <strong>tarjetas CRC</strong> (Clases · Responsabilidades · Colaboraciones) son una forma simple y efectiva de modelar responsabilidades. Los <strong>diagramas UML</strong> son la notación estándar de la industria.</p>
+    <div class="crc-wrap">
+      <div class="crc-card">
+        <div class="crc-name">Person</div>
+        <div class="crc-body">
+          <div class="crc-resp">
+            <div class="crc-sub">Responsabilidades</div>
+            <div class="crc-item">▸ Conocer nombre</div>
+            <div class="crc-item">▸ Conocer apellido</div>
+            <div class="crc-item">▸ Presentarse a otra persona</div>
+          </div>
+          <div class="crc-collab">
+            <div class="crc-sub">Colabora con</div>
+            <div class="crc-item">▸ Person</div>
+          </div>
+        </div>
+      </div>
+      <div class="crc-card">
+        <div class="crc-name">Program</div>
+        <div class="crc-body">
+          <div class="crc-resp">
+            <div class="crc-sub">Responsabilidades</div>
+            <div class="crc-item">▸ Presentar dos personas</div>
+          </div>
+          <div class="crc-collab">
+            <div class="crc-sub">Colabora con</div>
+            <div class="crc-item">▸ Person</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="uml-class">
+          <div class="uml-name">Person</div>
+          <div class="uml-section">
+            <p>+ Name : string</p>
+            <p>+ FamilyName : string</p>
+            <p>+ Age : int</p>
+          </div>
+          <div class="uml-section">
+            <p>+ SayHiTo(p:Person) : void</p>
+            <p>+ IsAdult() : bool</p>
+            <p>+ FullName : string</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="info-grid" style="margin-top:.3rem;">
+      <div class="info-box ib-mid">
+        <div class="ib-title ib-title-mid"><i class="fa fa-plus me-1"></i>Símbolo + en UML</div>
+        <p><code>+</code> = público. <code>-</code> = privado. <code>#</code> = protegido. Los atributos se escriben <code>nombre : Tipo</code> y los métodos <code>nombre(params) : retorno</code>.</p>
+      </div>
+      <div class="info-box ib-navy">
+        <div class="ib-title ib-title-navy"><i class="fa fa-arrow-right-arrow-left me-1"></i>Dependencia</div>
+        <p>Una línea punteada →  en UML indica que una clase <em>depende</em> de otra (usa una referencia local en algún método).</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 17 – PATRÓN EXPERT
+════════════════════════════════════════════════ -->
+<div class="slide" id="s16">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-star me-1"></i>Expert</span>
+    <span class="slide-counter">17 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-star"></i>
+      <div><h2>Patrón Expert</h2><small>¿A quién asignar la responsabilidad?</small></div>
+    </div>
+    <div class="principle-box">
+      <div class="pb-q"><i class="fa fa-circle-question me-1"></i>Problema</div>
+      <div class="pb-a">¿Cuál es el principio básico para asignar responsabilidades?</div>
+      <div style="margin-top:.6rem;background:rgba(255,255,255,.15);border-radius:8px;padding:.6rem .9rem;">
+        <div class="pb-q" style="color:var(--pale);"><i class="fa fa-lightbulb me-1"></i>Solución</div>
+        <div style="font-size:.95rem;">Asignar la responsabilidad al <strong>experto en los datos</strong>: la clase que tiene los datos necesarios para cumplir esa responsabilidad.</div>
+      </div>
+    </div>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="kw">public int</span> Age { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// Expert: Person tiene Age → Person determina si es mayor de edad</span>
+    <span class="kw">public bool</span> IsAdult() => <span class="kw">this</span>.Age >= 18;
+}</pre>
+    <div class="analogy">
+      <i class="fa fa-user-doctor"></i>
+      <p><strong>Analogía:</strong> si querés saber si un paciente tiene fiebre, le preguntás al <em>médico que tiene la historia clínica</em>, no al recepcionista. El que tiene los datos es el experto.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-box ib-blue">
+        <div class="ib-title ib-title-blue"><i class="fa fa-check me-1"></i>Ventaja</div>
+        <p>Los datos y la lógica que opera sobre ellos se mantienen <strong>juntos en la misma clase</strong>. El diseño queda cohesivo y fácil de mantener.</p>
+      </div>
+      <div class="info-box ib-sky">
+        <div class="ib-title ib-title-sky"><i class="fa fa-triangle-exclamation me-1"></i>Pero no siempre solo Expert</div>
+        <p>Expert tiene un límite: hay casos en que sería aplicable pero va en contra de otros principios, como el SRP que veremos a continuación.</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 18 – SRP
+════════════════════════════════════════════════ -->
+<div class="slide" id="s17">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-shield-halved me-1"></i>SRP</span>
+    <span class="slide-counter">18 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header">
+      <i class="fa fa-shield-halved"></i>
+      <div><h2>Principio de Responsabilidad Única (SRP)</h2><small>Single Responsibility Principle</small></div>
+    </div>
+    <div class="principle-box">
+      <div class="pb-q"><i class="fa fa-quote-left me-1"></i>Enunciado</div>
+      <div class="pb-a">"Nunca debería haber más de una razón para que una clase cambie."</div>
+    </div>
+    <pre class="code-block"><span class="cm">// ❌ MAL: Person sabe calcular IMC → si cambia el criterio, Person cambia</span>
+<span class="kw">public class</span> <span class="tp">Person</span>
+{
+    <span class="kw">public double</span> Weight { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public double</span> Height { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public bool</span> HasOverweight() { ... }  <span class="cm">// viola SRP</span>
+}
+
+<span class="cm">// ✅ BIEN: separamos la responsabilidad de calcular el sobrepeso</span>
+<span class="kw">public static class</span> <span class="tp">OverweightCalculator</span>
+{
+    <span class="kw">public static bool</span> HasOverweight(<span class="tp">Person</span> person)
+    {
+        <span class="kw">double</span> imc = person.Height / Math.Pow(person.Weight, 2);
+        <span class="kw">return</span> imc > 25;
+    }
+}</pre>
+    <div class="info-grid">
+      <div class="info-box ib-mid">
+        <div class="ib-title ib-title-mid"><i class="fa fa-wrench me-1"></i>¿Cuándo aplica?</div>
+        <p>Cuando una responsabilidad podría cambiar por razones <strong>ajenas</strong> a lo que la clase representa. Aquí el criterio de sobrepeso (IMC, %grasa…) puede cambiar, pero <code>Person</code> no debería cambiar por eso.</p>
+      </div>
+      <div class="info-box ib-navy">
+        <div class="ib-title ib-title-navy"><i class="fa fa-scale-balanced me-1"></i>Expert + SRP</div>
+        <p>Expert y SRP pueden <strong>complementarse</strong>: Expert asigna la responsabilidad al que tiene los datos, pero SRP impone que una clase no acumule responsabilidades con razones de cambio diferentes.</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 19 – PREGUNTA 3
+════════════════════════════════════════════════ -->
+<div class="slide slide-question" id="s18">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-question me-1"></i>Reflexión</span>
+    <span class="slide-counter">19 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__bounceIn">
+    <div class="q-badge"><i class="fa fa-lightbulb me-1"></i>Pregunta para el estudiante</div>
+    <div class="q-icon"><i class="fa fa-star"></i></div>
+    <div class="q-title">Expert vs SRP</div>
+    <div class="q-text">
+      Tenemos una clase <code style="font-size:.95rem;background:var(--pale);padding:2px 8px;border-radius:4px;">ShoppingCart</code> que conoce la lista de productos y sus precios.<br><br>
+      Queremos agregar la responsabilidad de <strong>calcular el impuesto total</strong> del carrito.<br><br>
+      <em>¿A qué clase asignaría esta responsabilidad según Expert?</em><br>
+      <em>¿Qué cuestionamiento haría el SRP a esa decisión?</em>
+    </div>
+    <div class="q-hint"><i class="fa fa-hourglass-half me-1"></i>No hay una sola respuesta correcta — argumentá tu posición</div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Ver respuesta <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 20 – RESPUESTA 3
+════════════════════════════════════════════════ -->
+<div class="slide slide-answer" id="s19">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-check me-1"></i>Respuesta</span>
+    <span class="slide-counter">20 / <span class="total-count"></span></span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeInRight">
+    <div class="sec-header" style="background:linear-gradient(90deg,var(--correct),#27ae60)">
+      <i class="fa fa-check-circle"></i>
+      <div><h2>Respuesta</h2><small>Expert vs SRP en ShoppingCart</small></div>
+    </div>
+    <div class="answer-highlight">
+      <p><strong>Expert dice:</strong> <code>ShoppingCart</code> tiene los productos y precios → asignale la responsabilidad del impuesto a ella.</p>
+    </div>
+    <div style="height:.4rem;"></div>
+    <div class="answer-highlight" style="border-color:var(--mid);">
+      <p><strong>SRP cuestiona:</strong> las reglas de impuesto pueden cambiar independientemente de la lógica del carrito. Si el IVA sube de 22% a 24%, o si hay exenciones, <code>ShoppingCart</code> tendría que cambiar por algo que no le concierne.</p>
+    </div>
+    <div style="height:.4rem;"></div>
+    <div class="answer-highlight" style="border-color:var(--blue);">
+      <p><strong>Buena solución:</strong> crear una clase <code>TaxCalculator</code> que recibe el carrito y aplica las reglas fiscales. El carrito sabe de productos; el calculador sabe de impuestos.</p>
+    </div>
+    <pre class="code-block"><span class="kw">public class</span> <span class="tp">TaxCalculator</span>
+{
+    <span class="kw">public decimal</span> Calculate(<span class="tp">ShoppingCart</span> cart)
+        => cart.Total * 0.22m;   <span class="cm">// lógica impositiva aislada</span>
+}</pre>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <div class="slide-dots"></div>
+    <button class="nav-btn" onclick="nextSlide()">Ir al Cuestionario <i class="fa fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 21 – QUIZ
+════════════════════════════════════════════════ -->
+<div class="slide" id="s20">
+  <div id="quiz-section">
+    <div class="quiz-topbar">
+      <div style="display:flex;align-items:center;gap:.8rem;">
+        <i class="fa fa-trophy" style="font-size:1.2rem;color:var(--sky);"></i>
+        <div>
+          <div style="font-weight:800;font-size:1rem;">Cuestionario Final</div>
+          <div style="font-size:.73rem;color:var(--sky);">Objetos, Clases y Mensajes · POO II</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:.78rem;color:var(--sky);" id="quiz-progress-label">0 / 10 respondidas</div>
+        <div class="progress-bar-outer" style="margin-top:.3rem;">
+          <div class="progress-bar-inner" id="quiz-progress-bar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="quiz-body" id="quiz-body">
+      <!-- preguntas inyectadas por JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+  SLIDE 22 – RESULTADO
+════════════════════════════════════════════════ -->
+<div class="slide" id="s21">
+  <div class="topbar">
+    <span class="course-tag"><i class="fa fa-chart-bar me-1"></i>Resultado</span>
+    <span class="slide-counter">Resultado Final</span>
+  </div>
+  <div class="slide-body animate__animated animate__fadeIn" id="result-body" style="align-items:center;justify-content:center;">
+    <!-- inyectado por JS -->
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="restartQuiz()"><i class="fa fa-rotate-left me-1"></i> Reintentar quiz</button>
+    <div></div>
+    <button class="nav-btn" onclick="goToSlide(0)"><i class="fa fa-house me-1"></i> Inicio</button>
+  </div>
+</div>
+
+</div><!-- #deck -->
+
+<!-- ════════════════════════════════════════ SCRIPTS ════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.2/sweetalert2.all.min.js"></script>
+
+<script>
+// ─── SLIDE ENGINE ───────────────────────────────────────────
+const SLIDES = Array.from(document.querySelectorAll('.slide'));
+const TOTAL  = SLIDES.length;
+let current  = 0;
+
+function updateCounters(){
+  document.querySelectorAll('.total-count').forEach(el => el.textContent = TOTAL);
+}
+
+function goToSlide(n){
+  SLIDES[current].classList.remove('active');
+  current = Math.max(0, Math.min(n, TOTAL-1));
+  const sl = SLIDES[current];
+  sl.classList.add('active');
+  // re-trigger animation
+  const body = sl.querySelector('.slide-body');
+  if(body){ body.classList.remove('animate__fadeInRight','animate__bounceIn','animate__fadeIn');
+    void body.offsetWidth;
+    if(sl.classList.contains('slide-question')) body.classList.add('animate__bounceIn');
+    else body.classList.add('animate__fadeInRight');
+  }
+  // render quiz on quiz slide
+  if(current === SLIDES.findIndex(s=>s.id==='s20')) renderQuiz();
+  // render result
+  if(current === SLIDES.findIndex(s=>s.id==='s21')) renderResult();
+}
+
+function nextSlide(){ goToSlide(current+1); }
+function prevSlide(){ goToSlide(current-1); }
+
+updateCounters();
+
+// ─── AUDIO ──────────────────────────────────────────────────
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  if(type==='correct'){
+    osc.type='sine';
+    osc.frequency.setValueAtTime(660,audioCtx.currentTime);
+    osc.frequency.setValueAtTime(880,audioCtx.currentTime+0.1);
+    gain.gain.setValueAtTime(0.18,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);
+    osc.start(); osc.stop(audioCtx.currentTime+0.5);
+  } else {
+    osc.type='sawtooth';
+    osc.frequency.setValueAtTime(330,audioCtx.currentTime);
+    osc.frequency.setValueAtTime(220,audioCtx.currentTime+0.15);
+    gain.gain.setValueAtTime(0.12,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);
+    osc.start(); osc.stop(audioCtx.currentTime+0.5);
+  }
+}
+
+// ─── QUIZ DATA ───────────────────────────────────────────────
+const QUESTIONS = [
+  {
+    q: "¿Qué es la abstracción en POO?",
+    opts: [
+      "Ocultar los atributos privados de una clase",
+      "Expresar las características esenciales de un objeto, relativas a la perspectiva del usuario",
+      "Distribuir datos y lógica entre objetos",
+      "El proceso de crear instancias de una clase"
+    ],
+    ans: 1,
+    exp: "La abstracción selecciona las características esenciales de un objeto según la perspectiva del sistema que se modela. No se trata de ocultar datos (eso es encapsulación), sino de elegir qué incluir."
+  },
+  {
+    q: "¿Cuál es la diferencia clave entre abstracción y encapsulación?",
+    opts: [
+      "No hay diferencia, son sinónimos",
+      "La abstracción oculta datos; la encapsulación los expone",
+      "La abstracción decide qué características modelar; la encapsulación oculta los detalles de implementación",
+      "La encapsulación es solo para atributos; la abstracción es solo para métodos"
+    ],
+    ans: 2,
+    exp: "La abstracción responde '¿qué existe en mi modelo?' y la encapsulación responde '¿quién puede acceder a qué?'. Son complementarias pero conceptualmente distintas."
+  },
+  {
+    q: "En un programa OO, ¿cómo se comunican los objetos?",
+    opts: [
+      "Compartiendo variables globales",
+      "Accediendo directamente a los atributos de otros objetos",
+      "Únicamente mediante el envío de mensajes",
+      "A través del garbage collector"
+    ],
+    ans: 2,
+    exp: "Los objetos se comunican exclusivamente mediante mensajes. El emisor no puede acceder directamente al estado del receptor; debe solicitarlo enviando un mensaje."
+  },
+  {
+    q: "Dado: Person a = new Person('Ana','López'); Person b = a; b.Name = 'Beatriz'; ¿Qué imprime Console.WriteLine(a.Name)?",
+    opts: [
+      "Ana",
+      "Beatriz",
+      "null",
+      "Error de compilación"
+    ],
+    ans: 1,
+    exp: "b = a copia la dirección de memoria del objeto, no el objeto. Ambas variables apuntan al mismo objeto en el heap. Al modificar b.Name también se modifica el objeto al que apunta a."
+  },
+  {
+    q: "¿Qué es el 'selector' de un mensaje?",
+    opts: [
+      "El objeto que envía el mensaje",
+      "El objeto que recibe el mensaje",
+      "El nombre del método que el emisor desea que ejecute el receptor",
+      "El valor de retorno del método"
+    ],
+    ans: 2,
+    exp: "El selector es el nombre del método al que hace referencia el mensaje. En lucho.SayHiTo(chino), el selector es 'SayHiTo'."
+  },
+  {
+    q: "¿Dónde se almacenan los objetos creados con 'new'?",
+    opts: [
+      "En el Stack (pila)",
+      "En el Heap (montículo)",
+      "En el registro del procesador",
+      "En las variables de clase"
+    ],
+    ans: 1,
+    exp: "Los objetos creados con 'new' se almacenan en el Heap. Las variables locales (que contienen referencias a esos objetos) se almacenan en el Stack."
+  },
+  {
+    q: "Según el patrón Expert, ¿a quién se asigna una responsabilidad?",
+    opts: [
+      "Siempre a la clase que tiene menos métodos",
+      "A la clase experta en los datos necesarios para cumplir esa responsabilidad",
+      "A la clase Program porque es el punto de entrada",
+      "Siempre a una clase nueva independiente"
+    ],
+    ans: 1,
+    exp: "Expert establece asignar la responsabilidad a la clase que ya tiene los datos necesarios para cumplirla. Así los datos y la lógica que opera sobre ellos quedan juntos."
+  },
+  {
+    q: "¿Cuándo viola el SRP una clase?",
+    opts: [
+      "Cuando tiene más de 10 métodos",
+      "Cuando tiene atributos privados",
+      "Cuando tiene más de una razón para cambiar",
+      "Cuando implementa interfaces"
+    ],
+    ans: 2,
+    exp: "El SRP dice: 'nunca debería haber más de una razón para que una clase cambie'. Si una clase cambia por distintos motivos (lógica de negocio, reglas fiscales, formato de presentación), viola el SRP."
+  },
+  {
+    q: "¿Cuál es la diferencia entre identidad e igualdad de objetos?",
+    opts: [
+      "Son lo mismo en C#",
+      "Identidad: dos objetos con mismos valores de atributos. Igualdad: mismo objeto en memoria",
+      "Igualdad: misma clase y mismos valores. Identidad: existencia separada aunque los atributos sean iguales",
+      "Identidad se usa solo con tipos primitivos"
+    ],
+    ans: 2,
+    exp: "Igualdad: misma clase + mismos valores de atributos. Identidad: el objeto existe como entidad separada independientemente de sus valores. Dos objetos iguales (==) apuntan al mismo lugar; dos objetos con igualdad de valor pueden estar en distintas direcciones de memoria."
+  },
+  {
+    q: "¿Por qué el constructor no puede ser un método de instancia?",
+    opts: [
+      "Por convención del lenguaje, pero podría serlo",
+      "Porque los constructores son siempre privados",
+      "Porque el objeto todavía no existe cuando se invoca el constructor",
+      "Porque los métodos de instancia no pueden retornar objetos"
+    ],
+    ans: 2,
+    exp: "Un método de instancia necesita un objeto existente para ejecutarse. El constructor crea ese objeto, por lo que debe ser un método de clase. No puede ser de instancia porque su propósito es crear la instancia."
+  }
+];
+
+// ─── QUIZ STATE ──────────────────────────────────────────────
+let answers = new Array(QUESTIONS.length).fill(null);
+let answered = 0;
+
+function renderQuiz(){
+  const body = document.getElementById('quiz-body');
+  if(body.children.length > 0) return; // ya renderizado
+  body.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'qcard animate__animated animate__fadeInUp';
+    card.style.animationDelay = (qi*0.04)+'s';
+    card.innerHTML = `
+      <div class="qnum"><i class="fa fa-circle-dot me-1"></i>Pregunta ${qi+1} de ${QUESTIONS.length}</div>
+      <div class="qtext">${q.q}</div>
+      ${q.opts.map((o,oi)=>`<button class="opt-btn" id="opt-${qi}-${oi}" onclick="selectAnswer(${qi},${oi})">${String.fromCharCode(65+oi)}) ${o}</button>`).join('')}
+      <div class="qfeedback" id="fb-${qi}"></div>
+    `;
+    body.appendChild(card);
+  });
+
+  // Botón de envío
+  const submitDiv = document.createElement('div');
+  submitDiv.id = 'quiz-submit-wrap';
+  submitDiv.style.cssText = 'text-align:center;padding:1rem 0 2rem;';
+  submitDiv.innerHTML = `<button id="quiz-submit-btn" class="nav-btn" style="background:var(--blue);border-color:var(--blue);padding:.6rem 2rem;font-size:1rem;" onclick="submitQuiz()"><i class="fa fa-paper-plane me-2"></i>Ver resultados</button>`;
+  body.appendChild(submitDiv);
+  updateQuizProgress();
+}
+
+function selectAnswer(qi, oi){
+  if(answers[qi] !== null) return;
+  const q = QUESTIONS[qi];
+  answers[qi] = oi;
+  answered++;
+
+  // Deshabilitar botones
+  q.opts.forEach((_,i) => {
+    const btn = document.getElementById(`opt-${qi}-${i}`);
+    btn.disabled = true;
+    if(i === q.ans)   btn.classList.add('correct');
+    if(i === oi && oi !== q.ans) btn.classList.add('wrong');
+  });
+
+  // Feedback
+  const fb = document.getElementById(`fb-${qi}`);
+  fb.classList.add('show');
+  if(oi === q.ans){
+    fb.classList.add('ok');
+    fb.innerHTML = `<i class="fa fa-check-circle me-1"></i>¡Correcto! ${q.exp}`;
+    playSound('correct');
+  } else {
+    fb.classList.add('bad');
+    fb.innerHTML = `<i class="fa fa-times-circle me-1"></i>Incorrecto. ${q.exp}`;
+    playSound('wrong');
+  }
+  updateQuizProgress();
+}
+
+function updateQuizProgress(){
+  const pct = Math.round((answered/QUESTIONS.length)*100);
+  document.getElementById('quiz-progress-bar').style.width = pct+'%';
+  document.getElementById('quiz-progress-label').textContent = `${answered} / ${QUESTIONS.length} respondidas`;
+}
+
+function submitQuiz(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered > 0){
+    Swal.fire({
+      title: `Quedan ${unanswered} pregunta${unanswered>1?'s':''} sin responder`,
+      text: 'Respondé todas las preguntas antes de ver los resultados.',
+      icon: 'warning',
+      confirmButtonColor: 'var(--blue)',
+      confirmButtonText: 'Volver al cuestionario'
+    });
+    return;
+  }
+  goToSlide(SLIDES.findIndex(s=>s.id==='s21'));
+}
+
+function renderResult(){
+  const correct = answers.filter((a,i)=> a === QUESTIONS[i].ans).length;
+  const total   = QUESTIONS.length;
+  const pct     = Math.round((correct/total)*100);
+  let grade, icon, color;
+  if(pct >= 90){ grade='¡Excelente!';    icon='fa-trophy';      color=var_('--correct'); }
+  else if(pct >= 70){ grade='¡Muy bien!'; icon='fa-star';       color=var_('--mid'); }
+  else if(pct >= 50){ grade='Aprobado';   icon='fa-thumbs-up';  color=var_('--sky'); }
+  else            { grade='A repasar';    icon='fa-book-open';   color=var_('--wrong'); }
+
+  const items = QUESTIONS.map((q,i)=>{
+    const ok = answers[i] === q.ans;
+    return `<div class="rs-item">
+      <i class="fa ${ok?'fa-check-circle':'fa-times-circle'}" style="color:${ok?'var(--correct)':'var(--wrong)'}"></i>
+      <span><strong>P${i+1}:</strong> ${q.q.substring(0,60)}${q.q.length>60?'…':''}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('result-body').innerHTML = `
+    <div class="result-wrap animate__animated animate__zoomIn" style="width:100%;max-width:680px;">
+      <i class="fa ${icon}" style="font-size:3rem;color:${color};margin-bottom:.5rem;"></i>
+      <div class="result-score">${correct} / ${total}</div>
+      <div class="result-label">${grade} · ${pct}% de respuestas correctas</div>
+      <div class="result-summary" style="margin-top:1.2rem;">${items}</div>
+    </div>`;
+}
+
+function var_(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function restartQuiz(){
+  answers = new Array(QUESTIONS.length).fill(null);
+  answered = 0;
+  document.getElementById('quiz-body').innerHTML = '';
+  goToSlide(SLIDES.findIndex(s=>s.id==='s20'));
+}
+</script>
+
+</body>
+</html>

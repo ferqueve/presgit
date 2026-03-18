@@ -581,22 +581,21 @@
                 successMsg: "¡Excelente! Has enviado correctamente el mensaje entre objetos."
             },
             {
-                category: "Ciclo de Vida de Objetos",
-                id: 4,
-                title: "Creación de Objetos (new)",
-                concept: "lifecycle",
-                desc: "Ordena los pasos que ocurren cuando se ejecuta 'new Person()'.",
-                theory: "Cuando usas 'new': 1) Se asigna memoria en heap, 2) Se invoca el constructor, 3) Se retorna la referencia.",
-                interactionType: "ordering",
-                items: [
-                    { text: "Se crea bloque de memoria en heap para el objeto", level: 0 },
-                    { text: "Se invoca el constructor de la clase", level: 1 },
-                    { text: "Se retorna la dirección de memoria a la variable", level: 2 },
-                    { text: "La variable en stack apunta al objeto en heap", level: 3 }
-                ],
-                hint: "Primero se necesita memoria, luego se inicializa, finalmente se asigna la referencia.",
-                successMsg: "¡Correcto! Entiendes el proceso de creación de objetos."
-            },
+            category: "Ciclo de Vida de Objetos",
+            id: 4,
+            title: "Creación de Objetos (new)",
+    concept: "lifecycle",
+    desc: "Ordena los pasos que ocurren cuando se ejecuta 'new Person()' según el documento de la semana 2.",
+    theory: "Cuando usas 'new' suceden 3 cosas: 1) Se asigna memoria en heap, 2) Se invoca el constructor, 3) Se retorna la referencia.",
+    interactionType: "ordering",
+    items: [
+        { text: "Se crea bloque de memoria en heap para el objeto", level: 0 },
+        { text: "Se invoca al constructor de la clase", level: 1 },
+        { text: "Se retorna la dirección de memoria que se almacena en la variable", level: 2 }
+    ],
+    hint: "Primero memoria (heap), luego inicialización (constructor), finalmente referencia (variable).",
+    successMsg: "¡Correcto! Entiendes el proceso de creación de objetos según el documento."
+},,
             {
                 id: 5,
                 title: "Stack vs Heap",

@@ -12,3 +12,4 @@ assets/images/characters/gods/ares/sprite-sheet.png
 assets/images/characters/gods/apolo/sprite-sheet.png
 assets/images/characters/gods/hefesto/sprite-sheet.png
 assets/images/characters/gods/afrodita/sprite-sheet.png
+assets/images/enemies/gods/consejo-divino.png

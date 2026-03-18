@@ -581,21 +581,21 @@
                 successMsg: "¡Excelente! Has enviado correctamente el mensaje entre objetos."
             },
             {
-            category: "Ciclo de Vida de Objetos",
-            id: 4,
-            title: "Creación de Objetos (new)",
-    concept: "lifecycle",
-    desc: "Ordena los pasos que ocurren cuando se ejecuta 'new Person()' según el documento de la semana 2.",
-    theory: "Cuando usas 'new' suceden 3 cosas: 1) Se asigna memoria en heap, 2) Se invoca el constructor, 3) Se retorna la referencia.",
-    interactionType: "ordering",
-    items: [
-        { text: "Se crea bloque de memoria en heap para el objeto", level: 0 },
-        { text: "Se invoca al constructor de la clase", level: 1 },
-        { text: "Se retorna la dirección de memoria que se almacena en la variable", level: 2 }
-    ],
-    hint: "Primero memoria (heap), luego inicialización (constructor), finalmente referencia (variable).",
-    successMsg: "¡Correcto! Entiendes el proceso de creación de objetos según el documento."
-},,
+                category: "Ciclo de Vida de Objetos",
+                id: 4,
+                title: "Creación de Objetos (new)",
+                concept: "lifecycle",
+                desc: "Ordena los 3 pasos que ocurren cuando se ejecuta 'new Person()' según el documento de la semana 2.",
+                theory: "Cuando usas 'new' suceden 3 cosas: 1) Se asigna memoria en heap, 2) Se invoca el constructor, 3) Se retorna la referencia.",
+                interactionType: "ordering",
+                items: [
+                    { text: "Se crea bloque de memoria en heap para el objeto", level: 0 },
+                    { text: "Se invoca al constructor de la clase", level: 1 },
+                    { text: "Se retorna la dirección de memoria que se almacena en la variable", level: 2 }
+                ],
+                hint: "Primero memoria (heap), luego inicialización (constructor), finalmente referencia (variable).",
+                successMsg: "¡Correcto! Entiendes el proceso de creación de objetos según el documento."
+            },
             {
                 id: 5,
                 title: "Stack vs Heap",
@@ -869,7 +869,6 @@ Person arquero = new Person("Sergio", "Rochet");
             const ex = exercises[index];
             const container = document.getElementById('exercise-container');
             
-            // Reset states
             memorySortState = { placed: [] };
             crcState = { selected: [] };
             tfState = { answers: {} };
@@ -968,27 +967,18 @@ Person arquero = new Person("Sergio", "Rochet");
             return html;
         }
 
-        function toggleTF(idx, correct) {
-            // Just for display, actual selection is via buttons
-        }
+        function toggleTF(idx, correct) {}
 
         function selectTF(idx, isTrue, event) {
             event.stopPropagation();
             const card = document.getElementById(`tf-${idx}`);
-            
-            // Remove previous selection
             card.classList.remove('selected-true', 'selected-false');
-            
-            // Add new selection
             if (isTrue) {
                 card.classList.add('selected-true');
             } else {
                 card.classList.add('selected-false');
             }
-            
             tfState.answers[idx] = isTrue;
-            
-            // Update status
             const answered = Object.keys(tfState.answers).length;
             const total = exercises[currentLevel].statements.length;
             document.getElementById('tf-status').innerHTML = `<i class="fa-solid fa-circle-info"></i> Respondidas: ${answered} / ${total}`;
@@ -997,11 +987,9 @@ Person arquero = new Person("Sergio", "Rochet");
         function validateTrueFalse(total, successMsg) {
             const ex = exercises[currentLevel];
             let correct = 0;
-            
             ex.statements.forEach((stmt, idx) => {
                 const userAnswer = tfState.answers[idx];
                 const expectedAnswer = stmt.correct;
-                
                 if (userAnswer === expectedAnswer) {
                     correct++;
                     document.getElementById(`tf-${idx}`).style.borderColor = 'var(--success-color)';
@@ -1009,64 +997,79 @@ Person arquero = new Person("Sergio", "Rochet");
                     document.getElementById(`tf-${idx}`).style.borderColor = 'var(--accent-color)';
                 }
             });
-            
             handleValidation(correct === total, successMsg);
         }
+
+        // ============================================
+        // DRAG & DROP CORREGIDAS - TODAS LAS FUNCIONES
+        // ============================================
+        let draggedItem = null;
+        let draggedMemoryItem = null;
 
         function generateOrdering(ex) {
             let html = '<div class="card h-100"><div class="card-body">';
             html += '<div id="order-container">';
             ex.items.forEach((item, idx) => {
-                html += `<div class="order-item" id="order${idx}" data-level="${item.level}" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)"><i class="fa-solid fa-grip-lines"></i>${item.text}</div>`;
+                html += `<div class="order-item" id="order${idx}" data-level="${item.level}" draggable="true" 
+                          ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)">
+                          <i class="fa-solid fa-grip-lines me-2"></i>${item.text}</div>`;
             });
             html += '</div>';
+            html += `<div class="status-message info" id="order-status"><i class="fa-solid fa-info-circle"></i> Arrastrá para ordenar del 1º al ${ex.items.length}º paso</div>`;
             html += `<button class="btn btn-validate w-100 mt-3" onclick="validateOrdering(${ex.items.length}, '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Orden</button></div></div>`;
             return html;
         }
 
-        let draggedItem = null;
-        function dragStart(ev) { draggedItem = ev.target; ev.dataTransfer.effectAllowed = 'move'; }
-        function dragOver(ev) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'move'; }
+        // CORRECCIÓN 1: Ordering dragStart
+        function dragStart(ev) {
+            draggedItem = ev.target.closest('.order-item');
+            ev.dataTransfer.effectAllowed = 'move';
+            ev.dataTransfer.setData('text/plain', draggedItem.id);
+        }
+
+        function dragOver(ev) {
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = 'move';
+        }
+
+        // CORRECCIÓN 2: Ordering drop
         function drop(ev) {
             ev.preventDefault();
-            if (ev.target.classList.contains('order-item') && ev.target !== draggedItem) {
-                const parent = ev.target.parentNode;
+            const targetItem = ev.target.closest('.order-item');
+            
+            if (targetItem && draggedItem && targetItem !== draggedItem) {
+                const parent = targetItem.parentNode;
                 const items = Array.from(parent.children);
                 const draggedIndex = items.indexOf(draggedItem);
-                const targetIndex = items.indexOf(ev.target);
-                if (draggedIndex < targetIndex) { parent.insertBefore(draggedItem, ev.target.nextSibling); }
-                else { parent.insertBefore(draggedItem, ev.target); }
+                const targetIndex = items.indexOf(targetItem);
+                
+                if (draggedIndex < targetIndex) {
+                    parent.insertBefore(draggedItem, targetItem.nextSibling);
+                } else {
+                    parent.insertBefore(draggedItem, targetItem);
+                }
             }
         }
 
         function validateOrdering(totalItems, successMsg) {
-            const items = document.querySelectorAll('[id^="order"]');
+            const container = document.getElementById('order-container');
+            const items = container.querySelectorAll('.order-item');
+            
             let correct = true;
-            items.forEach((item, idx) => { if (idx !== parseInt(item.dataset.level)) correct = false; });
+            items.forEach((item, idx) => {
+                const expectedLevel = parseInt(item.dataset.level);
+                if (idx !== expectedLevel) {
+                    correct = false;
+                    item.style.borderColor = 'var(--accent-color)';
+                } else {
+                    item.style.borderColor = 'var(--success-color)';
+                }
+            });
+            
             handleValidation(correct, successMsg);
         }
 
-        function generateCodeCompletion(ex) {
-            let html = '<div class="code-editor-container">';
-            html += '<div class="code-toolbar"><span>Program.cs</span><span><i class="fa-brands fa-microsoft"></i> C#</span></div>';
-            html += `<textarea id="code-input" class="code-editor">${ex.template}</textarea></div>`;
-            html += `<div class="status-message info" id="code-status"><i class="fa-solid fa-info-circle"></i> Completá los espacios en blanco</div>`;
-            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateCodeCompletion('${ex.correctAnswer}', '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Código</button>`;
-            return html;
-        }
-
-        function validateCodeCompletion(correctAnswer, successMsg) {
-            const code = document.getElementById('code-input').value;
-            const hasContent = !code.includes('________');
-            
-            if (hasContent) {
-                handleValidation(true, successMsg);
-            } else {
-                document.getElementById('code-status').className = 'status-message error';
-                document.getElementById('code-status').innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Completá todos los espacios en blanco';
-            }
-        }
-
+        // CORRECCIÓN 3: Memory Sort
         function generateMemorySort(ex) {
             memorySortState = { placed: [] };
             
@@ -1093,15 +1096,31 @@ Person arquero = new Person("Sergio", "Rochet");
             return html;
         }
 
-        let draggedMemoryItem = null;
-        function dragMemoryItem(ev, correct, idx) { draggedMemoryItem = { correct, idx }; ev.dataTransfer.effectAllowed = 'move'; }
-        function allowDrop(ev) { ev.preventDefault(); }
+        // CORRECCIÓN 4: Memory dragStart
+        function dragMemoryItem(ev, correct, idx) {
+            draggedMemoryItem = { correct, idx };
+            ev.dataTransfer.effectAllowed = 'move';
+            ev.stopPropagation();
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+
+        // CORRECCIÓN 5: Memory drop - usa closest() para encontrar la sección correcta
         function dropMemoryItem(ev, zone) {
             ev.preventDefault();
+            ev.stopPropagation();
+            
             if (!draggedMemoryItem) return;
             
+            // CORRECCIÓN: Usar closest() para asegurar que encontramos la sección correcta
+            const section = ev.target.closest('.memory-section');
+            if (!section) return;
+            
             const item = document.getElementById(`mem-item-${draggedMemoryItem.idx}`);
-            const targetContainer = document.getElementById(`${zone}-items`);
+            const targetContainer = section.querySelector('.memory-items-container');
             
             if (item.classList.contains('correct') || item.classList.contains('wrong')) return;
             
@@ -1125,6 +1144,28 @@ Person arquero = new Person("Sergio", "Rochet");
         function validateMemorySort(totalElements, successMsg) {
             const correct = memorySortState.placed.length === totalElements && memorySortState.placed.every(p => p);
             handleValidation(correct, successMsg);
+        }
+        // ============================================
+
+        function generateCodeCompletion(ex) {
+            let html = '<div class="code-editor-container">';
+            html += '<div class="code-toolbar"><span>Program.cs</span><span><i class="fa-brands fa-microsoft"></i> C#</span></div>';
+            html += `<textarea id="code-input" class="code-editor">${ex.template}</textarea></div>`;
+            html += `<div class="status-message info" id="code-status"><i class="fa-solid fa-info-circle"></i> Completá los espacios en blanco</div>`;
+            html += `<button class="btn btn-validate w-100 mt-3" onclick="validateCodeCompletion('${ex.correctAnswer}', '${ex.successMsg}')"><i class="fa-solid fa-check"></i> Validar Código</button>`;
+            return html;
+        }
+
+        function validateCodeCompletion(correctAnswer, successMsg) {
+            const code = document.getElementById('code-input').value;
+            const hasContent = !code.includes('________');
+            
+            if (hasContent) {
+                handleValidation(true, successMsg);
+            } else {
+                document.getElementById('code-status').className = 'status-message error';
+                document.getElementById('code-status').innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Completá todos los espacios en blanco';
+            }
         }
 
         function generateAnalysis(ex) {

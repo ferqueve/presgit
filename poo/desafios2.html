@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafíos C# - Presentación interactiva</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0b1120 100%);
+      color: #f8fafc;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    .app-shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+    }
+    .hero {
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 800;
+    }
+    .hero p {
+      max-width: 820px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+      color: #cbd5e1;
+    }
+    .tag {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 999px;
+      padding: .4rem .8rem;
+      font-size: .9rem;
+    }
+    pre {
+      background: #020617;
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 1rem;
+      white-space: pre-wrap;
+      font-size: .9rem;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    code { color: #fde68a; }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(2,6,23,.78);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .slide-dot {
+      border-radius: 999px;
+      min-width: 40px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .slide-dot.active {
+      background: #f59e0b;
+      color: #111827;
+      border-color: #f59e0b;
+    }
+    .content-block p, .content-block li {
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+    .content-block ul { padding-left: 1.25rem; }
+    .challenge-slide {
+      min-height: 72vh;
+      display: flex;
+      align-items: center;
+    }
+    .footer-note {
+      color: #94a3b8;
+      font-size: .92rem;
+    }
+    .accordion-button:not(.collapsed) {
+      background: #f59e0b;
+      color: #111827;
+    }
+    .accordion-button {
+      background: rgba(255,255,255,0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="toolbar d-flex flex-wrap gap-2 justify-content-between align-items-center">
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <button class="btn btn-outline-light" id="prevBtn">Anterior</button>
+        <button class="btn btn-warning text-dark fw-semibold" id="nextBtn">Siguiente</button>
+        <button class="btn btn-info text-dark fw-semibold" id="goSolutions">Ir a soluciones</button>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm slide-dot" data-jump="1">1</button><button class="btn btn-sm slide-dot" data-jump="2">2</button><button class="btn btn-sm slide-dot" data-jump="3">3</button><button class="btn btn-sm slide-dot" data-jump="4">4</button><button class="btn btn-sm slide-dot" data-jump="5">5</button><button class="btn btn-sm slide-dot" data-jump="6">6</button><button class="btn btn-sm slide-dot" data-jump="7">7</button>
+        <button class="btn btn-sm slide-dot" data-jump="8">S</button>
+      </div>
+    </div>
+
+    <section class="challenge-slide" data-slide="0">
+      <div class="glass-card hero animate__animated animate__fadeIn">
+        <span class="badge bg-info text-dark mb-3">Presentación interactiva</span>
+        <h1>Desafíos de programación en C#</h1>
+        <p>Versión adaptada como presentación web con <strong>HTML</strong>, <strong>Bootstrap</strong>, <strong>JavaScript</strong>, <strong>SweetAlert2</strong> y <strong>Animate.css</strong>. Recorre cada desafío, revisa pistas guiadas y consulta una página final con soluciones completas.</p>
+        <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+          <span class="tag">7 desafíos</span>
+          <span class="tag">Pistas interactivas</span>
+          <span class="tag">Soluciones finales</span>
+          <span class="tag">C# desde Python</span>
+        </div>
+        <button class="btn btn-warning btn-lg mt-4 px-5" onclick="jumpTo(1)">Comenzar</button>
+      </div>
+    </section>
+
+    
+    <section class="challenge-slide d-none" data-slide="1">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInLeft">
+            <span class="badge bg-warning text-dark mb-3">Desafío 1</span>
+            <h2 class="display-6 fw-bold">Valor absoluto sin usar la función provista por el lenguaje</h2>
+            <div class="content-block"><p>Escribir una función que implemente el valor absoluto, pero sin usar la función</p>
+<p>provista por el lenguaje. Para los números positivos su valor absoluto es igual</p>
+<p>al número, mientras que para los negativos su valor absoluto es el número</p>
+<p>multiplicado por -1.</p>
+<p>A continuación algunos ejemplos:</p>
+<pre><code>absolute_value(52)  # Devuelve 52
+absolute_value(-52)  # Devuelve también 52</code></pre></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass-card p-4 mb-4 animate__animated animate__fadeInRight">
+            <h3 class="h4">Tu misión</h3>
+            <p>Analiza el enunciado, identifica estructuras de control, tipos de datos y la lógica principal. Luego intenta resolverlo en C#.</p>
+            <button class="btn btn-primary btn-lg w-100 mt-2 pulse-btn" onclick="showPrompt(1)">
+              Ver pista guiada
+            </button>
+          </div>
+          <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <h3 class="h5">Qué practicarás</h3>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="tag">Lógica</span>
+              <span class="tag">C#</span>
+              <span class="tag">Condicionales</span>
+              <span class="tag">Bucles</span>
+              <span class="tag">Funciones</span>
+            </div>
+            <button class="btn btn-outline-light w-100 mt-4" onclick="toggleSolution(1)">Mostrar solución aquí</button>
+            <div id="solution-inline-1" class="solution-inline mt-3 d-none">
+              <pre><code>Functions myFunctions = new Functions();
+Console.WriteLine(&quot;Valor absoluto de -52: &quot; + myFunctions.AbsoluteValue(-52).ToString());
+Console.WriteLine(&quot;Valor absoluto de 52:&quot; + myFunctions.AbsoluteValue(52).ToString());
+
+public class Functions
+{
+    public int AbsoluteValue(int number)
+    {
+        if (number &lt; 0)
+        {
+            return number * -1;
+        }
+        else
+        {
+            return number;
+        }
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="challenge-slide d-none" data-slide="2">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInLeft">
+            <span class="badge bg-warning text-dark mb-3">Desafío 2</span>
+            <h2 class="display-6 fw-bold">Sistema de votación por candidato</h2>
+            <div class="content-block"><p>Un programa lee el candidato por el cual el usuario va a votar. Las</p>
+<p>posibilidades son: candidato <code>A</code> por el partido rojo, candidato <code>B</code> por el</p>
+<p>partido verde, candidato <code>C</code> por el partido azul. Según el candidato elegido</p>
+<p>—<code>A</code>, <code>B</code> ó <code>C</code>, en forma de string— se imprimirá el mensaje &quot;Usted ha votado</p>
+<p>por el partido [color que corresponda al candidato elegido]&quot;. Si el usuario</p>
+<p>ingresa una opción que no corresponde a ninguno de los candidatos disponibles,</p>
+<p>imprimir &quot;Opción errónea&quot;.</p></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass-card p-4 mb-4 animate__animated animate__fadeInRight">
+            <h3 class="h4">Tu misión</h3>
+            <p>Analiza el enunciado, identifica estructuras de control, tipos de datos y la lógica principal. Luego intenta resolverlo en C#.</p>
+            <button class="btn btn-primary btn-lg w-100 mt-2 pulse-btn" onclick="showPrompt(2)">
+              Ver pista guiada
+            </button>
+          </div>
+          <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <h3 class="h5">Qué practicarás</h3>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="tag">Lógica</span>
+              <span class="tag">C#</span>
+              <span class="tag">Condicionales</span>
+              <span class="tag">Bucles</span>
+              <span class="tag">Funciones</span>
+            </div>
+            <button class="btn btn-outline-light w-100 mt-4" onclick="toggleSolution(2)">Mostrar solución aquí</button>
+            <div id="solution-inline-2" class="solution-inline mt-3 d-none">
+              <pre><code>#r &quot;nuget: Microsoft.DotNet.Interactive, *-*&quot;
+using Microsoft.DotNet.Interactive;
+
+Console.WriteLine(&quot;A - Partido Rojo&quot;);
+Console.WriteLine(&quot;B - Partido Verde&quot;);
+Console.WriteLine(&quot;C - Partido Azul&quot;);
+Console.WriteLine();
+
+string option = Kernel.GetInputAsync(&quot;Ingrese opción: &quot;).Result;
+option = option.ToUpper();
+
+Functions myFunctions = new Functions();
+Console.WriteLine(myFunctions.Vote(option));
+
+public class Functions
+{
+    public string Vote(string candidate)
+    {
+        if (candidate == &quot;A&quot;)
+        {
+            return &quot;Usted a votado por el partido Rojo&quot;;
+        }
+        else if (candidate == &quot;B&quot;)
+        {
+            return &quot;Usted a votado por el partido Verde&quot;;
+        }
+        else if (candidate == &quot;C&quot;)
+        {
+            return &quot;Usted a votado por el partido Azul&quot;;
+        }
+        else
+        {
+            return &quot;Opción errónea&quot;;
+        }
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="challenge-slide d-none" data-slide="3">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInLeft">
+            <span class="badge bg-warning text-dark mb-3">Desafío 3</span>
+            <h2 class="display-6 fw-bold">Mensaje según el día de la semana</h2>
+            <div class="content-block"><p>Escribir un programa que dado un día de la semana en letras —por ejemplo,</p>
+<p>&quot;lunes&quot;— imprima el siguiente mensaje:</p>
+<ul><li>Si es lunes que imprima &quot;Hoy comienza la semana. ¡Ánimo!&quot;,</li><li>Si es viernes &quot;¡Ya casi termina!&quot;</li><li>Si es sábado o domingo “¡Siiii! ¡Fin de semana!”</li><li>Si el día no es ninguno de esos (pero es válido), que imprima el siguiente</li></ul>
+<p>mensaje &quot;¡Vamos que se puede!&quot;</p>
+<ul><li>Si el día ingresado no es válido, entonces debe mostrar un mensaje que lo</li></ul>
+<p>indique</p></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass-card p-4 mb-4 animate__animated animate__fadeInRight">
+            <h3 class="h4">Tu misión</h3>
+            <p>Analiza el enunciado, identifica estructuras de control, tipos de datos y la lógica principal. Luego intenta resolverlo en C#.</p>
+            <button class="btn btn-primary btn-lg w-100 mt-2 pulse-btn" onclick="showPrompt(3)">
+              Ver pista guiada
+            </button>
+          </div>
+          <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <h3 class="h5">Qué practicarás</h3>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="tag">Lógica</span>
+              <span class="tag">C#</span>
+              <span class="tag">Condicionales</span>
+              <span class="tag">Bucles</span>
+              <span class="tag">Funciones</span>
+            </div>
+            <button class="btn btn-outline-light w-100 mt-4" onclick="toggleSolution(3)">Mostrar solución aquí</button>
+            <div id="solution-inline-3" class="solution-inline mt-3 d-none">
+              <pre><code>Functions myFunctions = new Functions();
+Console.WriteLine(myFunctions.MessageForDay(&quot;Lunes&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Martes&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Miércoles&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Jueves&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Viernes&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Sábado&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Domingo&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Otro&quot;));
+
+public class Functions
+{
+    public string MessageForDay(string weekDay)
+    {
+        if (weekDay.ToLower() == &quot;lunes&quot;)
+        {
+            return &quot;Hoy comienza la semana. !Ánimo!&quot;;
+        }
+        else if (weekDay.ToLower() == &quot;viernes&quot;)
+        {
+            return &quot;¡Ya casi termina!&quot;;
+        }
+        else if (weekDay.ToLower() == &quot;sábado&quot;
+                 || weekDay.ToLower() == &quot;domingo&quot;)
+        {
+            return &quot;¡Siiii! ¡Fin de semana!&quot;;
+        }
+        else if (weekDay.ToLower() == &quot;martes&quot;
+                 || weekDay.ToLower() == &quot;miércoles&quot;
+                 || weekDay.ToLower() == &quot;jueves&quot;)
+
+        {
+            return &quot;¡Vamos que se puede!&quot;;
+        }
+        else
+        {
+            return &quot;¡Dia de la semana invalido!&quot;;
+        }
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="challenge-slide d-none" data-slide="4">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInLeft">
+            <span class="badge bg-warning text-dark mb-3">Desafío 4</span>
+            <h2 class="display-6 fw-bold">Suma de números positivos hasta ingresar 0</h2>
+            <div class="content-block"><p>Escribir un programa que lea números desde el teclado, hasta que el usuario</p>
+<p>ingrese el 0. Finalmente, mostrar la sumatoria de todos los números positivos</p>
+<p>ingresados —solo de los números que sean positivos—.</p></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass-card p-4 mb-4 animate__animated animate__fadeInRight">
+            <h3 class="h4">Tu misión</h3>
+            <p>Analiza el enunciado, identifica estructuras de control, tipos de datos y la lógica principal. Luego intenta resolverlo en C#.</p>
+            <button class="btn btn-primary btn-lg w-100 mt-2 pulse-btn" onclick="showPrompt(4)">
+              Ver pista guiada
+            </button>
+          </div>
+          <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <h3 class="h5">Qué practicarás</h3>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="tag">Lógica</span>
+              <span class="tag">C#</span>
+              <span class="tag">Condicionales</span>
+              <span class="tag">Bucles</span>
+              <span class="tag">Funciones</span>
+            </div>
+            <button class="btn btn-outline-light w-100 mt-4" onclick="toggleSolution(4)">Mostrar solución aquí</button>
+            <div id="solution-inline-4" class="solution-inline mt-3 d-none">
+              <pre><code>#r &quot;nuget: Microsoft.DotNet.Interactive, *-*&quot;
+using Microsoft.DotNet.Interactive;
+
+Functions myFunctions = new Functions();
+myFunctions.Sum();
+
+public class Functions
+{
+    public void Sum()
+    {
+        int total = 0;
+        string input = Kernel.GetInputAsync(&quot;Ingrese número (0 para terminar):&quot;).Result;
+        int number = int.Parse(input);
+        while (number != 0)
+        {
+            if (number &gt; 0)
+            {
+                total = total + number;
+            }
+
+            input = Kernel.GetInputAsync(&quot;Ingrese número (0 para terminar):&quot;).Result;
+            number = int.Parse(input);
+        }
+
+        Console.WriteLine(&quot;La suma es: &quot; + total.ToString());
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="challenge-slide d-none" data-slide="5">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInLeft">
+            <span class="badge bg-warning text-dark mb-3">Desafío 5</span>
+            <h2 class="display-6 fw-bold">Simulación de dados y estadísticas</h2>
+            <div class="content-block"><p>Escribir una función que simule 20 tiradas de dos dados simultáneamente,</p>
+<p>imprimiendo el promedio de la suma de los resultados de los dos dados. Escribir</p>
+<p>una función que cuente la cantidad de veces que salió la cara 1, 2, ... 6 en 30</p>
+<p>tiradas y las imprima.</p></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass-card p-4 mb-4 animate__animated animate__fadeInRight">
+            <h3 class="h4">Tu misión</h3>
+            <p>Analiza el enunciado, identifica estructuras de control, tipos de datos y la lógica principal. Luego intenta resolverlo en C#.</p>
+            <button class="btn btn-primary btn-lg w-100 mt-2 pulse-btn" onclick="showPrompt(5)">
+              Ver pista guiada
+            </button>
+          </div>
+          <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <h3 class="h5">Qué practicarás</h3>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="tag">Lógica</span>
+              <span class="tag">C#</span>
+              <span class="tag">Condicionales</span>
+              <span class="tag">Bucles</span>
+              <span class="tag">Funciones</span>
+            </div>
+            <button class="btn btn-outline-light w-100 mt-4" onclick="toggleSolution(5)">Mostrar solución aquí</button>
+            <div id="solution-inline-5" class="solution-inline mt-3 d-none">
+              <pre><code>Functions myFunctions = new Functions();
+myFunctions.Average20();
+myFunctions.Simulate30();
+
+public class Functions
+{
+    public int DrawDice()
+    {
+        return new Random().Next(1, 6);
+    }
+
+    public void Average20()
+    {
+        int i = 0;
+        int total = 0;
+        while (i &lt; 20)
+        {
+            int dice1 = DrawDice();
+            int dice2 = DrawDice();
+            total += dice1 + dice2;
+            i = i + 1;
+        }
+
+        Console.WriteLine(&quot;Promedio suma:&quot; + (total / 20).ToString());
+    }
+
+    public void Simulate30()
+    {
+        int i = 0;
+        int face1 = 0, face2 = 0, face3 = 0, face4 = 0, face5 = 0, face6 = 0;
+        while (i &lt; 30)
+        {
+            int dado = DrawDice();
+            switch (dado)
+            {
+                case 1:
+                    face1 += 1;
+                    break;
+                case 2:
+                    face2 += 1;
+                    break;
+                case 3:
+                    face3 += 1;
+                    break;
+                case 4:
+                    face4 += 1;
+                    break;
+                case 5:
+                    face5 += 1;
+                    break;
+                case 6:
+                    face6 += 1;
+                    break;
+            }
+
+            i += 1;
+        }
+
+        Console.WriteLine(&quot;cara 1:&quot; + face1.ToString());
+        Console.WriteLine(&quot;cara 2:&quot; + face2.ToString());
+        Console.WriteLine(&quot;cara 3:&quot; + face3.ToString());
+        Console.WriteLine(&quot;cara 4:&quot; + face4.ToString());
+        Console.WriteLine(&quot;cara 5:&quot; + face5.ToString());
+        Console.WriteLine(&quot;cara 6:&quot; + face6.ToString());
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="challenge-slide d-none" data-slide="6">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInLeft">
+            <span class="badge bg-warning text-dark mb-3">Desafío 6</span>
+            <h2 class="display-6 fw-bold">Detección de pangramas</h2>
+            <div class="content-block"><p>Crear una función &quot;pangrama&quot; que recibe una cadena de caracteres e indica si la</p>
+<p>misma es un pangrama. Un pangrama es una cadena de caracteres que contiene todas</p>
+<p>las letras posibles del alfabeto ya sea en mayúsculas o minúsculas (español</p>
+<p>para nuestro caso).</p>
+<p>Probar la función con los siguientes ejemplos:</p>
+<div class="table-responsive"><table class="table table-sm table-bordered table-dark-subtle align-middle"><tbody><tr><th>Texto</th><th>Pangrama</th></tr><tr><td>El viejo Señor Gómez pedía queso, kiwi y habas, pero le ha tocado un saxofón</td><td>Es un pangrama</td></tr><tr><td>José compró una vieja zampoña en Perú. Excusándose, Sofía tiró su whisky al desagüe de la banqueta&quot;</td><td>Es un pagrama</td></tr><tr><td>El cadáver de Wamba, rey godo de España, fue exhumado y trasladado en una caja de zinc que pesó un kilo</td><td>Es un pangrama</td></tr><tr><td>Compañera usted sabe que puede contar conmigo no hasta dos ni hasta diez sino contar conmigo.</td><td>No es un pangrama</td></tr></tbody></table></div>
+<p>Antes de evaluar la cadena es necesario convertir las letras con tilde a letras</p>
+<p>sin tilde; además, convertir todas las letras a minúsculas para simplificar la</p>
+<p>búsqueda —daría lo mismo si convirtiéramos todas a mayúsculas—. Luego, para cada</p>
+<p>letra del alfabeto, la buscamos en la cadena; si no está, ya sabemos que no es</p>
+<p>un pangrama; si está seguimos con la siguiente letra.</p></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass-card p-4 mb-4 animate__animated animate__fadeInRight">
+            <h3 class="h4">Tu misión</h3>
+            <p>Analiza el enunciado, identifica estructuras de control, tipos de datos y la lógica principal. Luego intenta resolverlo en C#.</p>
+            <button class="btn btn-primary btn-lg w-100 mt-2 pulse-btn" onclick="showPrompt(6)">
+              Ver pista guiada
+            </button>
+          </div>
+          <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <h3 class="h5">Qué practicarás</h3>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="tag">Lógica</span>
+              <span class="tag">C#</span>
+              <span class="tag">Condicionales</span>
+              <span class="tag">Bucles</span>
+              <span class="tag">Funciones</span>
+            </div>
+            <button class="btn btn-outline-light w-100 mt-4" onclick="toggleSolution(6)">Mostrar solución aquí</button>
+            <div id="solution-inline-6" class="solution-inline mt-3 d-none">
+              <pre><code>Functions myFunctions = new Functions();
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;El viejo Señor Gómez pedía queso, kiwi y habas, pero le ha tocado un saxofón&quot;)); // True
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;José compró una vieja zampoña en Perú. Excusándose, Sofía tiró su whisky al desagüe de la banqueta&quot;)); // True
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;El cadáver de Wamba, rey godo de España, fue exhumado y trasladado en una caja de zinc que pesó un kilo&quot;)); // True
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;Compañera usted sabe que puede contar conmigo no hasta dos ni hasta diez sino contar conmigo.&quot;)); // False
+
+public class Functions
+{
+    public string NormalizeString(string stringToNormalize)
+    {
+        string accentedChars = &quot;áéíóúü&quot;;
+        string normalizedChars = &quot;aeiouu&quot;;
+        string normalizedString = &quot;&quot;;
+        foreach (char letter in stringToNormalize.ToLower())
+        {
+            int indexOfAccentedChar = accentedChars.IndexOf(letter);
+            if (indexOfAccentedChar &gt;= 0)
+            {
+                normalizedString += normalizedChars[indexOfAccentedChar];
+            }
+            else
+            {
+                normalizedString += letter;
+            }
+        }
+
+        return normalizedString;
+    }
+
+    public bool IsPangram(string inputString)
+    {
+        string alphabet = &quot;abcdefghijklmnñopqrstuvwxyz&quot;;
+        string normalizedInput = NormalizeString(inputString);
+        foreach (char letter in alphabet)
+        {
+            if (normalizedInput.IndexOf(letter) &lt; 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="challenge-slide d-none" data-slide="7">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInLeft">
+            <span class="badge bg-warning text-dark mb-3">Desafío 7</span>
+            <h2 class="display-6 fw-bold">Generación de cartón de lotería</h2>
+            <div class="content-block"><p>Definir una función que permita generar un cartón de lotería. Un cartón de</p>
+<p>lotería contiene 3 filas con 5 números cada una. Los números son aleatorios</p>
+<p>entre 1 y 99 y no se repiten. La función debe retornar una lista conteniendo las</p>
+<p>3 filas, es decir 3 listas, con 5 números cada una.</p>
+<p>Por ejemplo:</p>
+<pre><code>generate_lottery_board() -&gt; [[13,10,11,16,15],[1,8,62,36,45],[99,97,85,73,28]]</code></pre>
+<p>Un enfoque para resolver este problema es generar primero los 15 números</p>
+<p>aleatorios únicos, y luego crear 3 filas de 5 números cada una a partir de los</p>
+<p>números aleatorios generados. Podemos ir guardando los números a medida que se</p>
+<p>generan en una lista, generar un nuevo número aleatorio hasta que sea único,</p>
+<p>agregarlo a la lista; y repetir este proceso 15 veces.</p>
+<p>Como generar un nuevo número aleatorio es algo que haremos varias veces —15 para</p>
+<p>ser exactos— podemos programar eso en una función. La función tiene que recibir</p>
+<p>la lista para conocer los números generados previamente; genera un número</p>
+<p>aleatorio y continúa generando números aleatorios mientras el número generado</p>
+<p>esté en la lista. Cuando el número generado no está en la lista, lo agrega. La</p>
+<p>estructura de repetición condicional para esto es <code>while</code>. La repetición puede</p>
+<p>ser controlada por una bandera que indique si el número generado está en la</p>
+<p>lista, para que la repetición termine cuando no lo esté.</p>
+<p>Esa función debe ser usada 15 veces, para generar los 15 números aleatorios y</p>
+<p>agregarlos en una lista. La estructura de repetición condicional en este caso es</p>
+<p><code>for</code> porque la cantidad de veces que se debe petir el código es conocida de</p>
+<p>antemano.</p></div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass-card p-4 mb-4 animate__animated animate__fadeInRight">
+            <h3 class="h4">Tu misión</h3>
+            <p>Analiza el enunciado, identifica estructuras de control, tipos de datos y la lógica principal. Luego intenta resolverlo en C#.</p>
+            <button class="btn btn-primary btn-lg w-100 mt-2 pulse-btn" onclick="showPrompt(7)">
+              Ver pista guiada
+            </button>
+          </div>
+          <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <h3 class="h5">Qué practicarás</h3>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="tag">Lógica</span>
+              <span class="tag">C#</span>
+              <span class="tag">Condicionales</span>
+              <span class="tag">Bucles</span>
+              <span class="tag">Funciones</span>
+            </div>
+            <button class="btn btn-outline-light w-100 mt-4" onclick="toggleSolution(7)">Mostrar solución aquí</button>
+            <div id="solution-inline-7" class="solution-inline mt-3 d-none">
+              <pre><code>Functions myFunctions = new Functions();
+Console.Write(&quot;[&quot;);
+foreach (var row in myFunctions.GenerateLotteryBoard())
+{
+    Console.Write(&quot;[&quot;);
+    Console.Write(String.Join(&quot;,&quot;, row));
+    Console.Write(&quot;]&quot;);
+}
+Console.Write(&quot;]&quot;);
+
+public class Functions
+{
+    public void GenerateNewNumber(List&lt;int&gt; numbersList)
+    {
+        int number;
+        bool numberInList;
+        do
+        {
+            number = (new Random()).Next(1, 100);
+            numberInList = numbersList.Contains(number);
+        } while (numberInList);
+
+        numbersList.Add(number);
+    }
+
+    public List&lt;List&lt;int&gt;&gt; GenerateLotteryBoard()
+    {
+        List&lt;int&gt; lotteryNumbers = new List&lt;int&gt;();
+
+        for (int i = 0; i &lt; 15; i++)
+        {
+            this.GenerateNewNumber(lotteryNumbers);
+        }
+
+        List&lt;int&gt; row1 = lotteryNumbers.GetRange(0, 5);
+        List&lt;int&gt; row2 = lotteryNumbers.GetRange(5, 5);
+        List&lt;int&gt; row3 = lotteryNumbers.GetRange(10, 5);
+
+        List&lt;List&lt;int&gt;&gt; lotteryBoard = new List&lt;List&lt;int&gt;&gt;() { row1, row2, row3 };
+        return lotteryBoard;
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+
+    <section class="challenge-slide d-none" data-slide="8">
+      <div class="glass-card p-4 p-lg-5 w-100 animate__animated animate__fadeInUp">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+          <div>
+            <span class="badge bg-success mb-2">Página final</span>
+            <h2 class="display-6 fw-bold mb-0">Soluciones</h2>
+          </div>
+          <button class="btn btn-outline-light" onclick="jumpTo(0)">Volver al inicio</button>
+        </div>
+        <div class="accordion" id="solutionsAccordion">
+          
+    <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#sol1">
+          Desafío 1 — Valor absoluto sin usar la función provista por el lenguaje
+        </button>
+      </h2>
+      <div id="sol1" class="accordion-collapse collapse" data-bs-parent="#solutionsAccordion">
+        <div class="accordion-body">
+          <pre><code>Functions myFunctions = new Functions();
+Console.WriteLine(&quot;Valor absoluto de -52: &quot; + myFunctions.AbsoluteValue(-52).ToString());
+Console.WriteLine(&quot;Valor absoluto de 52:&quot; + myFunctions.AbsoluteValue(52).ToString());
+
+public class Functions
+{
+    public int AbsoluteValue(int number)
+    {
+        if (number &lt; 0)
+        {
+            return number * -1;
+        }
+        else
+        {
+            return number;
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#sol2">
+          Desafío 2 — Sistema de votación por candidato
+        </button>
+      </h2>
+      <div id="sol2" class="accordion-collapse collapse" data-bs-parent="#solutionsAccordion">
+        <div class="accordion-body">
+          <pre><code>#r &quot;nuget: Microsoft.DotNet.Interactive, *-*&quot;
+using Microsoft.DotNet.Interactive;
+
+Console.WriteLine(&quot;A - Partido Rojo&quot;);
+Console.WriteLine(&quot;B - Partido Verde&quot;);
+Console.WriteLine(&quot;C - Partido Azul&quot;);
+Console.WriteLine();
+
+string option = Kernel.GetInputAsync(&quot;Ingrese opción: &quot;).Result;
+option = option.ToUpper();
+
+Functions myFunctions = new Functions();
+Console.WriteLine(myFunctions.Vote(option));
+
+public class Functions
+{
+    public string Vote(string candidate)
+    {
+        if (candidate == &quot;A&quot;)
+        {
+            return &quot;Usted a votado por el partido Rojo&quot;;
+        }
+        else if (candidate == &quot;B&quot;)
+        {
+            return &quot;Usted a votado por el partido Verde&quot;;
+        }
+        else if (candidate == &quot;C&quot;)
+        {
+            return &quot;Usted a votado por el partido Azul&quot;;
+        }
+        else
+        {
+            return &quot;Opción errónea&quot;;
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#sol3">
+          Desafío 3 — Mensaje según el día de la semana
+        </button>
+      </h2>
+      <div id="sol3" class="accordion-collapse collapse" data-bs-parent="#solutionsAccordion">
+        <div class="accordion-body">
+          <pre><code>Functions myFunctions = new Functions();
+Console.WriteLine(myFunctions.MessageForDay(&quot;Lunes&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Martes&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Miércoles&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Jueves&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Viernes&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Sábado&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Domingo&quot;));
+Console.WriteLine(myFunctions.MessageForDay(&quot;Otro&quot;));
+
+public class Functions
+{
+    public string MessageForDay(string weekDay)
+    {
+        if (weekDay.ToLower() == &quot;lunes&quot;)
+        {
+            return &quot;Hoy comienza la semana. !Ánimo!&quot;;
+        }
+        else if (weekDay.ToLower() == &quot;viernes&quot;)
+        {
+            return &quot;¡Ya casi termina!&quot;;
+        }
+        else if (weekDay.ToLower() == &quot;sábado&quot;
+                 || weekDay.ToLower() == &quot;domingo&quot;)
+        {
+            return &quot;¡Siiii! ¡Fin de semana!&quot;;
+        }
+        else if (weekDay.ToLower() == &quot;martes&quot;
+                 || weekDay.ToLower() == &quot;miércoles&quot;
+                 || weekDay.ToLower() == &quot;jueves&quot;)
+
+        {
+            return &quot;¡Vamos que se puede!&quot;;
+        }
+        else
+        {
+            return &quot;¡Dia de la semana invalido!&quot;;
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#sol4">
+          Desafío 4 — Suma de números positivos hasta ingresar 0
+        </button>
+      </h2>
+      <div id="sol4" class="accordion-collapse collapse" data-bs-parent="#solutionsAccordion">
+        <div class="accordion-body">
+          <pre><code>#r &quot;nuget: Microsoft.DotNet.Interactive, *-*&quot;
+using Microsoft.DotNet.Interactive;
+
+Functions myFunctions = new Functions();
+myFunctions.Sum();
+
+public class Functions
+{
+    public void Sum()
+    {
+        int total = 0;
+        string input = Kernel.GetInputAsync(&quot;Ingrese número (0 para terminar):&quot;).Result;
+        int number = int.Parse(input);
+        while (number != 0)
+        {
+            if (number &gt; 0)
+            {
+                total = total + number;
+            }
+
+            input = Kernel.GetInputAsync(&quot;Ingrese número (0 para terminar):&quot;).Result;
+            number = int.Parse(input);
+        }
+
+        Console.WriteLine(&quot;La suma es: &quot; + total.ToString());
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#sol5">
+          Desafío 5 — Simulación de dados y estadísticas
+        </button>
+      </h2>
+      <div id="sol5" class="accordion-collapse collapse" data-bs-parent="#solutionsAccordion">
+        <div class="accordion-body">
+          <pre><code>Functions myFunctions = new Functions();
+myFunctions.Average20();
+myFunctions.Simulate30();
+
+public class Functions
+{
+    public int DrawDice()
+    {
+        return new Random().Next(1, 6);
+    }
+
+    public void Average20()
+    {
+        int i = 0;
+        int total = 0;
+        while (i &lt; 20)
+        {
+            int dice1 = DrawDice();
+            int dice2 = DrawDice();
+            total += dice1 + dice2;
+            i = i + 1;
+        }
+
+        Console.WriteLine(&quot;Promedio suma:&quot; + (total / 20).ToString());
+    }
+
+    public void Simulate30()
+    {
+        int i = 0;
+        int face1 = 0, face2 = 0, face3 = 0, face4 = 0, face5 = 0, face6 = 0;
+        while (i &lt; 30)
+        {
+            int dado = DrawDice();
+            switch (dado)
+            {
+                case 1:
+                    face1 += 1;
+                    break;
+                case 2:
+                    face2 += 1;
+                    break;
+                case 3:
+                    face3 += 1;
+                    break;
+                case 4:
+                    face4 += 1;
+                    break;
+                case 5:
+                    face5 += 1;
+                    break;
+                case 6:
+                    face6 += 1;
+                    break;
+            }
+
+            i += 1;
+        }
+
+        Console.WriteLine(&quot;cara 1:&quot; + face1.ToString());
+        Console.WriteLine(&quot;cara 2:&quot; + face2.ToString());
+        Console.WriteLine(&quot;cara 3:&quot; + face3.ToString());
+        Console.WriteLine(&quot;cara 4:&quot; + face4.ToString());
+        Console.WriteLine(&quot;cara 5:&quot; + face5.ToString());
+        Console.WriteLine(&quot;cara 6:&quot; + face6.ToString());
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#sol6">
+          Desafío 6 — Detección de pangramas
+        </button>
+      </h2>
+      <div id="sol6" class="accordion-collapse collapse" data-bs-parent="#solutionsAccordion">
+        <div class="accordion-body">
+          <pre><code>Functions myFunctions = new Functions();
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;El viejo Señor Gómez pedía queso, kiwi y habas, pero le ha tocado un saxofón&quot;)); // True
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;José compró una vieja zampoña en Perú. Excusándose, Sofía tiró su whisky al desagüe de la banqueta&quot;)); // True
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;El cadáver de Wamba, rey godo de España, fue exhumado y trasladado en una caja de zinc que pesó un kilo&quot;)); // True
+Console.WriteLine(myFunctions.IsPangram(
+    &quot;Compañera usted sabe que puede contar conmigo no hasta dos ni hasta diez sino contar conmigo.&quot;)); // False
+
+public class Functions
+{
+    public string NormalizeString(string stringToNormalize)
+    {
+        string accentedChars = &quot;áéíóúü&quot;;
+        string normalizedChars = &quot;aeiouu&quot;;
+        string normalizedString = &quot;&quot;;
+        foreach (char letter in stringToNormalize.ToLower())
+        {
+            int indexOfAccentedChar = accentedChars.IndexOf(letter);
+            if (indexOfAccentedChar &gt;= 0)
+            {
+                normalizedString += normalizedChars[indexOfAccentedChar];
+            }
+            else
+            {
+                normalizedString += letter;
+            }
+        }
+
+        return normalizedString;
+    }
+
+    public bool IsPangram(string inputString)
+    {
+        string alphabet = &quot;abcdefghijklmnñopqrstuvwxyz&quot;;
+        string normalizedInput = NormalizeString(inputString);
+        foreach (char letter in alphabet)
+        {
+            if (normalizedInput.IndexOf(letter) &lt; 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#sol7">
+          Desafío 7 — Generación de cartón de lotería
+        </button>
+      </h2>
+      <div id="sol7" class="accordion-collapse collapse" data-bs-parent="#solutionsAccordion">
+        <div class="accordion-body">
+          <pre><code>Functions myFunctions = new Functions();
+Console.Write(&quot;[&quot;);
+foreach (var row in myFunctions.GenerateLotteryBoard())
+{
+    Console.Write(&quot;[&quot;);
+    Console.Write(String.Join(&quot;,&quot;, row));
+    Console.Write(&quot;]&quot;);
+}
+Console.Write(&quot;]&quot;);
+
+public class Functions
+{
+    public void GenerateNewNumber(List&lt;int&gt; numbersList)
+    {
+        int number;
+        bool numberInList;
+        do
+        {
+            number = (new Random()).Next(1, 100);
+            numberInList = numbersList.Contains(number);
+        } while (numberInList);
+
+        numbersList.Add(number);
+    }
+
+    public List&lt;List&lt;int&gt;&gt; GenerateLotteryBoard()
+    {
+        List&lt;int&gt; lotteryNumbers = new List&lt;int&gt;();
+
+        for (int i = 0; i &lt; 15; i++)
+        {
+            this.GenerateNewNumber(lotteryNumbers);
+        }
+
+        List&lt;int&gt; row1 = lotteryNumbers.GetRange(0, 5);
+        List&lt;int&gt; row2 = lotteryNumbers.GetRange(5, 5);
+        List&lt;int&gt; row3 = lotteryNumbers.GetRange(10, 5);
+
+        List&lt;List&lt;int&gt;&gt; lotteryBoard = new List&lt;List&lt;int&gt;&gt;() { row1, row2, row3 };
+        return lotteryBoard;
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    
+        </div>
+        <p class="footer-note mt-4">Consejo didáctico: primero intenta resolver cada ejercicio por tu cuenta y luego usa esta página para comparar estructura, sintaxis y lógica.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const totalSlides = 8;
+    let currentSlide = 0;
+
+    const prompts = {
+      1: "Piensa en una condición simple: si el número es negativo, multiplícalo por -1; de lo contrario, devuélvelo tal como está.",
+      2: "Conviene normalizar la entrada con ToUpper() y luego comparar con if / else if para A, B y C.",
+      3: "Puedes usar varias comparaciones encadenadas. Recuerda validar también días no válidos.",
+      4: "Necesitas un ciclo que siga hasta que el usuario ingrese 0 y un acumulador que solo sume positivos.",
+      5: "Separa el problema en métodos: uno para lanzar dados y otros para promedio y conteo.",
+      6: "Primero normaliza la cadena: minúsculas y sin tildes. Luego revisa si cada letra del alfabeto aparece.",
+      7: "Genera 15 números únicos, guárdalos en una lista y después divídelos en 3 filas de 5."
+    };
+
+    function renderSlides() {
+      document.querySelectorAll('[data-slide]').forEach(section => {
+        const n = Number(section.dataset.slide);
+        section.classList.toggle('d-none', n !== currentSlide);
+      });
+      document.querySelectorAll('.slide-dot').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.jump) === currentSlide);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function jumpTo(n) {
+      currentSlide = Math.max(0, Math.min(totalSlides, Number(n)));
+      renderSlides();
+    }
+
+    function showPrompt(n) {
+      Swal.fire({
+        title: 'Pista para el desafío ' + n,
+        text: prompts[n],
+        icon: 'info',
+        confirmButtonText: 'Entendido',
+        showClass: { popup: 'animate__animated animate__zoomIn' },
+        hideClass: { popup: 'animate__animated animate__fadeOutDown' }
+      });
+    }
+
+    function toggleSolution(n) {
+      const el = document.getElementById('solution-inline-' + n);
+      el.classList.toggle('d-none');
+      if (!el.classList.contains('d-none')) {
+        el.classList.add('animate__animated','animate__fadeIn');
+      }
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => jumpTo(currentSlide - 1));
+    document.getElementById('nextBtn').addEventListener('click', () => jumpTo(currentSlide + 1));
+    document.getElementById('goSolutions').addEventListener('click', () => jumpTo(8));
+    document.querySelectorAll('[data-jump]').forEach(btn => btn.addEventListener('click', () => jumpTo(btn.dataset.jump)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') jumpTo(currentSlide + 1);
+      if (e.key === 'ArrowLeft') jumpTo(currentSlide - 1);
+    });
+    renderSlides();
+  </script>
+</body>
+</html>

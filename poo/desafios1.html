@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desafíos C# desde Python</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --bg1:#0f172a;
+      --bg2:#1e293b;
+      --accent:#f59e0b;
+      --soft:#94a3b8;
+      --panel: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.12);
+    }
+    body {
+      min-height:100vh;
+      margin:0;
+      background: radial-gradient(circle at top, #1d4ed8 0%, #0f172a 35%, #020617 100%);
+      color:#f8fafc;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      overflow:hidden;
+    }
+    .slide {
+      display:none;
+      height:100vh;
+      overflow-y:auto;
+      padding:80px 0 110px;
+    }
+    .slide.active { display:block; }
+    .topbar {
+      position:fixed; top:0; left:0; right:0; z-index:1030;
+      background:rgba(2,6,23,.7); backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .bottombar {
+      position:fixed; bottom:0; left:0; right:0; z-index:1030;
+      background:rgba(2,6,23,.78); backdrop-filter: blur(10px);
+      border-top:1px solid var(--border);
+    }
+    .glass, .panel, .solution-card {
+      background:var(--panel);
+      backdrop-filter: blur(12px);
+      border:1px solid var(--border);
+      color:#f8fafc;
+      border-radius:1.25rem;
+    }
+    pre {
+      background:#020617;
+      color:#e2e8f0;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:1rem;
+      padding:1rem;
+      white-space:pre-wrap;
+      word-break:break-word;
+      margin-bottom:0;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    code { color:#fde68a; }
+    p, li { color:#e2e8f0; }
+    .hero { padding-top:10vh; }
+    .counter { font-weight:700; color:#fde68a; }
+    .progress { height:10px; background:rgba(255,255,255,.12); }
+    .progress-bar { background:linear-gradient(90deg, #f59e0b, #facc15); }
+    .thumbs { display:flex; gap:.45rem; flex-wrap:wrap; max-height:54px; overflow:auto; }
+    .thumb-btn {
+      border:none; border-radius:999px; padding:.35rem .7rem; font-size:.85rem;
+      background:rgba(255,255,255,.08); color:#fff;
+    }
+    .thumb-btn.active { background:#f59e0b; color:#111827; font-weight:700; }
+    .swal2-popup pre { text-align:left; font-size:.95rem; }
+  </style>
+</head>
+<body>
+  <div class="topbar py-3 px-3 px-md-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+      <div>
+        <div class="small text-uppercase text-warning fw-semibold">Presentación interactiva</div>
+        <div id="slideTitle" class="fw-bold">Portada</div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="counter" id="counter">1 / 13</span>
+        <button class="btn btn-sm btn-outline-warning" onclick="openIndex()"><i class="fa-solid fa-table-cells-large me-1"></i>Índice</button>
+      </div>
+    </div>
+    <div class="progress mt-2"><div id="progressBar" class="progress-bar" role="progressbar" style="width:0%"></div></div>
+  </div>
+
+  <main id="slidesContainer">
+<section class="slide active" data-title="Portada">
+  <div class="container py-5">
+    <div class="hero text-center animate__animated animate__fadeInDown">
+      <span class="badge rounded-pill text-bg-warning mb-3 px-3 py-2">Presentación interactiva</span>
+      <h1 class="display-4 fw-bold">Desafíos de programación en C# para desarrolladores Python</h1>
+      <p class="lead mt-3">Versión en HTML + Bootstrap + JavaScript + SweetAlert2 + Animate.css.</p>
+      <div class="row justify-content-center mt-4 g-3">
+        <div class="col-md-8">
+          <div class="card glass border-0 shadow-lg">
+            <div class="card-body p-4">
+              <h3 class="h4 mb-3">¿Qué encontrarás aquí?</h3>
+              <p class="mb-2">Una secuencia de desafíos para traducir código Python a C#.</p>
+              <p class="mb-0">Al final se incluye una página completa con las soluciones propuestas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-lg btn-warning mt-4 shadow" onclick="nextSlide()"><i class="fa-solid fa-play me-2"></i>Comenzar</button>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 1">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 1</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(1)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>print(&quot;Hello World!&quot;)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python imprime <code>Hello World!</code> en la consola:</p>
+<p>Escribe a continuación el código equivalente en C#. Busca en la [Ayuda de C#</p>
+<p>para programadores Python](https://github.com/ucudal/PII_Ayuda_Csharp_Python) el</p>
+<p>equivalente al <code>print()</code> de Python.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 2">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 2</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(2)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>text = &quot;Esto es un texto&quot;
+print(text)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python asigna una cadena de texto a una variable llamada</p>
+<p><code>text</code>; luego imprime el contenido de esa variable <code>text</code> en la consola:</p>
+<p>Escribe a continuación el código equivalente en C#. Ten en cuenta que en C# vas</p>
+<p>a tener que declarar el tipo de la variable <code>text</code>, que será <code>string</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 3">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 3</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(3)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>on = True
+print(&quot;Encendido: &quot;, on)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python asigna un valor a una variable llamada <code>on</code></p>
+<p>que represente el estado de un dispositivo que puede estar encendido o no; luego</p>
+<p>imprime el valor de esa variable <code>on</code> en la consola:</p>
+<p>Escribe a continuación el código equivalente en C#. Ten en cuenta que:</p>
+<ul>
+<li>En C# vas a tener que declarar el tipo de la variable <code>on</code>, que será <code>bool</code>.</li>
+<li>El valor <code>True</code> en Python es <code>true</code> en C# y el de <code>False</code> es <code>false</code>.</li>
+<li><code>Console.WriteLine()</code> en C# no permite múltiples argumentos separados por</li>
+</ul>
+<p>comas, a diferencia de <code>print()</code> en Python; vas a tener que usar <code>&quot;Encendido:</p>
+<p>&quot; + on</code> para lograr que se imprima en la consola lo mismo que en Python.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 4">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 4</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(4)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>pi = &quot;3.1416&quot;
+print(float(pi))</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python asigna un valor a una variable llamada <code>pi</code> con el</p>
+<p>texto <code>&quot;3.1416&quot;</code> y luego imprime ese valor convertido en un número en punto</p>
+<p>flotante en la consola:</p>
+<p>Escribe a continuación el código equivalente en C#. Ten en cuenta que en C# vas</p>
+<p>a tener que declarar el tipo de la variable <code>pi</code>, que será <code>string</code>. Busca en la</p>
+<p>[Ayuda de C# para programadores</p>
+<p>Python](https://github.com/ucudal/PII_Ayuda_Csharp_Python) el equivalente al</p>
+<p><code>float()</code> de Python.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 5">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 5</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(5)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>number = -5
+if number &gt; 0:
+    print(&quot;El número es positivo&quot;)
+else:
+    print(&quot;El número es negativo&quot;)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python asigna un entero a una variable llamada <code>number</code> y</p>
+<p>luego imprime un mensaje dependiendo de que el valor de esa variable sea</p>
+<p>positivo o negativo.</p>
+<p>Escribe a continuación el código equivalente en C#. Ten en cuenta que en C# vas</p>
+<p>a tener que declarar el tipo de la variable <code>number</code>, que será <code>int</code>.</p>
+<p>Prueba con diferentes valores para <code>number</code> y observa cómo cambia el mensaje</p>
+<p>impreso.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 6">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 6</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(6)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>number = -5
+if number &gt; 0:
+    print(&quot;El número es positivo&quot;)
+elif number &lt; 0:
+    print(&quot;El número es negativo&quot;)
+else:
+    print(&quot;El número es cero&quot;)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python asigna un entero a una variable llamada <code>number</code> y</p>
+<p>luego imprime un mensaje dependiendo de que el valor de esa variable sea</p>
+<p>positivo, negativo, o cero.</p>
+<p>Escribe a continuación el código equivalente en C#. Busca en la [Ayuda de C#</p>
+<p>para programadores Python](https://github.com/ucudal/PII_Ayuda_Csharp_Python) el</p>
+<p>equivalente al <code>if-else-elif</code> de Python.</p>
+<p>Prueba con diferentes valores para <code>number</code> y observa cómo cambia el mensaje</p>
+<p>impreso.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 7">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 7</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(7)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>nombre = &quot;Juan&quot;
+edad = 30
+print(f&quot;Hola, me llamo &quot;, nombre, &quot; y tengo &quot;, edad, &quot; años.&quot;)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El código Python a continuación permite imprimir en la consola una cadena de</p>
+<p>caracteres embebiendo expresiones, en particular, variables. La cadena <code>&quot;Hola,</p>
+<p>me llamo Juan y tengo 30 años&quot;</code> se obtiene como resultado de asignar <code>nombre =</p>
+<p>&quot;Juan&quot;</code> y <code>edad = 30</code> y luego concatenar <code>&quot;Hola, me llamo &quot;</code> con <code>nombre</code>, con</p>
+<p><code>&quot; y tengo &quot;</code>, con <code>edad</code> y con <code>&quot; años.&quot;</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 8">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 8</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(8)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>for i in range(0, 5):
+    print(f&quot;El valor de i es: {i}&quot;)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python imprime por consola el valor de la variable de</p>
+<p>iteración <code>i</code> que es sucesivamente uno de los números del 0 al 4.</p>
+<p>Escribe a continuación el código equivalente en C#. Busca en la [Ayuda de C#</p>
+<p>para programadores Python](https://github.com/ucudal/PII_Ayuda_Csharp_Python) el</p>
+<p>equivalente al <code>for i in range()</code> de Python.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 9">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 9</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(9)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>text = &quot;Hola mundo&quot;
+print(text[0])
+print(text[-1])</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python asigna una cadena de texto a una variable llamada</p>
+<p><code>text</code>; luego imprime el primer y el último carácter de esa variable <code>text</code> en</p>
+<p>la consola:</p>
+<p>Escribe a continuación el código equivalente en C#. Ten en cuenta que el índice</p>
+<p>del último caracter en C# es <code>text.Length - 1</code>, porque no puede haber un índice</p>
+<p>negativo a diferencia de Pyhton. <code>text.Length</code> obtiene la cantidad de caracteres</p>
+<p>de la cadena y <code>text.Length - 1</code> es el índice del último porque el índice del</p>
+<p>primero es <code>0</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 10">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 10</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(10)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>list = [1, 2, 3]
+list.append(4)
+print(list)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python crea una lista llamada <code>list</code> con los enteros <code>1</code>,</p>
+<p><code>2</code> y <code>3</code>; luego agrega el entero <code>4</code>; por último imprime la lista en la consola.</p>
+<p>Escribe a continuación el código equivalente en C#. Busca en la [Ayuda de C#</p>
+<p>para programadores Python](https://github.com/ucudal/PII_Ayuda_Csharp_Python)</p>
+<p>cómo usar una lista e imprimir su contenido en C#.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Desafío 11">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <span class="badge text-bg-primary mb-2">Python → C#</span>
+        <h2 class="fw-bold mb-0">Desafío 11</h2>
+      </div>
+      <button class="btn btn-outline-light" onclick="showSolution(11)"><i class="fa-solid fa-lightbulb me-2"></i>Ver pista / solución</button>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-brands fa-python me-2 text-warning"></i>Código original en Python</h3>
+            <pre><code>list = [1, 2, 3, 4]
+for element in list:
+    print(element)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0 panel">
+          <div class="card-body p-4">
+            <h3 class="h5"><i class="fa-solid fa-list-check me-2 text-info"></i>Consigna</h3>
+            <p>El siguiente código Python crea una lista llamada <code>list</code> con los enteros <code>1</code>,</p>
+<p><code>2</code> y <code>3</code> y luego imprime cada elemento por separado en la consola con un bucle</p>
+<p><code>for</code>:</p>
+<p>Escribe a continuación el código equivalente en C#. Busca en la [Ayuda de C#</p>
+<p>para programadores Python](https://github.com/ucudal/PII_Ayuda_Csharp_Python)</p>
+<p>el equivalente en C# al <code>for</code> de Python.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Soluciones">
+  <div class="container py-4">
+    <div class="text-center mb-4">
+      <span class="badge text-bg-success mb-2">Página final</span>
+      <h2 class="fw-bold">Soluciones propuestas</h2>
+      <p class="text-light-emphasis">Puedes usar esta sección como cierre de clase o como corrección grupal.</p>
+    </div>
+    <div class="row g-3">
+      
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 1</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>Console.WriteLine(&quot;Hello World!&quot;);</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 2</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>string text = &quot;Esto es un texto&quot;;
+Console.WriteLine(text);</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 3</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>bool on = true;
+Console.WriteLine(&quot;Encendido: &quot; + on);</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 4</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>string pi = &quot;3.1416&quot;;
+Console.WriteLine(float.Parse(pi));</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 5</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>int number = -5;
+if (number &gt; 0)
+{
+    Console.WriteLine(&quot;El número es positivo&quot;);
+}
+else
+{
+    Console.WriteLine(&quot;El número es negativo&quot;);
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 6</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>int number = -5;
+if (number &gt; 0)
+{
+    Console.WriteLine(&quot;El número es positivo&quot;);
+}
+else if (number &lt; 0)
+{
+    Console.WriteLine(&quot;El número es negativo&quot;);
+}
+else
+{
+    Console.WriteLine(&quot;El número es cero&quot;);
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 7</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>string nombre = &quot;Juan&quot;;
+int edad = 30;
+Console.WriteLine($&quot;Hola, me llamo {nombre} y tengo {edad} años.&quot;);</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 8</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>for (int i = 0; i &lt; 5; i++)
+{
+    Console.WriteLine($&quot;El valor de i es: {i}&quot;);
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 9</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>string text = &quot;Hola mundo&quot;;
+Console.WriteLine(text[0]);
+Console.WriteLine(text[text.Length - 1]);</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 10</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>List&lt;int&gt; list = new List&lt;int&gt;() { 1, 2, 3 };
+list.Add(4);
+Console.WriteLine(string.Join(&quot;, &quot;, list));</code></pre>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-12">
+        <div class="card border-0 shadow-sm solution-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <h3 class="h5 mb-0">Desafío 11</h3>
+              <span class="badge text-bg-success">Solución propuesta</span>
+            </div>
+            <pre><code>List&lt;int&gt; list = new List&lt;int&gt;() { 1, 2, 3, 4 };
+foreach (int element in list)
+{
+    Console.WriteLine(element);
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    
+    </div>
+  </div>
+</section>
+</main>
+
+  <div class="bottombar py-3 px-3 px-md-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+      <button class="btn btn-outline-light" onclick="prevSlide()"><i class="fa-solid fa-arrow-left me-2"></i>Anterior</button>
+      <div id="thumbs" class="thumbs"></div>
+      <button class="btn btn-warning" onclick="nextSlide()">Siguiente<i class="fa-solid fa-arrow-right ms-2"></i></button>
+    </div>
+  </div>
+
+  <script>
+    const solutions = {"1": "Console.WriteLine(\"Hello World!\");", "2": "string text = \"Esto es un texto\";\nConsole.WriteLine(text);", "3": "bool on = true;\nConsole.WriteLine(\"Encendido: \" + on);", "4": "string pi = \"3.1416\";\nConsole.WriteLine(float.Parse(pi));", "5": "int number = -5;\nif (number > 0)\n{\n    Console.WriteLine(\"El número es positivo\");\n}\nelse\n{\n    Console.WriteLine(\"El número es negativo\");\n}", "6": "int number = -5;\nif (number > 0)\n{\n    Console.WriteLine(\"El número es positivo\");\n}\nelse if (number < 0)\n{\n    Console.WriteLine(\"El número es negativo\");\n}\nelse\n{\n    Console.WriteLine(\"El número es cero\");\n}", "7": "string nombre = \"Juan\";\nint edad = 30;\nConsole.WriteLine($\"Hola, me llamo {nombre} y tengo {edad} años.\");", "8": "for (int i = 0; i < 5; i++)\n{\n    Console.WriteLine($\"El valor de i es: {i}\");\n}", "9": "string text = \"Hola mundo\";\nConsole.WriteLine(text[0]);\nConsole.WriteLine(text[text.Length - 1]);", "10": "List<int> list = new List<int>() { 1, 2, 3 };\nlist.Add(4);\nConsole.WriteLine(string.Join(\", \", list));", "11": "List<int> list = new List<int>() { 1, 2, 3, 4 };\nforeach (int element in list)\n{\n    Console.WriteLine(element);\n}"};
+    const slides = [...document.querySelectorAll('.slide')];
+    const thumbs = document.getElementById('thumbs');
+    let current = 0;
+
+    slides.forEach((slide, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'thumb-btn';
+      btn.textContent = idx === 0 ? 'Inicio' : (idx === slides.length - 1 ? 'Soluciones' : idx);
+      btn.onclick = () => goToSlide(idx);
+      thumbs.appendChild(btn);
+    });
+
+    function render() {
+      slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === current);
+        if (idx === current) {
+          slide.classList.remove('animate__animated','animate__fadeIn');
+          void slide.offsetWidth;
+          slide.classList.add('animate__animated','animate__fadeIn');
+          slide.scrollTop = 0;
+          window.scrollTo({top:0, behavior:'instant'});
+        }
+      });
+      const title = slides[current].dataset.title || `Slide ${current+1}`;
+      document.getElementById('slideTitle').textContent = title;
+      document.getElementById('counter').textContent = `${current+1} / ${slides.length}`;
+      document.getElementById('progressBar').style.width = `${((current+1)/slides.length)*100}%`;
+      [...thumbs.children].forEach((b, i) => b.classList.toggle('active', i === current));
+    }
+
+    function goToSlide(index) {
+      current = Math.max(0, Math.min(index, slides.length-1));
+      render();
+    }
+    function nextSlide() { goToSlide(current + 1); }
+    function prevSlide() { goToSlide(current - 1); }
+
+    function showSolution(num) {
+      Swal.fire({
+        title: `Solución propuesta - Desafío ${num}`,
+        html: `<pre><code>${escapeHtml(solutions[num])}</code></pre>`,
+        confirmButtonText: 'Cerrar',
+        width: 900,
+        background: '#0f172a',
+        color: '#f8fafc',
+        customClass: { popup: 'animate__animated animate__fadeInDown' }
+      });
+    }
+
+    function openIndex() {
+      const html = slides.map((s, i) => `
+        <button class="btn btn-outline-warning m-1" onclick="window.goFromModal(${i})">${i+1}. ${s.dataset.title}</button>
+      `).join('');
+      Swal.fire({
+        title: 'Índice de la presentación',
+        html: `<div class="d-flex flex-wrap justify-content-center">${html}</div>`,
+        showConfirmButton: false,
+        width: 900,
+        background: '#0f172a',
+        color: '#f8fafc'
+      });
+    }
+    window.goFromModal = function(index) { Swal.close(); goToSlide(index); }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+      if (e.key.toLowerCase() === 'i') openIndex();
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Programación II – Desafío Git #1</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
+
+<style>
+  :root {
+    --bg-dark:    #0d1117;
+    --bg-card:    #161b22;
+    --bg-card2:   #1e2530;
+    --accent:     #39d353;
+    --accent2:    #58a6ff;
+    --accent3:    #f78166;
+    --accent4:    #d2a8ff;
+    --text-main:  #e6edf3;
+    --text-muted: #8b949e;
+    --border:     #30363d;
+    --cmd-bg:     #010409;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg-dark);
+    font-family: 'Syne', sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  /* ===== SLIDE SYSTEM ===== */
+  .slide {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: none;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+  .slide.active {
+    display: flex;
+  }
+
+  /* ===== NAV BAR ===== */
+  .topbar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+  .topbar .brand {
+    font-size: .75rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .topbar .brand span { color: var(--accent); }
+  .slide-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--text-muted);
+  }
+  .slide-counter strong { color: var(--accent2); }
+
+  /* ===== PROGRESS ===== */
+  .progress-bar-outer {
+    height: 3px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease;
+  }
+
+  /* ===== CONTENT AREA ===== */
+  .slide-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 40px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .slide-content::-webkit-scrollbar { width: 5px; }
+  .slide-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ===== NAVIGATION BUTTONS ===== */
+  .nav-btns {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .btn-nav {
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    padding: 7px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .btn-nav:hover { background: var(--border); border-color: var(--accent2); color: var(--accent2); }
+  .btn-nav:disabled { opacity: .3; cursor: not-allowed; }
+
+  /* ===== DOTS ===== */
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 60%; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .dot.active { background: var(--accent2); transform: scale(1.3); }
+  .dot.visited { background: var(--accent); }
+
+  /* ===== TYPOGRAPHY ===== */
+  h1.slide-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: .5rem;
+  }
+  h2.section-title {
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 12px;
+  }
+  h2.section-title .icon-wrap {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  /* ===== CARDS ===== */
+  .card-dark {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color .2s, transform .2s;
+  }
+  .card-dark:hover { border-color: var(--accent2); transform: translateY(-2px); }
+
+  /* ===== CMD BLOCKS ===== */
+  .cmd-block {
+    background: var(--cmd-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem;
+    margin: 10px 0;
+    position: relative;
+    overflow-x: auto;
+  }
+  .cmd-block .prompt { color: var(--accent); }
+  .cmd-block .cmd-text { color: var(--text-main); }
+  .cmd-block .comment { color: var(--text-muted); font-style: italic; }
+  .cmd-block .copy-btn {
+    position: absolute; top: 8px; right: 10px;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: .7rem;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .cmd-block .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ===== COMMAND CHIP ===== */
+  .cmd-chip {
+    display: inline-block;
+    background: rgba(57,211,83,.12);
+    border: 1px solid rgba(57,211,83,.3);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-weight: 700;
+  }
+  .cmd-chip.blue {
+    background: rgba(88,166,255,.12);
+    border-color: rgba(88,166,255,.3);
+    color: var(--accent2);
+  }
+  .cmd-chip.red {
+    background: rgba(247,129,102,.12);
+    border-color: rgba(247,129,102,.3);
+    color: var(--accent3);
+  }
+  .cmd-chip.purple {
+    background: rgba(210,168,255,.12);
+    border-color: rgba(210,168,255,.3);
+    color: var(--accent4);
+  }
+
+  /* ===== TAGS ===== */
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(88,166,255,.1);
+    border: 1px solid rgba(88,166,255,.2);
+    color: var(--accent2);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: .75rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ===== BRANCH DIAGRAM ===== */
+  .branch-svg { width: 100%; max-width: 700px; margin: 0 auto; display: block; }
+
+  /* ===== ALERT BOX ===== */
+  .alert-tip {
+    background: rgba(88,166,255,.08);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: .88rem;
+    color: var(--text-main);
+    margin: 10px 0;
+  }
+  .alert-tip .tip-label {
+    font-weight: 700; color: var(--accent2); font-size: .75rem;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; display: block;
+    margin-bottom: 4px;
+  }
+  .alert-warn {
+    background: rgba(247,129,102,.08);
+    border-left: 3px solid var(--accent3);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: .88rem;
+    color: var(--text-main);
+    margin: 10px 0;
+  }
+  .alert-warn .tip-label { color: var(--accent3); font-weight: 700; font-size: .75rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+  .alert-success {
+    background: rgba(57,211,83,.08);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: .88rem;
+    color: var(--text-main);
+    margin: 10px 0;
+  }
+  .alert-success .tip-label { color: var(--accent); font-weight: 700; font-size: .75rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+
+  /* ===== STEP LIST ===== */
+  .step-list { list-style: none; padding: 0; margin: 0; }
+  .step-list li {
+    display: flex; gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .9rem;
+    align-items: flex-start;
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num {
+    min-width: 28px; height: 28px;
+    background: var(--accent2);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .78rem; font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* ===== GRID HELPERS ===== */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+  @media (max-width: 768px) {
+    .two-col, .three-col, .four-col { grid-template-columns: 1fr; }
+    .slide-content { padding: 16px 18px; }
+  }
+
+  /* ===== COVER SLIDE SPECIFIC ===== */
+  .cover-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(57,211,83,.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(88,166,255,.07) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 90%, rgba(210,168,255,.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(48,54,61,.5) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(48,54,61,.5) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; opacity: .4;
+  }
+  .cover-inner {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    height: 100%; padding: 0 40px;
+  }
+  .cover-subtitle {
+    font-size: clamp(.85rem, 2vw, 1.1rem);
+    color: var(--text-muted);
+    margin-top: 12px;
+    max-width: 560px;
+    line-height: 1.6;
+  }
+  .cover-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+  .cover-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: .78rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    transition: all .2s;
+  }
+  .cover-badge:hover { border-color: var(--accent); color: var(--text-main); }
+  .cover-badge i { color: var(--accent); }
+  .cover-right {
+    position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
+    z-index: 2;
+  }
+  .git-logo-big {
+    font-size: 9rem;
+    color: var(--accent3);
+    opacity: .15;
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-16px); }
+  }
+
+  /* ===== COMMAND REFERENCE CARD ===== */
+  .cmd-ref {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .cmd-ref-header {
+    padding: 12px 18px;
+    background: var(--bg-card2);
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cmd-ref-row {
+    display: flex; align-items: flex-start;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(48,54,61,.5);
+    gap: 14px;
+    transition: background .15s;
+  }
+  .cmd-ref-row:last-child { border-bottom: none; }
+  .cmd-ref-row:hover { background: rgba(48,54,61,.4); }
+  .cmd-ref-row .cmd-col { min-width: 200px; }
+  .cmd-ref-row .desc-col { color: var(--text-muted); font-size: .84rem; line-height: 1.5; }
+
+  /* ===== CONFLICT RESOLUTION ===== */
+  .conflict-code {
+    background: var(--cmd-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    overflow: hidden;
+  }
+  .conflict-code .line { padding: 2px 16px; }
+  .conflict-code .line.conflict-head { background: rgba(247,129,102,.15); color: var(--accent3); }
+  .conflict-code .line.conflict-sep  { background: rgba(88,166,255,.1); color: var(--accent2); }
+  .conflict-code .line.conflict-end  { background: rgba(57,211,83,.1); color: var(--accent); }
+  .conflict-code .line.normal        { color: var(--text-main); }
+  .conflict-code .line.muted         { color: var(--text-muted); }
+
+  /* ===== STUDENT CARDS ===== */
+  .student-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: all .2s;
+  }
+  .student-card:hover { transform: translateY(-3px); }
+  .student-card .avatar {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    margin: 0 auto 10px;
+  }
+  .student-card h4 { font-size: .9rem; margin-bottom: 4px; font-weight: 700; }
+  .student-card p { font-size: .78rem; color: var(--text-muted); margin: 0; }
+
+  /* ===== OVERVIEW STEPS ===== */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 900px) { .overview-grid { grid-template-columns: repeat(2, 1fr); } }
+  .ov-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: center;
+  }
+  .ov-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+  .ov-card .ov-num {
+    font-size: 1.5rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 6px;
+  }
+  .ov-card .ov-icon { font-size: 1.4rem; margin-bottom: 8px; }
+  .ov-card .ov-title { font-size: .82rem; font-weight: 600; }
+  .ov-card .ov-cmd { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* ===== CODE RESULT ===== */
+  .code-result {
+    background: var(--cmd-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .83rem;
+    overflow: hidden;
+  }
+  .code-result .cr-header {
+    background: var(--bg-card2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text-muted); font-size: .75rem;
+  }
+  .code-result .cr-body { padding: 16px; line-height: 1.7; }
+  .kw { color: var(--accent2); }
+  .cl { color: var(--accent4); }
+  .fn { color: var(--accent); }
+  .cm { color: var(--text-muted); font-style: italic; }
+  .st { color: #a5d6ff; }
+
+  /* ===== TROFEO FINAL ===== */
+  .final-glow {
+    text-align: center;
+    padding: 20px;
+  }
+  .final-glow i {
+    font-size: 4rem;
+    color: #f0c040;
+    filter: drop-shadow(0 0 20px rgba(240,192,64,.5));
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%,100% { filter: drop-shadow(0 0 20px rgba(240,192,64,.5)); }
+    50%      { filter: drop-shadow(0 0 40px rgba(240,192,64,.9)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== SLIDE 1: COVER ========== -->
+<div class="slide active" id="slide-1">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git init presentacion</span>
+    <span class="slide-counter">Diapositiva <strong id="sc1">1</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb1" style="width:6.6%"></div></div>
+  <div style="position:relative; flex:1; overflow:hidden;">
+    <div class="cover-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="cover-inner animate__animated animate__fadeInUp">
+      <div class="step-badge"><i class="fa-brands fa-git-alt" style="color:var(--accent3)"></i> Programación II</div>
+      <h1 class="slide-title">Desafío<br><span style="color:var(--accent)">Git</span> <span style="color:var(--accent2)">#1</span></h1>
+      <p class="cover-subtitle">Calculadora Colaborativa — Aprende a trabajar en equipo con control de versiones usando los comandos fundamentales de Git.</p>
+      <div class="cover-badges">
+        <div class="cover-badge"><i class="fa-solid fa-code-branch"></i> clone</div>
+        <div class="cover-badge"><i class="fa-solid fa-code-branch"></i> checkout</div>
+        <div class="cover-badge"><i class="fa-solid fa-cloud-arrow-down"></i> pull</div>
+        <div class="cover-badge"><i class="fa-solid fa-plus"></i> add</div>
+        <div class="cover-badge"><i class="fa-solid fa-check"></i> commit</div>
+        <div class="cover-badge"><i class="fa-solid fa-box-archive"></i> stash</div>
+        <div class="cover-badge"><i class="fa-solid fa-code-merge"></i> merge</div>
+        <div class="cover-badge"><i class="fa-solid fa-cloud-arrow-up"></i> push</div>
+      </div>
+    </div>
+    <div class="cover-right animate__animated animate__fadeIn animate__delay-1s">
+      <i class="fa-brands fa-git-alt git-logo-big"></i>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" disabled><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-1"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 2: ¿Qué es Git? ========== -->
+<div class="slide" id="slide-2">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git --version</span>
+    <span class="slide-counter">Diapositiva <strong id="sc2">2</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb2" style="width:13.3%"></div></div>
+  <div class="slide-content">
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(247,129,102,.15)"><i class="fa-brands fa-git-alt" style="color:var(--accent3)"></i></span>
+      ¿Qué es Git?
+    </h2>
+    <div class="two-col">
+      <div>
+        <p style="color:var(--text-muted); font-size:.9rem; line-height:1.7">
+          <strong style="color:var(--text-main)">Git</strong> es un sistema de <span style="color:var(--accent)">control de versiones distribuido</span>. Registra cada cambio que haces en tu código, permitiéndote:
+        </p>
+        <ul class="step-list" style="margin-top:12px">
+          <li><span class="step-num" style="background:var(--accent)"><i class="fa-solid fa-check fa-xs"></i></span><div><strong>Guardar historial</strong> — cada versión queda registrada y es recuperable</div></li>
+          <li><span class="step-num" style="background:var(--accent2)"><i class="fa-solid fa-check fa-xs"></i></span><div><strong>Trabajar en equipo</strong> — múltiples personas editan el mismo proyecto sin pisarse</div></li>
+          <li><span class="step-num" style="background:var(--accent4)"><i class="fa-solid fa-check fa-xs"></i></span><div><strong>Experimentar sin miedo</strong> — creás ramas, probás y las descartás si no funcionan</div></li>
+          <li><span class="step-num" style="background:var(--accent3)"><i class="fa-solid fa-check fa-xs"></i></span><div><strong>Sincronizar con un servidor</strong> — GitHub, GitLab, Bitbucket guardan tu código en la nube</div></li>
+        </ul>
+      </div>
+      <div>
+        <!-- Mini diagram local ↔ remote -->
+        <svg viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:340px;margin:0 auto;display:block">
+          <!-- Local box -->
+          <rect x="20" y="60" width="120" height="120" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+          <text x="80" y="90" text-anchor="middle" fill="#8b949e" font-size="11" font-family="JetBrains Mono,monospace">REPOSITORIO</text>
+          <text x="80" y="106" text-anchor="middle" fill="#8b949e" font-size="11" font-family="JetBrains Mono,monospace">LOCAL</text>
+          <text x="80" y="130" text-anchor="middle" fill="#e6edf3" font-size="26">💻</text>
+          <text x="80" y="165" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="JetBrains Mono,monospace">tu máquina</text>
+
+          <!-- Remote box -->
+          <rect x="180" y="60" width="120" height="120" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+          <text x="240" y="90" text-anchor="middle" fill="#8b949e" font-size="11" font-family="JetBrains Mono,monospace">REPOSITORIO</text>
+          <text x="240" y="106" text-anchor="middle" fill="#8b949e" font-size="11" font-family="JetBrains Mono,monospace">REMOTO</text>
+          <text x="240" y="130" text-anchor="middle" fill="#e6edf3" font-size="26">☁️</text>
+          <text x="240" y="165" text-anchor="middle" fill="#39d353" font-size="10" font-family="JetBrains Mono,monospace">github.com</text>
+
+          <!-- Arrows -->
+          <defs>
+            <marker id="ah" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#58a6ff"/>
+            </marker>
+            <marker id="ah2" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#39d353"/>
+            </marker>
+          </defs>
+          <!-- push -->
+          <path d="M 142 108 L 178 108" stroke="#39d353" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ah2)"/>
+          <text x="160" y="100" text-anchor="middle" fill="#39d353" font-size="9" font-family="JetBrains Mono,monospace">push</text>
+          <!-- pull -->
+          <path d="M 178 128 L 142 128" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ah)"/>
+          <text x="160" y="144" text-anchor="middle" fill="#58a6ff" font-size="9" font-family="JetBrains Mono,monospace">pull / clone</text>
+
+          <!-- Working directory -->
+          <rect x="20" y="200" width="120" height="32" rx="8" fill="#1e2530" stroke="#30363d"/>
+          <text x="80" y="220" text-anchor="middle" fill="#8b949e" font-size="10" font-family="JetBrains Mono,monospace">Working Directory</text>
+          <line x1="80" y1="180" x2="80" y2="200" stroke="#30363d" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="100" y="195" fill="#8b949e" font-size="8" font-family="JetBrains Mono,monospace">add/commit</text>
+        </svg>
+
+        <div class="alert-tip" style="margin-top:12px">
+          <span class="tip-label"><i class="fa-solid fa-lightbulb"></i> CONCEPTO CLAVE</span>
+          Cada desarrollador tiene una copia <strong>completa</strong> del repositorio en su máquina. Si el servidor falla, ¡el historial está seguro en todos los equipos del equipo!
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-2"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 3: Comandos ========== -->
+<div class="slide" id="slide-3">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git help</span>
+    <span class="slide-counter">Diapositiva <strong id="sc3">3</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb3" style="width:20%"></div></div>
+  <div class="slide-content">
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(88,166,255,.15)"><i class="fa-solid fa-terminal" style="color:var(--accent2)"></i></span>
+      Los 8 Comandos del Desafío
+    </h2>
+    <div class="cmd-ref">
+      <div class="cmd-ref-header"><i class="fa-solid fa-circle-dot" style="color:#f85149"></i><i class="fa-solid fa-circle-dot" style="color:#f0c040; margin-left:4px"></i><i class="fa-solid fa-circle-dot" style="color:var(--accent); margin-left:4px"></i>&nbsp;&nbsp; terminal — bash</div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip">git clone</span></div>
+        <div class="desc-col"><i class="fa-solid fa-copy" style="color:var(--accent2);margin-right:6px"></i>Descarga un repositorio remoto y crea una copia local completa con todo el historial.</div>
+      </div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip">git checkout</span></div>
+        <div class="desc-col"><i class="fa-solid fa-code-branch" style="color:var(--accent2);margin-right:6px"></i>Cambia entre ramas o crea una nueva con el flag <code style="color:var(--accent3)">-b</code>. También restaura archivos.</div>
+      </div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip">git pull</span></div>
+        <div class="desc-col"><i class="fa-solid fa-cloud-arrow-down" style="color:var(--accent2);margin-right:6px"></i>Descarga los últimos cambios del repositorio remoto y los integra en la rama actual.</div>
+      </div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip">git add</span></div>
+        <div class="desc-col"><i class="fa-solid fa-plus" style="color:var(--accent2);margin-right:6px"></i>Agrega archivos al <em>staging area</em> (área de preparación) para incluirlos en el próximo commit.</div>
+      </div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip">git commit</span></div>
+        <div class="desc-col"><i class="fa-solid fa-check-double" style="color:var(--accent2);margin-right:6px"></i>Guarda una instantánea de los cambios del staging area con un mensaje descriptivo.</div>
+      </div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip red">git stash</span></div>
+        <div class="desc-col"><i class="fa-solid fa-box-archive" style="color:var(--accent3);margin-right:6px"></i>Guarda temporalmente cambios sin commitear. Útil cuando necesitás cambiar de rama sin perder trabajo. Se recupera con <code style="color:var(--accent3)">git stash pop</code>.</div>
+      </div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip purple">git merge</span></div>
+        <div class="desc-col"><i class="fa-solid fa-code-merge" style="color:var(--accent4);margin-right:6px"></i>Combina los cambios de una rama en la rama actual. Puede generar conflictos que hay que resolver manualmente.</div>
+      </div>
+      <div class="cmd-ref-row">
+        <div class="cmd-col"><span class="cmd-chip blue">git push</span></div>
+        <div class="desc-col"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent2);margin-right:6px"></i>Envía los commits locales al repositorio remoto para que los demás puedan verlos y descargarlos.</div>
+      </div>
+    </div>
+    <div class="alert-tip" style="margin-top:14px">
+      <span class="tip-label"><i class="fa-solid fa-lightbulb"></i> TIP</span>
+      El flujo básico es siempre: <span class="cmd-chip" style="font-size:.72rem">add</span> → <span class="cmd-chip" style="font-size:.72rem">commit</span> → <span class="cmd-chip blue" style="font-size:.72rem">push</span>. Primero preparás, luego registrás, luego compartís.
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-3"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 4: Ramas ========== -->
+<div class="slide" id="slide-4">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git branch --list</span>
+    <span class="slide-counter">Diapositiva <strong id="sc4">4</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb4" style="width:26.6%"></div></div>
+  <div class="slide-content">
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(57,211,83,.15)"><i class="fa-solid fa-code-branch" style="color:var(--accent)"></i></span>
+      ¿Qué son las Ramas (Branches)?
+    </h2>
+    <div class="two-col">
+      <div>
+        <p style="color:var(--text-muted); font-size:.88rem; line-height:1.7; margin-bottom:12px">
+          Una <strong style="color:var(--text-main)">rama</strong> es una línea de desarrollo independiente. Imaginala como una <em>copia paralela</em> del proyecto donde podés trabajar sin afectar el código principal.
+        </p>
+        <div class="card-dark" style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="width:12px;height:12px;border-radius:50%;background:var(--accent2);display:inline-block"></span>
+            <strong style="font-size:.88rem">main / master</strong>
+          </div>
+          <p style="font-size:.8rem;color:var(--text-muted);margin:0">La rama principal. Contiene el código estable y "oficial" del proyecto.</p>
+        </div>
+        <div class="card-dark" style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="width:12px;height:12px;border-radius:50%;background:var(--accent);display:inline-block"></span>
+            <strong style="font-size:.88rem">feature branches</strong>
+          </div>
+          <p style="font-size:.8rem;color:var(--text-muted);margin:0">Ramas de trabajo donde cada estudiante desarrolla su parte sin interferir con el resto.</p>
+        </div>
+        <div class="alert-success">
+          <span class="tip-label"><i class="fa-solid fa-check-circle"></i> VENTAJA</span>
+          Si una rama "sale mal", no afecta a <code style="color:var(--accent)">main</code>. Simplemente la descartás y empezás de nuevo.
+        </div>
+      </div>
+      <div>
+        <!-- Branch diagram SVG -->
+        <svg viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+          <!-- main line -->
+          <line x1="30" y1="60" x2="330" y2="60" stroke="#30363d" stroke-width="2"/>
+          <!-- commits main -->
+          <circle cx="60"  cy="60" r="10" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+          <circle cx="130" cy="60" r="10" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+          <circle cx="200" cy="60" r="10" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+          <circle cx="290" cy="60" r="10" fill="#58a6ff"/>
+          <text x="60"  y="40" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">c1</text>
+          <text x="130" y="40" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">c2</text>
+          <text x="200" y="40" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">c3</text>
+          <text x="290" y="40" text-anchor="middle" fill="#58a6ff" font-size="9" font-family="JetBrains Mono,monospace">merge</text>
+          <!-- label main -->
+          <rect x="20" y="14" width="36" height="16" rx="5" fill="#1e2530" stroke="#58a6ff" stroke-width="1"/>
+          <text x="38" y="25" text-anchor="middle" fill="#58a6ff" font-size="9" font-family="JetBrains Mono,monospace">main</text>
+
+          <!-- branch suma -->
+          <path d="M130 60 Q145 100 160 110" stroke="#39d353" stroke-width="1.5" fill="none"/>
+          <line x1="160" y1="110" x2="260" y2="110" stroke="#39d353" stroke-width="1.5"/>
+          <path d="M260 110 Q275 80 290 60" stroke="#39d353" stroke-width="1.5" fill="none"/>
+          <circle cx="190" cy="110" r="8" fill="#161b22" stroke="#39d353" stroke-width="2"/>
+          <circle cx="235" cy="110" r="8" fill="#39d353"/>
+          <text x="190" y="128" text-anchor="middle" fill="#39d353" font-size="8" font-family="JetBrains Mono,monospace">suma</text>
+          <text x="235" y="128" text-anchor="middle" fill="#39d353" font-size="8" font-family="JetBrains Mono,monospace">suma</text>
+          <rect x="125" y="136" width="36" height="16" rx="5" fill="#1e2530" stroke="#39d353" stroke-width="1"/>
+          <text x="143" y="147" text-anchor="middle" fill="#39d353" font-size="8" font-family="JetBrains Mono,monospace">suma</text>
+
+          <!-- branch resta -->
+          <path d="M130 60 Q145 150 160 165" stroke="#f78166" stroke-width="1.5" fill="none"/>
+          <line x1="160" y1="165" x2="255" y2="165" stroke="#f78166" stroke-width="1.5"/>
+          <path d="M255 165 Q270 120 290 60" stroke="#f78166" stroke-width="1.5" fill="none"/>
+          <circle cx="200" cy="165" r="8" fill="#161b22" stroke="#f78166" stroke-width="2"/>
+          <text x="200" y="183" text-anchor="middle" fill="#f78166" font-size="8" font-family="JetBrains Mono,monospace">resta</text>
+          <rect x="124" y="192" width="36" height="16" rx="5" fill="#1e2530" stroke="#f78166" stroke-width="1"/>
+          <text x="142" y="203" text-anchor="middle" fill="#f78166" font-size="8" font-family="JetBrains Mono,monospace">resta</text>
+
+          <!-- branch multiplica -->
+          <path d="M130 60 Q145 200 160 220" stroke="#d2a8ff" stroke-width="1.5" fill="none"/>
+          <line x1="160" y1="220" x2="250" y2="220" stroke="#d2a8ff" stroke-width="1.5"/>
+          <path d="M250 220 Q265 150 290 60" stroke="#d2a8ff" stroke-width="1.5" fill="none"/>
+          <circle cx="205" cy="220" r="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2"/>
+          <text x="205" y="238" text-anchor="middle" fill="#d2a8ff" font-size="8" font-family="JetBrains Mono,monospace">multiplica</text>
+
+          <!-- checkout label -->
+          <text x="135" y="78" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace" transform="rotate(-90,135,78)">checkout -b</text>
+
+          <!-- merge arrow label -->
+          <text x="295" y="78" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace" transform="rotate(90,295,78)">merge</text>
+
+          <!-- HEAD label -->
+          <rect x="278" y="44" width="40" height="14" rx="4" fill="#f0c040" opacity=".15" stroke="#f0c040" stroke-width="1"/>
+          <text x="298" y="54" text-anchor="middle" fill="#f0c040" font-size="8" font-family="JetBrains Mono,monospace">HEAD</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-4"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 5: OVERVIEW EJERCICIO ========== -->
+<div class="slide" id="slide-5">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git log --oneline</span>
+    <span class="slide-counter">Diapositiva <strong id="sc5">5</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb5" style="width:33.3%"></div></div>
+  <div class="slide-content">
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(57,211,83,.15)"><i class="fa-solid fa-map" style="color:var(--accent)"></i></span>
+      Hoja de Ruta — Calculadora Colaborativa
+    </h2>
+    <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:16px">
+      <i class="fa-solid fa-circle-info" style="color:var(--accent2);margin-right:6px"></i>
+      El código inicial <strong style="color:var(--accent3)">no compila</strong>. A través de los 8 pasos, el equipo lo completará colaborativamente.
+    </p>
+    <div class="overview-grid">
+      <div class="ov-card" onclick="goToSlide(6)">
+        <div class="ov-num" style="color:var(--accent2)">01</div>
+        <div class="ov-icon">🏗️</div>
+        <div class="ov-title">Crear Repositorio</div>
+        <div class="ov-cmd">Use this template</div>
+      </div>
+      <div class="ov-card" onclick="goToSlide(7)">
+        <div class="ov-num" style="color:var(--accent2)">02</div>
+        <div class="ov-icon">📥</div>
+        <div class="ov-title">Clonar el Repo</div>
+        <div class="ov-cmd">git clone</div>
+      </div>
+      <div class="ov-card" onclick="goToSlide(8)">
+        <div class="ov-num" style="color:var(--accent2)">03</div>
+        <div class="ov-icon">🌿</div>
+        <div class="ov-title">Crear Ramas</div>
+        <div class="ov-cmd">git checkout -b</div>
+      </div>
+      <div class="ov-card" onclick="goToSlide(9)">
+        <div class="ov-num" style="color:var(--accent2)">04</div>
+        <div class="ov-icon">⌨️</div>
+        <div class="ov-title">Implementar Código</div>
+        <div class="ov-cmd">code .</div>
+      </div>
+      <div class="ov-card" onclick="goToSlide(10)">
+        <div class="ov-num" style="color:var(--accent3)">05</div>
+        <div class="ov-icon">✅</div>
+        <div class="ov-title">Add + Commit</div>
+        <div class="ov-cmd">git add . && git commit</div>
+      </div>
+      <div class="ov-card" onclick="goToSlide(11)">
+        <div class="ov-num" style="color:var(--accent3)">06</div>
+        <div class="ov-icon">📦</div>
+        <div class="ov-title">Stash</div>
+        <div class="ov-cmd">git stash / pop</div>
+      </div>
+      <div class="ov-card" onclick="goToSlide(12)">
+        <div class="ov-num" style="color:var(--accent3)">07</div>
+        <div class="ov-icon">📤</div>
+        <div class="ov-title">Push al Remoto</div>
+        <div class="ov-cmd">git push origin</div>
+      </div>
+      <div class="ov-card" onclick="goToSlide(13)">
+        <div class="ov-num" style="color:var(--accent3)">08</div>
+        <div class="ov-icon">🔀</div>
+        <div class="ov-title">Pull + Merge</div>
+        <div class="ov-cmd">git pull && git merge</div>
+      </div>
+    </div>
+
+    <!-- Team roles -->
+    <div style="margin-top:20px">
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px"><i class="fa-solid fa-users" style="color:var(--accent2);margin-right:6px"></i>Cada integrante del equipo implementa <strong style="color:var(--text-main)">una operación</strong>:</p>
+      <div class="four-col">
+        <div class="student-card">
+          <div class="avatar" style="background:rgba(57,211,83,.15);border:2px solid var(--accent)">➕</div>
+          <h4>Estudiante A</h4>
+          <p>Rama: <span class="cmd-chip" style="font-size:.68rem">suma</span></p>
+        </div>
+        <div class="student-card">
+          <div class="avatar" style="background:rgba(88,166,255,.15);border:2px solid var(--accent2)">➖</div>
+          <h4>Estudiante B</h4>
+          <p>Rama: <span class="cmd-chip blue" style="font-size:.68rem">resta</span></p>
+        </div>
+        <div class="student-card">
+          <div class="avatar" style="background:rgba(247,129,102,.15);border:2px solid var(--accent3)">✖️</div>
+          <h4>Estudiante C</h4>
+          <p>Rama: <span class="cmd-chip red" style="font-size:.68rem">multiplica</span></p>
+        </div>
+        <div class="student-card">
+          <div class="avatar" style="background:rgba(210,168,255,.15);border:2px solid var(--accent4)">➗</div>
+          <h4>Estudiante D</h4>
+          <p>Rama: <span class="cmd-chip purple" style="font-size:.68rem">divide</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-5"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 6: PASO 1 ========== -->
+<div class="slide" id="slide-6">
+  <div class="topbar">
+    <span class="brand"><span>$</span> paso 1 — crear repositorio</span>
+    <span class="slide-counter">Diapositiva <strong id="sc6">6</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb6" style="width:40%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 1 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(88,166,255,.15)"><i class="fa-brands fa-github" style="color:var(--accent2)"></i></span>
+      Crear Repositorio desde Plantilla
+    </h2>
+    <div class="alert-warn">
+      <span class="tip-label"><i class="fa-solid fa-triangle-exclamation"></i> ATENCIÓN</span>
+      En este paso, <strong>todos leen</strong> las instrucciones primero, luego <strong>solo UNO</strong> las ejecuta.
+    </div>
+    <ul class="step-list" style="margin-top:14px">
+      <li><span class="step-num">1</span><div>Un estudiante hace clic en el botón <span class="tag"><i class="fa-solid fa-copy"></i> Use this template</span> → <strong>Create a new repository</strong></div></li>
+      <li><span class="step-num">2</span><div>En el campo <strong>Repository name</strong> escribe un nombre único para la organización (puede ser el que sugiere GitHub).</div></li>
+      <li><span class="step-num">3</span><div>Ir a <span class="tag"><i class="fa-solid fa-gear"></i> Settings</span> → <span class="tag"><i class="fa-solid fa-users"></i> Collaborators</span> y agregar al resto del equipo como colaboradores.</div></li>
+      <li><span class="step-num">4</span><div>Compartir el <strong>link al repositorio</strong> con todo el equipo por el canal de comunicación que usen.</div></li>
+    </ul>
+    <div style="margin-top:16px;text-align:center">
+      <svg viewBox="0 0 480 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px">
+        <!-- Template repo -->
+        <rect x="10" y="30" width="130" height="60" rx="10" fill="#1e2530" stroke="#30363d" stroke-width="1.5"/>
+        <text x="75" y="52" text-anchor="middle" fill="#8b949e" font-size="10" font-family="Syne,sans-serif" font-weight="700">📦 PLANTILLA</text>
+        <text x="75" y="68" text-anchor="middle" fill="#8b949e" font-size="8.5" font-family="JetBrains Mono,monospace">calculadora-template</text>
+        <text x="75" y="82" text-anchor="middle" fill="#f0c040" font-size="8" font-family="JetBrains Mono,monospace">Use this template</text>
+
+        <!-- Arrow -->
+        <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#39d353"/></marker></defs>
+        <line x1="142" y1="60" x2="168" y2="60" stroke="#39d353" stroke-width="2" marker-end="url(#a1)"/>
+        <text x="155" y="52" text-anchor="middle" fill="#39d353" font-size="8" font-family="JetBrains Mono,monospace">fork</text>
+
+        <!-- New repo -->
+        <rect x="170" y="30" width="130" height="60" rx="10" fill="#1e2530" stroke="#39d353" stroke-width="1.5"/>
+        <text x="235" y="52" text-anchor="middle" fill="#39d353" font-size="10" font-family="Syne,sans-serif" font-weight="700">📁 TU REPO</text>
+        <text x="235" y="68" text-anchor="middle" fill="#8b949e" font-size="8.5" font-family="JetBrains Mono,monospace">org/nombre-elegido</text>
+        <text x="235" y="82" text-anchor="middle" fill="#58a6ff" font-size="8" font-family="JetBrains Mono,monospace">+ Collaborators</text>
+
+        <!-- Arrows to team -->
+        <defs><marker id="a2" markerWidth="6" markerHeight="5" refX="4" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#58a6ff"/></marker></defs>
+        <line x1="302" y1="60" x2="328" y2="60" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#a2)"/>
+        <text x="315" y="52" text-anchor="middle" fill="#58a6ff" font-size="8" font-family="JetBrains Mono,monospace">share</text>
+
+        <!-- Team -->
+        <rect x="330" y="10" width="70" height="25" rx="7" fill="#161b22" stroke="#30363d"/>
+        <text x="365" y="26" text-anchor="middle" fill="#e6edf3" font-size="9" font-family="Syne,sans-serif">👤 Est. A</text>
+        <rect x="330" y="47" width="70" height="25" rx="7" fill="#161b22" stroke="#30363d"/>
+        <text x="365" y="63" text-anchor="middle" fill="#e6edf3" font-size="9" font-family="Syne,sans-serif">👤 Est. B</text>
+        <rect x="330" y="84" width="70" height="25" rx="7" fill="#161b22" stroke="#30363d"/>
+        <text x="365" y="100" text-anchor="middle" fill="#e6edf3" font-size="9" font-family="Syne,sans-serif">👤 Est. C</text>
+        <line x1="330" y1="22" x2="302" y2="45" stroke="#30363d" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="330" y1="60" x2="302" y2="60" stroke="#30363d" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="330" y1="96" x2="302" y2="75" stroke="#30363d" stroke-width="1" stroke-dasharray="3,3"/>
+      </svg>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-6"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 7: PASO 2 – Clone ========== -->
+<div class="slide" id="slide-7">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git clone &lt;url&gt;</span>
+    <span class="slide-counter">Diapositiva <strong id="sc7">7</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb7" style="width:46.6%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 2 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(57,211,83,.15)"><i class="fa-solid fa-cloud-arrow-down" style="color:var(--accent)"></i></span>
+      Clonar el Repositorio
+    </h2>
+    <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:12px">
+      <strong style="color:var(--text-main)">Todos los estudiantes</strong> realizan estos pasos en su propia máquina.
+    </p>
+    <div class="two-col">
+      <div>
+        <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:8px">Abrí la terminal y navegá hasta tu carpeta de repositorios:</p>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git clone &lt;url-del-repositorio&gt;</span>
+        </div>
+        <div class="cmd-block" style="margin-top:8px">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">cd &lt;nombre-repositorio&gt;</span>
+        </div>
+        <div class="alert-tip" style="margin-top:10px">
+          <span class="tip-label"><i class="fa-solid fa-lightbulb"></i> TIP</span>
+          <code>ls</code> (Mac/Linux) o <code>dir</code> (Windows) para listar los archivos del directorio actual.
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:6px">Salida esperada en la terminal:</p>
+        <div class="cmd-block" style="font-size:.77rem;line-height:1.6">
+          <span class="comment">Cloning into 'nombre-repositorio'...</span><br>
+          <span style="color:#8b949e">remote: Enumerating objects: 9, done.</span><br>
+          <span style="color:#8b949e">remote: Counting objects: 100% (9/9), done.</span><br>
+          <span style="color:#8b949e">remote: Compressing objects: 100% (8/8), done.</span><br>
+          <span style="color:var(--accent)">Receiving objects: 100% (9/9), 9.54 KiB, done.</span>
+        </div>
+        <div class="card-dark" style="margin-top:12px;display:flex;align-items:center;gap:12px">
+          <i class="fa-solid fa-folder-tree" style="font-size:1.8rem;color:var(--accent2)"></i>
+          <div>
+            <div style="font-size:.84rem;font-weight:700">Estructura creada</div>
+            <div style="font-size:.78rem;color:var(--text-muted)">El comando crea una carpeta con el nombre del repo y descarga <em>todo</em> el historial de commits.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-7"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 8: PASO 3 – checkout -b ========== -->
+<div class="slide" id="slide-8">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git checkout -b suma</span>
+    <span class="slide-counter">Diapositiva <strong id="sc8">8</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb8" style="width:53.3%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 3 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(57,211,83,.15)"><i class="fa-solid fa-code-branch" style="color:var(--accent)"></i></span>
+      Crear Ramas Individuales
+    </h2>
+    <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:12px">
+      Cada estudiante crea <strong style="color:var(--text-main)">su propia rama</strong> con el nombre de la operación que va a implementar.
+    </p>
+    <div class="cmd-block" style="font-size:.9rem">
+      <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+      <span class="prompt">$ </span><span class="cmd-text">git checkout <span style="color:var(--accent3)">-b</span> &lt;nombre-rama&gt;</span>
+    </div>
+    <div class="four-col" style="margin-top:16px">
+      <div class="card-dark" style="border-color:rgba(57,211,83,.3)">
+        <div style="font-size:1.5rem;margin-bottom:8px">➕</div>
+        <div class="cmd-chip" style="font-size:.8rem;margin-bottom:8px">suma</div>
+        <div class="cmd-block" style="font-size:.75rem;padding:8px 12px">
+          <span class="prompt">$ </span><span class="cmd-text">git checkout -b suma</span>
+        </div>
+      </div>
+      <div class="card-dark" style="border-color:rgba(88,166,255,.3)">
+        <div style="font-size:1.5rem;margin-bottom:8px">➖</div>
+        <div class="cmd-chip blue" style="font-size:.8rem;margin-bottom:8px">resta</div>
+        <div class="cmd-block" style="font-size:.75rem;padding:8px 12px">
+          <span class="prompt">$ </span><span class="cmd-text">git checkout -b resta</span>
+        </div>
+      </div>
+      <div class="card-dark" style="border-color:rgba(247,129,102,.3)">
+        <div style="font-size:1.5rem;margin-bottom:8px">✖️</div>
+        <div class="cmd-chip red" style="font-size:.8rem;margin-bottom:8px">multiplica</div>
+        <div class="cmd-block" style="font-size:.75rem;padding:8px 12px">
+          <span class="prompt">$ </span><span class="cmd-text">git checkout -b multiplica</span>
+        </div>
+      </div>
+      <div class="card-dark" style="border-color:rgba(210,168,255,.3)">
+        <div style="font-size:1.5rem;margin-bottom:8px">➗</div>
+        <div class="cmd-chip purple" style="font-size:.8rem;margin-bottom:8px">divide</div>
+        <div class="cmd-block" style="font-size:.75rem;padding:8px 12px">
+          <span class="prompt">$ </span><span class="cmd-text">git checkout -b divide</span>
+        </div>
+      </div>
+    </div>
+    <div class="two-col" style="margin-top:14px">
+      <div class="alert-success">
+        <span class="tip-label"><i class="fa-solid fa-check-circle"></i> SALIDA ESPERADA</span>
+        <code>Switched to a new branch 'suma'</code>
+      </div>
+      <div class="alert-tip">
+        <span class="tip-label"><i class="fa-solid fa-lightbulb"></i> ¿Qué hace -b?</span>
+        El flag <code>-b</code> crea la rama <em>y</em> te mueve a ella en un solo paso. Sin <code>-b</code> solo cambia de rama (que debe existir).
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-8"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 9: PASO 4 – Implementar ========== -->
+<div class="slide" id="slide-9">
+  <div class="topbar">
+    <span class="brand"><span>$</span> code .</span>
+    <span class="slide-counter">Diapositiva <strong id="sc9">9</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb9" style="width:60%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 4 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(247,129,102,.15)"><i class="fa-solid fa-code" style="color:var(--accent3)"></i></span>
+      Implementar la Operación en C#
+    </h2>
+    <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:12px">Abrir VS Code con <code style="color:var(--accent)">code .</code> y agregar el código en <code>src/Program/Program.cs</code></p>
+    <div class="four-col">
+      <!-- A -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block"></span>
+          <span style="font-size:.78rem;font-weight:700">Estudiante A — suma</span>
+        </div>
+        <div class="code-result">
+          <div class="cr-header"><i class="fa-solid fa-file-code"></i> Program.cs</div>
+          <div class="cr-body" style="font-size:.72rem">
+            <span class="kw">public class</span> <span class="cl">Addition</span><br>
+            {<br>
+            &nbsp;&nbsp;<span class="kw">public static int</span> <span class="fn">Add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b)<br>
+            &nbsp;&nbsp;{<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> a <span style="color:var(--accent3)">+</span> b;<br>
+            &nbsp;&nbsp;}<br>
+            }
+          </div>
+        </div>
+      </div>
+      <!-- B -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--accent2);display:inline-block"></span>
+          <span style="font-size:.78rem;font-weight:700">Estudiante B — resta</span>
+        </div>
+        <div class="code-result">
+          <div class="cr-header"><i class="fa-solid fa-file-code"></i> Program.cs</div>
+          <div class="cr-body" style="font-size:.72rem">
+            <span class="kw">public class</span> <span class="cl">Substraction</span><br>
+            {<br>
+            &nbsp;&nbsp;<span class="kw">public static int</span> <span class="fn">Substract</span>(<span class="kw">int</span> a, <span class="kw">int</span> b)<br>
+            &nbsp;&nbsp;{<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> a <span style="color:var(--accent3)">-</span> b;<br>
+            &nbsp;&nbsp;}<br>
+            }
+          </div>
+        </div>
+      </div>
+      <!-- C -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--accent3);display:inline-block"></span>
+          <span style="font-size:.78rem;font-weight:700">Estudiante C — multiplica</span>
+        </div>
+        <div class="code-result">
+          <div class="cr-header"><i class="fa-solid fa-file-code"></i> Program.cs</div>
+          <div class="cr-body" style="font-size:.72rem">
+            <span class="kw">public class</span> <span class="cl">Multiplication</span><br>
+            {<br>
+            &nbsp;&nbsp;<span class="kw">public static int</span> <span class="fn">Multiply</span>(<span class="kw">int</span> a, <span class="kw">int</span> b)<br>
+            &nbsp;&nbsp;{<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> a <span style="color:var(--accent3)">*</span> b;<br>
+            &nbsp;&nbsp;}<br>
+            }
+          </div>
+        </div>
+      </div>
+      <!-- D -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--accent4);display:inline-block"></span>
+          <span style="font-size:.78rem;font-weight:700">Estudiante D — divide</span>
+        </div>
+        <div class="code-result">
+          <div class="cr-header"><i class="fa-solid fa-file-code"></i> Program.cs</div>
+          <div class="cr-body" style="font-size:.72rem">
+            <span class="kw">public class</span> <span class="cl">Division</span><br>
+            {<br>
+            &nbsp;&nbsp;<span class="kw">public static double</span> <span class="fn">Divide</span>(<span class="kw">int</span> a, <span class="kw">int</span> b)<br>
+            &nbsp;&nbsp;{<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> (<span class="kw">double</span>)a <span style="color:var(--accent3)">/</span> b;<br>
+            &nbsp;&nbsp;}<br>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert-tip" style="margin-top:14px">
+      <span class="tip-label"><i class="fa-solid fa-lightbulb"></i> NOTA</span>
+      No te preocupes si no entendés todo el código. El objetivo es vivir el <strong>flujo de desarrollo colaborativo y concurrente</strong> en Git, no dominar C# aún.
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-9"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 10: PASO 5 – Add + Commit ========== -->
+<div class="slide" id="slide-10">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git add . && git commit -m "..."</span>
+    <span class="slide-counter">Diapositiva <strong id="sc10">10</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb10" style="width:66.6%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 5 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(57,211,83,.15)"><i class="fa-solid fa-check-double" style="color:var(--accent)"></i></span>
+      Add y Commit de los Cambios
+    </h2>
+    <div class="two-col">
+      <div>
+        <!-- Staging diagram -->
+        <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+          <!-- Working Dir -->
+          <rect x="10" y="20" width="80" height="50" rx="8" fill="#1e2530" stroke="#30363d" stroke-width="1.5"/>
+          <text x="50" y="40" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">WORKING</text>
+          <text x="50" y="53" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">DIRECTORY</text>
+          <text x="50" y="68" text-anchor="middle" fill="#f78166" font-size="9" font-family="JetBrains Mono,monospace">● modified</text>
+
+          <!-- Staging Area -->
+          <rect x="110" y="20" width="80" height="50" rx="8" fill="#1e2530" stroke="#f0c040" stroke-width="1.5"/>
+          <text x="150" y="40" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">STAGING</text>
+          <text x="150" y="53" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">AREA</text>
+          <text x="150" y="68" text-anchor="middle" fill="#f0c040" font-size="9" font-family="JetBrains Mono,monospace">● staged</text>
+
+          <!-- Local Repo -->
+          <rect x="210" y="20" width="80" height="50" rx="8" fill="#1e2530" stroke="#39d353" stroke-width="1.5"/>
+          <text x="250" y="40" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">LOCAL</text>
+          <text x="250" y="53" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">REPO</text>
+          <text x="250" y="68" text-anchor="middle" fill="#39d353" font-size="9" font-family="JetBrains Mono,monospace">● committed</text>
+
+          <!-- Arrows -->
+          <defs><marker id="a3" markerWidth="6" markerHeight="5" refX="4" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#f0c040"/></marker>
+          <marker id="a4" markerWidth="6" markerHeight="5" refX="4" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#39d353"/></marker></defs>
+          <line x1="92" y1="45" x2="108" y2="45" stroke="#f0c040" stroke-width="1.5" marker-end="url(#a3)"/>
+          <text x="100" y="38" text-anchor="middle" fill="#f0c040" font-size="8" font-family="JetBrains Mono,monospace">add</text>
+          <line x1="192" y1="45" x2="208" y2="45" stroke="#39d353" stroke-width="1.5" marker-end="url(#a4)"/>
+          <text x="200" y="38" text-anchor="middle" fill="#39d353" font-size="8" font-family="JetBrains Mono,monospace">commit</text>
+
+          <!-- Commands below -->
+          <text x="50" y="100" text-anchor="middle" fill="#30363d" font-size="8" font-family="JetBrains Mono,monospace">─────────────────────────────────────────────────────</text>
+          <rect x="10" y="110" width="120" height="28" rx="6" fill="#0d1117" stroke="#f0c040" stroke-width="1"/>
+          <text x="70" y="128" text-anchor="middle" fill="#f0c040" font-size="9" font-family="JetBrains Mono,monospace">$ git add .</text>
+          <rect x="140" y="110" width="150" height="28" rx="6" fill="#0d1117" stroke="#39d353" stroke-width="1"/>
+          <text x="215" y="128" text-anchor="middle" fill="#39d353" font-size="8.5" font-family="JetBrains Mono,monospace">$ git commit -m "..."</text>
+        </svg>
+      </div>
+      <div>
+        <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:10px">Ejecutar en la terminal (el punto en <code>git add</code> agrega <em>todos</em> los archivos modificados):</p>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git add .</span>
+        </div>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git commit -m <span style="color:#a5d6ff">"Implementación de la operación suma"</span></span>
+        </div>
+        <div class="alert-success" style="margin-top:10px">
+          <span class="tip-label"><i class="fa-solid fa-check-circle"></i> BUENA PRÁCTICA</span>
+          Los mensajes de commit deben ser <strong>descriptivos y en presente</strong>: "Agrega clase Addition", no "cambios" ni "arreglé cosas".
+        </div>
+        <div class="alert-warn" style="margin-top:8px">
+          <span class="tip-label"><i class="fa-solid fa-triangle-exclamation"></i> ATENCIÓN</span>
+          El punto al final de <code>git add .</code> es parte del comando. Agrega todos los cambios de la carpeta actual.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-10"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 11: PASO 6 – Stash ========== -->
+<div class="slide" id="slide-11">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git stash / git stash pop</span>
+    <span class="slide-counter">Diapositiva <strong id="sc11">11</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb11" style="width:73.3%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 6 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(247,129,102,.15)"><i class="fa-solid fa-box-archive" style="color:var(--accent3)"></i></span>
+      Guardar Temporalmente con Stash
+    </h2>
+    <div class="two-col">
+      <div>
+        <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:10px">
+          Situación: estás trabajando en cambios a mitad, y necesitás "pausar" sin hacer commit. <span class="cmd-chip red">git stash</span> los guarda en una pila temporal.
+        </p>
+        <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:10px">
+          <strong style="color:var(--text-main)">1.</strong> Agregar este comentario antes de tu clase en <code>Program.cs</code>:
+        </p>
+        <div class="cmd-block" style="font-size:.78rem">
+          <span class="comment">// Esta clase implementa la operación &lt;nombre-operación&gt;</span><br>
+          <span class="kw" style="color:var(--accent2)">public class</span> <span style="color:var(--accent4)">Resta</span><br>
+          {<br>
+          &nbsp;&nbsp;<span class="kw" style="color:var(--accent2)">public static int</span> <span style="color:var(--accent)">Restar</span>(...) { ... }<br>
+          }
+        </div>
+        <p style="font-size:.84rem;color:var(--text-muted);margin:10px 0 6px">
+          <strong style="color:var(--text-main)">2.</strong> Guardar temporalmente sin commitear:
+        </p>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git stash</span>
+        </div>
+        <p style="font-size:.84rem;color:var(--text-muted);margin:10px 0 6px">
+          <strong style="color:var(--text-main)">3.</strong> Recuperar los cambios guardados:
+        </p>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git stash pop</span>
+        </div>
+      </div>
+      <div>
+        <!-- Stash visual -->
+        <svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+          <!-- Working Dir -->
+          <rect x="10" y="10" width="110" height="50" rx="8" fill="#1e2530" stroke="#f78166" stroke-width="1.5"/>
+          <text x="65" y="30" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">WORKING DIR</text>
+          <text x="65" y="46" text-anchor="middle" fill="#f78166" font-size="9" font-family="JetBrains Mono,monospace">cambios sin commit</text>
+
+          <!-- Stash box -->
+          <rect x="160" y="10" width="110" height="50" rx="8" fill="#1e2530" stroke="#f0c040" stroke-width="1.5"/>
+          <text x="215" y="30" text-anchor="middle" fill="#f0c040" font-size="9" font-family="JetBrains Mono,monospace">STASH</text>
+          <text x="215" y="46" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">pila temporal 📦</text>
+
+          <!-- Arrows stash / pop -->
+          <defs>
+            <marker id="a5" markerWidth="6" markerHeight="5" refX="4" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#f0c040"/></marker>
+            <marker id="a6" markerWidth="6" markerHeight="5" refX="4" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#39d353"/></marker>
+          </defs>
+          <line x1="122" y1="25" x2="158" y2="25" stroke="#f0c040" stroke-width="1.5" marker-end="url(#a5)"/>
+          <text x="140" y="18" text-anchor="middle" fill="#f0c040" font-size="8" font-family="JetBrains Mono,monospace">git stash</text>
+          <line x1="158" y1="45" x2="122" y2="45" stroke="#39d353" stroke-width="1.5" marker-end="url(#a6)"/>
+          <text x="140" y="58" text-anchor="middle" fill="#39d353" font-size="8" font-family="JetBrains Mono,monospace">git stash pop</text>
+
+          <!-- Clean working dir -->
+          <rect x="10" y="90" width="110" height="40" rx="8" fill="#1e2530" stroke="#39d353" stroke-width="1.5"/>
+          <text x="65" y="108" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">WORKING DIR</text>
+          <text x="65" y="122" text-anchor="middle" fill="#39d353" font-size="9" font-family="JetBrains Mono,monospace">limpio ✓</text>
+          <line x1="65" y1="62" x2="65" y2="88" stroke="#30363d" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="82" y="78" fill="#8b949e" font-size="8" font-family="JetBrains Mono,monospace">después de stash</text>
+
+          <!-- Multiple stashes -->
+          <text x="140" y="110" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">Pila LIFO:</text>
+          <rect x="160" y="118" width="110" height="18" rx="4" fill="#0d1117" stroke="#f0c040" stroke-width="1"/>
+          <text x="215" y="130" text-anchor="middle" fill="#f0c040" font-size="8" font-family="JetBrains Mono,monospace">stash@{0} ← último</text>
+          <rect x="160" y="140" width="110" height="18" rx="4" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+          <text x="215" y="152" text-anchor="middle" fill="#8b949e" font-size="8" font-family="JetBrains Mono,monospace">stash@{1}</text>
+          <rect x="160" y="162" width="110" height="18" rx="4" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+          <text x="215" y="174" text-anchor="middle" fill="#8b949e" font-size="8" font-family="JetBrains Mono,monospace">stash@{2}</text>
+
+          <text x="140" y="200" fill="#8b949e" font-size="8" font-family="JetBrains Mono,monospace">stash pop = saca el último (LIFO)</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-11"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 12: PASO 7 – Push ========== -->
+<div class="slide" id="slide-12">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git push origin suma</span>
+    <span class="slide-counter">Diapositiva <strong id="sc12">12</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb12" style="width:80%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 7 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(88,166,255,.15)"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent2)"></i></span>
+      Enviar Cambios al Repositorio Remoto
+    </h2>
+    <div class="two-col">
+      <div>
+        <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:10px">
+          Primero, commitear el comentario del paso anterior, luego subir la rama al servidor:
+        </p>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git add .</span>
+        </div>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git commit -m <span style="color:#a5d6ff">"Comentario agregado"</span></span>
+        </div>
+        <div class="cmd-block" style="margin-top:12px;border-color:rgba(88,166,255,.4)">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git push origin <span style="color:var(--accent2)">&lt;nombre-rama&gt;</span></span>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-top:8px">Reemplazá <code>&lt;nombre-rama&gt;</code> con: <span class="cmd-chip" style="font-size:.72rem">suma</span> <span class="cmd-chip blue" style="font-size:.72rem">resta</span> <span class="cmd-chip red" style="font-size:.72rem">multiplica</span> <span class="cmd-chip purple" style="font-size:.72rem">divide</span></p>
+      </div>
+      <div>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:6px">Salida esperada:</p>
+        <div class="cmd-block" style="font-size:.75rem;line-height:1.7">
+          <span style="color:#8b949e">Enumerating objects: 14, done.</span><br>
+          <span style="color:#8b949e">Counting objects: 100% (14/14), done.</span><br>
+          <span style="color:#8b949e">Compressing objects: 100% (8/8), done.</span><br>
+          <span style="color:var(--accent)">Writing objects: 100% (10/10), 931 bytes, done.</span><br>
+          <span style="color:var(--accent2)">To github.com:org/nombre-repositorio.git</span><br>
+          <span style="color:var(--accent)"> * [new branch]  suma → suma</span>
+        </div>
+        <div class="alert-tip" style="margin-top:12px">
+          <span class="tip-label"><i class="fa-solid fa-lightbulb"></i> ¿Qué es "origin"?</span>
+          <strong>origin</strong> es el nombre por defecto del repositorio remoto (el de GitHub). Es un alias para la URL larga del repositorio.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-12"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 13: PASO 8 – Pull + Merge ========== -->
+<div class="slide" id="slide-13">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git pull && git merge</span>
+    <span class="slide-counter">Diapositiva <strong id="sc13">13</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb13" style="width:86.6%"></div></div>
+  <div class="slide-content">
+    <div class="step-badge"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Paso 8 de 8</div>
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(210,168,255,.15)"><i class="fa-solid fa-code-merge" style="color:var(--accent4)"></i></span>
+      Obtener Cambios y Hacer Merge
+    </h2>
+    <div class="two-col">
+      <div>
+        <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:8px">De <strong>a un estudiante a la vez</strong>, cada uno ejecuta:</p>
+        <div class="cmd-block">
+          <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+          <span class="prompt">$ </span><span class="cmd-text">git checkout main</span><br>
+          <span class="prompt">$ </span><span class="cmd-text">git pull</span><br>
+          <span class="prompt">$ </span><span class="cmd-text">git merge <span style="color:var(--accent2)">&lt;nombre-rama&gt;</span></span><br>
+          <span class="prompt">$ </span><span class="cmd-text">git push</span>
+        </div>
+        <div class="alert-success" style="margin-top:10px">
+          <span class="tip-label"><i class="fa-solid fa-check-circle"></i> SIN CONFLICTOS</span>
+          <code style="font-size:.78rem">Fast-forward ... 1 file changed, 9 insertions(+)</code>
+        </div>
+        <div class="alert-warn" style="margin-top:8px">
+          <span class="tip-label"><i class="fa-solid fa-triangle-exclamation"></i> CON CONFLICTOS</span>
+          <code style="font-size:.78rem">CONFLICT (content): Merge conflict in src/Program/Program.cs</code><br>
+          <span style="font-size:.8rem">→ Resolvé manualmente, luego: <code>git add . && git commit && git push</code></span>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:6px">Código en conflicto — qué verás en el editor:</p>
+        <div class="conflict-code" style="font-size:.74rem;line-height:1.7">
+          <div class="line normal">&nbsp;&nbsp;Console.WriteLine(...);</div>
+          <div class="line conflict-head"><<<<<<< HEAD</div>
+          <div class="line normal">&nbsp;&nbsp;<span style="color:var(--accent3)">// código en main actual</span></div>
+          <div class="line conflict-sep">======= </div>
+          <div class="line normal">&nbsp;&nbsp;<span style="color:var(--accent2)">// código de tu rama</span></div>
+          <div class="line conflict-end">>>>>>>> suma</div>
+        </div>
+        <div class="alert-tip" style="margin-top:10px">
+          <span class="tip-label"><i class="fa-solid fa-lightbulb"></i> CÓMO RESOLVER</span>
+          En este ejercicio, <strong>ambos bloques deben quedar</strong>. Solo borrá los marcadores <code>&lt;&lt;&lt;</code>, <code>===</code> y <code>&gt;&gt;&gt;</code>. En otros casos, elegís qué código conservar.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-13"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 14: RESULTADO FINAL ========== -->
+<div class="slide" id="slide-14">
+  <div class="topbar">
+    <span class="brand"><span>$</span> dotnet run</span>
+    <span class="slide-counter">Diapositiva <strong id="sc14">14</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb14" style="width:93.3%"></div></div>
+  <div class="slide-content">
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(57,211,83,.15)"><i class="fa-solid fa-trophy" style="color:#f0c040"></i></span>
+      Código Final — Resultado del Equipo
+    </h2>
+    <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:14px">Después de hacer merge de todas las contribuciones, el <code>Program.cs</code> debería verse así:</p>
+    <div class="two-col">
+      <div>
+        <div class="code-result">
+          <div class="cr-header"><i class="fa-solid fa-file-code"></i> src/Program/Program.cs — bloque principal</div>
+          <div class="cr-body" style="font-size:.78rem;line-height:1.8">
+            <span class="cm">// Llamadas a las clases del equipo</span><br>
+            <span class="cl">Console</span>.<span class="fn">WriteLine</span>(<span class="cl">Addition</span>.<span class="fn">Add</span>(<span style="color:#79c0ff">7</span>, <span style="color:#79c0ff">2</span>));<br>
+            <span class="cl">Console</span>.<span class="fn">WriteLine</span>(<span class="cl">Substraction</span>.<span class="fn">Substract</span>(<span style="color:#79c0ff">10</span>, <span style="color:#79c0ff">1</span>));<br>
+            <span class="cl">Console</span>.<span class="fn">WriteLine</span>(<span class="cl">Multiplication</span>.<span class="fn">Multiply</span>(<span style="color:#79c0ff">3</span>, <span style="color:#79c0ff">3</span>));<br>
+            <span class="cl">Console</span>.<span class="fn">WriteLine</span>(<span class="cl">Division</span>.<span class="fn">Divide</span>(<span style="color:#79c0ff">18</span>, <span style="color:#79c0ff">2</span>));
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="code-result">
+          <div class="cr-header"><i class="fa-solid fa-terminal"></i> Salida en consola</div>
+          <div class="cr-body" style="font-size:.9rem;line-height:2">
+            <span style="color:var(--accent)">9</span>&nbsp;&nbsp;<span style="color:var(--text-muted); font-size:.75rem">← 7 + 2</span><br>
+            <span style="color:var(--accent)">9</span>&nbsp;&nbsp;<span style="color:var(--text-muted); font-size:.75rem">← 10 - 1</span><br>
+            <span style="color:var(--accent)">9</span>&nbsp;&nbsp;<span style="color:var(--text-muted); font-size:.75rem">← 3 × 3</span><br>
+            <span style="color:var(--accent)">9</span>&nbsp;&nbsp;<span style="color:var(--text-muted); font-size:.75rem">← 18 ÷ 2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div class="four-col">
+        <div class="student-card" style="border-color:rgba(57,211,83,.3)">
+          <div class="avatar" style="background:rgba(57,211,83,.15);border:2px solid var(--accent)">➕</div>
+          <h4 style="color:var(--accent)">Addition</h4>
+          <p><code style="font-size:.72rem">Add(a, b)</code><br><span class="cmd-chip" style="font-size:.68rem;margin-top:4px;display:inline-block">rama: suma</span></p>
+        </div>
+        <div class="student-card" style="border-color:rgba(88,166,255,.3)">
+          <div class="avatar" style="background:rgba(88,166,255,.15);border:2px solid var(--accent2)">➖</div>
+          <h4 style="color:var(--accent2)">Substraction</h4>
+          <p><code style="font-size:.72rem">Substract(a, b)</code><br><span class="cmd-chip blue" style="font-size:.68rem;margin-top:4px;display:inline-block">rama: resta</span></p>
+        </div>
+        <div class="student-card" style="border-color:rgba(247,129,102,.3)">
+          <div class="avatar" style="background:rgba(247,129,102,.15);border:2px solid var(--accent3)">✖️</div>
+          <h4 style="color:var(--accent3)">Multiplication</h4>
+          <p><code style="font-size:.72rem">Multiply(a, b)</code><br><span class="cmd-chip red" style="font-size:.68rem;margin-top:4px;display:inline-block">rama: multiplica</span></p>
+        </div>
+        <div class="student-card" style="border-color:rgba(210,168,255,.3)">
+          <div class="avatar" style="background:rgba(210,168,255,.15);border:2px solid var(--accent4)">➗</div>
+          <h4 style="color:var(--accent4)">Division</h4>
+          <p><code style="font-size:.72rem">Divide(a, b)</code><br><span class="cmd-chip purple" style="font-size:.68rem;margin-top:4px;display:inline-block">rama: divide</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-14"></div>
+    <button class="btn-nav" onclick="goNext()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ========== SLIDE 15: RESUMEN FINAL ========== -->
+<div class="slide" id="slide-15">
+  <div class="topbar">
+    <span class="brand"><span>$</span> git log --all --oneline --graph</span>
+    <span class="slide-counter">Diapositiva <strong id="sc15">15</strong> / 15</span>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb15" style="width:100%"></div></div>
+  <div class="slide-content">
+    <h2 class="section-title animate__animated animate__fadeInDown">
+      <span class="icon-wrap" style="background:rgba(240,192,64,.15)"><i class="fa-solid fa-star" style="color:#f0c040"></i></span>
+      Resumen — Lo que Aprendiste
+    </h2>
+    <div class="three-col">
+      <div class="card-dark" style="text-align:center;border-color:rgba(57,211,83,.2)">
+        <i class="fa-brands fa-git-alt" style="font-size:2rem;color:var(--accent3);margin-bottom:10px;display:block"></i>
+        <h4 style="font-size:.92rem;margin-bottom:6px">Control de Versiones</h4>
+        <p style="font-size:.78rem;color:var(--text-muted)">Git registra cada cambio, permite volver al pasado y trabaja de forma distribuida.</p>
+      </div>
+      <div class="card-dark" style="text-align:center;border-color:rgba(88,166,255,.2)">
+        <i class="fa-solid fa-code-branch" style="font-size:2rem;color:var(--accent2);margin-bottom:10px;display:block"></i>
+        <h4 style="font-size:.92rem;margin-bottom:6px">Ramas y Trabajo Paralelo</h4>
+        <p style="font-size:.78rem;color:var(--text-muted)">Cada integrante trabajó en su rama sin pisar el código de los demás.</p>
+      </div>
+      <div class="card-dark" style="text-align:center;border-color:rgba(210,168,255,.2)">
+        <i class="fa-solid fa-code-merge" style="font-size:2rem;color:var(--accent4);margin-bottom:10px;display:block"></i>
+        <h4 style="font-size:.92rem;margin-bottom:6px">Integración y Conflictos</h4>
+        <p style="font-size:.78rem;color:var(--text-muted)">Merge combina el trabajo del equipo; los conflictos se resuelven manualmente.</p>
+      </div>
+    </div>
+
+    <!-- Command recap -->
+    <div style="margin-top:16px">
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px"><i class="fa-solid fa-terminal" style="color:var(--accent2);margin-right:6px"></i>Los 8 comandos del desafío:</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="cmd-chip">git clone</span>
+        <span class="cmd-chip">git checkout -b</span>
+        <span class="cmd-chip">git checkout main</span>
+        <span class="cmd-chip">git add .</span>
+        <span class="cmd-chip">git commit -m</span>
+        <span class="cmd-chip red">git stash</span>
+        <span class="cmd-chip red">git stash pop</span>
+        <span class="cmd-chip blue">git pull</span>
+        <span class="cmd-chip purple">git merge</span>
+        <span class="cmd-chip blue">git push</span>
+      </div>
+    </div>
+
+    <div class="final-glow" style="margin-top:18px">
+      <i class="fa-solid fa-trophy"></i>
+      <p style="font-size:.88rem;color:var(--text-muted);margin-top:8px">¡Calculadora colaborativa completada! El código que no compilaba ahora funciona gracias al trabajo en equipo con Git.</p>
+      <button class="btn-nav" style="margin:10px auto;display:inline-flex" onclick="showQuiz()">
+        <i class="fa-solid fa-circle-question"></i> Quiz rápido
+      </button>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goPrev()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <div class="dots" id="dots-15"></div>
+    <button class="btn-nav" disabled>Finalizado <i class="fa-solid fa-check"></i></button>
+  </div>
+</div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+const TOTAL = 15;
+let current = 1;
+const visited = new Set([1]);
+
+function buildDots() {
+  for (let s = 1; s <= TOTAL; s++) {
+    const container = document.getElementById(`dots-${s}`);
+    if (!container) continue;
+    container.innerHTML = '';
+    for (let i = 1; i <= TOTAL; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === current ? ' active' : (visited.has(i) ? ' visited' : ''));
+      d.title = `Diapositiva ${i}`;
+      d.onclick = () => goToSlide(i);
+      container.appendChild(d);
+    }
+  }
+}
+
+function goToSlide(n) {
+  if (n < 1 || n > TOTAL) return;
+  document.getElementById(`slide-${current}`).classList.remove('active');
+  current = n;
+  visited.add(n);
+  const el = document.getElementById(`slide-${n}`);
+  el.classList.add('active');
+  // Animate content
+  const content = el.querySelector('.slide-content');
+  if (content) {
+    content.classList.remove('animate__animated','animate__fadeIn');
+    void content.offsetWidth;
+    content.classList.add('animate__animated','animate__fadeIn');
+  }
+  buildDots();
+}
+
+function goNext() { goToSlide(current + 1); }
+function goPrev() { goToSlide(current - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext();
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goPrev();
+});
+
+// Copy button
+function copyCmd(btn) {
+  const block = btn.closest('.cmd-block');
+  const text = block.innerText.replace('copiar','').replace(/^\$\s*/gm,'').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ copiado';
+    btn.style.color = 'var(--accent)';
+    btn.style.borderColor = 'var(--accent)';
+    setTimeout(() => { btn.textContent = 'copiar'; btn.style.color=''; btn.style.borderColor=''; }, 1800);
+  });
+}
+
+// Quick Quiz
+const questions = [
+  { q: '¿Qué comando descarga un repositorio remoto a tu máquina?', opts: ['git pull', 'git clone', 'git fetch', 'git init'], ans: 1 },
+  { q: '¿Qué hace git stash?', opts: ['Hace commit de los cambios', 'Borra los cambios', 'Guarda cambios temporalmente sin commitear', 'Sube cambios al servidor'], ans: 2 },
+  { q: '¿Cómo creás y te movés a una nueva rama en un solo comando?', opts: ['git branch -n rama', 'git checkout rama', 'git checkout -b rama', 'git new branch rama'], ans: 2 },
+  { q: '¿Qué comando combina los cambios de una rama en la rama actual?', opts: ['git push', 'git merge', 'git pull', 'git combine'], ans: 1 },
+  { q: 'El flujo básico de guardar cambios en Git es:', opts: ['commit → add → push', 'pull → add → commit', 'add → commit → push', 'clone → push → commit'], ans: 2 },
+];
+
+let qi = 0, score = 0;
+
+function showQuiz() {
+  qi = 0; score = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  if (qi >= questions.length) {
+    Swal.fire({
+      background: '#161b22',
+      color: '#e6edf3',
+      title: `<span style="color:#f0c040">Resultado Final</span>`,
+      html: `<p style="font-size:1.1rem">Respondiste <strong style="color:${score>=4?'#39d353':'#f78166'}">${score}/${questions.length}</strong> correctas</p>
+             <p style="color:#8b949e;font-size:.9rem">${score===5?'¡Perfecto! Dominás los comandos básicos de Git.':score>=3?'¡Bien! Repasá los comandos que fallaste.':'Repasá la presentación y volvé a intentarlo.'}</p>`,
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#39d353',
+      icon: score >= 4 ? 'success' : score >= 3 ? 'info' : 'warning',
+    });
+    return;
+  }
+  const q = questions[qi];
+  Swal.fire({
+    background: '#161b22',
+    color: '#e6edf3',
+    title: `<span style="font-size:.85rem;color:#8b949e">Pregunta ${qi+1}/${questions.length}</span><br><span style="font-size:1rem">${q.q}</span>`,
+    html: q.opts.map((o,i) => `<button onclick="answerQ(${i})" style="display:block;width:100%;margin:6px 0;padding:10px 14px;background:#1e2530;border:1px solid #30363d;border-radius:8px;color:#e6edf3;cursor:pointer;font-family:Syne,sans-serif;font-size:.88rem;text-align:left;transition:all .2s" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">${String.fromCharCode(65+i)}. ${o}</button>`).join(''),
+    showConfirmButton: false,
+    showCloseButton: true,
+  });
+}
+
+window.answerQ = function(idx) {
+  const q = questions[qi];
+  const correct = idx === q.ans;
+  if (correct) score++;
+  Swal.fire({
+    background: '#161b22',
+    color: '#e6edf3',
+    icon: correct ? 'success' : 'error',
+    title: correct ? '<span style="color:#39d353">¡Correcto!</span>' : '<span style="color:#f78166">Incorrecto</span>',
+    text: correct ? '¡Muy bien!' : `La respuesta correcta era: "${q.opts[q.ans]}"`,
+    confirmButtonText: qi < questions.length - 1 ? 'Siguiente →' : 'Ver resultado',
+    confirmButtonColor: '#58a6ff',
+    timer: 3000,
+    timerProgressBar: true,
+  }).then(() => { qi++; showQuestion(); });
+};
+
+// Init
+buildDots();
+</script>
+</body>
+</html>

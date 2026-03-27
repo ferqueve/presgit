@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git: revertir un commit y un push equivocado</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    .slide {
+      min-height: 100vh;
+      display: none;
+      padding: 56px 0 92px;
+    }
+    .slide.active {
+      display: flex;
+      align-items: center;
+    }
+    .glass {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      backdrop-filter: blur(9px);
+    }
+    .icon-big {
+      font-size: 4rem;
+      color: #fbbf24;
+    }
+    .code-box {
+      background: #0b1220;
+      color: #d1fae5;
+      border-radius: 14px;
+      padding: 14px;
+      font-family: Consolas, monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .nav-controls {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      background: rgba(0,0,0,0.45);
+      padding: 10px 16px;
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+    }
+    .progress-wrap {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 0;
+      background: rgba(255,255,255,0.1);
+    }
+    .progress-bar {
+      background: linear-gradient(90deg, #fbbf24, #34d399);
+    }
+    .step-card, .exercise-card, .case-card {
+      height: 100%;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 18px;
+    }
+    .good-box {
+      border-left: 5px solid #34d399;
+      background: rgba(52,211,153,0.08);
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .warn-box {
+      border-left: 5px solid #fb7185;
+      background: rgba(251,113,133,0.08);
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .info-box {
+      border-left: 5px solid #60a5fa;
+      background: rgba(96,165,250,0.08);
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .badge-soft {
+      background: rgba(251,191,36,0.18);
+      color: #fde68a;
+      border: 1px solid rgba(251,191,36,0.35);
+    }
+    .option-btn {
+      text-align: left;
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 12px;
+    }
+    .timeline-step {
+      position: relative;
+      padding-left: 26px;
+      margin-bottom: 16px;
+    }
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      background: #fbbf24;
+      border-radius: 50%;
+    }
+    .small-note {
+      color: #cbd5e1;
+    }
+    .table-dark-custom {
+      --bs-table-bg: rgba(255,255,255,0.04);
+      --bs-table-striped-bg: rgba(255,255,255,0.06);
+      --bs-table-color: #fff;
+      --bs-table-border-color: rgba(255,255,255,0.12);
+    }
+    kbd {
+      background: #111827;
+      border-radius: 6px;
+      padding: 3px 8px;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-wrap">
+    <div class="progress">
+      <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+    <section class="slide active" id="slide-0">
+      <div class="container">
+        <div class="glass p-5 text-center animate__animated animate__fadeIn">
+          <i class="fa-brands fa-git-alt icon-big mb-3"></i>
+          <h1 class="display-4 fw-bold">Git: cómo revertir un commit o un push equivocado</h1>
+          <p class="lead mt-3">Presentación pensada para clase: explicación paso a paso, casos reales y ejercicios.</p>
+          <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
+            <span class="badge rounded-pill badge-soft px-3 py-2">git add</span>
+            <span class="badge rounded-pill badge-soft px-3 py-2">git commit</span>
+            <span class="badge rounded-pill badge-soft px-3 py-2">git push</span>
+            <span class="badge rounded-pill badge-soft px-3 py-2">git revert</span>
+            <span class="badge rounded-pill badge-soft px-3 py-2">git reset</span>
+          </div>
+          <p class="mt-4 small-note">Puedes avanzar con los botones inferiores o con las flechas del teclado.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-1">
+      <div class="container">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-7">
+            <div class="glass p-4 animate__animated animate__fadeInLeft">
+              <h2><i class="fa-solid fa-diagram-project text-warning me-2"></i>El proceso completo de trabajo en Git</h2>
+              <div class="timeline-step"><strong>1. Modificas archivos</strong><br>Ejemplo: cambias un archivo HTML, CSS o JS.</div>
+              <div class="timeline-step"><strong>2. Preparas los cambios</strong><br>Usas <code>git add</code> para enviarlos al área de staging.</div>
+              <div class="timeline-step"><strong>3. Confirmas los cambios</strong><br>Usas <code>git commit</code> para guardarlos en el historial local.</div>
+              <div class="timeline-step"><strong>4. Publicas en remoto</strong><br>Usas <code>git push</code> para subirlos a GitHub, GitLab o similar.</div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="glass p-4 animate__animated animate__fadeInRight">
+              <h4>Idea clave para clase</h4>
+              <p>Un error puede ocurrir en cualquiera de estas etapas:</p>
+              <ul>
+                <li>Antes del commit</li>
+                <li>Después del commit pero antes del push</li>
+                <li>Después del push</li>
+              </ul>
+              <div class="warn-box mt-3">
+                La forma correcta de deshacer algo depende de <strong>en qué etapa te equivocaste</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-2">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__zoomIn">
+          <h2><i class="fa-solid fa-circle-question text-info me-2"></i>¿Qué significa “revertir”?</h2>
+          <p>En Git, deshacer un error no siempre significa lo mismo. A veces quieres:</p>
+          <div class="row g-4 mt-2">
+            <div class="col-md-4"><div class="step-card"><h5>Conservar historial</h5><p>Se usa normalmente <code>git revert</code>.</p></div></div>
+            <div class="col-md-4"><div class="step-card"><h5>Rehacer el último commit</h5><p>Se usa con frecuencia <code>git reset --soft</code>.</p></div></div>
+            <div class="col-md-4"><div class="step-card"><h5>Borrar todo</h5><p>Se usa con mucho cuidado <code>git reset --hard</code>.</p></div></div>
+          </div>
+          <div class="info-box mt-4">
+            Antes de elegir un comando, conviene responder tres preguntas: ¿ya hice push?, ¿trabajo solo o en equipo?, ¿quiero conservar los cambios o eliminarlos?
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-3">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeInUp">
+          <h2><i class="fa-solid fa-laptop-code text-success me-2"></i>Escenario central: commit y push equivocado</h2>
+          <p>Supongamos este caso típico para explicarlo en clase:</p>
+          <div class="code-box">1) Modificaste login.js
+2) Hiciste git add .
+3) Hiciste git commit -m "Arreglo login"
+4) Hiciste git push
+5) Descubres que rompiste el acceso de usuarios</div>
+          <div class="good-box mt-4">
+            En este caso, el error ya está en el remoto. Si otros pueden ver o descargar ese commit, la opción más segura normalmente es <strong>git revert</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-4">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeIn">
+          <h2><i class="fa-solid fa-rotate-left text-warning me-2"></i>Paso a paso para revertir un commit ya pusheado</h2>
+          <div class="row g-4 mt-2">
+            <div class="col-lg-6">
+              <div class="step-card h-100">
+                <h5>Paso 1: ver el historial</h5>
+                <div class="code-box">git log --oneline</div>
+                <p class="mb-0">Esto te muestra los commits recientes en formato resumido.</p>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="step-card h-100">
+                <h5>Paso 2: identificar el commit incorrecto</h5>
+                <div class="code-box">a1b2c3d Arreglo login
+x8y9z7w Cambio de estilos
+r4t5u6v Actualización footer</div>
+                <p class="mb-0">Aquí, por ejemplo, <code>a1b2c3d</code> es el commit problemático.</p>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="step-card h-100">
+                <h5>Paso 3: revertirlo</h5>
+                <div class="code-box">git revert a1b2c3d</div>
+                <p class="mb-0">Git creará un nuevo commit que deshace ese cambio.</p>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="step-card h-100">
+                <h5>Paso 4: subir el revert</h5>
+                <div class="code-box">git push</div>
+                <p class="mb-0">Ahora el remoto queda con el historial intacto, pero con el error deshecho.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-5">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__zoomIn">
+          <h2><i class="fa-solid fa-file-lines text-primary me-2"></i>¿Qué ocurre internamente con <code>git revert</code>?</h2>
+          <p>No borra el commit original. Lo que hace es agregar otro commit que compensa sus cambios.</p>
+          <div class="row g-4 mt-2">
+            <div class="col-md-6">
+              <div class="step-card">
+                <h5>Antes</h5>
+                <div class="code-box">Commit A
+Commit B (error)
+Commit C</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="step-card">
+                <h5>Después del revert</h5>
+                <div class="code-box">Commit A
+Commit B (error)
+Commit C
+Commit D (revert de B)</div>
+              </div>
+            </div>
+          </div>
+          <div class="good-box mt-4">
+            Esto es muy útil en equipos porque el historial queda claro: se ve qué se hizo y cómo se corrigió.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-6">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeInUp">
+          <h2><i class="fa-solid fa-scissors text-danger me-2"></i>¿Cuándo aparece <code>git reset</code>?</h2>
+          <p><code>git reset</code> se usa más cuando quieres mover la rama hacia atrás. Es común en trabajo local, antes de compartir.</p>
+          <div class="table-responsive mt-3">
+            <table class="table table-striped table-dark-custom">
+              <thead>
+                <tr>
+                  <th>Comando</th>
+                  <th>Resultado</th>
+                  <th>Uso típico</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>git reset --soft HEAD~1</code></td>
+                  <td>Quita el commit, pero deja cambios en staging</td>
+                  <td>Rehacer el commit</td>
+                </tr>
+                <tr>
+                  <td><code>git reset --mixed HEAD~1</code></td>
+                  <td>Quita el commit y deja cambios sin stage</td>
+                  <td>Revisar antes de volver a agregar</td>
+                </tr>
+                <tr>
+                  <td><code>git reset --hard HEAD~1</code></td>
+                  <td>Quita commit y borra cambios locales</td>
+                  <td>Descartar por completo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="warn-box mt-3">
+            Si ya hiciste push y trabajas con otras personas, usar reset más force push puede ser problemático.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-7">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="case-card animate__animated animate__fadeInUp">
+              <h4>Caso 1</h4>
+              <p><strong>Hiciste commit, pero no push.</strong></p>
+              <p>Quieres corregir el mensaje o agregar un archivo faltante.</p>
+              <div class="code-box">git reset --soft HEAD~1</div>
+              <p class="mb-0">Te deja todo listo para commitear nuevamente.</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="case-card animate__animated animate__fadeInUp animate__delay-1s">
+              <h4>Caso 2</h4>
+              <p><strong>Hiciste commit y push equivocado.</strong></p>
+              <p>El cambio rompió producción o una funcionalidad importante.</p>
+              <div class="code-box">git revert &lt;commit_id&gt;
+git push</div>
+              <p class="mb-0">Es la salida más segura en ramas compartidas.</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="case-card animate__animated animate__fadeInUp animate__delay-2s">
+              <h4>Caso 3</h4>
+              <p><strong>Solo estás probando localmente.</strong></p>
+              <p>Quieres borrar todo y volver al punto anterior.</p>
+              <div class="code-box">git reset --hard HEAD~1</div>
+              <p class="mb-0">Úsalo solo si entiendes que perderás esos cambios.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-8">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeInLeft">
+          <h2><i class="fa-solid fa-users text-info me-2"></i>Caso de trabajo en equipo</h2>
+          <div class="row g-4 mt-1">
+            <div class="col-md-6">
+              <div class="good-box h-100">
+                <h5>Situación</h5>
+                <p>Subiste un cambio a la rama compartida y dos compañeros ya hicieron <code>pull</code>.</p>
+                <p class="mb-0">La opción más sana suele ser <strong>git revert</strong>.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="warn-box h-100">
+                <h5>Problema si fuerzas</h5>
+                <p>Si haces <code>git push --force</code>, puedes dejar a tus compañeros con historiales distintos y conflictos difíciles de resolver.</p>
+              </div>
+            </div>
+          </div>
+          <div class="info-box mt-4">
+            En clase, esta es una buena regla simple: <strong>si el commit ya fue compartido, primero piensa en revert y no en reset</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-9">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeInRight">
+          <h2><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>¿Y si ya hice push pero estoy solo en mi rama?</h2>
+          <p>En ese caso, a veces se usa reescritura de historial.</p>
+          <div class="code-box">git reset --hard HEAD~1
+git push --force</div>
+          <div class="row g-4 mt-2">
+            <div class="col-md-6">
+              <div class="step-card">
+                <h5>Ventaja</h5>
+                <p class="mb-0">La rama queda como si ese commit nunca hubiera existido.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="step-card">
+                <h5>Riesgo</h5>
+                <p class="mb-0">Si alguien más alcanzó a usar esa rama, puedes causar problemas.</p>
+              </div>
+            </div>
+          </div>
+          <div class="warn-box mt-4">
+            Este método no suele ser el primero que se enseña a principiantes para trabajo colaborativo. Para clase conviene presentarlo como una opción avanzada y delicada.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-10">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__zoomIn">
+          <h2><i class="fa-solid fa-list-check text-success me-2"></i>Checklist antes de deshacer un commit</h2>
+          <div class="row g-3 mt-2">
+            <div class="col-md-4"><div class="step-card"><strong>1</strong><p class="mb-0">Revisa <code>git status</code></p></div></div>
+            <div class="col-md-4"><div class="step-card"><strong>2</strong><p class="mb-0">Consulta <code>git log --oneline</code></p></div></div>
+            <div class="col-md-4"><div class="step-card"><strong>3</strong><p class="mb-0">Confirma si ya hubo <code>push</code></p></div></div>
+            <div class="col-md-4"><div class="step-card"><strong>4</strong><p class="mb-0">Piensa si trabajas solo o en equipo</p></div></div>
+            <div class="col-md-4"><div class="step-card"><strong>5</strong><p class="mb-0">Decide si quieres conservar cambios</p></div></div>
+            <div class="col-md-4"><div class="step-card"><strong>6</strong><p class="mb-0">Haz prueba final después del cambio</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-11">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeInUp">
+          <h2><i class="fa-solid fa-dumbbell text-primary me-2"></i>Ejercicio 1</h2>
+          <div class="exercise-card mt-3">
+            <p><strong>Situación:</strong> hiciste commit y push de un cambio que rompió la página principal. Tu equipo ya puede haber descargado esos cambios.</p>
+            <p><strong>¿Qué deberías usar?</strong></p>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(1,'A')">A) <code>git reset --hard HEAD~1</code></button>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(1,'B')">B) <code>git revert &lt;commit_id&gt;</code></button>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(1,'C')">C) <code>git push --force</code></button>
+            <div id="exercise1-feedback" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-12">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeInUp">
+          <h2><i class="fa-solid fa-dumbbell text-primary me-2"></i>Ejercicio 2</h2>
+          <div class="exercise-card mt-3">
+            <p><strong>Situación:</strong> hiciste un commit local, todavía no hiciste push, y olvidaste agregar un archivo. Quieres rehacer el commit sin perder nada.</p>
+            <p><strong>¿Qué opción es mejor?</strong></p>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(2,'A')">A) <code>git revert HEAD</code></button>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(2,'B')">B) <code>git reset --soft HEAD~1</code></button>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(2,'C')">C) <code>git reset --hard HEAD~1</code></button>
+            <div id="exercise2-feedback" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-13">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__fadeInUp">
+          <h2><i class="fa-solid fa-dumbbell text-primary me-2"></i>Ejercicio 3</h2>
+          <div class="exercise-card mt-3">
+            <p><strong>Situación:</strong> estás probando cosas en tu máquina, nadie más usa tu rama y quieres borrar el último commit junto con esos cambios.</p>
+            <p><strong>¿Qué opción encaja mejor?</strong></p>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(3,'A')">A) <code>git reset --hard HEAD~1</code></button>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(3,'B')">B) <code>git revert &lt;commit_id&gt;</code></button>
+            <button class="btn btn-outline-light option-btn" onclick="checkAnswer(3,'C')">C) <code>git add .</code></button>
+            <div id="exercise3-feedback" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-14">
+      <div class="container">
+        <div class="glass p-4 animate__animated animate__zoomIn">
+          <h2><i class="fa-solid fa-lightbulb text-warning me-2"></i>Soluciones y cierre</h2>
+          <div class="row g-4 mt-2">
+            <div class="col-md-4"><div class="step-card"><h5>Ejercicio 1</h5><p><strong>Correcta:</strong> <code>git revert</code></p><p class="mb-0">Porque el commit ya fue compartido.</p></div></div>
+            <div class="col-md-4"><div class="step-card"><h5>Ejercicio 2</h5><p><strong>Correcta:</strong> <code>git reset --soft HEAD~1</code></p><p class="mb-0">Porque quieres rehacer el commit sin perder cambios.</p></div></div>
+            <div class="col-md-4"><div class="step-card"><h5>Ejercicio 3</h5><p><strong>Correcta:</strong> <code>git reset --hard HEAD~1</code></p><p class="mb-0">Porque quieres borrar el commit y los cambios locales.</p></div></div>
+          </div>
+          <div class="good-box mt-4">
+            <strong>Resumen para recordar en clase:</strong><br>
+            • Si ya hiciste push y compartiste el commit: piensa primero en <code>git revert</code>.<br>
+            • Si todavía no hiciste push: muchas veces <code>git reset</code> te sirve mejor.<br>
+            • Si usas <code>--hard</code>, puedes perder trabajo.
+          </div>
+          <div class="code-box mt-4"># Ver historial
+git log --oneline
+
+# Deshacer de forma segura un commit ya subido
+git revert <commit_id>
+git push
+
+# Rehacer el último commit local sin perder cambios
+git reset --soft HEAD~1
+
+# Borrar el último commit local y sus cambios
+git reset --hard HEAD~1</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="nav-controls d-flex align-items-center gap-2">
+    <button class="btn btn-outline-light btn-sm rounded-pill" onclick="prevSlide()"><i class="fa-solid fa-arrow-left"></i></button>
+    <span id="slideIndicator" class="px-2">1 / 15</span>
+    <button class="btn btn-outline-light btn-sm rounded-pill" onclick="nextSlide()"><i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let currentSlide = 0;
+
+    function updateSlide() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlide) slide.classList.add('active');
+      });
+      document.getElementById('slideIndicator').textContent = `${currentSlide + 1} / ${slides.length}`;
+      document.getElementById('progressBar').style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    function checkAnswer(exercise, answer) {
+      const feedback = document.getElementById(`exercise${exercise}-feedback`);
+      let html = '';
+
+      if (exercise === 1) {
+        html = answer === 'B'
+          ? '<div class="alert alert-success">Correcto. Si el commit ya fue subido y pudo ser descargado por otros, la opción más segura suele ser <strong>git revert</strong>.</div>'
+          : '<div class="alert alert-danger">No es la mejor opción para una rama compartida. Si el commit ya está publicado, conviene evitar reescribir historial y usar <strong>git revert</strong>.</div>';
+      }
+
+      if (exercise === 2) {
+        html = answer === 'B'
+          ? '<div class="alert alert-success">Correcto. <strong>git reset --soft HEAD~1</strong> elimina el commit, pero conserva los cambios listos para rehacerlo.</div>'
+          : '<div class="alert alert-danger">Revisa la pista del ejercicio: todavía no hubo push y quieres conservar los cambios. Por eso conviene <strong>git reset --soft HEAD~1</strong>.</div>';
+      }
+
+      if (exercise === 3) {
+        html = answer === 'A'
+          ? '<div class="alert alert-success">Correcto. <strong>git reset --hard HEAD~1</strong> borra el último commit y también sus cambios locales.</div>'
+          : '<div class="alert alert-danger">Aquí la idea es borrar por completo el commit y sus cambios. La opción que encaja mejor es <strong>git reset --hard HEAD~1</strong>.</div>';
+      }
+
+      feedback.innerHTML = html;
+    }
+
+    updateSlide();
+  </script>
+</body>
+</html>

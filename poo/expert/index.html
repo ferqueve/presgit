@@ -602,7 +602,7 @@ const SLIDES = [
     {
         Console.WriteLine(<span class="st">$"Fecha: {DateTime}"</span>);
         <span class="kw">foreach</span> (<span class="cl">TicketLineItem</span> item <span class="kw">in</span> lineItems)
-            Console.WriteLine(<span class="st">$"{item.Quantity} de '{item.Product.Description}' a ${item.Product.Price}"</span>);
+            Console.WriteLine(<span class="st">$"{item.Quantity} de '{item.Product.Description}' a \${item.Product.Price}"</span>);
     }
 }</code></pre></div>
             <div class="tab-pane fade" id="tab-line"><pre><code><span class="kw">public class</span> <span class="cl">TicketLineItem</span>
@@ -692,8 +692,8 @@ const SLIDES = [
     {
         Console.WriteLine(<span class="st">$"Fecha: {DateTime}"</span>);
         <span class="kw">foreach</span> (<span class="cl">TicketLineItem</span> item <span class="kw">in</span> lineItems)
-            Console.WriteLine(<span class="st">$"{item.Quantity} de '{item.Product.Description}' a ${item.Product.Price}"</span>);
-<span class="diff-add">        Console.WriteLine(<span class="st">$"Total: ${Total}"</span>);</span>
+            Console.WriteLine(<span class="st">$"{item.Quantity} de '{item.Product.Description}' a \${item.Product.Price}"</span>);
+<span class="diff-add">        Console.WriteLine(<span class="st">$"Total: \${Total}"</span>);</span>
     }
 }</code></pre>
         <div class="row g-3 mt-1">

@@ -12,88 +12,1187 @@
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-
   <!-- Animate.css -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
-
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-
   <!-- SweetAlert2 -->
   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
 
-  <!-- Estilos propios -->
-  <link href="css/styles.css" rel="stylesheet" />
+<style>
+/* ===== VARIABLES ===== */
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2563a8;
+  --accent: #00b4d8;
+  --accent-warm: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #e8f0f8;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #cbd5e1;
+  --code-bg: #0d1b2a;
+  --code-text: #e2e8f0;
+  --font-title: 'Syne', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(26,58,92,0.10);
+  --shadow-lg: 0 8px 40px rgba(26,58,92,0.18);
+  --transition: 0.28s cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+.topbar-brand {
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.grasp-badge {
+  background: var(--accent);
+  color: var(--primary);
+  font-size: .7rem;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 20px;
+  letter-spacing: 2px;
+}
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-btn {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .85rem;
+  font-family: var(--font-body);
+  transition: background var(--transition);
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.22); }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.slide-counter {
+  font-family: var(--font-title);
+  font-size: .85rem;
+  color: rgba(255,255,255,0.7);
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar-wrap {
+  position: fixed;
+  top: 48px; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  z-index: 99;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-warm));
+  transition: width var(--transition);
+}
+
+/* ===== SLIDES ===== */
+.slides-wrapper {
+  margin-top: 51px;
+  min-height: calc(100vh - 51px);
+}
+.slide {
+  display: none;
+  width: 100%;
+  padding: 40px 24px 80px;
+  animation: slideIn 0.4s ease;
+}
+.slide.active { display: flex; flex-direction: column; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== SLIDE TYPOGRAHY ===== */
+.slide-label {
+  font-family: var(--font-title);
+  font-size: .72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.slide-title {
+  font-family: var(--font-title);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+.slide-title .accent { color: var(--accent); }
+.lead-text {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* ===== COVER ===== */
+.slide-cover {
+  background: linear-gradient(135deg, var(--primary) 0%, #0f2640 60%, #0a1929 100%);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  min-height: calc(100vh - 51px);
+}
+.cover-badge {
+  font-family: var(--font-title);
+  font-size: .7rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.cover-icon {
+  font-size: 5rem;
+  color: var(--accent);
+  margin-bottom: 24px;
+  text-shadow: 0 0 40px rgba(0,180,216,0.4);
+}
+.cover-title {
+  font-family: var(--font-title);
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.cover-subtitle {
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 32px;
+}
+.cover-note {
+  background: rgba(0,180,216,0.12);
+  border: 1px solid rgba(0,180,216,0.3);
+  color: rgba(255,255,255,0.8);
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-size: .9rem;
+  display: inline-block;
+}
+
+/* ===== CONCEPT BOXES ===== */
+.concept-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.concept-question, .concept-answer {
+  padding: 20px;
+  border-radius: var(--radius);
+  line-height: 1.6;
+}
+.concept-question { background: #fff3cd; border-left: 4px solid var(--accent-warm); }
+.concept-question i { color: var(--accent-warm); margin-right: 8px; }
+.concept-answer { background: #d1fae5; border-left: 4px solid var(--success); }
+.concept-answer i { color: var(--success); margin-right: 8px; }
+.concept-answer .highlight { color: var(--primary-light); font-weight: 700; }
+.intuition-box {
+  background: var(--primary);
+  color: rgba(255,255,255,0.9);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  text-align: center;
+  font-size: 1.05rem;
+}
+.intuition-box i { color: var(--accent); margin-right: 10px; }
+
+/* ===== TICKET ===== */
+.ticket-preview {
+  background: #fff;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-family: var(--font-code);
+  font-size: .88rem;
+}
+.ticket-header { background: var(--primary); color: #fff; padding: 10px 16px; font-family: var(--font-title); font-weight: 700; }
+.ticket-body { padding: 12px 16px; }
+.ticket-line { padding: 4px 0; border-bottom: 1px dashed var(--border); }
+.ticket-line:last-child { border-bottom: none; }
+.ticket-meta { color: var(--text-muted); }
+.qty { font-weight: 700; color: var(--primary-light); }
+.price { font-weight: 700; color: var(--success); }
+
+/* ===== INFO / CRC ===== */
+.info-card {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+.info-card h6 { color: var(--primary); font-weight: 700; margin-bottom: 8px; }
+.crc-diagram { border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; margin-top: 12px; font-size: .82rem; }
+.crc-name { background: var(--primary); color: #fff; padding: 6px 10px; font-family: var(--font-title); font-weight: 700; text-align: center; }
+.crc-body { display: flex; }
+.crc-resp, .crc-collab { padding: 8px 10px; flex: 1; color: var(--text-muted); font-style: italic; }
+.crc-resp { border-right: 1px solid var(--primary); }
+.crc-card { border: 2px solid var(--primary); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); height: 100%; }
+.crc-card-name { background: var(--primary); color: #fff; padding: 12px 16px; font-family: var(--font-title); font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+.crc-card-body { display: flex; min-height: 140px; }
+.crc-card-resp { flex: 1.4; padding: 12px 14px; border-right: 1px solid var(--border); }
+.crc-card-collab { flex: 1; padding: 12px 14px; background: var(--surface2); }
+.crc-card-resp h6, .crc-card-collab h6 { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+.crc-card-resp ul, .crc-card-collab ul { padding-left: 16px; margin: 0; font-size: .85rem; line-height: 1.7; }
+.relation-arrows { display: flex; align-items: center; gap: 12px; justify-content: center; }
+.badge-class { background: var(--primary); color: #fff; padding: 4px 14px; border-radius: 20px; font-family: var(--font-code); font-size: .82rem; }
+.relation-arrows i { color: var(--text-muted); }
+
+/* ===== CODE ===== */
+.code-tabs { background: var(--code-bg); border-radius: var(--radius); overflow: hidden; }
+.code-nav { background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 8px 8px 0; gap: 4px; }
+.code-nav .nav-link { color: rgba(255,255,255,0.5); font-family: var(--font-code); font-size: .82rem; padding: 6px 14px; border-radius: 6px 6px 0 0; border: 1px solid transparent; }
+.code-nav .nav-link.active { background: rgba(0,180,216,0.15); color: var(--accent); border-color: rgba(0,180,216,0.3); }
+.code-tab-content { padding: 0; }
+.code-tab-content .tab-pane pre { margin: 0; padding: 20px; overflow-x: auto; }
+pre, code { font-family: var(--font-code); font-size: .83rem; line-height: 1.7; }
+pre { background: var(--code-bg); color: var(--code-text); border-radius: var(--radius); padding: 20px; overflow-x: auto; margin: 0; }
+.kw  { color: #569cd6; }
+.cl  { color: #4ec9b0; }
+.mt  { color: #dcdcaa; }
+.st  { color: #ce9178; }
+.cm  { color: #6a9955; font-style: italic; }
+.diff-add { color: #b5cea8; display: block; }
+.diff-rem { color: #f48771; display: block; }
+.diff-add::before { content: '+ '; color: var(--success); }
+.diff-rem::before { content: '- '; color: var(--danger); }
+
+/* ===== OUTPUT / NOTES ===== */
+.output-preview { background: #0d1b2a; border: 1px solid rgba(0,180,216,0.3); border-radius: var(--radius); overflow: hidden; margin-top: 16px; }
+.output-header { background: rgba(0,180,216,0.15); color: var(--accent); padding: 8px 16px; font-family: var(--font-code); font-size: .8rem; }
+.output-body { padding: 12px 16px; font-family: var(--font-code); font-size: .85rem; color: #a8d8a8; line-height: 1.8; }
+.output-new { color: var(--accent); font-weight: 700; border-top: 1px solid rgba(0,180,216,0.2); padding-top: 4px; margin-top: 4px; }
+.note-box { background: rgba(37,99,168,0.08); border: 1px solid rgba(37,99,168,0.2); border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: .88rem; color: var(--text-muted); display: flex; align-items: flex-start; gap: 10px; }
+.note-box i { color: var(--primary-light); margin-top: 2px; flex-shrink: 0; }
+
+/* ===== PROBLEM / ANALYSIS ===== */
+.problem-box, .analysis-box { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); height: 100%; }
+.problem-box h5, .analysis-box h5 { font-family: var(--font-title); font-size: 1rem; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.formula-box { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; margin-top: 12px; }
+.formula-line { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-family: var(--font-code); font-size: .87rem; }
+.formula-label { color: var(--accent); font-weight: 700; min-width: 120px; }
+.formula-op { color: rgba(255,255,255,0.5); }
+.formula-val { color: #b5cea8; }
+.analysis-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; font-size: .9rem; }
+.step-num { background: var(--primary); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; flex-shrink: 0; }
+.highlight-step { background: #d1fae5 !important; border-left: 3px solid var(--success); }
+.highlight-step .step-num { background: var(--success); }
+
+/* ===== EXPERT FLOW ===== */
+.expert-flow { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 20px; background: var(--code-bg); border-radius: var(--radius); }
+.expert-node { background: rgba(0,180,216,0.12); border: 1px solid rgba(0,180,216,0.3); border-radius: var(--radius); padding: 12px 20px; text-align: center; font-size: .82rem; color: var(--code-text); font-family: var(--font-code); }
+.expert-node i { color: var(--accent); font-size: 1.2rem; display: block; margin-bottom: 4px; }
+.expert-arrow { color: rgba(255,255,255,0.4); font-size: .78rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.expert-arrow i { font-size: 1rem; }
+
+/* ===== BENEFITS ===== */
+.benefit-card { background: var(--surface); border-radius: var(--radius); padding: 24px 20px; text-align: center; box-shadow: var(--shadow); border-top: 3px solid var(--accent); height: 100%; transition: transform var(--transition), box-shadow var(--transition); }
+.benefit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.benefit-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.3rem; color: #fff; }
+.benefit-card h5 { font-family: var(--font-title); color: var(--primary); margin-bottom: 10px; }
+.benefit-card p { color: var(--text-muted); font-size: .9rem; line-height: 1.6; }
+.summary-banner { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; padding: 18px 24px; border-radius: var(--radius); text-align: center; font-size: 1rem; }
+.summary-banner i { color: var(--accent-warm); margin-right: 10px; }
+
+/* ===== EXERCISES ===== */
+.exercises-wrapper { padding: 60px 24px 80px; margin-top: 51px; display: none; }
+.exercises-wrapper.active { display: block; }
+.ex-header { text-align: center; margin-bottom: 40px; }
+.ex-header h2 { font-family: var(--font-title); font-size: 2.2rem; color: var(--primary); font-weight: 800; }
+.exercise-card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 32px; overflow: hidden; border: 1px solid var(--border); }
+.exercise-card-header { background: var(--primary); color: #fff; padding: 16px 24px; display: flex; align-items: center; gap: 14px; }
+.ex-number { width: 36px; height: 36px; background: var(--accent); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-title); font-weight: 800; font-size: 1rem; flex-shrink: 0; }
+.exercise-card-header h4 { font-family: var(--font-title); margin: 0; font-size: 1.15rem; }
+.difficulty-badge { margin-left: auto; padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; letter-spacing: 1px; }
+.easy   { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+.medium { background: rgba(245,158,11,0.2); color: #fde68a; }
+.hard   { background: rgba(239,68,68,0.2);  color: #fca5a5; }
+.exercise-card-body { padding: 24px; }
+.exercise-context { background: var(--surface2); border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: .92rem; }
+.exercise-question { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 16px; padding: 12px 16px; background: rgba(37,99,168,0.07); border-left: 4px solid var(--primary-light); border-radius: 0 8px 8px 0; }
+.option-list { list-style: none; padding: 0; margin: 0 0 16px; }
+.option-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; margin-bottom: 8px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color var(--transition), background var(--transition); font-size: .92rem; }
+.option-item:hover { border-color: var(--primary-light); background: rgba(37,99,168,0.04); }
+.option-item.selected  { border-color: var(--primary-light); background: rgba(37,99,168,0.08); }
+.option-item.correct   { border-color: var(--success); background: #d1fae5; }
+.option-item.incorrect { border-color: var(--danger);  background: #fee2e2; }
+.option-letter { width: 28px; height: 28px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-title); font-weight: 700; font-size: .82rem; flex-shrink: 0; transition: all var(--transition); }
+.option-item.selected  .option-letter { background: var(--primary-light); border-color: var(--primary-light); color: #fff; }
+.option-item.correct   .option-letter { background: var(--success); border-color: var(--success); color: #fff; }
+.option-item.incorrect .option-letter { background: var(--danger);  border-color: var(--danger);  color: #fff; }
+.option-text code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 4px; font-size: .82rem; }
+.exercise-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-check-ex { background: var(--primary); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background var(--transition); }
+.btn-check-ex:hover { background: var(--primary-light); }
+.btn-show-sol { background: transparent; color: var(--primary-light); border: 2px solid var(--primary-light); padding: 10px 22px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all var(--transition); }
+.btn-show-sol:hover { background: var(--primary-light); color: #fff; }
+.solution-panel { display: none; margin-top: 20px; border-top: 2px dashed var(--border); padding-top: 20px; }
+.solution-panel.visible { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.solution-explanation { background: #d1fae5; border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 16px; margin-bottom: 16px; font-size: .9rem; line-height: 1.7; }
+.solution-explanation p, .solution-explanation ul { margin-bottom: 8px; }
+.solution-explanation ul { padding-left: 18px; }
+.solution-code-title { font-family: var(--font-title); font-size: .82rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.mini-crc { background: var(--surface); border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; font-size: .82rem; height: 100%; }
+.mini-crc-name { background: var(--primary); color: #fff; padding: 6px 10px; font-family: var(--font-title); font-weight: 700; font-size: .85rem; }
+.mini-crc ul { padding: 8px 8px 8px 22px; margin: 0; line-height: 1.7; color: var(--text-muted); }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.bottom-dots { display: flex; gap: 6px; align-items: center; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all var(--transition); }
+.dot.active { background: var(--primary); transform: scale(1.4); }
+.dot.exercises-dot { background: var(--accent-warm); }
+.dot.exercises-dot.active { background: var(--accent-warm); transform: scale(1.4); }
+.btn-exercises { background: linear-gradient(135deg, var(--accent-warm), #e67e22); color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity var(--transition); }
+.btn-exercises:hover { opacity: .9; }
+.btn-exercises.active-mode { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+.keyboard-hint { position: fixed; bottom: 60px; right: 16px; background: rgba(26,58,92,0.85); color: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; font-size: .72rem; font-family: var(--font-code); pointer-events: none; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .concept-box { grid-template-columns: 1fr; }
+  .expert-flow { flex-direction: column; }
+  .slide-title { font-size: 1.5rem; }
+  .cover-title { font-size: 3rem; }
+}
+</style>
 </head>
 <body>
 
-  <!-- ===== TOP BAR ===== -->
-  <header class="topbar">
-    <div class="topbar-brand">
-      <span class="grasp-badge">GRASP</span>
-      <span>Expert — Experto en Información</span>
-    </div>
-    <div class="topbar-nav">
-      <button id="btn-prev" class="nav-btn" onclick="prevSlide()">
-        <i class="fa-solid fa-chevron-left"></i> Anterior
-      </button>
-      <span class="slide-counter" id="slide-counter">1 / 9</span>
-      <button id="btn-next" class="nav-btn" onclick="nextSlide()">
-        Siguiente <i class="fa-solid fa-chevron-right"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- ===== PROGRESS BAR ===== -->
-  <div class="progress-bar-wrap">
-    <div class="progress-bar-fill" style="width: 11%"></div>
+<!-- ===== TOP BAR ===== -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="grasp-badge">GRASP</span>
+    <span>Expert — Experto en Información</span>
   </div>
-
-  <!-- ===== SLIDES ===== -->
-  <div class="slides-wrapper">
-    <div id="slides-container" style="width:100%">
-      <!-- Slides rendered by JS -->
-    </div>
-  </div>
-
-  <!-- ===== EXERCISES SECTION ===== -->
-  <section id="exercises-section" class="exercises-wrapper">
-    <div class="container-xl">
-      <div class="ex-header">
-        <div class="slide-label">Práctica</div>
-        <h2><i class="fa-solid fa-dumbbell me-2 text-warning"></i>Ejercicios — GRASP Expert</h2>
-        <p class="text-muted">Aplicá el principio Expert en los siguientes escenarios. Podés resolver en Rider antes de verificar.</p>
-      </div>
-      <div id="exercises-container">
-        <!-- Exercises rendered by JS -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== BOTTOM NAV ===== -->
-  <nav class="bottom-nav">
-    <div class="bottom-dots">
-      <!-- Dots rendered by JS -->
-    </div>
-    <button class="btn-exercises" onclick="toggleMode()">
-      <i class="fa-solid fa-dumbbell"></i> Ejercicios
+  <div class="topbar-nav">
+    <button id="btn-prev" class="nav-btn" onclick="prevSlide()">
+      <i class="fa-solid fa-chevron-left"></i> Anterior
     </button>
-  </nav>
+    <span class="slide-counter" id="slide-counter">1 / 9</span>
+    <button id="btn-next" class="nav-btn" onclick="nextSlide()">
+      Siguiente <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+</header>
 
-  <!-- ===== KEYBOARD HINT ===== -->
-  <div class="keyboard-hint">← → para navegar</div>
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" style="width:11%"></div>
+</div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ===== SLIDES ===== -->
+<div class="slides-wrapper">
+  <div id="slides-container" style="width:100%"></div>
+</div>
 
-  <!-- SweetAlert2 -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<!-- ===== EXERCISES ===== -->
+<section id="exercises-section" class="exercises-wrapper">
+  <div class="container-xl">
+    <div class="ex-header">
+      <div class="slide-label">Práctica</div>
+      <h2><i class="fa-solid fa-dumbbell me-2 text-warning"></i>Ejercicios — GRASP Expert</h2>
+      <p class="text-muted">Aplicá el principio Expert en los siguientes escenarios. Podés resolver en Rider antes de verificar.</p>
+    </div>
+    <div id="exercises-container"></div>
+  </div>
+</section>
 
-  <!-- Data -->
-  <script src="data/slides.js"></script>
-  <script src="data/exercises.js"></script>
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <div class="bottom-dots"></div>
+  <button class="btn-exercises" onclick="toggleMode()">
+    <i class="fa-solid fa-dumbbell"></i> Ejercicios
+  </button>
+</nav>
 
-  <!-- App -->
-  <script src="js/app.js"></script>
+<div class="keyboard-hint">← → para navegar</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+/* ================================================================
+   DATOS — SLIDES
+   ================================================================ */
+const SLIDES = [
+  {
+    id: 1, type: "cover",
+    badge: "GRASP · Patrones de Asignación de Responsabilidades",
+    title: "Expert",
+    subtitle: "¿Quién debe saber qué?",
+    icon: "fa-solid fa-brain",
+    note: "Principio fundamental del diseño orientado a objetos"
+  },
+  {
+    id: 2, type: "content",
+    label: "El Principio",
+    title: "¿Qué es <span class='accent'>Expert</span>?",
+    content: `
+      <div class="container-xl py-2">
+        <div class="concept-box">
+          <div class="concept-question">
+            <i class="fa-solid fa-circle-question"></i><strong>Problema</strong>
+            <p>¿Cuál es el principio más básico para asignar responsabilidades en un diseño orientado a objetos?</p>
+          </div>
+          <div class="concept-answer">
+            <i class="fa-solid fa-circle-check"></i><strong>Solución</strong>
+            <p>Asignar la responsabilidad al <span class="highlight">experto en información</span>: la clase que tiene la información necesaria para cumplir con esa responsabilidad.</p>
+          </div>
+        </div>
+        <div class="intuition-box animate__animated animate__fadeInUp animate__delay-1s">
+          <i class="fa-solid fa-quote-left"></i>
+          <em>"Los objetos hacen cosas relacionadas con la información que tienen."</em>
+        </div>
+      </div>`
+  },
+  {
+    id: 3, type: "content",
+    label: "Contexto",
+    title: "App de <span class='accent'>Punto de Venta</span>",
+    content: `
+      <div class="container-xl py-2">
+        <div class="row g-4 align-items-center">
+          <div class="col-md-6">
+            <p class="lead-text">Tenemos una aplicación que genera tickets de venta. Un ticket simplificado luce así:</p>
+            <div class="ticket-preview">
+              <div class="ticket-header"><i class="fa-solid fa-receipt"></i> Ticket de Venta</div>
+              <div class="ticket-body">
+                <div class="ticket-line"><span class="ticket-meta">Fecha:</span> 31/3/2021</div>
+                <div class="ticket-line"><span class="qty">2</span> de <span>'Agua mineral'</span> a <span class="price">$25</span></div>
+                <div class="ticket-line"><span class="qty">1</span> de <span>'Café cortado'</span> a <span class="price">$35</span></div>
+                <div class="ticket-line"><span class="qty">1</span> de <span>'Café expreso'</span> a <span class="price">$31</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <p class="lead-text">⚠️ <strong>Importante:</strong> comenzar enunciando las responsabilidades claramente antes de asignarlas.</p>
+            <div class="info-card">
+              <h6><i class="fa-solid fa-id-card"></i> Tarjetas CRC</h6>
+              <p>Usamos tarjetas <strong>CRC</strong> (Clases · Responsabilidades · Colaboraciones) para visualizar el diseño.</p>
+              <div class="crc-diagram">
+                <div class="crc-name">NombreClase</div>
+                <div class="crc-body">
+                  <div class="crc-resp">Responsabilidades</div>
+                  <div class="crc-collab">Colaboraciones</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 4, type: "content",
+    label: "Diseño Inicial",
+    title: "Tarjetas <span class='accent'>CRC</span> de Partida",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">Las clases que ya existen en la aplicación de punto de venta:</p>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="crc-card animate__animated animate__fadeInLeft">
+              <div class="crc-card-name"><i class="fa-solid fa-file-invoice"></i> SaleTicket</div>
+              <div class="crc-card-body">
+                <div class="crc-card-resp"><h6>Responsabilidades</h6><ul><li>Conocer fecha y hora</li><li>Conocer líneas de ítems vendidos</li><li>Imprimir el ticket</li></ul></div>
+                <div class="crc-card-collab"><h6>Colabora con</h6><ul><li>TicketLineItem</li></ul></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="crc-card animate__animated animate__fadeInUp">
+              <div class="crc-card-name"><i class="fa-solid fa-list-check"></i> TicketLineItem</div>
+              <div class="crc-card-body">
+                <div class="crc-card-resp"><h6>Responsabilidades</h6><ul><li>Conocer la cantidad del producto</li><li>Conocer el producto</li></ul></div>
+                <div class="crc-card-collab"><h6>Colabora con</h6><ul><li>ProductSpecification</li></ul></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="crc-card animate__animated animate__fadeInRight">
+              <div class="crc-card-name"><i class="fa-solid fa-box"></i> ProductSpecification</div>
+              <div class="crc-card-body">
+                <div class="crc-card-resp"><h6>Responsabilidades</h6><ul><li>Conocer la descripción</li><li>Conocer el precio</li></ul></div>
+                <div class="crc-card-collab"><h6>Colabora con</h6><ul><li class="text-muted fst-italic">ninguna</li></ul></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="relation-arrows mt-3">
+          <span class="badge-class">SaleTicket</span>
+          <i class="fa-solid fa-arrow-right"></i>
+          <span class="badge-class">TicketLineItem</span>
+          <i class="fa-solid fa-arrow-right"></i>
+          <span class="badge-class">ProductSpecification</span>
+        </div>
+      </div>`
+  },
+  {
+    id: 5, type: "content",
+    label: "Código C#",
+    title: "Las clases en <span class='accent'>C#</span>",
+    content: `
+      <div class="container-xl py-2">
+        <div class="code-tabs">
+          <ul class="nav nav-tabs code-nav" id="codeTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-sale"  type="button">SaleTicket</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#tab-line"  type="button">TicketLineItem</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#tab-prod"  type="button">ProductSpecification</button></li>
+          </ul>
+          <div class="tab-content code-tab-content">
+            <div class="tab-pane fade show active" id="tab-sale"><pre><code><span class="kw">public class</span> <span class="cl">SaleTicket</span>
+{
+    <span class="kw">private</span> ArrayList lineItems = <span class="kw">new</span> ArrayList();
+    <span class="kw">public</span> DateTime DateTime { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public void</span> <span class="mt">AddLineItem</span>(<span class="cl">TicketLineItem</span> item)
+        =&gt; lineItems.Add(item);
+
+    <span class="kw">public void</span> <span class="mt">RemoveLineItem</span>(<span class="cl">TicketLineItem</span> item)
+        =&gt; lineItems.Remove(item);
+
+    <span class="kw">public void</span> <span class="mt">PrintTicket</span>()
+    {
+        Console.WriteLine(<span class="st">$"Fecha: {DateTime}"</span>);
+        <span class="kw">foreach</span> (<span class="cl">TicketLineItem</span> item <span class="kw">in</span> lineItems)
+            Console.WriteLine(<span class="st">$"{item.Quantity} de '{item.Product.Description}' a ${item.Product.Price}"</span>);
+    }
+}</code></pre></div>
+            <div class="tab-pane fade" id="tab-line"><pre><code><span class="kw">public class</span> <span class="cl">TicketLineItem</span>
+{
+    <span class="kw">public</span> <span class="mt">TicketLineItem</span>(<span class="kw">double</span> quantity, <span class="cl">ProductSpecification</span> product)
+    {
+        Quantity = quantity;
+        Product  = product;
+    }
+
+    <span class="kw">public double</span> Quantity { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="cl">ProductSpecification</span> Product { <span class="kw">get</span>; <span class="kw">set</span>; }
+}</code></pre></div>
+            <div class="tab-pane fade" id="tab-prod"><pre><code><span class="kw">public class</span> <span class="cl">ProductSpecification</span>
+{
+    <span class="kw">public</span> <span class="mt">ProductSpecification</span>(<span class="kw">string</span> description, <span class="kw">double</span> price)
+    {
+        Description = description;
+        Price       = price;
+    }
+
+    <span class="kw">public string</span> Description { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public double</span> Price       { <span class="kw">get</span>; <span class="kw">set</span>; }
+}</code></pre></div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 6, type: "content",
+    label: "Aplicando Expert",
+    title: "¿Quién calcula el <span class='accent'>Total</span>?",
+    content: `
+      <div class="container-xl py-2">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="problem-box">
+              <h5><i class="fa-solid fa-circle-question"></i> El problema</h5>
+              <p>Queremos agregar el <strong>total de la venta</strong> al ticket. ¿Qué clase debe tener esa responsabilidad?</p>
+              <div class="formula-box">
+                <div class="formula-line"><span class="formula-label">Total</span><span class="formula-op">=</span><span class="formula-val">Σ subtotales de líneas</span></div>
+                <div class="formula-line"><span class="formula-label">Subtotal línea</span><span class="formula-op">=</span><span class="formula-val">cantidad × precio</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="analysis-box">
+              <h5><i class="fa-solid fa-microscope"></i> Aplicando Expert</h5>
+              <div class="analysis-step">
+                <span class="step-num">1</span>
+                <p>¿Qué información se necesita? → Todas las instancias de <code>TicketLineItem</code> y la suma de sus subtotales.</p>
+              </div>
+              <div class="analysis-step">
+                <span class="step-num">2</span>
+                <p>¿Quién tiene esa información? → Solo <code>SaleTicket</code> conoce todas sus líneas.</p>
+              </div>
+              <div class="analysis-step highlight-step">
+                <span class="step-num">✓</span>
+                <p><strong>Conclusión:</strong> <code>SaleTicket</code> es el experto → asignamos <code>Total</code> a <code>SaleTicket</code>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 7, type: "content",
+    label: "Solución Paso 1",
+    title: "<span class='accent'>SaleTicket.Total</span> — Primera mejora",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">Agregamos la propiedad <code>Total</code> (solo lectura) a <code>SaleTicket</code> y actualizamos <code>PrintTicket()</code>:</p>
+        <pre><code><span class="kw">public class</span> <span class="cl">SaleTicket</span>
+{
+<span class="diff-add">    <span class="kw">public double</span> Total</span>
+<span class="diff-add">    {</span>
+<span class="diff-add">        <span class="kw">get</span></span>
+<span class="diff-add">        {</span>
+<span class="diff-add">            <span class="kw">double</span> result = 0;</span>
+<span class="diff-add">            <span class="kw">foreach</span> (<span class="cl">TicketLineItem</span> item <span class="kw">in</span> lineItems)</span>
+<span class="diff-add">                result += item.Quantity * item.Product.Price;</span>
+<span class="diff-add">            <span class="kw">return</span> result;</span>
+<span class="diff-add">        }</span>
+<span class="diff-add">    }</span>
+
+    <span class="kw">public void</span> <span class="mt">PrintTicket</span>()
+    {
+        Console.WriteLine(<span class="st">$"Fecha: {DateTime}"</span>);
+        <span class="kw">foreach</span> (<span class="cl">TicketLineItem</span> item <span class="kw">in</span> lineItems)
+            Console.WriteLine(<span class="st">$"{item.Quantity} de '{item.Product.Description}' a ${item.Product.Price}"</span>);
+<span class="diff-add">        Console.WriteLine(<span class="st">$"Total: ${Total}"</span>);</span>
+    }
+}</code></pre>
+        <div class="row g-3 mt-1">
+          <div class="col-md-7">
+            <div class="output-preview">
+              <div class="output-header"><i class="fa-solid fa-terminal"></i> Salida</div>
+              <div class="output-body">
+                <div>Fecha: 31/3/2021</div>
+                <div>2 de 'Agua mineral' a $25</div>
+                <div>1 de 'Café cortado' a $35</div>
+                <div>1 de 'Café expreso' a $31</div>
+                <div class="output-new">Total: $116</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="note-box h-100">
+              <i class="fa-solid fa-info-circle"></i>
+              <span><code>Total</code> es una propiedad de <strong>solo lectura</strong>: el total cambia únicamente cuando se agregan o quitan líneas, no tiene sentido asignarlo directamente.</span>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 8, type: "content",
+    label: "Solución Paso 2",
+    title: "<span class='accent'>TicketLineItem.SubTotal</span> — Segunda mejora",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">La información para el subtotal de una línea (<em>cantidad × precio</em>) ya está en <code>TicketLineItem</code>. ¡También es experto parcial!</p>
+        <div class="row g-3">
+          <div class="col-md-6"><pre><code><span class="kw">public class</span> <span class="cl">TicketLineItem</span>
+{
+    <span class="cm">// ... código anterior ...</span>
+<span class="diff-add">
+    <span class="kw">public double</span> SubTotal</span>
+<span class="diff-add">    {</span>
+<span class="diff-add">        <span class="kw">get</span> =&gt; Quantity * Product.Price;</span>
+<span class="diff-add">    }</span>
+}</code></pre></div>
+          <div class="col-md-6"><pre><code><span class="kw">public class</span> <span class="cl">SaleTicket</span>
+{
+    <span class="kw">public double</span> Total
+    {
+        <span class="kw">get</span>
+        {
+            <span class="kw">double</span> result = 0;
+            <span class="kw">foreach</span> (<span class="cl">TicketLineItem</span> item <span class="kw">in</span> lineItems)
+            {
+<span class="diff-rem">                result += item.Quantity * item.Product.Price;</span>
+<span class="diff-add">                result += item.SubTotal;</span>
+            }
+            <span class="kw">return</span> result;
+        }
+    }
+}</code></pre></div>
+        </div>
+        <div class="expert-flow mt-3">
+          <div class="expert-node"><i class="fa-solid fa-file-invoice"></i>SaleTicket<br><small>calcula Total</small></div>
+          <div class="expert-arrow"><i class="fa-solid fa-arrow-right"></i><small>delega</small></div>
+          <div class="expert-node"><i class="fa-solid fa-list-check"></i>TicketLineItem<br><small>calcula SubTotal</small></div>
+          <div class="expert-arrow"><i class="fa-solid fa-arrow-right"></i><small>usa</small></div>
+          <div class="expert-node"><i class="fa-solid fa-box"></i>ProductSpecification<br><small>conoce Price</small></div>
+        </div>
+      </div>`
+  },
+  {
+    id: 9, type: "content",
+    label: "Beneficios",
+    title: "<span class='accent'>Beneficios</span> de Expert",
+    content: `
+      <div class="container-xl py-2">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInLeft">
+              <div class="benefit-icon"><i class="fa-solid fa-lock"></i></div>
+              <h5>Encapsulación</h5>
+              <p>Los objetos usan su <strong>propia información</strong> para cumplir responsabilidades. El estado interno está protegido.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInUp">
+              <div class="benefit-icon"><i class="fa-solid fa-link-slash"></i></div>
+              <h5>Bajo Acoplamiento</h5>
+              <p>Menor dependencia entre clases produce programas <strong>más robustos y fáciles de mantener</strong>.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInRight">
+              <div class="benefit-icon"><i class="fa-solid fa-puzzle-piece"></i></div>
+              <h5>Alta Cohesión</h5>
+              <p>El comportamiento se distribuye a clases con la información necesaria → clases <strong>más cohesivas y comprensibles</strong>.</p>
+            </div>
+          </div>
+        </div>
+        <div class="summary-banner mt-4">
+          <i class="fa-solid fa-trophy"></i>
+          Expert es el patrón GRASP <strong>más utilizado</strong>. Expresa la intuición de que los objetos hacen cosas relacionadas con la información que tienen.
+        </div>
+      </div>`
+  }
+];
+
+/* ================================================================
+   DATOS — EJERCICIOS
+   ================================================================ */
+const EXERCISES = [
+  {
+    id: 1,
+    title: "Sistema de Biblioteca",
+    icon: "fa-solid fa-book-open",
+    difficulty: "Básico",
+    difficultyClass: "easy",
+    context: `
+      <p>Una biblioteca tiene las siguientes clases:</p>
+      <div class="row g-2 mb-3">
+        <div class="col-md-4"><div class="mini-crc"><div class="mini-crc-name">Loan</div><ul><li>Conocer fecha de préstamo</li><li>Conocer fecha de devolución esperada</li><li>Conocer el libro</li><li>Conocer el socio</li></ul></div></div>
+        <div class="col-md-4"><div class="mini-crc"><div class="mini-crc-name">Book</div><ul><li>Conocer título</li><li>Conocer autor</li><li>Conocer ISBN</li></ul></div></div>
+        <div class="col-md-4"><div class="mini-crc"><div class="mini-crc-name">Member</div><ul><li>Conocer nombre</li><li>Conocer nro. de socio</li></ul></div></div>
+      </div>
+      <p>La multa se calcula como: <strong>días de atraso × $5 por día</strong>.<br>La fecha de devolución real se captura al momento de devolver el libro.</p>`,
+    question: "¿A qué clase le asignás la responsabilidad de <strong>calcular la multa por atraso</strong>? Justificá usando Expert.",
+    options: [
+      { id: "a", text: "Book — porque es el recurso que se prestó." },
+      { id: "b", text: "Loan — porque tiene la fecha de vencimiento y puede recibir la fecha de devolución real." },
+      { id: "c", text: "Member — porque es quien paga la multa." },
+      { id: "d", text: "Una nueva clase FineCalculator, especializada en cálculos." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ <strong>Loan</strong> es el experto de información correcto porque:</p>
+      <ul>
+        <li>Conoce la <strong>fecha de vencimiento</strong> del préstamo.</li>
+        <li>Puede recibir la <strong>fecha real de devolución</strong> como parámetro.</li>
+        <li>Con esos dos datos puede calcular días de atraso y multiplicar por la tarifa.</li>
+      </ul>
+      <p><code>Book</code> no sabe nada sobre fechas. <code>Member</code> solo conoce datos del socio. <code>FineCalculator</code> es una clase artificiosa: crearía acoplamiento innecesario y violaría la cohesión natural del diseño.</p>`,
+    code: `<span class="kw">public class</span> <span class="cl">Loan</span>
+{
+    <span class="kw">public</span> DateTime DueDate { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="cl">Book</span>   Book   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="cl">Member</span> Member { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// ✅ Loan es el experto: tiene DueDate</span>
+    <span class="kw">public double</span> <span class="mt">CalculateFine</span>(DateTime returnDate)
+    {
+        <span class="kw">int</span> daysLate = (returnDate - DueDate).Days;
+        <span class="kw">return</span> daysLate &gt; 0 ? daysLate * 5.0 : 0;
+    }
+}`
+  },
+  {
+    id: 2,
+    title: "Sistema de E-Commerce",
+    icon: "fa-solid fa-cart-shopping",
+    difficulty: "Intermedio",
+    difficultyClass: "medium",
+    context: `
+      <p>Un sistema de e-commerce tiene estas clases:</p>
+      <div class="row g-2 mb-3">
+        <div class="col-md-3"><div class="mini-crc"><div class="mini-crc-name">Order</div><ul><li>Conocer items del pedido</li><li>Conocer fecha</li><li>Conocer cliente</li></ul></div></div>
+        <div class="col-md-3"><div class="mini-crc"><div class="mini-crc-name">OrderItem</div><ul><li>Conocer cantidad</li><li>Conocer producto</li></ul></div></div>
+        <div class="col-md-3"><div class="mini-crc"><div class="mini-crc-name">Product</div><ul><li>Conocer nombre</li><li>Conocer precio</li><li>Conocer peso (kg)</li></ul></div></div>
+        <div class="col-md-3"><div class="mini-crc"><div class="mini-crc-name">Customer</div><ul><li>Conocer nombre</li><li>Conocer dirección</li></ul></div></div>
+      </div>
+      <p>El peso total de un pedido es la suma de: <strong>peso del producto × cantidad</strong> por cada item.</p>`,
+    question: "Identificá los <strong>expertos parciales</strong> y asigná correctamente las responsabilidades para calcular el peso total del pedido.",
+    options: [
+      { id: "a", text: "Order calcula el total. No hay expertos parciales: toda la lógica en un lugar." },
+      { id: "b", text: "OrderItem calcula el peso de su línea (peso parcial). Order suma todos los pesos parciales (peso total)." },
+      { id: "c", text: "Product calcula el peso total, porque conoce el peso unitario." },
+      { id: "d", text: "Customer calcula el peso total, porque necesita saber cuánto le llega." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ Hay <strong>dos expertos parciales</strong>:</p>
+      <ul>
+        <li><strong>OrderItem</strong>: conoce la <em>cantidad</em> y el <em>Product</em> (que tiene el peso unitario). Experto del peso de esa línea → <code>double ItemWeight { get => Quantity * Product.Weight; }</code></li>
+        <li><strong>Order</strong>: conoce todos los <em>OrderItem</em>. Experto del total → suma todos los <code>ItemWeight</code>.</li>
+      </ul>
+      <p>La opción A concentra todo en <code>Order</code> y viola la cohesión. <code>Product</code> y <code>Customer</code> no tienen la información completa.</p>`,
+    code: `<span class="cm">// Experto parcial: conoce cantidad y producto</span>
+<span class="kw">public class</span> <span class="cl">OrderItem</span>
+{
+    <span class="kw">public int</span>     Quantity { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="cl">Product</span> Product  { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public double</span> ItemWeight =&gt; Quantity * Product.Weight;
+}
+
+<span class="cm">// Experto total: conoce todos los items</span>
+<span class="kw">public class</span> <span class="cl">Order</span>
+{
+    <span class="kw">private</span> List&lt;<span class="cl">OrderItem</span>&gt; items = <span class="kw">new</span>();
+
+    <span class="kw">public double</span> TotalWeight
+    {
+        <span class="kw">get</span>
+        {
+            <span class="kw">double</span> total = 0;
+            <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> items)
+                total += item.ItemWeight; <span class="cm">// delega en experto parcial</span>
+            <span class="kw">return</span> total;
+        }
+    }
+}`
+  },
+  {
+    id: 3,
+    title: "Completar el Código",
+    icon: "fa-solid fa-keyboard",
+    difficulty: "Avanzado",
+    difficultyClass: "hard",
+    context: `
+      <p>Tenés un sistema de facturación con estas clases ya implementadas:</p>
+      <pre><code><span class="kw">public class</span> <span class="cl">Invoice</span>
+{
+    <span class="kw">private</span> List&lt;<span class="cl">InvoiceLine</span>&gt; lines = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="cl">Customer</span> Customer { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> DateTime Date     { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public void</span> <span class="mt">AddLine</span>(<span class="cl">InvoiceLine</span> line) =&gt; lines.Add(line);
+
+    <span class="cm">// ❓ FALTA IMPLEMENTAR</span>
+    <span class="kw">public double</span> Total { <span class="kw">get</span>; }
+}
+
+<span class="kw">public class</span> <span class="cl">InvoiceLine</span>
+{
+    <span class="kw">public</span> <span class="cl">Item</span>   Item     { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>    Quantity { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public double</span> Discount { <span class="kw">get</span>; <span class="kw">set</span>; } <span class="cm">// porcentaje 0-100</span>
+
+    <span class="cm">// ❓ FALTA IMPLEMENTAR</span>
+    <span class="kw">public double</span> LineTotal { <span class="kw">get</span>; }
+}
+
+<span class="kw">public class</span> <span class="cl">Item</span>
+{
+    <span class="kw">public string</span> Name      { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public double</span> UnitPrice { <span class="kw">get</span>; <span class="kw">set</span>; }
+}</code></pre>
+      <p class="mt-3">Fórmula del total de línea con descuento: <strong>cantidad × precio × (1 − descuento / 100)</strong></p>`,
+    question: "Seleccioná la implementación correcta que aplica el principio Expert:",
+    options: [
+      { id: "a", text: "InvoiceLine.LineTotal calcula cantidad × precio sin descuento. Invoice.Total aplica el descuento al final." },
+      { id: "b", text: "InvoiceLine.LineTotal = Quantity × Item.UnitPrice × (1 − Discount/100). Invoice.Total suma todos los LineTotal." },
+      { id: "c", text: "Item.LineTotal(qty, disc) calcula el total de línea recibiendo parámetros. Invoice.Total llama a Item directamente." },
+      { id: "d", text: "Invoice.Total calcula todo: itera líneas y accede a item.UnitPrice directamente para calcular cada subtotal." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ La opción B aplica Expert correctamente:</p>
+      <ul>
+        <li><strong>InvoiceLine</strong> conoce <code>Quantity</code>, <code>Discount</code> e <code>Item</code> (que tiene <code>UnitPrice</code>) → es el experto del total de línea con descuento.</li>
+        <li><strong>Invoice</strong> conoce todas las líneas → es el experto del total general, y delega el cálculo en <code>InvoiceLine.LineTotal</code>.</li>
+      </ul>
+      <p>La opción D viola Expert y cohesión: <code>Invoice</code> accede directamente a <code>item.UnitPrice</code>, asumiendo conocimiento interno de <code>Item</code> y aumentando el acoplamiento.</p>`,
+    code: `<span class="kw">public class</span> <span class="cl">InvoiceLine</span>
+{
+    <span class="kw">public</span> <span class="cl">Item</span>   Item     { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>    Quantity { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public double</span> Discount { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// ✅ InvoiceLine es experto: tiene todo lo necesario</span>
+    <span class="kw">public double</span> LineTotal
+        =&gt; Quantity * Item.UnitPrice * (1 - Discount / 100.0);
+}
+
+<span class="kw">public class</span> <span class="cl">Invoice</span>
+{
+    <span class="kw">private</span> List&lt;<span class="cl">InvoiceLine</span>&gt; lines = <span class="kw">new</span>();
+
+    <span class="cm">// ✅ Invoice delega en el experto parcial</span>
+    <span class="kw">public double</span> Total
+    {
+        <span class="kw">get</span>
+        {
+            <span class="kw">double</span> sum = 0;
+            <span class="kw">foreach</span> (<span class="kw">var</span> line <span class="kw">in</span> lines)
+                sum += line.LineTotal;
+            <span class="kw">return</span> sum;
+        }
+    }
+}`
+  }
+];
+
+/* ================================================================
+   MOTOR DE SLIDES
+   ================================================================ */
+let currentSlide = 0;
+let mode = "slides";
+
+function renderSlide(data) {
+  if (data.type === "cover") {
+    return `
+      <div class="slide-cover">
+        <div class="cover-badge animate__animated animate__fadeInDown">${data.badge}</div>
+        <div class="cover-icon animate__animated animate__bounceIn animate__delay-1s"><i class="${data.icon}"></i></div>
+        <div class="cover-title animate__animated animate__fadeInUp">${data.title}</div>
+        <div class="cover-subtitle animate__animated animate__fadeIn animate__delay-1s">${data.subtitle}</div>
+        <div class="cover-note animate__animated animate__fadeIn animate__delay-2s">
+          <i class="fa-solid fa-circle-info me-2"></i>${data.note}
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="container-xl py-2">
+      <div class="slide-label animate__animated animate__fadeInLeft">${data.label}</div>
+      <div class="slide-title animate__animated animate__fadeInLeft">${data.title}</div>
+      <div class="animate__animated animate__fadeIn animate__delay-1s">${data.content}</div>
+    </div>`;
+}
+
+function buildSlides() {
+  const c = document.getElementById("slides-container");
+  c.innerHTML = "";
+  SLIDES.forEach((s, i) => {
+    const div = document.createElement("div");
+    div.className = `slide${i === 0 ? " active" : ""}`;
+    div.id = `slide-${i}`;
+    div.innerHTML = renderSlide(s);
+    c.appendChild(div);
+  });
+}
+
+function buildDots() {
+  const wrap = document.querySelector(".bottom-dots");
+  wrap.innerHTML = "";
+  SLIDES.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = `dot${i === 0 ? " active" : ""}`;
+    d.title = `Diapositiva ${i + 1}`;
+    d.onclick = () => goToSlide(i);
+    wrap.appendChild(d);
+  });
+  const ex = document.createElement("div");
+  ex.className = "dot exercises-dot";
+  ex.title = "Ejercicios";
+  ex.onclick = () => showExercises();
+  wrap.appendChild(ex);
+}
+
+function updateUI() {
+  if (mode !== "slides") return;
+  document.querySelectorAll(".slide").forEach((s, i) => s.classList.toggle("active", i === currentSlide));
+  document.querySelectorAll(".dot:not(.exercises-dot)").forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+  document.querySelector(".dot.exercises-dot")?.classList.remove("active");
+  document.getElementById("btn-prev").disabled = currentSlide === 0;
+  document.getElementById("btn-next").disabled = currentSlide === SLIDES.length - 1;
+  document.getElementById("slide-counter").textContent = `${currentSlide + 1} / ${SLIDES.length}`;
+  document.querySelector(".progress-bar-fill").style.width = `${((currentSlide + 1) / SLIDES.length) * 100}%`;
+}
+
+function goToSlide(n) {
+  if (mode === "exercises") showSlides();
+  currentSlide = Math.max(0, Math.min(n, SLIDES.length - 1));
+  updateUI();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function prevSlide() { if (currentSlide > 0) goToSlide(currentSlide - 1); }
+function nextSlide() { if (currentSlide < SLIDES.length - 1) goToSlide(currentSlide + 1); }
+
+/* ================================================================
+   MOTOR DE EJERCICIOS
+   ================================================================ */
+function showExercises() {
+  mode = "exercises";
+  document.getElementById("slides-container").style.display = "none";
+  document.getElementById("exercises-section").classList.add("active");
+  const btn = document.querySelector(".btn-exercises");
+  btn.innerHTML = '<i class="fa-solid fa-chalkboard-user"></i> Ver Presentación';
+  btn.classList.add("active-mode");
+  document.getElementById("btn-prev").disabled = true;
+  document.getElementById("btn-next").disabled = true;
+  document.querySelector(".dot.exercises-dot")?.classList.add("active");
+  document.querySelectorAll(".dot:not(.exercises-dot)").forEach(d => d.classList.remove("active"));
+  document.querySelector(".progress-bar-fill").style.width = "100%";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showSlides() {
+  mode = "slides";
+  document.getElementById("slides-container").style.display = "";
+  document.getElementById("exercises-section").classList.remove("active");
+  const btn = document.querySelector(".btn-exercises");
+  btn.innerHTML = '<i class="fa-solid fa-dumbbell"></i> Ejercicios';
+  btn.classList.remove("active-mode");
+  updateUI();
+}
+
+function toggleMode() {
+  mode === "slides" ? showExercises() : showSlides();
+}
+
+function buildExercises() {
+  const c = document.getElementById("exercises-container");
+  c.innerHTML = "";
+  EXERCISES.forEach(ex => {
+    const div = document.createElement("div");
+    div.className = "exercise-card";
+    div.id = `ex-${ex.id}`;
+    div.innerHTML = `
+      <div class="exercise-card-header">
+        <div class="ex-number">${ex.id}</div>
+        <i class="${ex.icon}"></i>
+        <h4>${ex.title}</h4>
+        <span class="difficulty-badge ${ex.difficultyClass}">${ex.difficulty}</span>
+      </div>
+      <div class="exercise-card-body">
+        <div class="exercise-context">${ex.context}</div>
+        <div class="exercise-question">${ex.question}</div>
+        <ul class="option-list" id="opts-${ex.id}">
+          ${ex.options.map(o => `
+            <li class="option-item" data-ex="${ex.id}" data-opt="${o.id}" onclick="selectOption(${ex.id},'${o.id}')">
+              <div class="option-letter">${o.id.toUpperCase()}</div>
+              <div class="option-text">${o.text}</div>
+            </li>`).join("")}
+        </ul>
+        <div class="exercise-actions">
+          <button class="btn-check-ex" onclick="checkAnswer(${ex.id})">
+            <i class="fa-solid fa-check"></i> Verificar
+          </button>
+          <button class="btn-show-sol" onclick="toggleSolution(${ex.id})">
+            <i class="fa-solid fa-eye"></i> Ver Solución
+          </button>
+        </div>
+        <div class="solution-panel" id="sol-${ex.id}">
+          <div class="solution-explanation">${ex.explanation}</div>
+          <div class="solution-code-title"><i class="fa-solid fa-code me-2"></i>Implementación en C#</div>
+          <pre><code>${ex.code}</code></pre>
+        </div>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+const selectedOptions = {};
+
+function selectOption(exId, optId) {
+  if (document.querySelector(`#opts-${exId} .correct, #opts-${exId} .incorrect`)) return;
+  selectedOptions[exId] = optId;
+  document.querySelectorAll(`#opts-${exId} .option-item`).forEach(el => {
+    el.classList.toggle("selected", el.dataset.opt === optId);
+  });
+}
+
+function checkAnswer(exId) {
+  const ex = EXERCISES.find(e => e.id === exId);
+  const selected = selectedOptions[exId];
+  if (!selected) {
+    Swal.fire({ title: "Seleccioná una opción", text: "Hacé click en una de las respuestas antes de verificar.", icon: "warning", confirmButtonColor: "#1a3a5c", confirmButtonText: "Entendido" });
+    return;
+  }
+  const items = document.querySelectorAll(`#opts-${exId} .option-item`);
+  items.forEach(item => {
+    if (item.dataset.opt === ex.correct)                     item.classList.add("correct");
+    else if (item.dataset.opt === selected && selected !== ex.correct) item.classList.add("incorrect");
+  });
+  if (selected === ex.correct) {
+    Swal.fire({ title: "¡Correcto! 🎉", html: "Aplicaste Expert correctamente.<br>Revisá la solución completa abajo.", icon: "success", confirmButtonColor: "#10b981", confirmButtonText: "Ver explicación" })
+      .then(() => document.getElementById(`sol-${exId}`).classList.add("visible"));
+  } else {
+    Swal.fire({ title: "No exactamente…", html: "Repasá el enunciado y pensá: <strong>¿qué clase tiene la información necesaria?</strong>", icon: "error", confirmButtonColor: "#1a3a5c", confirmButtonText: "Intentar de nuevo", showDenyButton: true, denyButtonText: "Ver solución", denyButtonColor: "#64748b" })
+      .then(result => {
+        if (result.isDenied) {
+          document.getElementById(`sol-${exId}`).classList.add("visible");
+        } else {
+          items.forEach(i => i.classList.remove("selected","correct","incorrect"));
+          delete selectedOptions[exId];
+        }
+      });
+  }
+}
+
+function toggleSolution(exId) {
+  document.getElementById(`sol-${exId}`).classList.toggle("visible");
+}
+
+/* ================================================================
+   TECLADO
+   ================================================================ */
+document.addEventListener("keydown", e => {
+  if (mode !== "slides") return;
+  if (["ArrowRight","ArrowDown"," "].includes(e.key)) { e.preventDefault(); nextSlide(); }
+  if (["ArrowLeft","ArrowUp"].includes(e.key))        { e.preventDefault(); prevSlide(); }
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  buildSlides();
+  buildDots();
+  buildExercises();
+  updateUI();
+});
+</script>
 </body>
 </html>

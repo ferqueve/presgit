@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRASP · Polymorphism — Patrón de Polimorfismo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+
+<style>
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2563a8;
+  --accent: #00b4d8;
+  --accent-warm: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #e8f0f8;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #cbd5e1;
+  --code-bg: #0d1b2a;
+  --code-text: #e2e8f0;
+  --font-title: 'Syne', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(26,58,92,0.10);
+  --shadow-lg: 0 8px 40px rgba(26,58,92,0.18);
+  --transition: 0.28s cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
+
+/* TOP BAR */
+.topbar { background: var(--primary); color: #fff; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+.topbar-brand { font-family: var(--font-title); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+.grasp-badge { background: var(--accent); color: var(--primary); font-size: .7rem; font-weight: 800; padding: 2px 10px; border-radius: 20px; letter-spacing: 2px; }
+.topbar-nav { display: flex; align-items: center; gap: 8px; }
+.nav-btn { background: rgba(255,255,255,0.12); border: none; color: #fff; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: .85rem; font-family: var(--font-body); transition: background var(--transition); display: flex; align-items: center; gap: 6px; }
+.nav-btn:hover { background: rgba(255,255,255,0.22); }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.slide-counter { font-family: var(--font-title); font-size: .85rem; color: rgba(255,255,255,0.7); min-width: 60px; text-align: center; }
+
+/* PROGRESS */
+.progress-bar-wrap { position: fixed; top: 48px; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.1); z-index: 99; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-warm)); transition: width var(--transition); }
+
+/* SLIDES */
+.slides-wrapper { margin-top: 51px; min-height: calc(100vh - 51px); }
+.slide { display: none; width: 100%; padding: 40px 24px 80px; animation: slideIn 0.4s ease; }
+.slide.active { display: flex; flex-direction: column; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* TYPOGRAPHY */
+.slide-label { font-family: var(--font-title); font-size: .72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.slide-title { font-family: var(--font-title); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; color: var(--primary); line-height: 1.2; margin-bottom: 24px; }
+.slide-title .accent { color: var(--accent); }
+.lead-text { font-size: 1rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+
+/* COVER */
+.slide-cover { background: linear-gradient(135deg, var(--primary) 0%, #0f2640 60%, #0a1929 100%); justify-content: center; align-items: center; text-align: center; color: #fff; min-height: calc(100vh - 51px); }
+.cover-badge { font-family: var(--font-title); font-size: .7rem; letter-spacing: 4px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.cover-icon { font-size: 5rem; color: var(--accent); margin-bottom: 24px; text-shadow: 0 0 40px rgba(0,180,216,0.4); }
+.cover-title { font-family: var(--font-title); font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 800; color: #fff; letter-spacing: -2px; line-height: 1; margin-bottom: 12px; }
+.cover-subtitle { font-size: 1.2rem; color: rgba(255,255,255,0.65); margin-bottom: 32px; }
+.cover-note { background: rgba(0,180,216,0.12); border: 1px solid rgba(0,180,216,0.3); color: rgba(255,255,255,0.8); padding: 10px 24px; border-radius: 30px; font-size: .9rem; display: inline-block; }
+
+/* CONCEPT BOXES */
+.concept-box { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.concept-question, .concept-answer { padding: 20px; border-radius: var(--radius); line-height: 1.6; }
+.concept-question { background: #fff3cd; border-left: 4px solid var(--accent-warm); }
+.concept-question i { color: var(--accent-warm); margin-right: 8px; }
+.concept-answer { background: #d1fae5; border-left: 4px solid var(--success); }
+.concept-answer i { color: var(--success); margin-right: 8px; }
+.concept-answer .highlight { color: var(--primary-light); font-weight: 700; }
+.intuition-box { background: var(--primary); color: rgba(255,255,255,0.9); border-radius: var(--radius); padding: 16px 24px; text-align: center; font-size: 1.05rem; }
+.intuition-box i { color: var(--accent); margin-right: 10px; }
+
+/* WARNING BOX */
+.warning-box { background: #fff3cd; border: 1px solid #fbbf24; border-left: 4px solid #f59e0b; border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; font-size: .92rem; }
+.warning-box i { color: #d97706; margin-top: 2px; flex-shrink: 0; }
+
+/* CODE */
+.code-tabs { background: var(--code-bg); border-radius: var(--radius); overflow: hidden; }
+.code-nav { background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 8px 8px 0; gap: 4px; }
+.code-nav .nav-link { color: rgba(255,255,255,0.5); font-family: var(--font-code); font-size: .82rem; padding: 6px 14px; border-radius: 6px 6px 0 0; border: 1px solid transparent; }
+.code-nav .nav-link.active { background: rgba(0,180,216,0.15); color: var(--accent); border-color: rgba(0,180,216,0.3); }
+.code-tab-content { padding: 0; }
+.code-tab-content .tab-pane pre { margin: 0; padding: 20px; overflow-x: auto; }
+pre, code { font-family: var(--font-code); font-size: .83rem; line-height: 1.7; }
+pre { background: var(--code-bg); color: var(--code-text); border-radius: var(--radius); padding: 20px; overflow-x: auto; margin: 0; }
+.kw  { color: #569cd6; }
+.cl  { color: #4ec9b0; }
+.iface { color: #c586c0; }
+.mt  { color: #dcdcaa; }
+.st  { color: #ce9178; }
+.cm  { color: #6a9955; font-style: italic; }
+.en  { color: #b5cea8; }
+.diff-add { color: #b5cea8; display: block; }
+.diff-rem { color: #f48771; display: block; }
+.diff-add::before { content: '+ '; color: var(--success); }
+.diff-rem::before { content: '- '; color: var(--danger); }
+
+/* NOTE */
+.note-box { background: rgba(37,99,168,0.08); border: 1px solid rgba(37,99,168,0.2); border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: .88rem; color: var(--text-muted); display: flex; align-items: flex-start; gap: 10px; }
+.note-box i { color: var(--primary-light); margin-top: 2px; flex-shrink: 0; }
+
+/* PROBLEM / ANALYSIS */
+.problem-box, .analysis-box { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); height: 100%; }
+.problem-box h5, .analysis-box h5 { font-family: var(--font-title); font-size: 1rem; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.analysis-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; font-size: .9rem; }
+.step-num { background: var(--primary); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; flex-shrink: 0; }
+.highlight-step { background: #d1fae5 !important; border-left: 3px solid var(--success); }
+.highlight-step .step-num { background: var(--success); }
+.bad-step { background: #fee2e2 !important; border-left: 3px solid var(--danger); }
+.bad-step .step-num { background: var(--danger); }
+
+/* UML DIAGRAM */
+.uml-diagram { background: var(--code-bg); border-radius: var(--radius); padding: 24px; display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
+.uml-box { border-radius: 8px; text-align: center; font-family: var(--font-code); font-size: .82rem; min-width: 130px; }
+.uml-interface { background: rgba(197,134,192,0.15); border: 2px solid #c586c0; }
+.uml-class    { background: rgba(78,201,176,0.12); border: 2px solid #4ec9b0; }
+.uml-other    { background: rgba(0,180,216,0.10); border: 2px solid var(--accent); }
+.uml-box-header { padding: 8px 14px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.uml-box-header small { display: block; font-size: .65rem; opacity: .7; font-style: italic; }
+.uml-box-body { padding: 8px 14px; font-size: .78rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+.uml-connector { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0 10px; color: rgba(255,255,255,0.4); font-size: .7rem; }
+.uml-connector-line { width: 2px; height: 40px; background: rgba(255,255,255,0.25); }
+.uml-connector-h { height: 2px; width: 40px; background: rgba(255,255,255,0.25); }
+.uml-connector-diamond { width: 10px; height: 10px; border: 2px solid rgba(255,255,255,0.4); transform: rotate(45deg); }
+.uml-connector-tri { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid rgba(197,134,192,0.6); }
+.uml-col { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+/* COMPARE */
+.compare-box { border-radius: var(--radius); overflow: hidden; border: 2px solid var(--border); }
+.compare-header { padding: 10px 16px; font-family: var(--font-title); font-size: .85rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.compare-bad  .compare-header { background: #fee2e2; color: #b91c1c; border-bottom: 1px solid #fca5a5; }
+.compare-good .compare-header { background: #d1fae5; color: #065f46; border-bottom: 1px solid #6ee7b7; }
+.compare-bad  { border-color: #fca5a5; }
+.compare-good { border-color: #6ee7b7; }
+
+/* POLY FLOW */
+.poly-flow { display: flex; align-items: stretch; justify-content: center; gap: 0; background: var(--code-bg); border-radius: var(--radius); padding: 20px; flex-wrap: wrap; }
+.poly-node { background: rgba(0,180,216,0.12); border: 1px solid rgba(0,180,216,0.3); border-radius: var(--radius); padding: 14px 18px; text-align: center; font-size: .82rem; color: var(--code-text); font-family: var(--font-code); min-width: 130px; }
+.poly-node.iface-node { background: rgba(197,134,192,0.15); border-color: #c586c0; }
+.poly-node.impl-node  { background: rgba(78,201,176,0.12);  border-color: #4ec9b0; }
+.poly-node i { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+.poly-node i.iface-icon { color: #c586c0; }
+.poly-node i.impl-icon  { color: #4ec9b0; }
+.poly-node i.prog-icon  { color: var(--accent); }
+.poly-arrow { display: flex; align-items: center; justify-content: center; padding: 0 10px; color: rgba(255,255,255,0.35); font-size: .75rem; flex-direction: column; gap: 2px; }
+.poly-arrow i { font-size: .95rem; }
+.poly-arrow-v { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: rgba(255,255,255,0.35); font-size: .75rem; padding: 4px 0; }
+
+/* BENEFITS */
+.benefit-card { background: var(--surface); border-radius: var(--radius); padding: 24px 20px; text-align: center; box-shadow: var(--shadow); border-top: 3px solid var(--accent); height: 100%; transition: transform var(--transition), box-shadow var(--transition); }
+.benefit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.benefit-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.3rem; color: #fff; }
+.benefit-card h5 { font-family: var(--font-title); color: var(--primary); margin-bottom: 10px; }
+.benefit-card p { color: var(--text-muted); font-size: .9rem; line-height: 1.6; }
+.summary-banner { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; padding: 18px 24px; border-radius: var(--radius); text-align: center; font-size: 1rem; }
+.summary-banner i { color: var(--accent-warm); margin-right: 10px; }
+
+/* EXERCISES */
+.exercises-wrapper { padding: 60px 24px 80px; margin-top: 51px; display: none; }
+.exercises-wrapper.active { display: block; }
+.ex-header { text-align: center; margin-bottom: 40px; }
+.ex-header h2 { font-family: var(--font-title); font-size: 2.2rem; color: var(--primary); font-weight: 800; }
+.exercise-card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 32px; overflow: hidden; border: 1px solid var(--border); }
+.exercise-card-header { background: var(--primary); color: #fff; padding: 16px 24px; display: flex; align-items: center; gap: 14px; }
+.ex-number { width: 36px; height: 36px; background: var(--accent); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-title); font-weight: 800; font-size: 1rem; flex-shrink: 0; }
+.exercise-card-header h4 { font-family: var(--font-title); margin: 0; font-size: 1.15rem; }
+.difficulty-badge { margin-left: auto; padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; letter-spacing: 1px; }
+.easy   { background: rgba(16,185,129,0.2);  color: #6ee7b7; }
+.medium { background: rgba(245,158,11,0.2);  color: #fde68a; }
+.hard   { background: rgba(239,68,68,0.2);   color: #fca5a5; }
+.exercise-card-body { padding: 24px; }
+.exercise-context { background: var(--surface2); border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: .92rem; }
+.exercise-question { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 16px; padding: 12px 16px; background: rgba(37,99,168,0.07); border-left: 4px solid var(--primary-light); border-radius: 0 8px 8px 0; }
+.option-list { list-style: none; padding: 0; margin: 0 0 16px; }
+.option-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; margin-bottom: 8px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color var(--transition), background var(--transition); font-size: .92rem; }
+.option-item:hover    { border-color: var(--primary-light); background: rgba(37,99,168,0.04); }
+.option-item.selected { border-color: var(--primary-light); background: rgba(37,99,168,0.08); }
+.option-item.correct  { border-color: var(--success); background: #d1fae5; }
+.option-item.incorrect{ border-color: var(--danger);  background: #fee2e2; }
+.option-letter { width: 28px; height: 28px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-title); font-weight: 700; font-size: .82rem; flex-shrink: 0; transition: all var(--transition); }
+.option-item.selected  .option-letter { background: var(--primary-light); border-color: var(--primary-light); color: #fff; }
+.option-item.correct   .option-letter { background: var(--success); border-color: var(--success); color: #fff; }
+.option-item.incorrect .option-letter { background: var(--danger);  border-color: var(--danger);  color: #fff; }
+.option-text code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 4px; font-size: .82rem; }
+.exercise-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-check-ex { background: var(--primary); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background var(--transition); }
+.btn-check-ex:hover { background: var(--primary-light); }
+.btn-show-sol { background: transparent; color: var(--primary-light); border: 2px solid var(--primary-light); padding: 10px 22px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all var(--transition); }
+.btn-show-sol:hover { background: var(--primary-light); color: #fff; }
+.solution-panel { display: none; margin-top: 20px; border-top: 2px dashed var(--border); padding-top: 20px; }
+.solution-panel.visible { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.solution-explanation { background: #d1fae5; border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 16px; margin-bottom: 16px; font-size: .9rem; line-height: 1.7; }
+.solution-explanation p, .solution-explanation ul { margin-bottom: 8px; }
+.solution-explanation ul { padding-left: 18px; }
+.solution-code-title { font-family: var(--font-title); font-size: .82rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.mini-crc { background: var(--surface); border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; font-size: .82rem; height: 100%; }
+.mini-crc-name { background: var(--primary); color: #fff; padding: 6px 10px; font-family: var(--font-title); font-weight: 700; font-size: .85rem; }
+.mini-crc ul { padding: 8px 8px 8px 22px; margin: 0; line-height: 1.7; color: var(--text-muted); }
+
+/* BOTTOM NAV */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.bottom-dots { display: flex; gap: 6px; align-items: center; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all var(--transition); }
+.dot.active { background: var(--primary); transform: scale(1.4); }
+.dot.exercises-dot { background: var(--accent-warm); }
+.dot.exercises-dot.active { background: var(--accent-warm); transform: scale(1.4); }
+.btn-exercises { background: linear-gradient(135deg, var(--accent-warm), #e67e22); color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity var(--transition); }
+.btn-exercises:hover { opacity: .9; }
+.btn-exercises.active-mode { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+.keyboard-hint { position: fixed; bottom: 60px; right: 16px; background: rgba(26,58,92,0.85); color: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; font-size: .72rem; font-family: var(--font-code); pointer-events: none; }
+
+@media (max-width: 768px) {
+  .concept-box { grid-template-columns: 1fr; }
+  .poly-flow { flex-direction: column; align-items: center; }
+  .slide-title { font-size: 1.5rem; }
+  .cover-title { font-size: 2.8rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="grasp-badge">GRASP</span>
+    <span>Polymorphism — Patrón de Polimorfismo</span>
+  </div>
+  <div class="topbar-nav">
+    <button id="btn-prev" class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <span class="slide-counter" id="slide-counter">1 / 9</span>
+    <button id="btn-next" class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</header>
+
+<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:11%"></div></div>
+
+<div class="slides-wrapper">
+  <div id="slides-container" style="width:100%"></div>
+</div>
+
+<section id="exercises-section" class="exercises-wrapper">
+  <div class="container-xl">
+    <div class="ex-header">
+      <div class="slide-label">Práctica</div>
+      <h2><i class="fa-solid fa-dumbbell me-2 text-warning"></i>Ejercicios — GRASP Polymorphism</h2>
+      <p class="text-muted">Identificá cuándo aplicar el patrón y refactorizá el código. Podés resolver en Rider antes de verificar.</p>
+    </div>
+    <div id="exercises-container"></div>
+  </div>
+</section>
+
+<nav class="bottom-nav">
+  <div class="bottom-dots"></div>
+  <button class="btn-exercises" onclick="toggleMode()"><i class="fa-solid fa-dumbbell"></i> Ejercicios</button>
+</nav>
+
+<div class="keyboard-hint">← → para navegar</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+/* ================================================================
+   DATOS — SLIDES
+   ================================================================ */
+const SLIDES = [
+  {
+    id: 1, type: "cover",
+    badge: "GRASP · Patrones de Asignación de Responsabilidades",
+    title: "Polymorphism",
+    subtitle: "Comportamiento que varía según el tipo",
+    icon: "fa-solid fa-shapes",
+    note: "Craig Larman — Applying UML and Patterns, 1998"
+  },
+  {
+    id: 2, type: "content",
+    label: "El Principio",
+    title: "¿Qué es <span class='accent'>Polymorphism</span>?",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">Una operación es <strong>polimórfica</strong> cuando es implementada por dos o más objetos de diferentes tipos.</p>
+        <div class="concept-box">
+          <div class="concept-question">
+            <i class="fa-solid fa-circle-question"></i><strong>Problema</strong>
+            <p>¿Cómo manejar alternativas basadas en el tipo? ¿Cómo crear componentes de software <em>conectables</em>?</p>
+          </div>
+          <div class="concept-answer">
+            <i class="fa-solid fa-circle-check"></i><strong>Solución</strong>
+            <p>Cuando el comportamiento varía según el tipo, asignar las responsabilidades usando <span class="highlight">operaciones polimórficas</span> a los tipos cuyo comportamiento varía.</p>
+          </div>
+        </div>
+        <div class="warning-box animate__animated animate__fadeInUp animate__delay-1s">
+          <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+          <span><strong>Regla de oro:</strong> No pregunten por el tipo de un objeto y usen lógica condicional (<code>if/switch</code>) para ejecutar diferentes fragmentos de código que varían según el tipo.</span>
+        </div>
+      </div>`
+  },
+  {
+    id: 3, type: "content",
+    label: "Contexto",
+    title: "El Problema: <span class='accent'>AllInOnePrinter</span>",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">En la aplicación de punto de venta, ¿quién debería ser responsable de imprimir el ticket en <strong>diferentes destinos</strong> (consola o archivo)?</p>
+        <p class="lead-text">La solución inicial crea una clase <code>AllInOnePrinter</code> que usa un <code>enum Destination</code> y condicionales:</p>
+        <div class="row g-3">
+          <div class="col-md-5">
+            <pre><code><span class="kw">public enum</span> <span class="en">Destination</span>
+{
+    Console,
+    File
+}</code></pre>
+          </div>
+          <div class="col-md-7">
+            <div class="compare-box compare-bad">
+              <div class="compare-header"><i class="fa-solid fa-xmark-circle"></i> Problemático — viola Polymorphism</div>
+<pre style="border-radius:0"><code><span class="kw">public class</span> <span class="cl">AllInOnePrinter</span>
+{
+  <span class="kw">public void</span> <span class="mt">PrintTicket</span>(<span class="cl">Sale</span> sale, <span class="en">Destination</span> dest)
+  {
+    <span class="kw">if</span> (dest == <span class="en">Destination</span>.Console)
+    {
+      Console.WriteLine(sale.GetTextToPrint());
+    }
+    <span class="kw">else</span>
+    {
+      File.WriteAllText(<span class="st">"Ticket.txt"</span>, sale.GetTextToPrint());
+    }
+  }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="note-box mt-2">
+          <i class="fa-solid fa-info-circle"></i>
+          <span>El método tiene un bloque para <code>Console</code> y otro para <code>File</code>. Cada vez que se agregue un nuevo destino hay que modificar esta clase: frágil, difícil de mantener y de extender.</span>
+        </div>
+      </div>`
+  },
+  {
+    id: 4, type: "content",
+    label: "Código Problemático",
+    title: "Cómo se <span class='accent'>usa</span> AllInOnePrinter",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">El programa crea una instancia de <code>AllInOnePrinter</code> y le pasa el destino como parámetro:</p>
+        <pre><code><span class="kw">public class</span> <span class="cl">Program</span>
+{
+    <span class="kw">public static void</span> <span class="mt">Main</span>(<span class="kw">string</span>[] args)
+    {
+        <span class="cm">// ...</span>
+        <span class="cl">Sale</span> sale = <span class="kw">new</span> <span class="cl">Sale</span>();
+        <span class="cm">// ...</span>
+        <span class="cl">AllInOnePrinter</span> printer = <span class="kw">new</span> <span class="cl">AllInOnePrinter</span>();
+
+        printer.PrintTicket(sale, <span class="en">Destination</span>.Console);  <span class="cm">// imprime en consola</span>
+        printer.PrintTicket(sale, <span class="en">Destination</span>.File);     <span class="cm">// imprime en archivo</span>
+    }
+}</code></pre>
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <div class="problem-box">
+              <h5><i class="fa-solid fa-bug"></i> Problemas de este diseño</h5>
+              <div class="analysis-step bad-step">
+                <span class="step-num" style="background:var(--danger)">1</span>
+                <p>El código que varía (consola vs. archivo) está mezclado en un solo método con condicionales.</p>
+              </div>
+              <div class="analysis-step bad-step">
+                <span class="step-num" style="background:var(--danger)">2</span>
+                <p>Agregar un nuevo destino (ej: email, impresora física) obliga a modificar <code>AllInOnePrinter</code>.</p>
+              </div>
+              <div class="analysis-step bad-step">
+                <span class="step-num" style="background:var(--danger)">3</span>
+                <p>No es posible intercambiar el destino de impresión en tiempo de ejecución de forma limpia.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="analysis-box">
+              <h5><i class="fa-solid fa-lightbulb"></i> Lo que necesitamos</h5>
+              <div class="analysis-step highlight-step">
+                <span class="step-num">✓</span>
+                <p>Cada destino en su propia clase con su propia lógica de impresión.</p>
+              </div>
+              <div class="analysis-step highlight-step">
+                <span class="step-num">✓</span>
+                <p>Un contrato común (interfaz) que todos los destinos implementen.</p>
+              </div>
+              <div class="analysis-step highlight-step">
+                <span class="step-num">✓</span>
+                <p>El programa trabaja con el contrato, no con tipos concretos.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 5, type: "content",
+    label: "Solución",
+    title: "Aplicando <span class='accent'>Polymorphism</span>",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">Definimos la interfaz <code>IPrinter</code> y dos clases que la implementan: <code>ConsolePrinter</code> y <code>FilePrinter</code>.</p>
+        <div class="code-tabs">
+          <ul class="nav nav-tabs code-nav" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-iface"   type="button">IPrinter</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#tab-console" type="button">ConsolePrinter</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#tab-file"    type="button">FilePrinter</button></li>
+          </ul>
+          <div class="tab-content code-tab-content">
+            <div class="tab-pane fade show active" id="tab-iface"><pre><code><span class="cm">// Contrato común: cualquier impresora debe implementar este método</span>
+<span class="kw">public interface</span> <span class="iface">IPrinter</span>
+{
+    <span class="kw">void</span> <span class="mt">PrintTicket</span>(<span class="cl">Sale</span> sale);
+}</code></pre></div>
+            <div class="tab-pane fade" id="tab-console"><pre><code><span class="kw">public class</span> <span class="cl">ConsolePrinter</span> : <span class="iface">IPrinter</span>
+{
+    <span class="cm">// ✅ La lógica de consola vive aquí, no en un if</span>
+    <span class="kw">public void</span> <span class="mt">PrintTicket</span>(<span class="cl">Sale</span> sale)
+    {
+        Console.WriteLine(sale.GetTextToPrint());
+    }
+}</code></pre></div>
+            <div class="tab-pane fade" id="tab-file"><pre><code><span class="kw">public class</span> <span class="cl">FilePrinter</span> : <span class="iface">IPrinter</span>
+{
+    <span class="cm">// ✅ La lógica de archivo vive aquí, no en un else</span>
+    <span class="kw">public void</span> <span class="mt">PrintTicket</span>(<span class="cl">Sale</span> sale)
+    {
+        File.WriteAllText(<span class="st">"Ticket.txt"</span>, sale.GetTextToPrint());
+    }
+}</code></pre></div>
+          </div>
+        </div>
+        <div class="note-box mt-3">
+          <i class="fa-solid fa-info-circle"></i>
+          <span>La operación <code>PrintTicket</code> es <strong>polimórfica</strong>: existe en múltiples clases con diferente implementación. No hay ningún <code>if</code> ni <code>switch</code> preguntando por el tipo.</span>
+        </div>
+      </div>`
+  },
+  {
+    id: 6, type: "content",
+    label: "Diagrama UML",
+    title: "Estructura en <span class='accent'>UML</span>",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">El diagrama muestra cómo <code>ConsolePrinter</code> y <code>FilePrinter</code> implementan la interfaz <code>IPrinter</code>, que a su vez depende de <code>Sale</code>:</p>
+        <div class="uml-diagram">
+          <div class="uml-col">
+            <div class="uml-box uml-class">
+              <div class="uml-box-header"><i class="fa-solid fa-shapes me-1" style="color:#4ec9b0"></i>ConsolePrinter</div>
+              <div class="uml-box-body">+ PrintTicket(sale)</div>
+            </div>
+            <div class="uml-connector-v" style="display:flex;flex-direction:column;align-items:center;padding:4px 0">
+              <div style="width:2px;height:20px;background:rgba(255,255,255,0.2)"></div>
+              <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid rgba(197,134,192,0.6)"></div>
+              <div style="width:2px;height:20px;background:rgba(255,255,255,0.2)"></div>
+            </div>
+            <div class="uml-box uml-interface" style="width:180px">
+              <div class="uml-box-header"><small>&laquo;interface&raquo;</small><i class="fa-solid fa-plug me-1" style="color:#c586c0"></i>IPrinter</div>
+              <div class="uml-box-body">+ PrintTicket(sale)</div>
+            </div>
+            <div class="uml-connector-v" style="display:flex;flex-direction:column;align-items:center;padding:4px 0">
+              <div style="width:2px;height:20px;background:rgba(255,255,255,0.2)"></div>
+              <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:12px solid rgba(0,180,216,0.5)"></div>
+              <div style="width:2px;height:20px;background:rgba(255,255,255,0.2)"></div>
+            </div>
+            <div class="uml-box uml-other">
+              <div class="uml-box-header"><i class="fa-solid fa-file-invoice me-1" style="color:var(--accent)"></i>Sale</div>
+              <div class="uml-box-body">+ GetTextToPrint()</div>
+            </div>
+            <div class="uml-connector-v" style="display:flex;flex-direction:column;align-items:center;padding:4px 0">
+              <div style="width:2px;height:20px;background:rgba(255,255,255,0.2)"></div>
+              <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid rgba(78,201,176,0.6)"></div>
+              <div style="width:2px;height:20px;background:rgba(255,255,255,0.2)"></div>
+            </div>
+            <div class="uml-box uml-class">
+              <div class="uml-box-header"><i class="fa-solid fa-shapes me-1" style="color:#4ec9b0"></i>FilePrinter</div>
+              <div class="uml-box-body">+ PrintTicket(sale)</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3 mt-3">
+          <div class="col-md-6">
+            <div class="note-box">
+              <i class="fa-solid fa-plug" style="color:#c586c0"></i>
+              <span>El conector <strong>implementa</strong> (triángulo vacío) indica que <code>ConsolePrinter</code> y <code>FilePrinter</code> cumplen el contrato de <code>IPrinter</code>.</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="note-box">
+              <i class="fa-solid fa-arrow-right" style="color:var(--accent)"></i>
+              <span>El conector <strong>depende de</strong> (flecha punteada) indica que <code>IPrinter</code> necesita conocer <code>Sale</code> para declarar <code>PrintTicket(Sale)</code>.</span>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 7, type: "content",
+    label: "Nuevo Program.cs",
+    title: "El programa con <span class='accent'>IPrinter</span>",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">La nueva versión usa variables de tipo <code>IPrinter</code> y asigna diferentes implementaciones. Sin ningún <code>if</code> ni <code>enum Destination</code>:</p>
+        <pre><code><span class="kw">public class</span> <span class="cl">Program</span>
+{
+    <span class="kw">public static void</span> <span class="mt">Main</span>(<span class="kw">string</span>[] args)
+    {
+        <span class="cm">// ...</span>
+        <span class="cl">Sale</span> sale = <span class="kw">new</span> <span class="cl">Sale</span>();
+        <span class="cm">// ...</span>
+
+<span class="diff-add">        <span class="iface">IPrinter</span> printer;</span>
+
+<span class="diff-add">        printer = <span class="kw">new</span> <span class="cl">ConsolePrinter</span>();</span>
+<span class="diff-add">        printer.PrintTicket(sale);  <span class="cm">// → llama ConsolePrinter.PrintTicket</span></span>
+
+<span class="diff-add">        printer = <span class="kw">new</span> <span class="cl">FilePrinter</span>();</span>
+<span class="diff-add">        printer.PrintTicket(sale);  <span class="cm">// → llama FilePrinter.PrintTicket</span></span>
+    }
+}</code></pre>
+        <div class="poly-flow mt-3">
+          <div class="poly-node prog-node"><i class="fa-solid fa-terminal prog-icon"></i>Program<br><small>llama PrintTicket</small></div>
+          <div class="poly-arrow"><i class="fa-solid fa-arrow-right"></i><small>usa</small></div>
+          <div class="poly-node iface-node"><i class="fa-solid fa-plug iface-icon"></i>IPrinter<br><small>&laquo;interface&raquo;</small></div>
+          <div class="poly-arrow"><i class="fa-solid fa-arrow-right"></i><small>resuelve a</small></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="poly-node impl-node"><i class="fa-solid fa-display impl-icon"></i>ConsolePrinter<br><small>implementa</small></div>
+            <div class="poly-node impl-node"><i class="fa-solid fa-file impl-icon"></i>FilePrinter<br><small>implementa</small></div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 8, type: "content",
+    label: "Comparación",
+    title: "<span class='accent'>Antes</span> vs. <span class='accent'>Después</span>",
+    content: `
+      <div class="container-xl py-2">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="compare-box compare-bad h-100">
+              <div class="compare-header"><i class="fa-solid fa-xmark-circle"></i> Sin Polymorphism</div>
+              <div style="padding:16px;font-size:.88rem;line-height:1.7">
+                <ul style="padding-left:18px;margin:0">
+                  <li>Un solo método con <code>if/else</code> por destino</li>
+                  <li>Agregar un destino = modificar la clase existente</li>
+                  <li>Lógica de diferentes responsabilidades mezclada</li>
+                  <li>Alto acoplamiento al <code>enum Destination</code></li>
+                  <li>Difícil de testear cada destino por separado</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="compare-box compare-good h-100">
+              <div class="compare-header"><i class="fa-solid fa-circle-check"></i> Con Polymorphism</div>
+              <div style="padding:16px;font-size:.88rem;line-height:1.7">
+                <ul style="padding-left:18px;margin:0">
+                  <li>Cada destino en su propia clase cohesiva</li>
+                  <li>Agregar un destino = crear una nueva clase</li>
+                  <li>Sin condicionales: el polimorfismo resuelve el tipo</li>
+                  <li>El programa depende de la interfaz, no de concreciones</li>
+                  <li>Cada clase es fácil de testear de forma independiente</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="intuition-box mt-4 animate__animated animate__fadeInUp">
+          <i class="fa-solid fa-plug"></i>
+          <em>Los componentes son "conectables": podés cambiar el printer sin tocar el resto del programa.</em>
+        </div>
+      </div>`
+  },
+  {
+    id: 9, type: "content",
+    label: "Beneficios",
+    title: "<span class='accent'>Beneficios</span> de Polymorphism",
+    content: `
+      <div class="container-xl py-2">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInLeft">
+              <div class="benefit-icon"><i class="fa-solid fa-plug"></i></div>
+              <h5>Componentes Conectables</h5>
+              <p>Podés intercambiar implementaciones sin modificar el código que las usa. El programa depende de la <strong>interfaz</strong>, no de la clase concreta.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInUp">
+              <div class="benefit-icon"><i class="fa-solid fa-lock-open"></i></div>
+              <h5>Abierto / Cerrado</h5>
+              <p>Agregar un nuevo destino de impresión <strong>no requiere modificar</strong> el código existente. Solo se crea una nueva clase que implementa la interfaz.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInRight">
+              <div class="benefit-icon"><i class="fa-solid fa-vial"></i></div>
+              <h5>Fácil de Testear</h5>
+              <p>Cada implementación puede testearse de forma independiente. También es fácil crear <em>mocks</em> de la interfaz para tests unitarios.</p>
+            </div>
+          </div>
+        </div>
+        <div class="summary-banner mt-4">
+          <i class="fa-solid fa-shapes"></i>
+          Polymorphism evita los condicionales frágiles. El <strong>tipo correcto de objeto</strong> es el que decide el comportamiento, no un <code>if</code>.
+        </div>
+      </div>`
+  }
+];
+
+/* ================================================================
+   DATOS — EJERCICIOS
+   ================================================================ */
+const EXERCISES = [
+  {
+    id: 1,
+    title: "Sistema de Notificaciones",
+    icon: "fa-solid fa-bell",
+    difficulty: "Básico",
+    difficultyClass: "easy",
+    context: `
+      <p>Una aplicación envía notificaciones a los usuarios. El código actual es el siguiente:</p>
+      <pre><code><span class="kw">public enum</span> <span class="en">NotificationType</span> { Email, SMS, Push }
+
+<span class="kw">public class</span> <span class="cl">NotificationSender</span>
+{
+    <span class="kw">public void</span> <span class="mt">Send</span>(<span class="kw">string</span> message, <span class="en">NotificationType</span> type)
+    {
+        <span class="kw">if</span> (type == <span class="en">NotificationType</span>.Email)
+            Console.WriteLine(<span class="st">"Email: "</span> + message);
+        <span class="kw">else if</span> (type == <span class="en">NotificationType</span>.SMS)
+            Console.WriteLine(<span class="st">"SMS: "</span> + message);
+        <span class="kw">else</span>
+            Console.WriteLine(<span class="st">"Push: "</span> + message);
+    }
+}</code></pre>`,
+    question: "¿Cuál es la refactorización correcta aplicando el patrón <strong>Polymorphism</strong>?",
+    options: [
+      { id: "a", text: "Crear una clase NotificationFactory con un método estático que retorne el mensaje según el tipo." },
+      { id: "b", text: "Definir una interfaz INotification con el método Send(string), y crear EmailNotification, SmsNotification y PushNotification que la implementen." },
+      { id: "c", text: "Reemplazar el if/else por un switch para que sea más legible, sin cambiar la estructura de clases." },
+      { id: "d", text: "Mover la lógica condicional al Program.cs para que NotificationSender quede más limpia." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ La opción B aplica Polymorphism correctamente:</p>
+      <ul>
+        <li>Se define una <strong>interfaz</strong> <code>INotification</code> con la operación <code>Send(string)</code>.</li>
+        <li>Cada tipo de notificación tiene su propia clase (<code>EmailNotification</code>, <code>SmsNotification</code>, <code>PushNotification</code>) con su implementación.</li>
+        <li>El código cliente trabaja con <code>INotification</code> y no necesita condicionales.</li>
+      </ul>
+      <p>Las opciones A, C y D no eliminan la lógica condicional — solo la mueven o disfrazan.</p>`,
+    code: `<span class="kw">public interface</span> <span class="iface">INotification</span>
+{
+    <span class="kw">void</span> <span class="mt">Send</span>(<span class="kw">string</span> message);
+}
+
+<span class="kw">public class</span> <span class="cl">EmailNotification</span> : <span class="iface">INotification</span>
+{
+    <span class="kw">public void</span> <span class="mt">Send</span>(<span class="kw">string</span> message)
+        => Console.WriteLine(<span class="st">"Email: "</span> + message);
+}
+
+<span class="kw">public class</span> <span class="cl">SmsNotification</span> : <span class="iface">INotification</span>
+{
+    <span class="kw">public void</span> <span class="mt">Send</span>(<span class="kw">string</span> message)
+        => Console.WriteLine(<span class="st">"SMS: "</span> + message);
+}
+
+<span class="kw">public class</span> <span class="cl">PushNotification</span> : <span class="iface">INotification</span>
+{
+    <span class="kw">public void</span> <span class="mt">Send</span>(<span class="kw">string</span> message)
+        => Console.WriteLine(<span class="st">"Push: "</span> + message);
+}
+
+<span class="cm">// Uso — sin ningún if/switch:</span>
+<span class="iface">INotification</span> notif = <span class="kw">new</span> <span class="cl">EmailNotification</span>();
+notif.Send(<span class="st">"Tu pedido está listo"</span>);`
+  },
+  {
+    id: 2,
+    title: "Cálculo de Descuentos",
+    icon: "fa-solid fa-tag",
+    difficulty: "Intermedio",
+    difficultyClass: "medium",
+    context: `
+      <p>Un sistema de e-commerce aplica descuentos según el tipo de cliente:</p>
+      <pre><code><span class="kw">public enum</span> <span class="en">CustomerType</span> { Regular, Premium, Employee }
+
+<span class="kw">public class</span> <span class="cl">DiscountCalculator</span>
+{
+    <span class="kw">public double</span> <span class="mt">Calculate</span>(<span class="kw">double</span> price, <span class="en">CustomerType</span> type)
+    {
+        <span class="kw">if</span> (type == <span class="en">CustomerType</span>.Regular)
+            <span class="kw">return</span> price;
+        <span class="kw">else if</span> (type == <span class="en">CustomerType</span>.Premium)
+            <span class="kw">return</span> price * 0.85;  <span class="cm">// 15% off</span>
+        <span class="kw">else</span>
+            <span class="kw">return</span> price * 0.70;  <span class="cm">// 30% off</span>
+    }
+}</code></pre>
+      <p>Se necesita agregar un tipo <strong>VIP</strong> con 25% de descuento y un tipo <strong>Student</strong> con 10%.</p>`,
+    question: "¿Cuál es la mejor forma de extender el sistema para los nuevos tipos de descuento aplicando Polymorphism?",
+    options: [
+      { id: "a", text: "Agregar dos ramas más al if/else existente en DiscountCalculator." },
+      { id: "b", text: "Crear una interfaz IDiscountStrategy con CalculatePrice(double), e implementarla en RegularDiscount, PremiumDiscount, EmployeeDiscount, VipDiscount y StudentDiscount. DiscountCalculator desaparece." },
+      { id: "c", text: "Crear una clase base AbstractDiscount con el método Calculate como virtual y sobreescribirlo en subclases." },
+      { id: "d", text: "Usar un diccionario Dictionary<CustomerType, double> para mapear tipo a porcentaje de descuento." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ La opción B es la más correcta porque:</p>
+      <ul>
+        <li>Define una <strong>interfaz</strong> <code>IDiscountStrategy</code> como contrato polimórfico.</li>
+        <li>Cada tipo de descuento encapsula su propia lógica en una clase independiente.</li>
+        <li>Agregar VIP o Student significa <strong>crear una nueva clase</strong>, sin tocar el código existente (principio Abierto/Cerrado).</li>
+        <li>El código cliente trabaja con <code>IDiscountStrategy</code> sin saber el tipo concreto.</li>
+      </ul>
+      <p>La opción A viola Polymorphism. La C con herencia es válida pero la interfaz es más flexible. La D sigue siendo condicional (aunque implícito).</p>`,
+    code: `<span class="kw">public interface</span> <span class="iface">IDiscountStrategy</span>
+{
+    <span class="kw">double</span> <span class="mt">CalculatePrice</span>(<span class="kw">double</span> price);
+}
+
+<span class="kw">public class</span> <span class="cl">RegularDiscount</span>  : <span class="iface">IDiscountStrategy</span>
+{
+    <span class="kw">public double</span> <span class="mt">CalculatePrice</span>(<span class="kw">double</span> price) => price;
+}
+
+<span class="kw">public class</span> <span class="cl">PremiumDiscount</span>  : <span class="iface">IDiscountStrategy</span>
+{
+    <span class="kw">public double</span> <span class="mt">CalculatePrice</span>(<span class="kw">double</span> price) => price * 0.85;
+}
+
+<span class="kw">public class</span> <span class="cl">VipDiscount</span> : <span class="iface">IDiscountStrategy</span>
+{
+    <span class="kw">public double</span> <span class="mt">CalculatePrice</span>(<span class="kw">double</span> price) => price * 0.75;
+}
+
+<span class="kw">public class</span> <span class="cl">StudentDiscount</span> : <span class="iface">IDiscountStrategy</span>
+{
+    <span class="kw">public double</span> <span class="mt">CalculatePrice</span>(<span class="kw">double</span> price) => price * 0.90;
+}
+
+<span class="cm">// Uso:</span>
+<span class="iface">IDiscountStrategy</span> strategy = <span class="kw">new</span> <span class="cl">VipDiscount</span>();
+<span class="kw">double</span> finalPrice = strategy.CalculatePrice(1000);`
+  },
+  {
+    id: 3,
+    title: "Identificar la Violación",
+    icon: "fa-solid fa-magnifying-glass-minus",
+    difficulty: "Avanzado",
+    difficultyClass: "hard",
+    context: `
+      <p>Analizá este código de un sistema de pagos:</p>
+      <pre><code><span class="kw">public class</span> <span class="cl">PaymentProcessor</span>
+{
+    <span class="kw">public bool</span> <span class="mt">Process</span>(Order order, <span class="kw">string</span> paymentMethod)
+    {
+        <span class="kw">switch</span> (paymentMethod)
+        {
+            <span class="kw">case</span> <span class="st">"CreditCard"</span>:
+                <span class="cm">// lógica de tarjeta de crédito</span>
+                Console.WriteLine(<span class="st">"Procesando con tarjeta..."</span>);
+                <span class="kw">return true</span>;
+            <span class="kw">case</span> <span class="st">"PayPal"</span>:
+                <span class="cm">// lógica de PayPal</span>
+                Console.WriteLine(<span class="st">"Redirigiendo a PayPal..."</span>);
+                <span class="kw">return true</span>;
+            <span class="kw">case</span> <span class="st">"Crypto"</span>:
+                <span class="cm">// lógica de crypto</span>
+                Console.WriteLine(<span class="st">"Verificando wallet..."</span>);
+                <span class="kw">return true</span>;
+            <span class="kw">default</span>:
+                <span class="kw">return false</span>;
+        }
+    }
+}</code></pre>
+      <p>El equipo quiere agregar soporte para <strong>MercadoPago</strong>.</p>`,
+    question: "¿Cuál de las siguientes afirmaciones describe mejor el problema y la solución correcta?",
+    options: [
+      { id: "a", text: "El código está bien diseñado. Solo hay que agregar un case 'MercadoPago' al switch." },
+      { id: "b", text: "El switch viola Polymorphism. La solución es definir IPaymentMethod con Process(Order), crear CreditCardPayment, PayPalPayment, CryptoPayment y MercadoPagoPayment. PaymentProcessor trabaja con IPaymentMethod sin saber el tipo." },
+      { id: "c", text: "El problema es que usa string en lugar de enum. Reemplazar el string por enum PaymentType soluciona el diseño." },
+      { id: "d", text: "El switch está bien porque es más performante que el polimorfismo de objetos." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ La opción B identifica correctamente la violación y la solución:</p>
+      <ul>
+        <li>El <code>switch</code> pregunta por el tipo — exactamente lo que <strong>Polymorphism dice que no hay que hacer</strong>.</li>
+        <li>Agregar MercadoPago con un nuevo <code>case</code> modifica <code>PaymentProcessor</code>, que debería estar cerrado a modificaciones.</li>
+        <li>La interfaz <code>IPaymentMethod</code> actúa como contrato polimórfico. Cada medio de pago encapsula su propia lógica.</li>
+        <li>Agregar MercadoPago = crear <code>MercadoPagoPayment : IPaymentMethod</code> sin tocar nada más.</li>
+      </ul>
+      <p>La opción C no resuelve el problema: cambiar string por enum sigue siendo código condicional. La D es incorrecta: la diferencia de performance es insignificante y el argumento no justifica el mal diseño.</p>`,
+    code: `<span class="kw">public interface</span> <span class="iface">IPaymentMethod</span>
+{
+    <span class="kw">bool</span> <span class="mt">Process</span>(<span class="cl">Order</span> order);
+}
+
+<span class="kw">public class</span> <span class="cl">CreditCardPayment</span> : <span class="iface">IPaymentMethod</span>
+{
+    <span class="kw">public bool</span> <span class="mt">Process</span>(<span class="cl">Order</span> order)
+    {
+        Console.WriteLine(<span class="st">"Procesando con tarjeta..."</span>);
+        <span class="kw">return true</span>;
+    }
+}
+
+<span class="kw">public class</span> <span class="cl">MercadoPagoPayment</span> : <span class="iface">IPaymentMethod</span>
+{
+    <span class="kw">public bool</span> <span class="mt">Process</span>(<span class="cl">Order</span> order)
+    {
+        Console.WriteLine(<span class="st">"Procesando con MercadoPago..."</span>);
+        <span class="kw">return true</span>;
+    }
+}
+
+<span class="cm">// PaymentProcessor ya no necesita saber el tipo:</span>
+<span class="kw">public class</span> <span class="cl">PaymentProcessor</span>
+{
+    <span class="kw">public bool</span> <span class="mt">Process</span>(<span class="cl">Order</span> order, <span class="iface">IPaymentMethod</span> method)
+        => method.Process(order);
+}`
+  }
+];
+
+/* ================================================================
+   MOTOR DE SLIDES
+   ================================================================ */
+let currentSlide = 0;
+let mode = "slides";
+
+function renderSlide(data) {
+  if (data.type === "cover") {
+    return `
+      <div class="slide-cover">
+        <div class="cover-badge animate__animated animate__fadeInDown">${data.badge}</div>
+        <div class="cover-icon animate__animated animate__bounceIn animate__delay-1s"><i class="${data.icon}"></i></div>
+        <div class="cover-title animate__animated animate__fadeInUp">${data.title}</div>
+        <div class="cover-subtitle animate__animated animate__fadeIn animate__delay-1s">${data.subtitle}</div>
+        <div class="cover-note animate__animated animate__fadeIn animate__delay-2s">
+          <i class="fa-solid fa-book me-2"></i>${data.note}
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="container-xl py-2">
+      <div class="slide-label animate__animated animate__fadeInLeft">${data.label}</div>
+      <div class="slide-title animate__animated animate__fadeInLeft">${data.title}</div>
+      <div class="animate__animated animate__fadeIn animate__delay-1s">${data.content}</div>
+    </div>`;
+}
+
+function buildSlides() {
+  const c = document.getElementById("slides-container");
+  c.innerHTML = "";
+  SLIDES.forEach((s, i) => {
+    const div = document.createElement("div");
+    div.className = `slide${i === 0 ? " active" : ""}`;
+    div.id = `slide-${i}`;
+    div.innerHTML = renderSlide(s);
+    c.appendChild(div);
+  });
+}
+
+function buildDots() {
+  const wrap = document.querySelector(".bottom-dots");
+  wrap.innerHTML = "";
+  SLIDES.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = `dot${i === 0 ? " active" : ""}`;
+    d.title = `Diapositiva ${i + 1}`;
+    d.onclick = () => goToSlide(i);
+    wrap.appendChild(d);
+  });
+  const ex = document.createElement("div");
+  ex.className = "dot exercises-dot";
+  ex.title = "Ejercicios";
+  ex.onclick = () => showExercises();
+  wrap.appendChild(ex);
+}
+
+function updateUI() {
+  if (mode !== "slides") return;
+  document.querySelectorAll(".slide").forEach((s, i) => s.classList.toggle("active", i === currentSlide));
+  document.querySelectorAll(".dot:not(.exercises-dot)").forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+  document.querySelector(".dot.exercises-dot")?.classList.remove("active");
+  document.getElementById("btn-prev").disabled = currentSlide === 0;
+  document.getElementById("btn-next").disabled = currentSlide === SLIDES.length - 1;
+  document.getElementById("slide-counter").textContent = `${currentSlide + 1} / ${SLIDES.length}`;
+  document.querySelector(".progress-bar-fill").style.width = `${((currentSlide + 1) / SLIDES.length) * 100}%`;
+}
+
+function goToSlide(n) {
+  if (mode === "exercises") showSlides();
+  currentSlide = Math.max(0, Math.min(n, SLIDES.length - 1));
+  updateUI();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function prevSlide() { if (currentSlide > 0) goToSlide(currentSlide - 1); }
+function nextSlide() { if (currentSlide < SLIDES.length - 1) goToSlide(currentSlide + 1); }
+
+/* ================================================================
+   MOTOR DE EJERCICIOS
+   ================================================================ */
+function showExercises() {
+  mode = "exercises";
+  document.getElementById("slides-container").style.display = "none";
+  document.getElementById("exercises-section").classList.add("active");
+  const btn = document.querySelector(".btn-exercises");
+  btn.innerHTML = '<i class="fa-solid fa-chalkboard-user"></i> Ver Presentación';
+  btn.classList.add("active-mode");
+  document.getElementById("btn-prev").disabled = true;
+  document.getElementById("btn-next").disabled = true;
+  document.querySelector(".dot.exercises-dot")?.classList.add("active");
+  document.querySelectorAll(".dot:not(.exercises-dot)").forEach(d => d.classList.remove("active"));
+  document.querySelector(".progress-bar-fill").style.width = "100%";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showSlides() {
+  mode = "slides";
+  document.getElementById("slides-container").style.display = "";
+  document.getElementById("exercises-section").classList.remove("active");
+  const btn = document.querySelector(".btn-exercises");
+  btn.innerHTML = '<i class="fa-solid fa-dumbbell"></i> Ejercicios';
+  btn.classList.remove("active-mode");
+  updateUI();
+}
+
+function toggleMode() {
+  mode === "slides" ? showExercises() : showSlides();
+}
+
+function buildExercises() {
+  const c = document.getElementById("exercises-container");
+  c.innerHTML = "";
+  EXERCISES.forEach(ex => {
+    const div = document.createElement("div");
+    div.className = "exercise-card";
+    div.id = `ex-${ex.id}`;
+    div.innerHTML = `
+      <div class="exercise-card-header">
+        <div class="ex-number">${ex.id}</div>
+        <i class="${ex.icon}"></i>
+        <h4>${ex.title}</h4>
+        <span class="difficulty-badge ${ex.difficultyClass}">${ex.difficulty}</span>
+      </div>
+      <div class="exercise-card-body">
+        <div class="exercise-context">${ex.context}</div>
+        <div class="exercise-question">${ex.question}</div>
+        <ul class="option-list" id="opts-${ex.id}">
+          ${ex.options.map(o => `
+            <li class="option-item" data-ex="${ex.id}" data-opt="${o.id}" onclick="selectOption(${ex.id},'${o.id}')">
+              <div class="option-letter">${o.id.toUpperCase()}</div>
+              <div class="option-text">${o.text}</div>
+            </li>`).join("")}
+        </ul>
+        <div class="exercise-actions">
+          <button class="btn-check-ex" onclick="checkAnswer(${ex.id})">
+            <i class="fa-solid fa-check"></i> Verificar
+          </button>
+          <button class="btn-show-sol" onclick="toggleSolution(${ex.id})">
+            <i class="fa-solid fa-eye"></i> Ver Solución
+          </button>
+        </div>
+        <div class="solution-panel" id="sol-${ex.id}">
+          <div class="solution-explanation">${ex.explanation}</div>
+          <div class="solution-code-title"><i class="fa-solid fa-code me-2"></i>Implementación en C#</div>
+          <pre><code>${ex.code}</code></pre>
+        </div>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+const selectedOptions = {};
+
+function selectOption(exId, optId) {
+  if (document.querySelector(`#opts-${exId} .correct, #opts-${exId} .incorrect`)) return;
+  selectedOptions[exId] = optId;
+  document.querySelectorAll(`#opts-${exId} .option-item`).forEach(el => {
+    el.classList.toggle("selected", el.dataset.opt === optId);
+  });
+}
+
+function checkAnswer(exId) {
+  const ex = EXERCISES.find(e => e.id === exId);
+  const selected = selectedOptions[exId];
+  if (!selected) {
+    Swal.fire({ title: "Seleccioná una opción", text: "Hacé click en una de las respuestas antes de verificar.", icon: "warning", confirmButtonColor: "#1a3a5c", confirmButtonText: "Entendido" });
+    return;
+  }
+  const items = document.querySelectorAll(`#opts-${exId} .option-item`);
+  items.forEach(item => {
+    if (item.dataset.opt === ex.correct) item.classList.add("correct");
+    else if (item.dataset.opt === selected && selected !== ex.correct) item.classList.add("incorrect");
+  });
+  if (selected === ex.correct) {
+    Swal.fire({ title: "¡Correcto! 🎉", html: "Aplicaste Polymorphism correctamente.<br>Revisá la solución completa abajo.", icon: "success", confirmButtonColor: "#10b981", confirmButtonText: "Ver explicación" })
+      .then(() => document.getElementById(`sol-${exId}`).classList.add("visible"));
+  } else {
+    Swal.fire({ title: "No exactamente…", html: "Pensá: <strong>¿el código pregunta por el tipo con un if o switch?</strong> Ese es el síntoma que Polymorphism resuelve.", icon: "error", confirmButtonColor: "#1a3a5c", confirmButtonText: "Intentar de nuevo", showDenyButton: true, denyButtonText: "Ver solución", denyButtonColor: "#64748b" })
+      .then(result => {
+        if (result.isDenied) {
+          document.getElementById(`sol-${exId}`).classList.add("visible");
+        } else {
+          items.forEach(i => i.classList.remove("selected", "correct", "incorrect"));
+          delete selectedOptions[exId];
+        }
+      });
+  }
+}
+
+function toggleSolution(exId) {
+  document.getElementById(`sol-${exId}`).classList.toggle("visible");
+}
+
+/* ================================================================
+   TECLADO
+   ================================================================ */
+document.addEventListener("keydown", e => {
+  if (mode !== "slides") return;
+  if (["ArrowRight", "ArrowDown", " "].includes(e.key)) { e.preventDefault(); nextSlide(); }
+  if (["ArrowLeft", "ArrowUp"].includes(e.key))         { e.preventDefault(); prevSlide(); }
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  buildSlides();
+  buildDots();
+  buildExercises();
+  updateUI();
+});
+</script>
+</body>
+</html>

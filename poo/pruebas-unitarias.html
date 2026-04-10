@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pruebas Unitarias en C#</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+
+<style>
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2563a8;
+  --accent: #00b4d8;
+  --accent-warm: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #e8f0f8;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #cbd5e1;
+  --code-bg: #0d1b2a;
+  --code-text: #e2e8f0;
+  --font-title: 'Syne', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(26,58,92,0.10);
+  --shadow-lg: 0 8px 40px rgba(26,58,92,0.18);
+  --transition: 0.28s cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden; }
+
+/* TOP BAR */
+.topbar { background: var(--primary); color: #fff; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+.topbar-brand { font-family: var(--font-title); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+.grasp-badge { background: var(--accent); color: var(--primary); font-size: .7rem; font-weight: 800; padding: 2px 10px; border-radius: 20px; letter-spacing: 2px; }
+.topbar-nav { display: flex; align-items: center; gap: 8px; }
+.nav-btn { background: rgba(255,255,255,0.12); border: none; color: #fff; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: .85rem; font-family: var(--font-body); transition: background var(--transition); display: flex; align-items: center; gap: 6px; }
+.nav-btn:hover { background: rgba(255,255,255,0.22); }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.slide-counter { font-family: var(--font-title); font-size: .85rem; color: rgba(255,255,255,0.7); min-width: 60px; text-align: center; }
+
+/* PROGRESS */
+.progress-bar-wrap { position: fixed; top: 48px; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.1); z-index: 99; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-warm)); transition: width var(--transition); }
+
+/* SLIDES */
+.slides-wrapper { margin-top: 51px; min-height: calc(100vh - 51px); }
+.slide { display: none; width: 100%; padding: 40px 24px 80px; animation: slideIn 0.4s ease; }
+.slide.active { display: flex; flex-direction: column; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* TYPOGRAPHY */
+.slide-label { font-family: var(--font-title); font-size: .72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.slide-title { font-family: var(--font-title); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; color: var(--primary); line-height: 1.2; margin-bottom: 24px; }
+.slide-title .accent { color: var(--accent); }
+.lead-text { font-size: 1rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+
+/* COVER */
+.slide-cover { background: linear-gradient(135deg, #0a1929 0%, #0f2640 50%, #1a3a5c 100%); justify-content: center; align-items: center; text-align: center; color: #fff; min-height: calc(100vh - 51px); }
+.cover-badge { font-family: var(--font-title); font-size: .7rem; letter-spacing: 4px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.cover-icon { font-size: 5rem; color: var(--accent); margin-bottom: 24px; text-shadow: 0 0 40px rgba(0,180,216,0.4); }
+.cover-title { font-family: var(--font-title); font-size: clamp(2.6rem, 6vw, 5rem); font-weight: 800; color: #fff; letter-spacing: -2px; line-height: 1.05; margin-bottom: 12px; }
+.cover-subtitle { font-size: 1.2rem; color: rgba(255,255,255,0.65); margin-bottom: 32px; }
+.cover-note { background: rgba(0,180,216,0.12); border: 1px solid rgba(0,180,216,0.3); color: rgba(255,255,255,0.8); padding: 10px 24px; border-radius: 30px; font-size: .9rem; display: inline-block; }
+
+/* CONCEPT BOXES */
+.concept-box { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.concept-question, .concept-answer { padding: 20px; border-radius: var(--radius); line-height: 1.6; }
+.concept-question { background: #fff3cd; border-left: 4px solid var(--accent-warm); }
+.concept-question i { color: var(--accent-warm); margin-right: 8px; }
+.concept-answer { background: #d1fae5; border-left: 4px solid var(--success); }
+.concept-answer i { color: var(--success); margin-right: 8px; }
+.concept-answer .highlight { color: var(--primary-light); font-weight: 700; }
+.intuition-box { background: var(--primary); color: rgba(255,255,255,0.9); border-radius: var(--radius); padding: 16px 24px; text-align: center; font-size: 1.05rem; }
+.intuition-box i { color: var(--accent); margin-right: 10px; }
+
+/* WARNING / NOTE */
+.warning-box { background: #fff3cd; border: 1px solid #fbbf24; border-left: 4px solid #f59e0b; border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; font-size: .92rem; }
+.warning-box i { color: #d97706; margin-top: 2px; flex-shrink: 0; }
+.note-box { background: rgba(37,99,168,0.08); border: 1px solid rgba(37,99,168,0.2); border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: .88rem; color: var(--text-muted); display: flex; align-items: flex-start; gap: 10px; }
+.note-box i { color: var(--primary-light); margin-top: 2px; flex-shrink: 0; }
+
+/* CODE */
+.code-tabs { background: var(--code-bg); border-radius: var(--radius); overflow: hidden; }
+.code-nav { background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 8px 8px 0; gap: 4px; }
+.code-nav .nav-link { color: rgba(255,255,255,0.5); font-family: var(--font-code); font-size: .82rem; padding: 6px 14px; border-radius: 6px 6px 0 0; border: 1px solid transparent; }
+.code-nav .nav-link.active { background: rgba(0,180,216,0.15); color: var(--accent); border-color: rgba(0,180,216,0.3); }
+.code-tab-content { padding: 0; }
+.code-tab-content .tab-pane pre { margin: 0; padding: 20px; overflow-x: auto; }
+pre, code { font-family: var(--font-code); font-size: .83rem; line-height: 1.7; }
+pre { background: var(--code-bg); color: var(--code-text); border-radius: var(--radius); padding: 20px; overflow-x: auto; margin: 0; }
+.kw   { color: #569cd6; }
+.cl   { color: #4ec9b0; }
+.attr { color: #c586c0; }
+.mt   { color: #dcdcaa; }
+.st   { color: #ce9178; }
+.cm   { color: #6a9955; font-style: italic; }
+.num  { color: #b5cea8; }
+.aok  { color: #10b981; font-weight: 700; }
+.diff-add { color: #b5cea8; display: block; }
+.diff-rem { color: #f48771; display: block; }
+.diff-add::before { content: '+ '; color: var(--success); }
+.diff-rem::before { content: '- '; color: var(--danger); }
+
+/* STEP / ANALYSIS */
+.analysis-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; font-size: .9rem; }
+.step-num { background: var(--primary); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; flex-shrink: 0; }
+.highlight-step { background: #d1fae5 !important; border-left: 3px solid var(--success); }
+.highlight-step .step-num { background: var(--success); }
+.bad-step { background: #fee2e2 !important; border-left: 3px solid var(--danger); }
+.bad-step .step-num { background: var(--danger); }
+
+/* COMPARE */
+.compare-box { border-radius: var(--radius); overflow: hidden; border: 2px solid var(--border); }
+.compare-header { padding: 10px 16px; font-family: var(--font-title); font-size: .85rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.compare-bad  .compare-header { background: #fee2e2; color: #b91c1c; border-bottom: 1px solid #fca5a5; }
+.compare-good .compare-header { background: #d1fae5; color: #065f46; border-bottom: 1px solid #6ee7b7; }
+.compare-bad  { border-color: #fca5a5; }
+.compare-good { border-color: #6ee7b7; }
+
+/* AAA BOXES */
+.aaa-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.aaa-card { border-radius: var(--radius); padding: 18px; text-align: center; }
+.aaa-arrange { background: rgba(245,158,11,0.12); border: 2px solid var(--accent-warm); }
+.aaa-act     { background: rgba(0,180,216,0.12);  border: 2px solid var(--accent); }
+.aaa-assert  { background: rgba(16,185,129,0.12); border: 2px solid var(--success); }
+.aaa-card .aaa-letter { font-family: var(--font-title); font-size: 2.2rem; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+.aaa-arrange .aaa-letter { color: var(--accent-warm); }
+.aaa-act     .aaa-letter { color: var(--accent); }
+.aaa-assert  .aaa-letter { color: var(--success); }
+.aaa-card h5 { font-family: var(--font-title); font-size: .95rem; margin-bottom: 6px; }
+.aaa-card p  { font-size: .85rem; color: var(--text-muted); margin: 0; }
+
+/* FLOW NODES */
+.flow-wrap { display: flex; align-items: center; justify-content: center; gap: 0; background: var(--code-bg); border-radius: var(--radius); padding: 20px; flex-wrap: wrap; }
+.flow-node { border-radius: var(--radius); padding: 14px 18px; text-align: center; font-size: .82rem; color: var(--code-text); font-family: var(--font-code); min-width: 120px; }
+.flow-node.fn-arrange { background: rgba(245,158,11,0.15); border: 1px solid var(--accent-warm); }
+.flow-node.fn-act     { background: rgba(0,180,216,0.12);  border: 1px solid var(--accent); }
+.flow-node.fn-assert  { background: rgba(16,185,129,0.12); border: 1px solid var(--success); }
+.flow-node.fn-green   { background: rgba(16,185,129,0.12); border: 1px solid var(--success); }
+.flow-node.fn-red     { background: rgba(239,68,68,0.12);  border: 1px solid var(--danger); }
+.flow-node i { display: block; font-size: 1.3rem; margin-bottom: 4px; }
+.flow-arrow { display: flex; align-items: center; justify-content: center; padding: 0 10px; color: rgba(255,255,255,0.3); font-size: .8rem; flex-direction: column; gap: 2px; }
+.flow-arrow i { font-size: .95rem; }
+
+/* BENEFITS */
+.benefit-card { background: var(--surface); border-radius: var(--radius); padding: 24px 20px; text-align: center; box-shadow: var(--shadow); border-top: 3px solid var(--accent); height: 100%; transition: transform var(--transition), box-shadow var(--transition); }
+.benefit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.benefit-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.3rem; color: #fff; }
+.benefit-card h5 { font-family: var(--font-title); color: var(--primary); margin-bottom: 10px; }
+.benefit-card p { color: var(--text-muted); font-size: .9rem; line-height: 1.6; }
+.summary-banner { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; padding: 18px 24px; border-radius: var(--radius); text-align: center; font-size: 1rem; }
+.summary-banner i { color: var(--accent-warm); margin-right: 10px; }
+
+/* RIDER STEPS */
+.rider-steps { counter-reset: rider-step; list-style: none; padding: 0; margin: 0; }
+.rider-steps li { counter-increment: rider-step; display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: .92rem; }
+.rider-steps li:last-child { border-bottom: none; }
+.rider-steps li::before { content: counter(rider-step); background: var(--primary); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-title); font-weight: 800; font-size: .8rem; flex-shrink: 0; }
+
+/* EXERCISES */
+.exercises-wrapper { padding: 60px 24px 80px; margin-top: 51px; display: none; }
+.exercises-wrapper.active { display: block; }
+.ex-header { text-align: center; margin-bottom: 40px; }
+.ex-header h2 { font-family: var(--font-title); font-size: 2.2rem; color: var(--primary); font-weight: 800; }
+.exercise-card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 32px; overflow: hidden; border: 1px solid var(--border); }
+.exercise-card-header { background: var(--primary); color: #fff; padding: 16px 24px; display: flex; align-items: center; gap: 14px; }
+.ex-number { width: 36px; height: 36px; background: var(--accent); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-title); font-weight: 800; font-size: 1rem; flex-shrink: 0; }
+.exercise-card-header h4 { font-family: var(--font-title); margin: 0; font-size: 1.15rem; }
+.difficulty-badge { margin-left: auto; padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; letter-spacing: 1px; }
+.easy   { background: rgba(16,185,129,0.2);  color: #6ee7b7; }
+.medium { background: rgba(245,158,11,0.2);  color: #fde68a; }
+.hard   { background: rgba(239,68,68,0.2);   color: #fca5a5; }
+.exercise-card-body { padding: 24px; }
+.exercise-context { background: var(--surface2); border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: .92rem; }
+.exercise-question { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 16px; padding: 12px 16px; background: rgba(37,99,168,0.07); border-left: 4px solid var(--primary-light); border-radius: 0 8px 8px 0; }
+.option-list { list-style: none; padding: 0; margin: 0 0 16px; }
+.option-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; margin-bottom: 8px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color var(--transition), background var(--transition); font-size: .92rem; }
+.option-item:hover    { border-color: var(--primary-light); background: rgba(37,99,168,0.04); }
+.option-item.selected { border-color: var(--primary-light); background: rgba(37,99,168,0.08); }
+.option-item.correct  { border-color: var(--success); background: #d1fae5; }
+.option-item.incorrect{ border-color: var(--danger);  background: #fee2e2; }
+.option-letter { width: 28px; height: 28px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-title); font-weight: 700; font-size: .82rem; flex-shrink: 0; transition: all var(--transition); }
+.option-item.selected  .option-letter { background: var(--primary-light); border-color: var(--primary-light); color: #fff; }
+.option-item.correct   .option-letter { background: var(--success); border-color: var(--success); color: #fff; }
+.option-item.incorrect .option-letter { background: var(--danger);  border-color: var(--danger);  color: #fff; }
+.option-text code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 4px; font-size: .82rem; }
+.exercise-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-check-ex { background: var(--primary); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background var(--transition); }
+.btn-check-ex:hover { background: var(--primary-light); }
+.btn-show-sol { background: transparent; color: var(--primary-light); border: 2px solid var(--primary-light); padding: 10px 22px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all var(--transition); }
+.btn-show-sol:hover { background: var(--primary-light); color: #fff; }
+.solution-panel { display: none; margin-top: 20px; border-top: 2px dashed var(--border); padding-top: 20px; }
+.solution-panel.visible { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.solution-explanation { background: #d1fae5; border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 16px; margin-bottom: 16px; font-size: .9rem; line-height: 1.7; }
+.solution-explanation p, .solution-explanation ul { margin-bottom: 8px; }
+.solution-explanation ul { padding-left: 18px; }
+.solution-code-title { font-family: var(--font-title); font-size: .82rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+
+/* BOTTOM NAV */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.bottom-dots { display: flex; gap: 6px; align-items: center; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all var(--transition); }
+.dot.active { background: var(--primary); transform: scale(1.4); }
+.dot.exercises-dot { background: var(--accent-warm); }
+.dot.exercises-dot.active { background: var(--accent-warm); transform: scale(1.4); }
+.btn-exercises { background: linear-gradient(135deg, var(--accent-warm), #e67e22); color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-family: var(--font-body); font-weight: 600; font-size: .9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity var(--transition); }
+.btn-exercises:hover { opacity: .9; }
+.btn-exercises.active-mode { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+.keyboard-hint { position: fixed; bottom: 60px; right: 16px; background: rgba(26,58,92,0.85); color: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; font-size: .72rem; font-family: var(--font-code); pointer-events: none; }
+
+@media (max-width: 768px) {
+  .concept-box { grid-template-columns: 1fr; }
+  .aaa-grid { grid-template-columns: 1fr; }
+  .flow-wrap { flex-direction: column; align-items: center; }
+  .slide-title { font-size: 1.5rem; }
+  .cover-title { font-size: 2.5rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="grasp-badge">POO II</span>
+    <span>Pruebas Unitarias en C#</span>
+  </div>
+  <div class="topbar-nav">
+    <button id="btn-prev" class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+    <span class="slide-counter" id="slide-counter">1 / 9</span>
+    <button id="btn-next" class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</header>
+
+<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:11%"></div></div>
+
+<div class="slides-wrapper">
+  <div id="slides-container" style="width:100%"></div>
+</div>
+
+<section id="exercises-section" class="exercises-wrapper">
+  <div class="container-xl">
+    <div class="ex-header">
+      <div class="slide-label">Práctica</div>
+      <h2><i class="fa-solid fa-dumbbell me-2 text-warning"></i>Ejercicios — Pruebas Unitarias</h2>
+      <p class="text-muted">Analizá, completá y corregí pruebas unitarias en C# con xUnit. Resolvé en Rider antes de verificar.</p>
+    </div>
+    <div id="exercises-container"></div>
+  </div>
+</section>
+
+<nav class="bottom-nav">
+  <div class="bottom-dots"></div>
+  <button class="btn-exercises" onclick="toggleMode()"><i class="fa-solid fa-dumbbell"></i> Ejercicios</button>
+</nav>
+
+<div class="keyboard-hint">← → para navegar</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+/* ================================================================
+   DATOS — SLIDES
+   ================================================================ */
+const SLIDES = [
+  {
+    id: 1, type: "cover",
+    badge: "Programación Orientada a Objetos II",
+    title: "Pruebas Unitarias en C#",
+    subtitle: "Verificar que el código hace lo que se espera",
+    icon: "fa-solid fa-vial-circle-check",
+    note: "xUnit · Arrange · Act · Assert · Rider"
+  },
+  {
+    id: 2, type: "content",
+    label: "Concepto",
+    title: "¿Qué es una <span class='accent'>Prueba Unitaria</span>?",
+    content: `
+      <div class="container-xl py-2">
+        <div class="concept-box">
+          <div class="concept-question">
+            <i class="fa-solid fa-circle-question"></i><strong>¿Qué es?</strong>
+            <p>Una prueba unitaria es un fragmento de código que verifica el comportamiento de una <strong>unidad pequeña y aislada</strong> del sistema: típicamente un método o una clase.</p>
+          </div>
+          <div class="concept-answer">
+            <i class="fa-solid fa-circle-check"></i><strong>¿Qué garantiza?</strong>
+            <p>Que ante una <span class="highlight">entrada conocida</span>, el código produce la <span class="highlight">salida esperada</span>, sin depender de bases de datos, red ni otros servicios externos.</p>
+          </div>
+        </div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-4">
+            <div class="analysis-step highlight-step">
+              <span class="step-num">✓</span>
+              <p>Prueban <strong>una sola cosa</strong> a la vez</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="analysis-step highlight-step">
+              <span class="step-num">✓</span>
+              <p>Son <strong>rápidas</strong> — milisegundos</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="analysis-step highlight-step">
+              <span class="step-num">✓</span>
+              <p>Son <strong>repetibles</strong> y deterministas</p>
+            </div>
+          </div>
+        </div>
+        <div class="intuition-box mt-3 animate__animated animate__fadeInUp animate__delay-1s">
+          <i class="fa-solid fa-quote-left"></i>
+          <em>"Un test que no puede fallar no prueba nada. Un test que nunca pasa no sirve de nada."</em>
+        </div>
+      </div>`
+  },
+  {
+    id: 3, type: "content",
+    label: "¿Por qué testear?",
+    title: "<span class='accent'>Beneficios</span> de las Pruebas Unitarias",
+    content: `
+      <div class="container-xl py-2">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInLeft">
+              <div class="benefit-icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <h5>Red de Seguridad</h5>
+              <p>Al refactorizar o agregar funcionalidades, los tests detectan inmediatamente si algo se rompió.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInUp">
+              <div class="benefit-icon"><i class="fa-solid fa-file-contract"></i></div>
+              <h5>Documentación Viva</h5>
+              <p>Un test bien escrito describe el <strong>comportamiento esperado</strong> del código mejor que cualquier comentario.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInRight">
+              <div class="benefit-icon"><i class="fa-solid fa-cubes"></i></div>
+              <h5>Mejor Diseño</h5>
+              <p>El código difícil de testear suele ser código mal diseñado. Testear fuerza a escribir clases <strong>cohesivas y desacopladas</strong>.</p>
+            </div>
+          </div>
+        </div>
+        <div class="row g-4 mt-1">
+          <div class="col-md-6">
+            <div class="compare-box compare-bad">
+              <div class="compare-header"><i class="fa-solid fa-xmark-circle"></i> Sin pruebas unitarias</div>
+              <div style="padding:14px;font-size:.88rem;line-height:1.8">
+                <ul style="padding-left:18px;margin:0">
+                  <li>Los bugs se descubren tarde (producción)</li>
+                  <li>Refactorizar da miedo: "¿qué rompí?"</li>
+                  <li>El manual de QA tarda horas</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="compare-box compare-good">
+              <div class="compare-header"><i class="fa-solid fa-circle-check"></i> Con pruebas unitarias</div>
+              <div style="padding:14px;font-size:.88rem;line-height:1.8">
+                <ul style="padding-left:18px;margin:0">
+                  <li>Los bugs se detectan en segundos</li>
+                  <li>Refactorizar con confianza</li>
+                  <li>Los tests corren en milisegundos</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 4, type: "content",
+    label: "Estructura AAA",
+    title: "El patrón <span class='accent'>Arrange · Act · Assert</span>",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">Todo test unitario bien escrito sigue el patrón <strong>AAA</strong>, dividido en tres secciones claramente separadas:</p>
+        <div class="aaa-grid">
+          <div class="aaa-card aaa-arrange">
+            <div class="aaa-letter">A</div>
+            <h5>Arrange</h5>
+            <p>Preparar el escenario: crear objetos, inicializar valores, configurar dependencias.</p>
+          </div>
+          <div class="aaa-card aaa-act">
+            <div class="aaa-letter">A</div>
+            <h5>Act</h5>
+            <p>Ejecutar la acción que se quiere probar: llamar al método bajo prueba.</p>
+          </div>
+          <div class="aaa-card aaa-assert">
+            <div class="aaa-letter">A</div>
+            <h5>Assert</h5>
+            <p>Verificar que el resultado es el esperado: comparar valores, comprobar estados.</p>
+          </div>
+        </div>
+        <pre><code><span class="cm">// Ejemplo básico con el patrón AAA</span>
+[<span class="attr">Fact</span>]
+<span class="kw">public void</span> <span class="mt">Add_TwoPositiveNumbers_ReturnsCorrectSum</span>()
+{
+    <span class="cm">// Arrange</span>
+    <span class="kw">var</span> calculator = <span class="kw">new</span> <span class="cl">Calculator</span>();
+
+    <span class="cm">// Act</span>
+    <span class="kw">var</span> result = calculator.Add(<span class="num">3</span>, <span class="num">5</span>);
+
+    <span class="cm">// Assert</span>
+    Assert.Equal(<span class="num">8</span>, result);
+}</code></pre>
+      </div>`
+  },
+  {
+    id: 5, type: "content",
+    label: "xUnit en Rider",
+    title: "Configurar <span class='accent'>xUnit</span> en Rider",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">xUnit es el framework de pruebas más usado en C#. Para usarlo en Rider:</p>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <ol class="rider-steps">
+              <li>En la solución, click derecho → <strong>Add → New Project</strong></li>
+              <li>Elegir plantilla <strong>xUnit Test Project</strong></li>
+              <li>Nombrar el proyecto: <code>NombreProyecto.Tests</code></li>
+              <li>Agregar referencia al proyecto principal: click derecho en Dependencies → <strong>Add Reference</strong></li>
+              <li>Ejecutar los tests con <strong>Ctrl+T</strong> o desde el panel Unit Tests</li>
+            </ol>
+          </div>
+          <div class="col-md-6">
+            <pre><code><span class="cm">// En el proyecto .Tests, las referencias</span>
+<span class="cm">// en el .csproj son automáticas:</span>
+
+&lt;ItemGroup&gt;
+  &lt;PackageReference
+    Include=<span class="st">"xunit"</span>
+    Version=<span class="st">"2.9.*"</span> /&gt;
+  &lt;PackageReference
+    Include=<span class="st">"xunit.runner.visualstudio"</span>
+    Version=<span class="st">"2.8.*"</span> /&gt;
+&lt;/ItemGroup&gt;
+
+&lt;ItemGroup&gt;
+  <span class="cm">&lt;!-- Referencia al proyecto a testear --&gt;</span>
+  &lt;ProjectReference
+    Include=<span class="st">"..\MiApp\MiApp.csproj"</span> /&gt;
+&lt;/ItemGroup&gt;</code></pre>
+            <div class="note-box mt-2">
+              <i class="fa-solid fa-lightbulb"></i>
+              <span>Convención: un archivo de test por clase. Si tenés <code>Calculator.cs</code>, el archivo de tests se llama <code>CalculatorTests.cs</code>.</span>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 6, type: "content",
+    label: "Primer Test",
+    title: "Escribir el <span class='accent'>primer test</span> con xUnit",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">Testeamos una clase <code>Calculator</code> con los atributos <code>[Fact]</code> (caso único) y <code>[Theory]</code> (múltiples casos):</p>
+        <div class="code-tabs">
+          <ul class="nav nav-tabs code-nav" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-sut"    type="button">Calculator.cs</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#tab-fact"   type="button">[Fact]</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#tab-theory" type="button">[Theory]</button></li>
+          </ul>
+          <div class="tab-content code-tab-content">
+            <div class="tab-pane fade show active" id="tab-sut"><pre><code><span class="cm">// Clase bajo prueba (SUT = System Under Test)</span>
+<span class="kw">public class</span> <span class="cl">Calculator</span>
+{
+    <span class="kw">public double</span> <span class="mt">Add</span>(<span class="kw">double</span> a, <span class="kw">double</span> b)      => a + b;
+    <span class="kw">public double</span> <span class="mt">Subtract</span>(<span class="kw">double</span> a, <span class="kw">double</span> b) => a - b;
+    <span class="kw">public double</span> <span class="mt">Multiply</span>(<span class="kw">double</span> a, <span class="kw">double</span> b) => a * b;
+
+    <span class="kw">public double</span> <span class="mt">Divide</span>(<span class="kw">double</span> a, <span class="kw">double</span> b)
+    {
+        <span class="kw">if</span> (b == <span class="num">0</span>)
+            <span class="kw">throw new</span> DivideByZeroException(<span class="st">"Divisor cannot be zero"</span>);
+        <span class="kw">return</span> a / b;
+    }
+}</code></pre></div>
+            <div class="tab-pane fade" id="tab-fact"><pre><code><span class="kw">public class</span> <span class="cl">CalculatorTests</span>
+{
+    [<span class="attr">Fact</span>]
+    <span class="kw">public void</span> <span class="mt">Add_TwoPositiveNumbers_ReturnsSum</span>()
+    {
+        <span class="cm">// Arrange</span>
+        <span class="kw">var</span> calc = <span class="kw">new</span> <span class="cl">Calculator</span>();
+
+        <span class="cm">// Act</span>
+        <span class="kw">var</span> result = calc.Add(<span class="num">3</span>, <span class="num">5</span>);
+
+        <span class="cm">// Assert</span>
+        Assert.Equal(<span class="num">8</span>, result);
+    }
+
+    [<span class="attr">Fact</span>]
+    <span class="kw">public void</span> <span class="mt">Divide_ByZero_ThrowsDivideByZeroException</span>()
+    {
+        <span class="kw">var</span> calc = <span class="kw">new</span> <span class="cl">Calculator</span>();
+
+        Assert.Throws&lt;DivideByZeroException&gt;(
+            () =&gt; calc.Divide(<span class="num">10</span>, <span class="num">0</span>)
+        );
+    }
+}</code></pre></div>
+            <div class="tab-pane fade" id="tab-theory"><pre><code><span class="kw">public class</span> <span class="cl">CalculatorTests</span>
+{
+    <span class="cm">// [Theory] ejecuta el test una vez por cada [InlineData]</span>
+    [<span class="attr">Theory</span>]
+    [<span class="attr">InlineData</span>(<span class="num">3</span>,  <span class="num">5</span>,  <span class="num">8</span>)]
+    [<span class="attr">InlineData</span>(<span class="num">-1</span>, <span class="num">1</span>,  <span class="num">0</span>)]
+    [<span class="attr">InlineData</span>(<span class="num">0</span>,  <span class="num">0</span>,  <span class="num">0</span>)]
+    [<span class="attr">InlineData</span>(<span class="num">-3</span>, <span class="num">-2</span>, <span class="num">-5</span>)]
+    <span class="kw">public void</span> <span class="mt">Add_VariousInputs_ReturnsCorrectSum</span>(
+        <span class="kw">double</span> a, <span class="kw">double</span> b, <span class="kw">double</span> expected)
+    {
+        <span class="kw">var</span> calc = <span class="kw">new</span> <span class="cl">Calculator</span>();
+
+        <span class="kw">var</span> result = calc.Add(a, b);
+
+        Assert.Equal(expected, result);
+    }
+}</code></pre></div>
+          </div>
+        </div>
+        <div class="note-box mt-3">
+          <i class="fa-solid fa-info-circle"></i>
+          <span><strong>Convención de nombres:</strong> <code>MetodoQueSeTestea_Escenario_ResultadoEsperado</code>. Hace que el nombre del test describa exactamente qué verifica.</span>
+        </div>
+      </div>`
+  },
+  {
+    id: 7, type: "content",
+    label: "Asserts Comunes",
+    title: "Los <span class='accent'>Assert</span> más usados",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">xUnit provee la clase estática <code>Assert</code> con métodos para verificar distintos tipos de resultados:</p>
+        <pre><code><span class="cm">// Igualdad de valores</span>
+Assert.Equal(<span class="num">8</span>, result);
+Assert.NotEqual(<span class="num">0</span>, result);
+
+<span class="cm">// Booleanos</span>
+Assert.True(user.IsActive);
+Assert.False(list.IsEmpty());
+
+<span class="cm">// Referencias nulas</span>
+Assert.Null(result);
+Assert.NotNull(result);
+
+<span class="cm">// Colecciones</span>
+Assert.Empty(list);
+Assert.Contains(<span class="st">"item"</span>, collection);
+Assert.Equal(<span class="num">3</span>, collection.Count());
+
+<span class="cm">// Excepciones</span>
+<span class="kw">var</span> ex = Assert.Throws&lt;ArgumentException&gt;(() =&gt; sut.Method(badInput));
+Assert.Equal(<span class="st">"message"</span>, ex.Message);
+
+<span class="cm">// Tipos</span>
+Assert.IsType&lt;<span class="cl">ConsolePrinter</span>&gt;(printer);
+Assert.IsAssignableFrom&lt;<span class="cl">IPrinter</span>&gt;(printer);</code></pre>
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <div class="warning-box">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Usá <code>Assert.Equal(expected, actual)</code> — el <strong>primer parámetro</strong> es siempre el valor esperado y el segundo el obtenido. Invertirlo genera mensajes de error confusos.</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="note-box">
+              <i class="fa-solid fa-lightbulb"></i>
+              <span>Cada test debe tener <strong>un solo Assert lógico</strong>. Si necesitás verificar varias cosas del mismo resultado, es válido; si estás verificando cosas distintas, separalos en tests diferentes.</span>
+            </div>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 8, type: "content",
+    label: "Test de Excepciones",
+    title: "Testear <span class='accent'>comportamiento de error</span>",
+    content: `
+      <div class="container-xl py-2">
+        <p class="lead-text">Las excepciones son parte del contrato de un método. Hay que testear que se lanzan en las condiciones correctas:</p>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:8px">Clase bajo prueba:</p>
+            <pre><code><span class="kw">public class</span> <span class="cl">BankAccount</span>
+{
+    <span class="kw">public double</span> Balance { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public void</span> <span class="mt">Deposit</span>(<span class="kw">double</span> amount)
+    {
+        <span class="kw">if</span> (amount &lt;= <span class="num">0</span>)
+            <span class="kw">throw new</span> ArgumentException(
+                <span class="st">"Amount must be positive"</span>);
+        Balance += amount;
+    }
+
+    <span class="kw">public void</span> <span class="mt">Withdraw</span>(<span class="kw">double</span> amount)
+    {
+        <span class="kw">if</span> (amount &gt; Balance)
+            <span class="kw">throw new</span> InvalidOperationException(
+                <span class="st">"Insufficient funds"</span>);
+        Balance -= amount;
+    }
+}</code></pre>
+          </div>
+          <div class="col-md-6">
+            <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:8px">Tests de error:</p>
+            <pre><code>[<span class="attr">Fact</span>]
+<span class="kw">public void</span> <span class="mt">Deposit_NegativeAmount_ThrowsArgumentException</span>()
+{
+    <span class="kw">var</span> account = <span class="kw">new</span> <span class="cl">BankAccount</span>();
+
+    Assert.Throws&lt;ArgumentException&gt;(
+        () =&gt; account.Deposit(-<span class="num">100</span>)
+    );
+}
+
+[<span class="attr">Fact</span>]
+<span class="kw">public void</span> <span class="mt">Withdraw_MoreThanBalance_ThrowsInvalidOperation</span>()
+{
+    <span class="kw">var</span> account = <span class="kw">new</span> <span class="cl">BankAccount</span>();
+    account.Deposit(<span class="num">500</span>);
+
+    Assert.Throws&lt;InvalidOperationException&gt;(
+        () =&gt; account.Withdraw(<span class="num">1000</span>)
+    );
+}
+
+[<span class="attr">Fact</span>]
+<span class="kw">public void</span> <span class="mt">Deposit_ValidAmount_UpdatesBalance</span>()
+{
+    <span class="kw">var</span> account = <span class="kw">new</span> <span class="cl">BankAccount</span>();
+
+    account.Deposit(<span class="num">300</span>);
+
+    Assert.Equal(<span class="num">300</span>, account.Balance);
+}</code></pre>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    id: 9, type: "content",
+    label: "Buenas Prácticas",
+    title: "<span class='accent'>Buenas Prácticas</span> al Testear",
+    content: `
+      <div class="container-xl py-2">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInLeft">
+              <div class="benefit-icon"><i class="fa-solid fa-1"></i></div>
+              <h5>Una responsabilidad por test</h5>
+              <p>Cada test verifica <strong>una sola cosa</strong>. Si falla, sabés exactamente qué falló.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInUp">
+              <div class="benefit-icon"><i class="fa-solid fa-tag"></i></div>
+              <h5>Nombres descriptivos</h5>
+              <p>El nombre del test debe leer como una <strong>especificación</strong>: qué método, qué condición, qué resultado.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="benefit-card animate__animated animate__fadeInRight">
+              <div class="benefit-icon"><i class="fa-solid fa-link-slash"></i></div>
+              <h5>Tests aislados</h5>
+              <p>Cada test debe ser <strong>independiente</strong>. No deben depender del orden de ejecución ni compartir estado.</p>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <div class="compare-box compare-bad">
+              <div class="compare-header"><i class="fa-solid fa-xmark-circle"></i> Evitar</div>
+              <pre style="border-radius:0;font-size:.78rem"><code><span class="cm">// ❌ Nombre que no dice nada</span>
+<span class="kw">public void</span> <span class="mt">Test1</span>() { }
+
+<span class="cm">// ❌ Múltiples asserts sin relación</span>
+Assert.Equal(<span class="num">8</span>,  calc.Add(<span class="num">3</span>, <span class="num">5</span>));
+Assert.Equal(<span class="num">-2</span>, calc.Add(<span class="num">3</span>, -<span class="num">5</span>));
+Assert.Equal(<span class="num">15</span>, calc.Multiply(<span class="num">3</span>, <span class="num">5</span>));
+
+<span class="cm">// ❌ Lógica condicional en el test</span>
+<span class="kw">if</span> (result &gt; <span class="num">0</span>) Assert.True(<span class="kw">true</span>);</code></pre>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="compare-box compare-good">
+              <div class="compare-header"><i class="fa-solid fa-circle-check"></i> Preferir</div>
+              <pre style="border-radius:0;font-size:.78rem"><code><span class="cm">// ✅ Nombre descriptivo</span>
+<span class="kw">public void</span> <span class="mt">Add_NegativeAndPositive_ReturnsNegative</span>() { }
+
+<span class="cm">// ✅ [Theory] para múltiples casos del mismo método</span>
+[<span class="attr">Theory</span>]
+[<span class="attr">InlineData</span>(<span class="num">3</span>, <span class="num">5</span>, <span class="num">8</span>)]
+[<span class="attr">InlineData</span>(<span class="num">3</span>, -<span class="num">5</span>, -<span class="num">2</span>)]
+<span class="kw">public void</span> <span class="mt">Add_ReturnsCorrectSum</span>(...) { }
+
+<span class="cm">// ✅ Un solo Assert por concepto</span>
+Assert.Equal(<span class="num">8</span>, result);</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="summary-banner mt-3">
+          <i class="fa-solid fa-vial-circle-check"></i>
+          Un buen test es tan importante como el código de producción. <strong>Mantenelo limpio, claro y corto.</strong>
+        </div>
+      </div>`
+  }
+];
+
+/* ================================================================
+   DATOS — EJERCICIOS
+   ================================================================ */
+const EXERCISES = [
+  {
+    id: 1,
+    title: "Identificar el patrón AAA",
+    icon: "fa-solid fa-magnifying-glass",
+    difficulty: "Básico",
+    difficultyClass: "easy",
+    context: `
+      <p>Observá el siguiente test unitario escrito con xUnit:</p>
+      <pre><code>[<span class="attr">Fact</span>]
+<span class="kw">public void</span> <span class="mt">GetFullName_FirstAndLastName_ReturnsCombined</span>()
+{
+    <span class="kw">var</span> person = <span class="kw">new</span> <span class="cl">Person</span>(<span class="st">"Juan"</span>, <span class="st">"García"</span>);
+    <span class="kw">var</span> result = person.GetFullName();
+    Assert.Equal(<span class="st">"Juan García"</span>, result);
+}</code></pre>
+      <p>La clase <code>Person</code> tiene un constructor que recibe nombre y apellido, y un método <code>GetFullName()</code> que los combina con un espacio.</p>`,
+    question: "¿Cuál de las siguientes afirmaciones sobre este test es <strong>correcta</strong>?",
+    options: [
+      { id: "a", text: "El test no sigue el patrón AAA porque le falta la sección Arrange." },
+      { id: "b", text: "El test sigue el patrón AAA: Arrange = crear Person, Act = llamar GetFullName(), Assert = verificar con Assert.Equal." },
+      { id: "c", text: "El test está mal porque Assert.Equal debería recibir el actual como primer parámetro." },
+      { id: "d", text: "El test está incompleto porque no testea el caso donde el nombre está vacío." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ La opción B es correcta. El test sigue el patrón AAA, aunque sin comentarios explícitos:</p>
+      <ul>
+        <li><strong>Arrange:</strong> <code>var person = new Person("Juan", "García")</code> — prepara el objeto.</li>
+        <li><strong>Act:</strong> <code>var result = person.GetFullName()</code> — ejecuta el método bajo prueba.</li>
+        <li><strong>Assert:</strong> <code>Assert.Equal("Juan García", result)</code> — verifica el resultado.</li>
+      </ul>
+      <p>La opción C está invertida: en xUnit el <strong>primer parámetro es el expected</strong> y el segundo el actual — el test está correcto. La D describe un escenario diferente que debería ser otro <code>[Fact]</code> independiente.</p>`,
+    code: `<span class="cm">// El mismo test con comentarios AAA explícitos</span>
+[<span class="attr">Fact</span>]
+<span class="kw">public void</span> <span class="mt">GetFullName_FirstAndLastName_ReturnsCombined</span>()
+{
+    <span class="cm">// Arrange</span>
+    <span class="kw">var</span> person = <span class="kw">new</span> <span class="cl">Person</span>(<span class="st">"Juan"</span>, <span class="st">"García"</span>);
+
+    <span class="cm">// Act</span>
+    <span class="kw">var</span> result = person.GetFullName();
+
+    <span class="cm">// Assert</span>
+    Assert.Equal(<span class="st">"Juan García"</span>, result);
+}
+
+<span class="cm">// Caso adicional: nombre vacío (test separado)</span>
+[<span class="attr">Fact</span>]
+<span class="kw">public void</span> <span class="mt">GetFullName_EmptyFirstName_ReturnsLastNameOnly</span>()
+{
+    <span class="kw">var</span> person = <span class="kw">new</span> <span class="cl">Person</span>(<span class="st">""</span>, <span class="st">"García"</span>);
+    <span class="kw">var</span> result = person.GetFullName();
+    Assert.Equal(<span class="st">"García"</span>, result);
+}`
+  },
+  {
+    id: 2,
+    title: "Completar el Test con [Theory]",
+    icon: "fa-solid fa-flask",
+    difficulty: "Intermedio",
+    difficultyClass: "medium",
+    context: `
+      <p>Tenés esta clase de descuentos ya implementada:</p>
+      <pre><code><span class="kw">public class</span> <span class="cl">DiscountService</span>
+{
+    <span class="kw">public double</span> <span class="mt">ApplyDiscount</span>(<span class="kw">double</span> price, <span class="kw">int</span> discountPercent)
+    {
+        <span class="kw">if</span> (discountPercent &lt; <span class="num">0</span> || discountPercent &gt; <span class="num">100</span>)
+            <span class="kw">throw new</span> ArgumentOutOfRangeException(
+                <span class="st">"discountPercent"</span>, <span class="st">"Must be between 0 and 100"</span>);
+        <span class="kw">return</span> price * (<span class="num">1</span> - discountPercent / <span class="num">100.0</span>);
+    }
+}</code></pre>
+      <p>Querés testear varios escenarios de descuento válidos y también que lance excepción con valores inválidos.</p>`,
+    question: "¿Cuál es la forma más correcta de testear <code>ApplyDiscount</code> en xUnit?",
+    options: [
+      { id: "a", text: "Un único [Fact] que llame al método varias veces con diferentes parámetros y use múltiples Assert.Equal." },
+      { id: "b", text: "Un [Theory] con [InlineData] para los casos válidos, y un [Fact] separado para el caso de excepción con valor fuera de rango." },
+      { id: "c", text: "Solo testear el caso feliz (precio con 10% de descuento) porque los casos de error son responsabilidad de la UI." },
+      { id: "d", text: "Un [Fact] con un try/catch alrededor del Assert.Throws para evitar que el test falle." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ La opción B es la forma idiomática de xUnit:</p>
+      <ul>
+        <li><strong>[Theory] + [InlineData]</strong> para los casos válidos: se ejecuta un test por cada conjunto de datos, con nombre descriptivo que incluye los valores.</li>
+        <li><strong>[Fact] separado</strong> para el caso de excepción: mantiene la responsabilidad única del test.</li>
+      </ul>
+      <p>La A mezcla casos en un solo test — si falla el Assert del caso 2, los siguientes no se ejecutan y no sabés si fallaron. La C es incorrecta: los casos de error son igual de importantes. La D es un antipatrón — nunca pongas try/catch en un test.</p>`,
+    code: `<span class="kw">public class</span> <span class="cl">DiscountServiceTests</span>
+{
+    [<span class="attr">Theory</span>]
+    [<span class="attr">InlineData</span>(<span class="num">100</span>, <span class="num">0</span>,   <span class="num">100</span>)]   <span class="cm">// sin descuento</span>
+    [<span class="attr">InlineData</span>(<span class="num">100</span>, <span class="num">10</span>,  <span class="num">90</span>)]    <span class="cm">// 10% off</span>
+    [<span class="attr">InlineData</span>(<span class="num">200</span>, <span class="num">50</span>,  <span class="num">100</span>)]   <span class="cm">// 50% off</span>
+    [<span class="attr">InlineData</span>(<span class="num">500</span>, <span class="num">100</span>, <span class="num">0</span>)]    <span class="cm">// 100% off</span>
+    <span class="kw">public void</span> <span class="mt">ApplyDiscount_ValidInputs_ReturnsCorrectPrice</span>(
+        <span class="kw">double</span> price, <span class="kw">int</span> discount, <span class="kw">double</span> expected)
+    {
+        <span class="kw">var</span> service = <span class="kw">new</span> <span class="cl">DiscountService</span>();
+
+        <span class="kw">var</span> result = service.ApplyDiscount(price, discount);
+
+        Assert.Equal(expected, result);
+    }
+
+    [<span class="attr">Theory</span>]
+    [<span class="attr">InlineData</span>(-<span class="num">1</span>)]
+    [<span class="attr">InlineData</span>(<span class="num">101</span>)]
+    <span class="kw">public void</span> <span class="mt">ApplyDiscount_InvalidPercent_ThrowsArgumentOutOfRange</span>(
+        <span class="kw">int</span> invalidDiscount)
+    {
+        <span class="kw">var</span> service = <span class="kw">new</span> <span class="cl">DiscountService</span>();
+
+        Assert.Throws&lt;ArgumentOutOfRangeException&gt;(
+            () =&gt; service.ApplyDiscount(<span class="num">100</span>, invalidDiscount)
+        );
+    }
+}`
+  },
+  {
+    id: 3,
+    title: "Detectar el Test Roto",
+    icon: "fa-solid fa-bug",
+    difficulty: "Avanzado",
+    difficultyClass: "hard",
+    context: `
+      <p>Un compañero escribió los siguientes tests para la clase <code>ShoppingCart</code>. El segundo test falla de forma intermitente:</p>
+      <pre><code><span class="kw">public class</span> <span class="cl">ShoppingCartTests</span>
+{
+    <span class="kw">private static</span> <span class="cl">ShoppingCart</span> _cart = <span class="kw">new</span> <span class="cl">ShoppingCart</span>(); <span class="cm">// ❓</span>
+
+    [<span class="attr">Fact</span>]
+    <span class="kw">public void</span> <span class="mt">AddItem_OneItem_CartHasOneItem</span>()
+    {
+        _cart.AddItem(<span class="kw">new</span> <span class="cl">Item</span>(<span class="st">"Laptop"</span>, <span class="num">1500</span>));
+        Assert.Equal(<span class="num">1</span>, _cart.ItemCount);
+    }
+
+    [<span class="attr">Fact</span>]
+    <span class="kw">public void</span> <span class="mt">AddItem_TwoItems_CartHasTwoItems</span>()
+    {
+        _cart.AddItem(<span class="kw">new</span> <span class="cl">Item</span>(<span class="st">"Mouse"</span>, <span class="num">50</span>));
+        _cart.AddItem(<span class="kw">new</span> <span class="cl">Item</span>(<span class="st">"Teclado"</span>, <span class="num">80</span>));
+        Assert.Equal(<span class="num">2</span>, _cart.ItemCount);
+    }
+}</code></pre>`,
+    question: "¿Cuál es el problema y cómo se soluciona?",
+    options: [
+      { id: "a", text: "El problema es que ShoppingCart no tiene un método Clear(). Agregar cart.Clear() al inicio de cada test lo soluciona." },
+      { id: "b", text: "El campo _cart es static y compartido entre tests. Los tests no son aislados: dependen del orden de ejecución. La solución es crear una nueva instancia dentro de cada test." },
+      { id: "c", text: "El problema es que [Fact] no soporta múltiples instancias del mismo objeto. Hay que usar [Theory] con [InlineData]." },
+      { id: "d", text: "No hay problema. Los tests son correctos y si fallan es porque ShoppingCart tiene un bug real." }
+    ],
+    correct: "b",
+    explanation: `
+      <p>✅ El problema es el <strong>estado compartido</strong>. El campo <code>static _cart</code> existe una sola vez para todos los tests:</p>
+      <ul>
+        <li>Si el test 1 corre primero, agrega 1 item. El carrito queda con 1 item.</li>
+        <li>Cuando corre el test 2, el carrito ya tiene 1 item. Agrega 2 más → <code>ItemCount == 3</code>, no 2 → <strong>falla</strong>.</li>
+        <li>Si el orden se invierte, el test 2 puede pasar y el 1 fallar.</li>
+      </ul>
+      <p>La regla de oro: <strong>cada test debe crear su propio estado</strong> desde cero. No uses campos estáticos ni de instancia compartidos entre tests.</p>`,
+    code: `<span class="kw">public class</span> <span class="cl">ShoppingCartTests</span>
+{
+    <span class="cm">// ✅ Cada test crea su propio carrito — aislamiento garantizado</span>
+
+    [<span class="attr">Fact</span>]
+    <span class="kw">public void</span> <span class="mt">AddItem_OneItem_CartHasOneItem</span>()
+    {
+        <span class="cm">// Arrange — instancia local, no compartida</span>
+        <span class="kw">var</span> cart = <span class="kw">new</span> <span class="cl">ShoppingCart</span>();
+
+        <span class="cm">// Act</span>
+        cart.AddItem(<span class="kw">new</span> <span class="cl">Item</span>(<span class="st">"Laptop"</span>, <span class="num">1500</span>));
+
+        <span class="cm">// Assert</span>
+        Assert.Equal(<span class="num">1</span>, cart.ItemCount);
+    }
+
+    [<span class="attr">Fact</span>]
+    <span class="kw">public void</span> <span class="mt">AddItem_TwoItems_CartHasTwoItems</span>()
+    {
+        <span class="kw">var</span> cart = <span class="kw">new</span> <span class="cl">ShoppingCart</span>();
+
+        cart.AddItem(<span class="kw">new</span> <span class="cl">Item</span>(<span class="st">"Mouse"</span>,   <span class="num">50</span>));
+        cart.AddItem(<span class="kw">new</span> <span class="cl">Item</span>(<span class="st">"Teclado"</span>, <span class="num">80</span>));
+
+        Assert.Equal(<span class="num">2</span>, cart.ItemCount);
+    }
+}`
+  }
+];
+
+/* ================================================================
+   MOTOR DE SLIDES
+   ================================================================ */
+let currentSlide = 0;
+let mode = "slides";
+
+function renderSlide(data) {
+  if (data.type === "cover") {
+    return `
+      <div class="slide-cover">
+        <div class="cover-badge animate__animated animate__fadeInDown">${data.badge}</div>
+        <div class="cover-icon animate__animated animate__bounceIn animate__delay-1s"><i class="${data.icon}"></i></div>
+        <div class="cover-title animate__animated animate__fadeInUp">${data.title}</div>
+        <div class="cover-subtitle animate__animated animate__fadeIn animate__delay-1s">${data.subtitle}</div>
+        <div class="cover-note animate__animated animate__fadeIn animate__delay-2s">
+          <i class="fa-solid fa-flask me-2"></i>${data.note}
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="container-xl py-2">
+      <div class="slide-label animate__animated animate__fadeInLeft">${data.label}</div>
+      <div class="slide-title animate__animated animate__fadeInLeft">${data.title}</div>
+      <div class="animate__animated animate__fadeIn animate__delay-1s">${data.content}</div>
+    </div>`;
+}
+
+function buildSlides() {
+  const c = document.getElementById("slides-container");
+  c.innerHTML = "";
+  SLIDES.forEach((s, i) => {
+    const div = document.createElement("div");
+    div.className = `slide${i === 0 ? " active" : ""}`;
+    div.id = `slide-${i}`;
+    div.innerHTML = renderSlide(s);
+    c.appendChild(div);
+  });
+}
+
+function buildDots() {
+  const wrap = document.querySelector(".bottom-dots");
+  wrap.innerHTML = "";
+  SLIDES.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = `dot${i === 0 ? " active" : ""}`;
+    d.title = `Diapositiva ${i + 1}`;
+    d.onclick = () => goToSlide(i);
+    wrap.appendChild(d);
+  });
+  const ex = document.createElement("div");
+  ex.className = "dot exercises-dot";
+  ex.title = "Ejercicios";
+  ex.onclick = () => showExercises();
+  wrap.appendChild(ex);
+}
+
+function updateUI() {
+  if (mode !== "slides") return;
+  document.querySelectorAll(".slide").forEach((s, i) => s.classList.toggle("active", i === currentSlide));
+  document.querySelectorAll(".dot:not(.exercises-dot)").forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+  document.querySelector(".dot.exercises-dot")?.classList.remove("active");
+  document.getElementById("btn-prev").disabled = currentSlide === 0;
+  document.getElementById("btn-next").disabled = currentSlide === SLIDES.length - 1;
+  document.getElementById("slide-counter").textContent = `${currentSlide + 1} / ${SLIDES.length}`;
+  document.querySelector(".progress-bar-fill").style.width = `${((currentSlide + 1) / SLIDES.length) * 100}%`;
+}
+
+function goToSlide(n) {
+  if (mode === "exercises") showSlides();
+  currentSlide = Math.max(0, Math.min(n, SLIDES.length - 1));
+  updateUI();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function prevSlide() { if (currentSlide > 0) goToSlide(currentSlide - 1); }
+function nextSlide() { if (currentSlide < SLIDES.length - 1) goToSlide(currentSlide + 1); }
+
+/* ================================================================
+   MOTOR DE EJERCICIOS
+   ================================================================ */
+function showExercises() {
+  mode = "exercises";
+  document.getElementById("slides-container").style.display = "none";
+  document.getElementById("exercises-section").classList.add("active");
+  const btn = document.querySelector(".btn-exercises");
+  btn.innerHTML = '<i class="fa-solid fa-chalkboard-user"></i> Ver Presentación';
+  btn.classList.add("active-mode");
+  document.getElementById("btn-prev").disabled = true;
+  document.getElementById("btn-next").disabled = true;
+  document.querySelector(".dot.exercises-dot")?.classList.add("active");
+  document.querySelectorAll(".dot:not(.exercises-dot)").forEach(d => d.classList.remove("active"));
+  document.querySelector(".progress-bar-fill").style.width = "100%";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showSlides() {
+  mode = "slides";
+  document.getElementById("slides-container").style.display = "";
+  document.getElementById("exercises-section").classList.remove("active");
+  const btn = document.querySelector(".btn-exercises");
+  btn.innerHTML = '<i class="fa-solid fa-dumbbell"></i> Ejercicios';
+  btn.classList.remove("active-mode");
+  updateUI();
+}
+
+function toggleMode() { mode === "slides" ? showExercises() : showSlides(); }
+
+function buildExercises() {
+  const c = document.getElementById("exercises-container");
+  c.innerHTML = "";
+  EXERCISES.forEach(ex => {
+    const div = document.createElement("div");
+    div.className = "exercise-card";
+    div.id = `ex-${ex.id}`;
+    div.innerHTML = `
+      <div class="exercise-card-header">
+        <div class="ex-number">${ex.id}</div>
+        <i class="${ex.icon}"></i>
+        <h4>${ex.title}</h4>
+        <span class="difficulty-badge ${ex.difficultyClass}">${ex.difficulty}</span>
+      </div>
+      <div class="exercise-card-body">
+        <div class="exercise-context">${ex.context}</div>
+        <div class="exercise-question">${ex.question}</div>
+        <ul class="option-list" id="opts-${ex.id}">
+          ${ex.options.map(o => `
+            <li class="option-item" data-ex="${ex.id}" data-opt="${o.id}" onclick="selectOption(${ex.id},'${o.id}')">
+              <div class="option-letter">${o.id.toUpperCase()}</div>
+              <div class="option-text">${o.text}</div>
+            </li>`).join("")}
+        </ul>
+        <div class="exercise-actions">
+          <button class="btn-check-ex" onclick="checkAnswer(${ex.id})">
+            <i class="fa-solid fa-check"></i> Verificar
+          </button>
+          <button class="btn-show-sol" onclick="toggleSolution(${ex.id})">
+            <i class="fa-solid fa-eye"></i> Ver Solución
+          </button>
+        </div>
+        <div class="solution-panel" id="sol-${ex.id}">
+          <div class="solution-explanation">${ex.explanation}</div>
+          <div class="solution-code-title"><i class="fa-solid fa-code me-2"></i>Código en C#</div>
+          <pre><code>${ex.code}</code></pre>
+        </div>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+const selectedOptions = {};
+
+function selectOption(exId, optId) {
+  if (document.querySelector(`#opts-${exId} .correct, #opts-${exId} .incorrect`)) return;
+  selectedOptions[exId] = optId;
+  document.querySelectorAll(`#opts-${exId} .option-item`).forEach(el => {
+    el.classList.toggle("selected", el.dataset.opt === optId);
+  });
+}
+
+function checkAnswer(exId) {
+  const ex = EXERCISES.find(e => e.id === exId);
+  const selected = selectedOptions[exId];
+  if (!selected) {
+    Swal.fire({ title: "Seleccioná una opción", text: "Hacé click en una de las respuestas antes de verificar.", icon: "warning", confirmButtonColor: "#1a3a5c", confirmButtonText: "Entendido" });
+    return;
+  }
+  const items = document.querySelectorAll(`#opts-${exId} .option-item`);
+  items.forEach(item => {
+    if (item.dataset.opt === ex.correct) item.classList.add("correct");
+    else if (item.dataset.opt === selected && selected !== ex.correct) item.classList.add("incorrect");
+  });
+  if (selected === ex.correct) {
+    Swal.fire({ title: "¡Correcto! 🎉", html: "¡Buen análisis!<br>Revisá la solución completa abajo.", icon: "success", confirmButtonColor: "#10b981", confirmButtonText: "Ver explicación" })
+      .then(() => document.getElementById(`sol-${exId}`).classList.add("visible"));
+  } else {
+    Swal.fire({ title: "No exactamente…", html: "Revisá el patrón <strong>AAA</strong> y los principios de aislamiento de tests.", icon: "error", confirmButtonColor: "#1a3a5c", confirmButtonText: "Intentar de nuevo", showDenyButton: true, denyButtonText: "Ver solución", denyButtonColor: "#64748b" })
+      .then(result => {
+        if (result.isDenied) {
+          document.getElementById(`sol-${exId}`).classList.add("visible");
+        } else {
+          items.forEach(i => i.classList.remove("selected", "correct", "incorrect"));
+          delete selectedOptions[exId];
+        }
+      });
+  }
+}
+
+function toggleSolution(exId) {
+  document.getElementById(`sol-${exId}`).classList.toggle("visible");
+}
+
+/* ================================================================
+   TECLADO
+   ================================================================ */
+document.addEventListener("keydown", e => {
+  if (mode !== "slides") return;
+  if (["ArrowRight", "ArrowDown", " "].includes(e.key)) { e.preventDefault(); nextSlide(); }
+  if (["ArrowLeft", "ArrowUp"].includes(e.key))         { e.preventDefault(); prevSlide(); }
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  buildSlides();
+  buildDots();
+  buildExercises();
+  updateUI();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debug en VS Code & Test Unitario en C#</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- FontAwesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<!-- Animate.css -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<!-- Highlight.js -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-dark:      #0d1117;
+    --bg-card:      #161b22;
+    --bg-editor:    #1e2432;
+    --bg-hover:     #21262d;
+    --accent-blue:  #58a6ff;
+    --accent-green: #3fb950;
+    --accent-orange:#ffa657;
+    --accent-red:   #ff7b72;
+    --accent-purple:#d2a8ff;
+    --accent-yellow:#e3b341;
+    --text-primary: #e6edf3;
+    --text-muted:   #8b949e;
+    --border:       #30363d;
+    --glow-blue:    0 0 20px rgba(88,166,255,0.3);
+    --glow-green:   0 0 20px rgba(63,185,80,0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- GRID BACKGROUND ---- */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(88,166,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(88,166,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---- HEADER ---- */
+  .main-header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .header-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent-blue);
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 6px;
+    padding: 4px 10px;
+    letter-spacing: 0.05em;
+  }
+  .header-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex: 1;
+  }
+  .slide-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* ---- PROGRESS BAR ---- */
+  .progress-bar-container {
+    height: 3px;
+    background: var(--border);
+    position: sticky; top: 53px; z-index: 99;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+    transition: width 0.4s ease;
+    box-shadow: var(--glow-blue);
+  }
+
+  /* ---- SLIDE ---- */
+  .slide {
+    display: none;
+    min-height: calc(100vh - 56px);
+    padding: 2.5rem 2rem 4rem;
+    position: relative;
+    z-index: 1;
+    animation-duration: 0.5s;
+  }
+  .slide.active { display: block; }
+
+  .slide-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.25);
+    border-radius: 20px;
+    padding: 3px 12px;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  .slide-tag.green  { color: var(--accent-green);  background: rgba(63,185,80,0.1);  border-color: rgba(63,185,80,0.25); }
+  .slide-tag.orange { color: var(--accent-orange); background: rgba(255,166,87,0.1); border-color: rgba(255,166,87,0.25); }
+  .slide-tag.purple { color: var(--accent-purple); background: rgba(210,168,255,0.1);border-color: rgba(210,168,255,0.25); }
+  .slide-tag.red    { color: var(--accent-red);    background: rgba(255,123,114,0.1);border-color: rgba(255,123,114,0.25); }
+  .slide-tag.yellow { color: var(--accent-yellow); background: rgba(227,179,65,0.1); border-color: rgba(227,179,65,0.25); }
+
+  .slide-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 0.4rem;
+    color: var(--text-primary);
+  }
+  .slide-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-weight: 400;
+  }
+
+  /* ---- CARDS ---- */
+  .info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .info-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: var(--glow-blue);
+  }
+  .info-card.green:hover { border-color: var(--accent-green); box-shadow: var(--glow-green); }
+  .info-card.orange:hover { border-color: var(--accent-orange); }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  .card-icon.blue   { background: rgba(88,166,255,0.15);  color: var(--accent-blue); }
+  .card-icon.green  { background: rgba(63,185,80,0.15);   color: var(--accent-green); }
+  .card-icon.orange { background: rgba(255,166,87,0.15);  color: var(--accent-orange); }
+  .card-icon.red    { background: rgba(255,123,114,0.15); color: var(--accent-red); }
+  .card-icon.purple { background: rgba(210,168,255,0.15); color: var(--accent-purple); }
+  .card-icon.yellow { background: rgba(227,179,65,0.15);  color: var(--accent-yellow); }
+
+  .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .card-text  { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* ---- CODE BLOCKS ---- */
+  .code-wrapper {
+    background: var(--bg-editor);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+  .code-header {
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot.red  { background: #ff5f57; }
+  .code-dot.yellow { background: #febc2e; }
+  .code-dot.green { background: #28c840; }
+  .code-filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+    flex: 1;
+  }
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .code-wrapper pre { margin: 0 !important; border-radius: 0 !important; }
+  .code-wrapper code { font-family: 'JetBrains Mono', monospace !important; font-size: 0.82rem !important; }
+
+  /* ---- STEP BOXES ---- */
+  .step-box {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s;
+  }
+  .step-box:hover { border-color: var(--accent-blue); }
+  .step-num {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent-blue), #1f6feb);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: white;
+  }
+  .step-num.green  { background: linear-gradient(135deg, var(--accent-green), #238636); }
+  .step-num.orange { background: linear-gradient(135deg, var(--accent-orange), #d1743a); }
+  .step-num.purple { background: linear-gradient(135deg, var(--accent-purple), #8957e5); }
+  .step-content { flex: 1; }
+  .step-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; }
+  .step-desc  { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* ---- KEYBOARD SHORTCUTS ---- */
+  kbd {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-bottom: 3px solid var(--border);
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent-yellow);
+    white-space: nowrap;
+  }
+
+  /* ---- BADGE PILLS ---- */
+  .tech-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.2);
+    color: var(--accent-blue);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 2px;
+  }
+
+  /* ---- HIGHLIGHT INLINE ---- */
+  .hl { color: var(--accent-blue); font-weight: 700; }
+  .hl.green  { color: var(--accent-green); }
+  .hl.orange { color: var(--accent-orange); }
+  .hl.red    { color: var(--accent-red); }
+  .hl.purple { color: var(--accent-purple); }
+  .hl.yellow { color: var(--accent-yellow); }
+
+  /* ---- ALERT BOXES ---- */
+  .alert-custom {
+    border-radius: 10px;
+    padding: 0.85rem 1.25rem;
+    border-left: 4px solid;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .alert-info  { background: rgba(88,166,255,0.08); border-color: var(--accent-blue);   color: #a5c8f0; }
+  .alert-warn  { background: rgba(255,166,87,0.08);  border-color: var(--accent-orange); color: #f0c896; }
+  .alert-good  { background: rgba(63,185,80,0.08);   border-color: var(--accent-green);  color: #8fd9a0; }
+  .alert-tip   { background: rgba(210,168,255,0.08); border-color: var(--accent-purple); color: #d2a8ff; }
+
+  /* ---- NAV BOTTOM ---- */
+  .nav-bottom {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(13,17,23,0.95);
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); box-shadow: var(--glow-blue); }
+  .nav-btn.primary {
+    background: linear-gradient(135deg, #1f6feb, #0d56b5);
+    border-color: #1f6feb;
+    color: white;
+  }
+  .nav-btn.primary:hover { background: linear-gradient(135deg, #388bfd, #1f6feb); box-shadow: var(--glow-blue); color: white; }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ---- SLIDE INDEX ---- */
+  .slide-index {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 60%;
+  }
+  .idx-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .idx-dot.active { background: var(--accent-blue); box-shadow: var(--glow-blue); }
+  .idx-dot:hover  { background: var(--text-muted); }
+
+  /* ---- HERO SLIDE ---- */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .slide-title { font-size: 1.6rem; }
+  }
+
+  /* ---- DEBUG PANEL VISUAL ---- */
+  .vscode-mock {
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+  }
+  .vscode-titlebar {
+    background: #3c3c3c;
+    padding: 5px 12px;
+    color: #ccc;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vscode-tab {
+    background: #1e1e1e;
+    padding: 3px 10px;
+    border-top: 2px solid transparent;
+    cursor: pointer;
+    color: #858585;
+  }
+  .vscode-tab.active { border-top-color: #007acc; color: #fff; }
+  .vscode-editor {
+    padding: 8px 12px;
+    line-height: 1.7;
+    color: #d4d4d4;
+  }
+  .vscode-line { display: flex; gap: 12px; }
+  .vscode-ln   { color: #555; min-width: 20px; text-align: right; user-select: none; }
+  .bp { color: #e06c75 !important; }
+  .bp-line { background: rgba(224,108,117,0.15); border-left: 3px solid #e06c75; }
+  .kw  { color: #569cd6; }
+  .ty  { color: #4ec9b0; }
+  .str { color: #ce9178; }
+  .nm  { color: #9cdcfe; }
+  .num { color: #b5cea8; }
+  .cm  { color: #6a9955; }
+  .fn  { color: #dcdcaa; }
+
+  /* ---- TABLE SHORTCUTS ---- */
+  .shortcuts-table th {
+    background: var(--bg-hover);
+    color: var(--accent-blue);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    border-color: var(--border) !important;
+    padding: 0.5rem 0.75rem;
+  }
+  .shortcuts-table td {
+    border-color: var(--border) !important;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: var(--bg-card);
+  }
+  .shortcuts-table tr:hover td { background: var(--bg-hover); }
+
+  /* ---- QUIZ INTERACTIVO ---- */
+  .quiz-option {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .quiz-option:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .quiz-option.correct { border-color: var(--accent-green); color: var(--accent-green); background: rgba(63,185,80,0.1); }
+  .quiz-option.wrong   { border-color: var(--accent-red);   color: var(--accent-red);   background: rgba(255,123,114,0.1); }
+
+  /* ---- CHECKLIST ---- */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item i { color: var(--accent-green); margin-top: 3px; flex-shrink: 0; }
+
+  /* ---- TERMINAL OUTPUT ---- */
+  .terminal {
+    background: #0a0e13;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: #b3b3b3;
+  }
+  .terminal .t-pass { color: #3fb950; }
+  .terminal .t-fail { color: #ff7b72; }
+  .terminal .t-info { color: #58a6ff; }
+  .terminal .t-warn { color: #e3b341; }
+  .terminal .t-prompt { color: #8b949e; }
+
+  /* ---- COVER ---- */
+  .cover-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, rgba(88,166,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 60%, rgba(63,185,80,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  @media (max-width: 768px) { .three-col { grid-template-columns: 1fr; } }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="main-header">
+  <span class="header-logo"><i class="fa-solid fa-bug me-1"></i>DEV TOOLS</span>
+  <span class="header-title">Debug en VS Code & Test Unitario en C#</span>
+  <span class="slide-counter" id="slideCounter">1 / 14</span>
+</header>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-container">
+  <div class="progress-bar-fill" id="progressBar" style="width:7.14%"></div>
+</div>
+
+<!-- ==================== SLIDE 1: PORTADA ==================== -->
+<div class="slide active" id="slide-1">
+  <div class="cover-bg"></div>
+  <div style="max-width:900px; margin:0 auto; padding-top:2rem; position:relative;">
+    <div class="animate__animated animate__fadeInDown">
+      <span class="slide-tag">Programación II · UTU</span>
+      <h1 class="slide-title" style="font-size:clamp(2rem,5vw,3.5rem); margin-bottom:0.75rem;">
+        <span style="color:var(--accent-blue)">Debug</span> en VS Code<br>
+        <span style="color:var(--accent-green)">&</span> Test Unitario en <span style="color:var(--accent-purple)">C#</span>
+      </h1>
+      <p style="font-size:1.1rem; color:var(--text-muted); max-width:550px; line-height:1.7; margin-bottom:2rem;">
+        Aprende a encontrar y corregir errores como un profesional, y a verificar tu código con pruebas automatizadas paso a paso.
+      </p>
+    </div>
+
+    <div class="hero-grid animate__animated animate__fadeInUp animate__delay-1s">
+      <div class="info-card">
+        <div class="card-icon blue"><i class="fa-solid fa-bug"></i></div>
+        <div class="card-title">Parte I: Debugging</div>
+        <div class="card-text">Breakpoints, Watch, Call Stack, Step Into/Over — domina el depurador de VS Code con ejemplos reales.</div>
+      </div>
+      <div class="info-card green">
+        <div class="card-icon green"><i class="fa-solid fa-flask"></i></div>
+        <div class="card-title">Parte II: Test Unitario</div>
+        <div class="card-text">Crea y ejecuta tests con xUnit en C#. Aprende a debuggear tests que fallan directamente en VS Code.</div>
+      </div>
+      <div class="info-card orange">
+        <div class="card-icon orange"><i class="fa-solid fa-keyboard"></i></div>
+        <div class="card-title">Atajos de teclado</div>
+        <div class="card-text">Los shortcuts esenciales que te harán 10x más rápido al depurar código en el día a día.</div>
+      </div>
+      <div class="info-card" style="border-color:rgba(210,168,255,0.3)">
+        <div class="card-icon purple"><i class="fa-solid fa-hammer"></i></div>
+        <div class="card-title">Ejercicios prácticos</div>
+        <div class="card-text">Proyectos listos para descargar. Cada ejercicio tiene una solución guiada paso a paso.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;" class="animate__animated animate__fadeIn animate__delay-2s">
+      <span class="tech-pill"><i class="fa-brands fa-microsoft"></i> VS Code</span>
+      <span class="tech-pill"><i class="fa-solid fa-hashtag"></i> C# .NET</span>
+      <span class="tech-pill"><i class="fa-solid fa-flask"></i> xUnit</span>
+      <span class="tech-pill"><i class="fa-solid fa-terminal"></i> .NET CLI</span>
+      <span class="tech-pill"><i class="fa-solid fa-bug"></i> Debugger</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: ¿QUÉ ES EL DEBUG? ==================== -->
+<div class="slide" id="slide-2">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag">Concepto Base</span>
+    <h2 class="slide-title">¿Qué es el <span style="color:var(--accent-blue)">Debug</span>?</h2>
+    <p class="slide-subtitle">Depurar es pausar la ejecución del programa para inspeccionarlo por dentro</p>
+
+    <div class="two-col">
+      <div>
+        <div class="info-card">
+          <div class="card-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+          <div class="card-title">Sin Debug <span class="hl red">(antes)</span></div>
+          <div class="card-text">Ponías <code style="color:var(--accent-orange)">Console.WriteLine()</code> por todos lados para ver los valores. Lento, sucio, y tenías que borrarlo todo después.</div>
+        </div>
+        <div class="info-card green">
+          <div class="card-icon green"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="card-title">Con Debug <span class="hl green">(ahora)</span></div>
+          <div class="card-text">Pones un <strong>Breakpoint</strong> en la línea exacta, y VS Code pausa ahí para que puedas ver todas las variables, la pila de llamadas, y ejecutar línea por línea.</div>
+        </div>
+      </div>
+
+      <div>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;">
+          <i class="fa-solid fa-circle-info me-2" style="color:var(--accent-blue)"></i>
+          El depurador es el <strong style="color:var(--text-primary)">superpoder #1</strong> de todo programador profesional.
+        </p>
+
+        <div class="step-box">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Pones un Breakpoint <i class="fa-solid fa-circle fa-xs" style="color:#e06c75"></i></div>
+            <div class="step-desc">Hacés click en el margen izquierdo del editor, al lado del número de línea. Aparece un punto rojo.</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Arrancás con F5</div>
+            <div class="step-desc">VS Code ejecuta el programa y lo pausa justo en tu breakpoint.</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Inspeccionás y navegás</div>
+            <div class="step-desc">Ves los valores de las variables, avanzás línea por línea, y entendés exactamente qué pasa.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-custom alert-info" style="margin-top:1rem;">
+      <i class="fa-solid fa-lightbulb me-2"></i>
+      <strong>Dato histórico:</strong> El término "bug" viene de 1947, cuando Grace Hopper encontró una polilla real atrapada en un relé de la computadora Harvard Mark II causando un fallo. Ese fue literalmente el primer "bug" documentado.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: CONFIGURAR VS CODE ==================== -->
+<div class="slide" id="slide-3">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag">Setup</span>
+    <h2 class="slide-title">Configurar VS Code <span style="color:var(--accent-blue)">para C#</span></h2>
+    <p class="slide-subtitle">Antes de debuggear, necesitás tener el entorno listo</p>
+
+    <div class="two-col">
+      <div>
+        <h5 style="color:var(--accent-blue); margin-bottom:1rem; font-size:0.9rem; font-family:'JetBrains Mono',monospace;">
+          <i class="fa-solid fa-puzzle-piece me-2"></i>EXTENSIONES NECESARIAS
+        </h5>
+        <div class="step-box">
+          <div class="step-num" style="background:linear-gradient(135deg,#007acc,#005f9e)"><i class="fa-brands fa-microsoft"></i></div>
+          <div class="step-content">
+            <div class="step-title">C# Dev Kit</div>
+            <div class="step-desc">Extensión oficial de Microsoft. Buscar: <code style="color:var(--accent-orange)">ms-dotnettools.csdevkit</code></div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num" style="background:linear-gradient(135deg,#6c3483,#4a235a)"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div class="step-content">
+            <div class="step-title">IntelliCode for C#</div>
+            <div class="step-desc">Autocompletado con IA. Se instala automáticamente con C# Dev Kit.</div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h5 style="color:var(--accent-green); margin-bottom:1rem; font-size:0.9rem; font-family:'JetBrains Mono',monospace;">
+          <i class="fa-solid fa-terminal me-2"></i>CREAR UN PROYECTO
+        </h5>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Terminal (PowerShell / bash)</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-bash"># Crear carpeta del proyecto
+mkdir MiProyectoDebug
+cd MiProyectoDebug
+
+# Crear aplicación de consola
+dotnet new console
+
+# Abrir en VS Code
+code .</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-orange); margin-bottom:1rem; font-size:0.9rem; font-family:'JetBrains Mono',monospace;">
+          <i class="fa-solid fa-gear me-2"></i>ARCHIVO launch.json
+        </h5>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          VS Code crea esto automáticamente cuando presionás <kbd>F5</kbd> por primera vez. Podés crearlo también desde el panel Debug <kbd>Ctrl+Shift+D</kbd>.
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">.vscode/launch.json</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-json">{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Core Launch",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/Debug/net8.0/MiProyectoDebug.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    }
+  ]
+}</code></pre>
+        </div>
+
+        <div class="alert-custom alert-tip">
+          <i class="fa-solid fa-star me-2"></i>
+          Con <strong>C# Dev Kit</strong> instalado, VS Code detecta el proyecto automáticamente y crea el <code>launch.json</code> solo. ¡No tenés que escribirlo a mano!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 4: BREAKPOINTS ==================== -->
+<div class="slide" id="slide-4">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag">Debug Básico</span>
+    <h2 class="slide-title">Los <span style="color:var(--accent-red)">Breakpoints</span></h2>
+    <p class="slide-subtitle">El punto de parada — la herramienta más importante del depurador</p>
+
+    <div class="two-col">
+      <div>
+        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1rem;">
+          Mirá cómo se ve un breakpoint en el editor. El punto rojo <span style="color:#e06c75">●</span> en el margen indica la línea donde se va a pausar.
+        </p>
+
+        <div class="vscode-mock">
+          <div class="vscode-titlebar">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <div class="vscode-tab active">Program.cs</div>
+          </div>
+          <div class="vscode-editor">
+            <div class="vscode-line"><span class="vscode-ln">1</span><span><span class="kw">using</span> System;</span></div>
+            <div class="vscode-line"><span class="vscode-ln">2</span><span></span></div>
+            <div class="vscode-line"><span class="vscode-ln">3</span><span><span class="kw">int</span> <span class="nm">a</span> = <span class="num">10</span>;</span></div>
+            <div class="vscode-line"><span class="vscode-ln">4</span><span><span class="kw">int</span> <span class="nm">b</span> = <span class="num">5</span>;</span></div>
+            <div class="vscode-line bp-line"><span class="vscode-ln bp">●</span><span><span class="kw">int</span> <span class="nm">resultado</span> = <span class="fn">Dividir</span>(<span class="nm">a</span>, <span class="nm">b</span>);</span></div>
+            <div class="vscode-line"><span class="vscode-ln">6</span><span><span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="nm">resultado</span>);</span></div>
+            <div class="vscode-line"><span class="vscode-ln">7</span><span></span></div>
+            <div class="vscode-line"><span class="vscode-ln">8</span><span><span class="kw">static int</span> <span class="fn">Dividir</span>(<span class="kw">int</span> <span class="nm">x</span>, <span class="kw">int</span> <span class="nm">y</span>)</span></div>
+            <div class="vscode-line"><span class="vscode-ln">9</span><span>{</span></div>
+            <div class="vscode-line"><span class="vscode-ln">10</span><span>&nbsp;&nbsp;<span class="kw">return</span> <span class="nm">x</span> / <span class="nm">y</span>;</span></div>
+            <div class="vscode-line"><span class="vscode-ln">11</span><span>}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--text-muted); font-size:0.8rem; font-family:'JetBrains Mono',monospace; margin-bottom:1rem;">TIPOS DE BREAKPOINTS</h5>
+
+        <div class="info-card">
+          <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.4rem;">
+            <span style="color:#e06c75; font-size:1.2rem;">●</span>
+            <span class="card-title">Normal Breakpoint</span>
+          </div>
+          <div class="card-text">Click en el margen izquierdo o <kbd>F9</kbd> en la línea. Pausa siempre que llega a esa línea.</div>
+        </div>
+
+        <div class="info-card orange">
+          <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.4rem;">
+            <span style="color:var(--accent-orange); font-size:1.2rem;">◆</span>
+            <span class="card-title">Conditional Breakpoint</span>
+          </div>
+          <div class="card-text">Click derecho en el punto rojo → <em>"Edit Breakpoint"</em>. Solo pausa si se cumple una condición, ej: <code style="color:var(--accent-orange)">i == 5</code> o <code style="color:var(--accent-orange)">nombre == "Juan"</code>.</div>
+        </div>
+
+        <div class="info-card" style="border-color:rgba(210,168,255,0.3)">
+          <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.4rem;">
+            <span style="color:var(--accent-purple); font-size:1.2rem;">◎</span>
+            <span class="card-title">Logpoint</span>
+          </div>
+          <div class="card-text">Como un <code style="color:var(--accent-purple)">Console.WriteLine</code> pero sin pausar. Imprime en la consola de Debug. Genial para loops sin interrumpir.</div>
+        </div>
+
+        <div class="alert-custom alert-info" style="margin-top:0.5rem;">
+          <i class="fa-solid fa-keyboard me-2"></i>
+          <kbd>F9</kbd> — Toggle breakpoint en la línea actual &nbsp;|&nbsp;
+          <kbd>Ctrl+Shift+F9</kbd> — Borrar todos los breakpoints
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 5: CONTROLES ==================== -->
+<div class="slide" id="slide-5">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag">Navegación</span>
+    <h2 class="slide-title">Controles del <span style="color:var(--accent-green)">Depurador</span></h2>
+    <p class="slide-subtitle">La barra de herramientas de debug — aprende qué hace cada botón</p>
+
+    <div class="three-col" style="margin-bottom:1.5rem;">
+      <div class="info-card" onclick="showDebugControl('continue')" style="cursor:pointer; text-align:center;">
+        <div style="font-size:2rem; color:var(--accent-green); margin-bottom:0.5rem;"><i class="fa-solid fa-play"></i></div>
+        <div class="card-title">Continue</div>
+        <div class="card-text">Continúa hasta el próximo breakpoint</div>
+        <div style="margin-top:0.5rem;"><kbd>F5</kbd></div>
+      </div>
+      <div class="info-card" onclick="showDebugControl('over')" style="cursor:pointer; text-align:center;">
+        <div style="font-size:2rem; color:var(--accent-blue); margin-bottom:0.5rem;"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="card-title">Step Over</div>
+        <div class="card-text">Ejecuta la línea actual SIN entrar a la función</div>
+        <div style="margin-top:0.5rem;"><kbd>F10</kbd></div>
+      </div>
+      <div class="info-card" onclick="showDebugControl('into')" style="cursor:pointer; text-align:center;">
+        <div style="font-size:2rem; color:var(--accent-purple); margin-bottom:0.5rem;"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="card-title">Step Into</div>
+        <div class="card-text">Entra DENTRO de la función que se está llamando</div>
+        <div style="margin-top:0.5rem;"><kbd>F11</kbd></div>
+      </div>
+      <div class="info-card" onclick="showDebugControl('out')" style="cursor:pointer; text-align:center;">
+        <div style="font-size:2rem; color:var(--accent-orange); margin-bottom:0.5rem;"><i class="fa-solid fa-arrow-up"></i></div>
+        <div class="card-title">Step Out</div>
+        <div class="card-text">Sale de la función actual y vuelve al llamador</div>
+        <div style="margin-top:0.5rem;"><kbd>Shift+F11</kbd></div>
+      </div>
+      <div class="info-card" onclick="showDebugControl('restart')" style="cursor:pointer; text-align:center;">
+        <div style="font-size:2rem; color:var(--accent-yellow); margin-bottom:0.5rem;"><i class="fa-solid fa-rotate"></i></div>
+        <div class="card-title">Restart</div>
+        <div class="card-text">Reinicia el debug desde el principio</div>
+        <div style="margin-top:0.5rem;"><kbd>Ctrl+Shift+F5</kbd></div>
+      </div>
+      <div class="info-card" onclick="showDebugControl('stop')" style="cursor:pointer; text-align:center;">
+        <div style="font-size:2rem; color:var(--accent-red); margin-bottom:0.5rem;"><i class="fa-solid fa-stop"></i></div>
+        <div class="card-title">Stop</div>
+        <div class="card-text">Detiene la sesión de debug completamente</div>
+        <div style="margin-top:0.5rem;"><kbd>Shift+F5</kbd></div>
+      </div>
+    </div>
+
+    <div class="alert-custom alert-tip">
+      <i class="fa-solid fa-brain me-2"></i>
+      <strong>Truco mnemónico:</strong> &nbsp;<kbd>F10</kbd> = Step <strong>O</strong>ver (número redondo) &nbsp;|&nbsp; <kbd>F11</kbd> = Step <strong>I</strong>nto (un número más). <kbd>Shift+F11</kbd> = sale hacia afuera.
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-top:0.5rem; text-align:center;"><i class="fa-solid fa-hand-pointer me-1"></i>Hacé click en cada control para ver un ejemplo</p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 6: PANEL DE VARIABLES ==================== -->
+<div class="slide" id="slide-6">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag">Inspección</span>
+    <h2 class="slide-title">Panel de <span style="color:var(--accent-yellow)">Variables</span> y Watch</h2>
+    <p class="slide-subtitle">Inspeccioná el estado de tu programa mientras está pausado</p>
+
+    <div class="two-col">
+      <div>
+        <h5 style="color:var(--accent-yellow); font-size:0.85rem; font-family:'JetBrains Mono',monospace; margin-bottom:1rem;">
+          <i class="fa-solid fa-eye me-2"></i>VARIABLES PANEL (izquierda en debug)
+        </h5>
+
+        <div style="background:var(--bg-editor); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:1rem;">
+          <div style="background:rgba(255,255,255,0.04); padding:6px 12px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-muted); border-bottom:1px solid var(--border);">
+            VARIABLES
+          </div>
+          <div style="padding:8px 12px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:2;">
+            <div>▼ <span style="color:#9cdcfe">Locals</span></div>
+            <div style="padding-left:16px;"><span style="color:#9cdcfe">a</span> <span style="color:var(--text-muted)">int</span> = <span style="color:#b5cea8">10</span></div>
+            <div style="padding-left:16px;"><span style="color:#9cdcfe">b</span> <span style="color:var(--text-muted)">int</span> = <span style="color:#b5cea8">0</span> <span style="background:rgba(255,123,114,0.2); color:#ff7b72; border-radius:3px; padding:0 4px; font-size:0.68rem;">⚠ ¡División por cero!</span></div>
+            <div style="padding-left:16px;"><span style="color:#9cdcfe">nombre</span> <span style="color:var(--text-muted)">string</span> = <span style="color:#ce9178">"Fernando"</span></div>
+            <div style="padding-left:16px;"><span style="color:#9cdcfe">lista</span> <span style="color:var(--text-muted)">List&lt;int&gt;</span> = <span style="color:#4ec9b0">Count = 3</span></div>
+            <div style="padding-left:16px; padding-bottom:4px;">▶ <span style="color:#9cdcfe">lista</span> [0] <span style="color:#b5cea8">1</span> &nbsp; [1] <span style="color:#b5cea8">2</span> &nbsp; [2] <span style="color:#b5cea8">3</span></div>
+          </div>
+        </div>
+
+        <div class="alert-custom alert-warn">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          Si una variable está en <span style="color:var(--accent-red)">rojo</span> en el panel, cambió de valor en el último paso — eso es lo que te interesa revisar.
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-blue); font-size:0.85rem; font-family:'JetBrains Mono',monospace; margin-bottom:1rem;">
+          <i class="fa-solid fa-magnifying-glass me-2"></i>WATCH — Expresiones personalizadas
+        </h5>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          En el panel Watch podés escribir <strong style="color:var(--text-primary)">cualquier expresión</strong> y ver su valor en tiempo real mientras navegás:
+        </p>
+
+        <div style="background:var(--bg-editor); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:1rem;">
+          <div style="background:rgba(255,255,255,0.04); padding:6px 12px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-muted); border-bottom:1px solid var(--border);">
+            WATCH
+          </div>
+          <div style="padding:8px 12px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:2;">
+            <div><span style="color:#9cdcfe">a + b</span> = <span style="color:#b5cea8">10</span></div>
+            <div><span style="color:#9cdcfe">lista.Count > 2</span> = <span style="color:#569cd6">true</span></div>
+            <div><span style="color:#9cdcfe">nombre.ToUpper()</span> = <span style="color:#ce9178">"FERNANDO"</span></div>
+            <div><span style="color:#9cdcfe">a / b</span> = <span style="color:#ff7b72">DivideByZeroException</span></div>
+          </div>
+        </div>
+
+        <h5 style="color:var(--accent-purple); font-size:0.85rem; font-family:'JetBrains Mono',monospace; margin-bottom:1rem; margin-top:1.25rem;">
+          <i class="fa-solid fa-layer-group me-2"></i>CALL STACK — ¿De dónde vengo?
+        </h5>
+        <div style="background:var(--bg-editor); border:1px solid var(--border); border-radius:10px; overflow:hidden;">
+          <div style="background:rgba(255,255,255,0.04); padding:6px 12px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-muted); border-bottom:1px solid var(--border);">
+            CALL STACK
+          </div>
+          <div style="padding:8px 12px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:2;">
+            <div style="color:#dcdcaa">► Dividir(x=10, y=0)</div>
+            <div style="color:#858585; padding-left:12px;">Main() — Program.cs línea 5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 7: EJEMPLO COMPLETO DEBUG ==================== -->
+<div class="slide" id="slide-7">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag orange">Ejercicio Práctico 1</span>
+    <h2 class="slide-title">Debug en <span style="color:var(--accent-orange)">Acción</span></h2>
+    <p class="slide-subtitle">Ejercicio guiado: encontrá el bug en este código</p>
+
+    <div class="two-col">
+      <div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Este programa debería calcular el promedio de una lista. Tiene un bug. Seguí los pasos:
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Program.cs — código con bug</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-csharp">using System;
+using System.Collections.Generic;
+
+List&lt;int&gt; numeros = new List&lt;int&gt; { 10, 20, 30, 40 };
+
+double promedio = CalcularPromedio(numeros);
+Console.WriteLine($"Promedio: {promedio}");
+
+static double CalcularPromedio(List&lt;int&gt; lista)
+{
+    int suma = 0;
+    for (int i = 0; i &lt;= lista.Count; i++) // ← ¿ves el bug?
+    {
+        suma += lista[i];
+    }
+    return suma / lista.Count;
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-orange); font-size:0.85rem; font-family:'JetBrains Mono',monospace; margin-bottom:1rem;">
+          <i class="fa-solid fa-shoe-prints me-2"></i>PASOS PARA DEBUGGEAR
+        </h5>
+
+        <div class="step-box">
+          <div class="step-num orange">1</div>
+          <div class="step-content">
+            <div class="step-title">Copiá el código en Program.cs</div>
+            <div class="step-desc">Creá un proyecto nuevo con <code>dotnet new console</code> y pegalo.</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num orange">2</div>
+          <div class="step-content">
+            <div class="step-title">Pon breakpoint en la línea 12 (suma +=)</div>
+            <div class="step-desc">Hacé click en el margen izquierdo al lado del número 12. Aparece el punto rojo.</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num orange">3</div>
+          <div class="step-content">
+            <div class="step-title">Presioná F5 para iniciar</div>
+            <div class="step-desc">El programa se pausa en la línea 12. Abrí el panel Variables a la izquierda.</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num orange">4</div>
+          <div class="step-content">
+            <div class="step-title">Presioná F10 repetidas veces</div>
+            <div class="step-desc">Observá el valor de <code>i</code> en cada vuelta. ¿Qué pasa cuando <code>i = 4</code>?</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num orange">5</div>
+          <div class="step-content">
+            <div class="step-title">¿Encontraste el bug?</div>
+            <div class="step-desc">El bug: <code>i &lt;= lista.Count</code> debería ser <code>i &lt; lista.Count</code>. Los índices van de 0 a 3, no a 4.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 8: TABLA DE SHORTCUTS ==================== -->
+<div class="slide" id="slide-8">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag">Referencia Rápida</span>
+    <h2 class="slide-title">Atajos de <span style="color:var(--accent-yellow)">Teclado</span></h2>
+    <p class="slide-subtitle">Los shortcuts que vas a usar todos los días — imprimilos si querés</p>
+
+    <div class="two-col">
+      <div>
+        <h5 style="color:var(--accent-blue); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">CONTROLES DE DEBUG</h5>
+        <table class="table shortcuts-table mb-3">
+          <thead><tr><th>Acción</th><th>Atajo</th></tr></thead>
+          <tbody>
+            <tr><td>Iniciar / Continuar debug</td><td><kbd>F5</kbd></td></tr>
+            <tr><td>Step Over (línea siguiente)</td><td><kbd>F10</kbd></td></tr>
+            <tr><td>Step Into (entrar función)</td><td><kbd>F11</kbd></td></tr>
+            <tr><td>Step Out (salir función)</td><td><kbd>Shift+F11</kbd></td></tr>
+            <tr><td>Detener debug</td><td><kbd>Shift+F5</kbd></td></tr>
+            <tr><td>Reiniciar debug</td><td><kbd>Ctrl+Shift+F5</kbd></td></tr>
+            <tr><td>Toggle Breakpoint</td><td><kbd>F9</kbd></td></tr>
+            <tr><td>Panel de Debug</td><td><kbd>Ctrl+Shift+D</kbd></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-green); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">EDITOR GENERAL</h5>
+        <table class="table shortcuts-table mb-3">
+          <thead><tr><th>Acción</th><th>Atajo</th></tr></thead>
+          <tbody>
+            <tr><td>Terminal integrado</td><td><kbd>Ctrl+`</kbd></td></tr>
+            <tr><td>Paleta de comandos</td><td><kbd>Ctrl+Shift+P</kbd></td></tr>
+            <tr><td>Buscar en archivo</td><td><kbd>Ctrl+F</kbd></td></tr>
+            <tr><td>Buscar en proyecto</td><td><kbd>Ctrl+Shift+F</kbd></td></tr>
+            <tr><td>Ir a definición</td><td><kbd>F12</kbd></td></tr>
+            <tr><td>Renombrar símbolo</td><td><kbd>F2</kbd></td></tr>
+            <tr><td>Formatear código</td><td><kbd>Shift+Alt+F</kbd></td></tr>
+            <tr><td>Comentar línea</td><td><kbd>Ctrl+/</kbd></td></tr>
+          </tbody>
+        </table>
+
+        <div class="alert-custom alert-good">
+          <i class="fa-solid fa-trophy me-2"></i>
+          <strong>Desafío:</strong> Intenta completar el ejercicio anterior usando <strong>solo</strong> el teclado, sin hacer click. ¡Es 3x más rápido!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 9: INTRO TEST UNITARIO ==================== -->
+<div class="slide" id="slide-9">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag green">Test Unitario · Parte II</span>
+    <h2 class="slide-title">¿Qué es un <span style="color:var(--accent-green)">Test Unitario</span>?</h2>
+    <p class="slide-subtitle">Código que verifica que otro código funciona correctamente — automatizado</p>
+
+    <div class="two-col" style="margin-bottom:1.5rem;">
+      <div class="info-card green">
+        <div class="card-icon green"><i class="fa-solid fa-vial"></i></div>
+        <div class="card-title">¿Qué prueba?</div>
+        <div class="card-text">Una <strong style="color:var(--text-primary)">unidad</strong> = un método o función individual. Verificás que dado cierto input, el output sea el esperado.</div>
+      </div>
+      <div class="info-card">
+        <div class="card-icon blue"><i class="fa-solid fa-robot"></i></div>
+        <div class="card-title">¿Por qué automatizar?</div>
+        <div class="card-text">Podés correr <strong style="color:var(--text-primary)">cientos de tests</strong> con un solo comando. Si algo se rompe, lo sabés al instante.</div>
+      </div>
+    </div>
+
+    <div class="three-col">
+      <div class="step-box" style="flex-direction:column; text-align:center;">
+        <div class="card-icon green" style="margin:0 auto 0.5rem;"><i class="fa-solid fa-check-double"></i></div>
+        <div class="step-title">Arrange</div>
+        <div class="step-desc">Preparar los datos de entrada y el objeto a probar.</div>
+      </div>
+      <div class="step-box" style="flex-direction:column; text-align:center;">
+        <div class="card-icon blue" style="margin:0 auto 0.5rem;"><i class="fa-solid fa-play"></i></div>
+        <div class="step-title">Act</div>
+        <div class="step-desc">Ejecutar el método que se está probando.</div>
+      </div>
+      <div class="step-box" style="flex-direction:column; text-align:center;">
+        <div class="card-icon orange" style="margin:0 auto 0.5rem;"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="step-title">Assert</div>
+        <div class="step-desc">Verificar que el resultado sea el esperado.</div>
+      </div>
+    </div>
+
+    <div class="alert-custom alert-info" style="margin-top:1rem;">
+      <i class="fa-solid fa-book me-2"></i>
+      <strong>Frameworks de Test en C#:</strong> &nbsp;
+      <span class="tech-pill">xUnit</span>
+      <span class="tech-pill">NUnit</span>
+      <span class="tech-pill">MSTest</span>
+      &nbsp; En este curso usamos <strong style="color:var(--accent-blue)">xUnit</strong> — el más popular en proyectos modernos de .NET.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 10: PRIMER TEST CON XUNIT ==================== -->
+<div class="slide" id="slide-10">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag green">Setup xUnit</span>
+    <h2 class="slide-title">Tu primer proyecto de <span style="color:var(--accent-green)">Test</span></h2>
+    <p class="slide-subtitle">Paso a paso — creá el proyecto de tests desde cero</p>
+
+    <div class="two-col">
+      <div>
+        <h5 style="color:var(--accent-orange); font-size:0.85rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">
+          <i class="fa-solid fa-folder-tree me-2"></i>ESTRUCTURA DEL PROYECTO
+        </h5>
+
+        <div class="code-wrapper" style="margin-bottom:1rem;">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Terminal — crear solución con tests</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-bash"># 1. Crear carpeta raíz
+mkdir MiCalculadora
+cd MiCalculadora
+
+# 2. Crear el proyecto principal (librería)
+dotnet new classlib -n Calculadora
+
+# 3. Crear el proyecto de tests xUnit
+dotnet new xunit -n Calculadora.Tests
+
+# 4. Referenciar el proyecto principal desde los tests
+cd Calculadora.Tests
+dotnet add reference ../Calculadora/Calculadora.csproj
+
+# 5. Volver a la raíz y abrir VS Code
+cd ..
+code .</code></pre>
+        </div>
+
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:1rem; font-family:'JetBrains Mono',monospace; font-size:0.75rem; line-height:1.8;">
+          <div style="color:var(--text-muted)">📁 MiCalculadora/</div>
+          <div style="padding-left:16px; color:var(--accent-blue)">📁 Calculadora/</div>
+          <div style="padding-left:32px; color:var(--text-muted)">📄 Calculadora.csproj</div>
+          <div style="padding-left:32px; color:var(--accent-green)">📄 OperacionesMatematicas.cs</div>
+          <div style="padding-left:16px; color:var(--accent-purple)">📁 Calculadora.Tests/</div>
+          <div style="padding-left:32px; color:var(--text-muted)">📄 Calculadora.Tests.csproj</div>
+          <div style="padding-left:32px; color:var(--accent-yellow)">📄 OperacionesTests.cs</div>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-green); font-size:0.85rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">
+          <i class="fa-solid fa-code me-2"></i>LA CLASE A PROBAR
+        </h5>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Calculadora/OperacionesMatematicas.cs</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-csharp">namespace Calculadora;
+
+public class OperacionesMatematicas
+{
+    public int Sumar(int a, int b)
+    {
+        return a + b;
+    }
+
+    public int Restar(int a, int b)
+    {
+        return a - b;
+    }
+
+    public double Dividir(int a, int b)
+    {
+        if (b == 0)
+            throw new DivideByZeroException(
+                "No se puede dividir por cero");
+        return (double)a / b;
+    }
+
+    public bool EsPar(int numero)
+    {
+        return numero % 2 == 0;
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 11: ESCRIBIR TESTS ==================== -->
+<div class="slide" id="slide-11">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag green">xUnit · Tests</span>
+    <h2 class="slide-title">Escribir los <span style="color:var(--accent-green)">Tests</span></h2>
+    <p class="slide-subtitle">Cómo se escribe un test con xUnit en C# — patrón AAA</p>
+
+    <div class="two-col">
+      <div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Calculadora.Tests/OperacionesTests.cs</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-csharp">using Xunit;
+using Calculadora;
+
+namespace Calculadora.Tests;
+
+public class OperacionesTests
+{
+    private readonly OperacionesMatematicas _calc;
+
+    // Constructor: se ejecuta ANTES de cada test
+    public OperacionesTests()
+    {
+        _calc = new OperacionesMatematicas();
+    }
+
+    [Fact]
+    public void Sumar_DosNumeroPositivos_RetornaLaSuma()
+    {
+        // Arrange
+        int a = 5, b = 3;
+
+        // Act
+        int resultado = _calc.Sumar(a, b);
+
+        // Assert
+        Assert.Equal(8, resultado);
+    }
+
+    [Fact]
+    public void Dividir_PorCero_LanzaExcepcion()
+    {
+        // Assert + Act con excepción esperada
+        Assert.Throws&lt;DivideByZeroException&gt;(
+            () => _calc.Dividir(10, 0)
+        );
+    }
+
+    [Theory]
+    [InlineData(2, true)]
+    [InlineData(3, false)]
+    [InlineData(100, true)]
+    [InlineData(7, false)]
+    public void EsPar_Numeros_RetornaEsperado(
+        int numero, bool esperado)
+    {
+        bool resultado = _calc.EsPar(numero);
+        Assert.Equal(esperado, resultado);
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-blue); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">ATRIBUTOS CLAVE DE XUNIT</h5>
+
+        <div class="info-card">
+          <div class="card-icon blue"><i class="fa-solid fa-tag"></i></div>
+          <div class="card-title"><code>[Fact]</code></div>
+          <div class="card-text">Un test simple, sin parámetros. Se ejecuta una sola vez. El más común.</div>
+        </div>
+
+        <div class="info-card green">
+          <div class="card-icon green"><i class="fa-solid fa-tags"></i></div>
+          <div class="card-title"><code>[Theory]</code> + <code>[InlineData]</code></div>
+          <div class="card-text">Test con múltiples conjuntos de datos. Se ejecuta una vez por cada <code>[InlineData]</code>. Ideal para probar varios casos sin repetir código.</div>
+        </div>
+
+        <h5 style="color:var(--accent-orange); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-top:1.25rem; margin-bottom:0.75rem;">ASSERTS MÁS USADOS</h5>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Métodos Assert de xUnit</span>
+          </div>
+          <pre><code class="language-csharp">Assert.Equal(esperado, actual);
+Assert.NotEqual(noEsperado, actual);
+Assert.True(condicion);
+Assert.False(condicion);
+Assert.Null(objeto);
+Assert.NotNull(objeto);
+Assert.Throws&lt;TipoExcepcion&gt;(() => ...);
+Assert.Contains(elemento, coleccion);</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 12: CORRER LOS TESTS ==================== -->
+<div class="slide" id="slide-12">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag green">Ejecutar Tests</span>
+    <h2 class="slide-title">Correr y <span style="color:var(--accent-green)">Debuggear</span> Tests</h2>
+    <p class="slide-subtitle">Desde la terminal, desde VS Code, y cómo debuggear un test que falla</p>
+
+    <div class="two-col">
+      <div>
+        <h5 style="color:var(--accent-blue); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">
+          <i class="fa-solid fa-terminal me-2"></i>DESDE LA TERMINAL
+        </h5>
+
+        <div class="code-wrapper" style="margin-bottom:1rem;">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Terminal</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-bash"># Desde la carpeta Calculadora.Tests
+dotnet test
+
+# Con más detalle (verbose)
+dotnet test --verbosity detailed
+
+# Solo un test específico
+dotnet test --filter "Sumar_DosNumeroPositivos"</code></pre>
+        </div>
+
+        <h5 style="color:var(--accent-green); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.5rem;">
+          SALIDA ESPERADA (todos pasan)
+        </h5>
+        <div class="terminal">
+          <div class="t-info">Build succeeded.</div>
+          <div>&nbsp;</div>
+          <div class="t-prompt">Test run for Calculadora.Tests.dll</div>
+          <div class="t-pass">✓ Sumar_DosNumeroPositivos_RetornaLaSuma [12ms]</div>
+          <div class="t-pass">✓ Dividir_PorCero_LanzaExcepcion [3ms]</div>
+          <div class="t-pass">✓ EsPar_Numeros_RetornaEsperado(2, True) [2ms]</div>
+          <div class="t-pass">✓ EsPar_Numeros_RetornaEsperado(3, False) [1ms]</div>
+          <div class="t-pass">✓ EsPar_Numeros_RetornaEsperado(100, True) [1ms]</div>
+          <div class="t-pass">✓ EsPar_Numeros_RetornaEsperado(7, False) [1ms]</div>
+          <div>&nbsp;</div>
+          <div class="t-pass">Passed! - Failed: 0, Passed: 6, Skipped: 0</div>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-purple); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">
+          <i class="fa-solid fa-bug me-2"></i>DEBUG DE UN TEST QUE FALLA
+        </h5>
+
+        <div class="step-box">
+          <div class="step-num purple">1</div>
+          <div class="step-content">
+            <div class="step-title">Instalá la extensión ".NET Core Test Explorer"</div>
+            <div class="step-desc">O usá el panel Testing nativo de VS Code (ícono del tubo de ensayo en la barra lateral).</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num purple">2</div>
+          <div class="step-content">
+            <div class="step-title">Pon breakpoint dentro del test o la función</div>
+            <div class="step-desc">Igual que siempre — hacé click en el margen izquierdo en la línea que te interesa.</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num purple">3</div>
+          <div class="step-content">
+            <div class="step-title">Click en "Debug Test" (sobre el [Fact])</div>
+            <div class="step-desc">VS Code muestra un lente 🔍 encima de cada <code>[Fact]</code>. Hacé click en "Debug" para arrancar el depurador sobre ese test específico.</div>
+          </div>
+        </div>
+        <div class="step-box">
+          <div class="step-num purple">4</div>
+          <div class="step-content">
+            <div class="step-title">Navegá con F10/F11 como siempre</div>
+            <div class="step-desc">El depurador funciona igual que con una aplicación normal. Ves todas las variables del test.</div>
+          </div>
+        </div>
+
+        <div class="alert-custom alert-warn" style="margin-top:0.5rem;">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          Cuando un test falla, el mensaje de error te dice el <strong>valor esperado</strong> vs el <strong>valor real</strong>. ¡Leélo primero antes de debuggear!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 13: EJERCICIO COMPLETO ==================== -->
+<div class="slide" id="slide-13">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag purple">Ejercicio Final</span>
+    <h2 class="slide-title">Ejercicio <span style="color:var(--accent-purple)">Integrador</span></h2>
+    <p class="slide-subtitle">Debuggeá, testeá, y corregí — todo junto</p>
+
+    <div class="two-col">
+      <div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Esta clase tiene <strong style="color:var(--accent-red)">3 bugs</strong>. Tu misión: encontrarlos usando el debugger y corregirlos para que todos los tests pasen.
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">Banco.cs — código con 3 bugs</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-csharp">namespace EjercicioFinal;
+
+public class CuentaBancaria
+{
+    public decimal Saldo { get; private set; }
+
+    public CuentaBancaria(decimal saldoInicial)
+    {
+        Saldo = saldoInicial;
+    }
+
+    // BUG #1: ¿cuál es?
+    public void Depositar(decimal monto)
+    {
+        if (monto &lt;= 0)
+            throw new ArgumentException("Monto inválido");
+        Saldo -= monto; // ← ¿bug acá?
+    }
+
+    // BUG #2: ¿cuál es?
+    public void Retirar(decimal monto)
+    {
+        if (monto &lt;= 0)
+            throw new ArgumentException("Monto inválido");
+        if (monto &gt; Saldo)
+            throw new InvalidOperationException("Saldo insuficiente");
+        Saldo -= monto;
+    }
+
+    // BUG #3: ¿cuál es?
+    public bool TieneSaldoSuficiente(decimal monto)
+    {
+        return Saldo &gt; monto; // ← ¿bug acá?
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-purple); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.75rem;">LOS TESTS (ya escritos)</h5>
+        <div class="code-wrapper" style="margin-bottom:1rem;">
+          <div class="code-header">
+            <div class="code-dot red"></div><div class="code-dot yellow"></div><div class="code-dot green"></div>
+            <span class="code-filename">CuentaBancariaTests.cs</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><code class="language-csharp">[Fact]
+public void Depositar_MontoCorrecto_AumentaSaldo()
+{
+    var cuenta = new CuentaBancaria(100);
+    cuenta.Depositar(50);
+    Assert.Equal(150, cuenta.Saldo); // FALLA ← buscar bug
+}
+
+[Fact]
+public void Retirar_SaldoExacto_SaldoQuedaEnCero()
+{
+    var cuenta = new CuentaBancaria(100);
+    cuenta.Retirar(100);
+    Assert.Equal(0, cuenta.Saldo); // PASA ✓
+}
+
+[Fact]
+public void TieneSaldo_MontoIgualAlSaldo_RetornaTrue()
+{
+    var cuenta = new CuentaBancaria(100);
+    bool resultado = cuenta.TieneSaldoSuficiente(100);
+    Assert.True(resultado); // FALLA ← buscar bug
+}</code></pre>
+        </div>
+
+        <button class="nav-btn" onclick="mostrarSolucion()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-eye me-2"></i>Ver solución (después de intentarlo)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 14: RESUMEN ==================== -->
+<div class="slide" id="slide-14">
+  <div style="max-width:900px; margin:0 auto;">
+    <span class="slide-tag">Resumen</span>
+    <h2 class="slide-title">Lo que <span style="color:var(--accent-green)">aprendiste</span> hoy</h2>
+    <p class="slide-subtitle">Un checklist de los conceptos clave de esta clase</p>
+
+    <div class="two-col">
+      <div>
+        <h5 style="color:var(--accent-blue); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:1rem;">
+          <i class="fa-solid fa-bug me-2"></i>DEBUGGING EN VS CODE
+        </h5>
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:1rem;">
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Configurar VS Code con C# Dev Kit y crear <code>launch.json</code></span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Poner breakpoints normales, condicionales y logpoints</span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Navegar con F5, F10, F11, Shift+F11</span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Inspeccionar variables, Watch y Call Stack</span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Encontrar bugs usando el depurador paso a paso</span></div>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:var(--accent-green); font-size:0.82rem; font-family:'JetBrains Mono',monospace; margin-bottom:1rem;">
+          <i class="fa-solid fa-flask me-2"></i>TEST UNITARIO CON XUNIT
+        </h5>
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:1rem;">
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Crear proyecto xUnit y referenciar el proyecto principal</span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Patrón AAA: Arrange, Act, Assert</span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Usar <code>[Fact]</code> y <code>[Theory]</code> con <code>[InlineData]</code></span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Métodos Assert: Equal, True, False, Throws</span></div>
+          <div class="check-item"><i class="fa-solid fa-circle-check"></i><span>Debuggear un test que falla con "Debug Test"</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div style="text-align:center; padding:1rem 0;">
+      <p style="font-size:1.1rem; color:var(--text-muted); margin-bottom:1rem;">
+        <i class="fa-solid fa-quote-left me-2" style="color:var(--accent-blue)"></i>
+        <em>"El código sin tests es código que <strong style="color:var(--accent-red)">reza</strong> para funcionar. El código con tests <strong style="color:var(--accent-green)">sabe</strong> que funciona."</em>
+      </p>
+      <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <button class="nav-btn primary" onclick="goToSlide(1)">
+          <i class="fa-solid fa-rotate-left me-2"></i>Volver al inicio
+        </button>
+        <button class="nav-btn" onclick="mostrarTodosLosEjercicios()">
+          <i class="fa-solid fa-list-check me-2"></i>Ver todos los ejercicios
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV BOTTOM -->
+<nav class="nav-bottom">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>
+    <i class="fa-solid fa-chevron-left"></i> Anterior
+  </button>
+
+  <div class="slide-index" id="slideIndex"></div>
+
+  <button class="nav-btn primary" id="nextBtn" onclick="changeSlide(1)">
+    Siguiente <i class="fa-solid fa-chevron-right"></i>
+  </button>
+</nav>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
+
+<style>
+/* SweetAlert2 Custom Dark Theme */
+.swal2-popup {
+  background: #161b22 !important;
+  border: 1px solid #30363d !important;
+  border-radius: 14px !important;
+  color: #e6edf3 !important;
+  font-family: 'Syne', sans-serif !important;
+}
+.swal2-title { color: #e6edf3 !important; font-family: 'Syne', sans-serif !important; font-weight: 700 !important; }
+.swal2-html-container { color: #8b949e !important; font-size: 0.9rem !important; line-height: 1.6 !important; }
+.swal2-confirm {
+  background: linear-gradient(135deg, #1f6feb, #0d56b5) !important;
+  border-radius: 8px !important;
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+.swal2-cancel {
+  background: #21262d !important;
+  border: 1px solid #30363d !important;
+  color: #e6edf3 !important;
+  border-radius: 8px !important;
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 600 !important;
+}
+.swal2-icon.swal2-success { border-color: #3fb950 !important; }
+.swal2-icon.swal2-success [class^='swal2-success-line'] { background: #3fb950 !important; }
+.swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(63,185,80,0.3) !important; }
+.swal2-icon.swal2-info { border-color: #58a6ff !important; color: #58a6ff !important; }
+.swal2-icon.swal2-warning { border-color: #e3b341 !important; color: #e3b341 !important; }
+.swal2-icon.swal2-error { border-color: #ff7b72 !important; color: #ff7b72 !important; }
+.swal2-icon.swal2-error [class^='swal2-x-mark-line'] { background: #ff7b72 !important; }
+</style>
+
+<script>
+hljs.highlightAll();
+
+const TOTAL_SLIDES = 14;
+let current = 1;
+
+// Init dots
+const indexContainer = document.getElementById('slideIndex');
+for (let i = 1; i <= TOTAL_SLIDES; i++) {
+  const d = document.createElement('div');
+  d.className = 'idx-dot' + (i === 1 ? ' active' : '');
+  d.onclick = () => goToSlide(i);
+  d.title = `Diapositiva ${i}`;
+  indexContainer.appendChild(d);
+}
+
+function goToSlide(n) {
+  document.getElementById('slide-' + current).classList.remove('active');
+  document.getElementById('slide-' + current).style.animationName = '';
+  current = Math.max(1, Math.min(TOTAL_SLIDES, n));
+  const el = document.getElementById('slide-' + current);
+  el.classList.add('active');
+  el.classList.add('animate__fadeIn');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  updateNav();
+}
+
+function changeSlide(dir) { goToSlide(current + dir); }
+
+function updateNav() {
+  document.getElementById('prevBtn').disabled = current === 1;
+  document.getElementById('nextBtn').disabled = current === TOTAL_SLIDES;
+  document.getElementById('slideCounter').textContent = `${current} / ${TOTAL_SLIDES}`;
+  document.getElementById('progressBar').style.width = `${(current / TOTAL_SLIDES) * 100}%`;
+  document.querySelectorAll('.idx-dot').forEach((d, i) => {
+    d.classList.toggle('active', i + 1 === current);
+  });
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+});
+
+// Copy button
+function copyCode(btn) {
+  const code = btn.closest('.code-wrapper').querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ copiado';
+    btn.style.color = '#3fb950';
+    btn.style.borderColor = '#3fb950';
+    setTimeout(() => {
+      btn.textContent = 'copiar';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  });
+}
+
+// Debug control explanation
+const debugInfo = {
+  continue: {
+    title: '▶ Continue (F5)',
+    icon: 'success',
+    html: `
+      <p>Continúa la ejecución hasta el próximo <strong style="color:#3fb950">breakpoint</strong>.</p>
+      <p style="margin-top:0.75rem">Útil cuando ya inspeccionaste la línea actual y querés avanzar rápidamente hasta el próximo punto de interés.</p>
+      <div style="background:#0a0e13;border-radius:8px;padding:0.75rem;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:#b3b3b3">
+        ⏸ Breakpoint en línea 5<br>
+        ▶ F5 → corre hasta línea 12 (siguiente breakpoint)
+      </div>`
+  },
+  over: {
+    title: '→ Step Over (F10)',
+    icon: 'info',
+    html: `
+      <p>Ejecuta la línea actual y pasa a la <strong style="color:#58a6ff">siguiente línea</strong> del mismo nivel.</p>
+      <p style="margin-top:0.75rem">Si la línea llama a una función, la ejecuta completamente <strong>sin entrar</strong> en ella. Ideal cuando ya sabés que esa función está bien.</p>
+      <div style="background:#0a0e13;border-radius:8px;padding:0.75rem;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:#b3b3b3">
+        línea 5: <span style="color:#dcdcaa">int resultado = Sumar(a, b);</span><br>
+        F10 → ejecuta Sumar() de una vez<br>
+        línea 6: <span style="color:#569cd6">// siguiente línea</span>
+      </div>`
+  },
+  into: {
+    title: '↓ Step Into (F11)',
+    icon: 'info',
+    html: `
+      <p>Entra <strong style="color:#d2a8ff">dentro de la función</strong> que se está llamando en esa línea.</p>
+      <p style="margin-top:0.75rem">Usalo cuando querés inspeccionar qué pasa dentro de una función específica.</p>
+      <div style="background:#0a0e13;border-radius:8px;padding:0.75rem;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:#b3b3b3">
+        línea 5: <span style="color:#dcdcaa">int resultado = Sumar(a, b);</span><br>
+        F11 → entra a <span style="color:#dcdcaa">Sumar()</span><br>
+        línea 10: <span style="color:#569cd6">return a + b;</span> ← ahora estás acá
+      </div>`
+  },
+  out: {
+    title: '↑ Step Out (Shift+F11)',
+    icon: 'warning',
+    html: `
+      <p>Sale de la función actual y vuelve al <strong style="color:#ffa657">llamador</strong>.</p>
+      <p style="margin-top:0.75rem">Usalo cuando entraste con F11 a una función y ya viste lo que necesitabas. Vuelve directamente a la línea que llamó a la función.</p>
+      <div style="background:#0a0e13;border-radius:8px;padding:0.75rem;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:#b3b3b3">
+        [dentro de Sumar()]<br>
+        Shift+F11 → sale y vuelve a línea 5 en Program.cs<br>
+        resultado ya tiene el valor calculado
+      </div>`
+  },
+  restart: {
+    title: '↺ Restart (Ctrl+Shift+F5)',
+    icon: 'info',
+    html: `<p>Reinicia la sesión de debug desde el principio, sin cerrar VS Code.</p>
+      <p style="margin-top:0.75rem">Útil cuando corregiste algo y querés volver a probar desde el inicio sin perder tu configuración de breakpoints.</p>`
+  },
+  stop: {
+    title: '■ Stop (Shift+F5)',
+    icon: 'error',
+    html: `<p>Detiene completamente la sesión de debug.</p>
+      <p style="margin-top:0.75rem">Tus breakpoints se mantienen para la próxima sesión. Solo se cierra el proceso en ejecución.</p>`
+  }
+};
+
+function showDebugControl(type) {
+  const info = debugInfo[type];
+  Swal.fire({
+    title: info.title,
+    icon: info.icon,
+    html: info.html,
+    confirmButtonText: 'Entendido',
+    width: '480px'
+  });
+}
+
+// Solution
+function mostrarSolucion() {
+  Swal.fire({
+    title: '🔍 Solución del Ejercicio',
+    icon: 'success',
+    html: `
+      <div style="text-align:left; font-size:0.88rem; line-height:1.8;">
+        <p><strong style="color:#ff7b72">Bug #1</strong> en <code>Depositar()</code>:</p>
+        <p style="color:#8b949e; padding-left:1rem">
+          <del><code>Saldo -= monto;</code></del><br>
+          <span style="color:#3fb950">✓ <code>Saldo += monto;</code></span>
+        </p>
+        <hr style="border-color:#30363d; margin:0.75rem 0">
+        <p><strong style="color:#ff7b72">Bug #2</strong>: ¡No hay bug! <code>Retirar()</code> está correcto.</p>
+        <hr style="border-color:#30363d; margin:0.75rem 0">
+        <p><strong style="color:#ff7b72">Bug #3</strong> en <code>TieneSaldoSuficiente()</code>:</p>
+        <p style="color:#8b949e; padding-left:1rem">
+          <del><code>return Saldo > monto;</code></del><br>
+          <span style="color:#3fb950">✓ <code>return Saldo >= monto;</code></span>
+        </p>
+        <p style="margin-top:1rem; color:#e3b341; font-size:0.82rem">
+          ⚠ El &gt; excluye el caso donde saldo == monto, que SÍ debería ser suficiente.
+        </p>
+      </div>
+    `,
+    confirmButtonText: '¡Gracias!',
+    width: '500px'
+  });
+}
+
+function mostrarTodosLosEjercicios() {
+  Swal.fire({
+    title: '📋 Ejercicios para practicar',
+    icon: 'info',
+    html: `
+      <div style="text-align:left; font-size:0.85rem; line-height:2;">
+        <div style="margin-bottom:0.5rem"><span style="color:#58a6ff">●</span> <strong>Ejercicio 1</strong> (Slide 7): Bug en CalcularPromedio — índice fuera de rango</div>
+        <div style="margin-bottom:0.5rem"><span style="color:#3fb950">●</span> <strong>Ejercicio 2</strong> (Slide 10-11): Crear proyecto con OperacionesMatematicas + xUnit</div>
+        <div style="margin-bottom:0.5rem"><span style="color:#d2a8ff">●</span> <strong>Ejercicio 3</strong> (Slide 13): CuentaBancaria con 3 bugs + tests</div>
+        <div style="margin-bottom:0.5rem"><span style="color:#ffa657">●</span> <strong>Desafío extra</strong>: Agregar test para <code>Restar()</code> que verifique resultado negativo</div>
+        <div style="margin-bottom:0.5rem"><span style="color:#e3b341">●</span> <strong>Desafío extra</strong>: Breakpoint condicional en loop <code>i == 3</code></div>
+      </div>
+    `,
+    confirmButtonText: '¡A practicar!',
+    width: '520px'
+  });
+}
+</script>
+</body>
+</html>

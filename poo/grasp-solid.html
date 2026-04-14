@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRASP & SOLID — Principios de Diseño en C#</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/night-owl.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=IBM+Plex+Mono:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:          #13110f;
+  --bg2:         #1c1916;
+  --bg3:         #252118;
+  --bg4:         #2e2920;
+  --amber:       #f0a500;
+  --amber-dim:   #c48400;
+  --amber-glow:  rgba(240,165,0,0.15);
+  --amber-border:rgba(240,165,0,0.25);
+  --cream:       #f5edd8;
+  --cream-dim:   #c9bfa8;
+  --cream-muted: #7a7060;
+  --red:         #e05c4a;
+  --green:       #5eb88a;
+  --blue:        #5b9bd5;
+  --purple:      #b07fd4;
+  --teal:        #4ab8a8;
+  --border:      #2e2920;
+  --border2:     #3a3228;
+  --shadow:      0 8px 32px rgba(0,0,0,0.5);
+  --glow:        0 0 30px rgba(240,165,0,0.2);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* NOISE TEXTURE OVERLAY */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:0.4;
+}
+
+/* RADIAL GLOW BG */
+body::before {
+  content:'';
+  position:fixed;
+  top:-20%; left:-10%;
+  width:70vw; height:70vw;
+  background: radial-gradient(circle, rgba(240,165,0,0.04) 0%, transparent 65%);
+  pointer-events:none; z-index:0;
+}
+
+/* ---- HEADER ---- */
+.main-header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(19,17,15,0.92);
+  border-bottom: 1px solid var(--border2);
+  backdrop-filter: blur(14px);
+  padding: 0 1.5rem;
+  height: 52px;
+  display: flex; align-items: center; gap: 1rem;
+}
+.h-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-border);
+  color: var(--amber);
+  border-radius: 4px;
+  padding: 3px 10px;
+}
+.h-title { font-size: 0.88rem; font-weight: 500; color: var(--cream-dim); flex:1; }
+.h-counter {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem; color: var(--cream-muted);
+}
+
+/* PROGRESS */
+.prog-bar { height: 2px; background: var(--border2); position: sticky; top:52px; z-index:199; }
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+  transition: width 0.4s ease;
+  box-shadow: 0 0 10px var(--amber);
+}
+
+/* ---- SLIDES ---- */
+.slide {
+  display: none;
+  min-height: calc(100vh - 55px);
+  padding: 2.5rem 2rem 5rem;
+  position: relative; z-index: 1;
+  animation-duration: 0.45s;
+}
+.slide.active { display: block; }
+
+/* ---- TYPOGRAPHY ---- */
+.s-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--amber);
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-border);
+  border-radius: 3px;
+  padding: 3px 10px;
+  display: inline-block; margin-bottom: 1rem;
+}
+.s-label.gr  { color: var(--green);  background: rgba(94,184,138,0.1); border-color: rgba(94,184,138,0.25); }
+.s-label.bl  { color: var(--blue);   background: rgba(91,155,213,0.1); border-color: rgba(91,155,213,0.25); }
+.s-label.pu  { color: var(--purple); background: rgba(176,127,212,0.1);border-color: rgba(176,127,212,0.25); }
+.s-label.rd  { color: var(--red);    background: rgba(224,92,74,0.1);  border-color: rgba(224,92,74,0.25); }
+.s-label.te  { color: var(--teal);   background: rgba(74,184,168,0.1); border-color: rgba(74,184,168,0.25); }
+
+.s-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 0.4rem;
+  color: var(--cream);
+  letter-spacing: -0.01em;
+}
+.s-sub {
+  font-size: 0.95rem;
+  color: var(--cream-muted);
+  margin-bottom: 2rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* ---- CARDS ---- */
+.card-g {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 0.9rem;
+  transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
+}
+.card-g:hover { transform: translateY(-2px); }
+.card-g.amber:hover { border-color: var(--amber); box-shadow: var(--glow); }
+.card-g.green:hover { border-color: var(--green); box-shadow: 0 0 20px rgba(94,184,138,0.2); }
+.card-g.blue:hover  { border-color: var(--blue);  box-shadow: 0 0 20px rgba(91,155,213,0.2); }
+.card-g.purple:hover{ border-color: var(--purple);box-shadow: 0 0 20px rgba(176,127,212,0.2); }
+.card-g.red:hover   { border-color: var(--red);   box-shadow: 0 0 20px rgba(224,92,74,0.2); }
+.card-g.teal:hover  { border-color: var(--teal);  box-shadow: 0 0 20px rgba(74,184,168,0.2); }
+
+.ci { width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:0.65rem;flex-shrink:0; }
+.ci.a { background:rgba(240,165,0,0.12); color:var(--amber); }
+.ci.g { background:rgba(94,184,138,0.12);color:var(--green); }
+.ci.b { background:rgba(91,155,213,0.12);color:var(--blue); }
+.ci.p { background:rgba(176,127,212,0.12);color:var(--purple);}
+.ci.r { background:rgba(224,92,74,0.12); color:var(--red); }
+.ci.t { background:rgba(74,184,168,0.12);color:var(--teal); }
+
+.ct { font-size:0.95rem;font-weight:600;margin-bottom:0.25rem;color:var(--cream); }
+.cd { font-size:0.83rem;color:var(--cream-muted);line-height:1.55; }
+
+/* ---- CODE ---- */
+.cw {
+  background: #0d0b09;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0.85rem 0;
+}
+.ch {
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border2);
+  padding: 6px 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.cd2 { width:9px;height:9px;border-radius:50%; }
+.cd2.r{background:#ff5f57;} .cd2.y{background:#febc2e;} .cd2.g{background:#28c840;}
+.cfn {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.72rem;color:var(--cream-muted);
+  flex:1; margin-left:4px;
+}
+.cbtn {
+  background:none;border:1px solid var(--border2);
+  color:var(--cream-muted);border-radius:4px;
+  padding:1px 8px;font-size:0.68rem;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;
+  transition: all 0.2s;
+}
+.cbtn:hover { border-color:var(--amber);color:var(--amber); }
+.cw pre { margin:0!important;border-radius:0!important; }
+.cw code { font-family:'IBM Plex Mono',monospace!important;font-size:0.8rem!important; }
+
+/* ---- STEPS ---- */
+.step {
+  display:flex;gap:0.9rem;align-items:flex-start;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:8px;padding:0.9rem 1.1rem;
+  margin-bottom:0.65rem;transition:border-color 0.2s;
+}
+.step:hover { border-color:var(--amber-border); }
+.sn {
+  width:30px;height:30px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:600;
+  flex-shrink:0;color:var(--bg);
+  background:linear-gradient(135deg,var(--amber),var(--amber-dim));
+}
+.sn.g{background:linear-gradient(135deg,var(--green),#3a8a62);}
+.sn.b{background:linear-gradient(135deg,var(--blue),#3a6ea0);}
+.sn.p{background:linear-gradient(135deg,var(--purple),#7a4faa);}
+.sn.r{background:linear-gradient(135deg,var(--red),#a03828);}
+.sn.t{background:linear-gradient(135deg,var(--teal),#2a8a7a);}
+.sc { flex:1; }
+.stit { font-size:0.9rem;font-weight:600;margin-bottom:0.2rem;color:var(--cream); }
+.sdesc{ font-size:0.82rem;color:var(--cream-muted);line-height:1.5; }
+
+/* ---- ALERTS ---- */
+.al {
+  border-radius:8px;padding:0.8rem 1.1rem;border-left:3px solid;
+  margin:0.9rem 0;font-size:0.85rem;line-height:1.6;
+}
+.al-a { background:rgba(240,165,0,0.07);border-color:var(--amber);color:#d4b870; }
+.al-g { background:rgba(94,184,138,0.07);border-color:var(--green);color:#7fc9a3; }
+.al-b { background:rgba(91,155,213,0.07);border-color:var(--blue);color:#7ab0d8; }
+.al-r { background:rgba(224,92,74,0.07);border-color:var(--red);color:#d4806e; }
+.al-p { background:rgba(176,127,212,0.07);border-color:var(--purple);color:#c49ad8; }
+.al-t { background:rgba(74,184,168,0.07);border-color:var(--teal);color:#74c4b8; }
+
+/* ---- LAYOUT ---- */
+.t2 { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem; }
+.t3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem; }
+@media(max-width:768px) {
+  .t2,.t3{grid-template-columns:1fr;}
+  .s-title{font-size:1.7rem;}
+}
+.div { height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:1.25rem 0; }
+
+/* ---- PRINCIPLE BADGE ---- */
+.p-badge {
+  display:inline-flex;align-items:center;gap:6px;
+  border-radius:6px;padding:4px 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem;font-weight:600;
+  margin:2px;
+}
+.p-badge.a { background:rgba(240,165,0,0.12);color:var(--amber);border:1px solid var(--amber-border); }
+.p-badge.g { background:rgba(94,184,138,0.12);color:var(--green);border:1px solid rgba(94,184,138,0.25); }
+.p-badge.b { background:rgba(91,155,213,0.12);color:var(--blue);border:1px solid rgba(91,155,213,0.25); }
+.p-badge.p { background:rgba(176,127,212,0.12);color:var(--purple);border:1px solid rgba(176,127,212,0.25); }
+.p-badge.r { background:rgba(224,92,74,0.12);color:var(--red);border:1px solid rgba(224,92,74,0.25); }
+.p-badge.t { background:rgba(74,184,168,0.12);color:var(--teal);border:1px solid rgba(74,184,168,0.25); }
+
+/* ---- VS/NOT-VS BOX ---- */
+.compare-box {
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:10px;overflow:hidden;
+}
+.cb-head {
+  padding:6px 14px;font-size:0.75rem;font-weight:600;
+  font-family:'IBM Plex Mono',monospace;letter-spacing:0.08em;
+}
+.cb-head.bad  { background:rgba(224,92,74,0.12);color:var(--red);border-bottom:1px solid rgba(224,92,74,0.2); }
+.cb-head.good { background:rgba(94,184,138,0.12);color:var(--green);border-bottom:1px solid rgba(94,184,138,0.2); }
+
+/* ---- NAV ---- */
+.nav-bot {
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(19,17,15,0.95);
+  border-top:1px solid var(--border2);
+  padding:0.7rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(12px);
+}
+.nb {
+  display:flex;align-items:center;gap:0.45rem;
+  background:var(--bg2);border:1px solid var(--border2);
+  color:var(--cream-dim);border-radius:7px;
+  padding:0.45rem 1.1rem;font-family:'DM Sans',sans-serif;
+  font-size:0.82rem;font-weight:600;cursor:pointer;
+  transition:all 0.2s;text-decoration:none;
+}
+.nb:hover { border-color:var(--amber);color:var(--amber);box-shadow:var(--glow); }
+.nb.pr { background:linear-gradient(135deg,#b87800,#f0a500);border-color:var(--amber);color:#13110f; }
+.nb.pr:hover { background:linear-gradient(135deg,#d08800,#ffb800);color:#13110f; }
+.nb:disabled { opacity:0.3;cursor:not-allowed; }
+
+.idx-wrap { display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:55%; }
+.dot { width:7px;height:7px;border-radius:50%;background:var(--border2);cursor:pointer;transition:all 0.2s; }
+.dot.active { background:var(--amber);box-shadow:0 0 6px var(--amber); }
+.dot:hover  { background:var(--cream-muted); }
+
+/* ---- CHECK ITEMS ---- */
+.ck-item {
+  display:flex;align-items:flex-start;gap:0.7rem;
+  padding:0.55rem 0;border-bottom:1px solid var(--border2);
+  font-size:0.87rem;
+}
+.ck-item:last-child{border:none;}
+.ck-item i{color:var(--green);margin-top:3px;flex-shrink:0;}
+
+/* ---- BIG LETTER ---- */
+.big-letter {
+  font-family:'Playfair Display',serif;
+  font-size:5rem;font-weight:900;
+  line-height:1;
+  position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);
+  opacity:0.06;pointer-events:none;
+  color:var(--amber);
+}
+
+/* ---- PRINCIPLE GRID ---- */
+.pg { display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1rem; }
+@media(max-width:768px){.pg{grid-template-columns:1fr 1fr;}}
+.pg-item {
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:8px;padding:0.9rem 1rem;
+  text-align:center;cursor:pointer;
+  transition:all 0.2s;
+}
+.pg-item:hover { border-color:var(--amber);transform:translateY(-3px);box-shadow:var(--glow); }
+.pg-num {
+  font-family:'Playfair Display',serif;
+  font-size:1.6rem;font-weight:700;color:var(--amber);
+  line-height:1;margin-bottom:0.3rem;
+}
+.pg-name { font-size:0.78rem;font-weight:600;color:var(--cream);margin-bottom:0.15rem; }
+.pg-desc { font-size:0.7rem;color:var(--cream-muted); }
+
+/* ---- SOLID GRID ---- */
+.sg { display:grid;grid-template-columns:repeat(5,1fr);gap:0.6rem;margin-bottom:1.25rem; }
+@media(max-width:768px){.sg{grid-template-columns:1fr 1fr;}}
+.sg-item {
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:8px;padding:0.75rem;text-align:center;
+  cursor:pointer;transition:all 0.2s;
+}
+.sg-item:hover { transform:translateY(-3px); }
+.sg-letter {
+  font-family:'Playfair Display',serif;
+  font-size:2.5rem;font-weight:900;line-height:1;
+  margin-bottom:0.25rem;
+}
+.sg-name { font-size:0.72rem;font-weight:600;color:var(--cream);margin-bottom:0.1rem; }
+.sg-full { font-size:0.65rem;color:var(--cream-muted); }
+
+/* ---- COVER DECO ---- */
+.cover-deco {
+  position:absolute;right:0;top:0;bottom:0;width:35%;
+  background:linear-gradient(135deg,transparent 0%,rgba(240,165,0,0.03) 50%,transparent 100%);
+  border-left:1px solid var(--border2);
+  pointer-events:none;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0.5rem;
+  padding:1rem;
+}
+@media(max-width:768px){.cover-deco{display:none;}}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--amber-dim);}
+
+kbd {
+  background:var(--bg3);border:1px solid var(--border2);
+  border-bottom:2px solid var(--border2);border-radius:4px;
+  padding:1px 6px;font-family:'IBM Plex Mono',monospace;
+  font-size:0.73rem;color:var(--amber);
+}
+code { font-family:'IBM Plex Mono',monospace;color:var(--amber);font-size:0.85em; }
+
+.hl  { color:var(--amber);   font-weight:600; }
+.hlg { color:var(--green);   font-weight:600; }
+.hlb { color:var(--blue);    font-weight:600; }
+.hlp { color:var(--purple);  font-weight:600; }
+.hlr { color:var(--red);     font-weight:600; }
+.hlt { color:var(--teal);    font-weight:600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="main-header">
+  <span class="h-badge"><i class="fa-solid fa-drafting-compass me-1"></i>DISEÑO OO</span>
+  <span class="h-title">GRASP & SOLID — Principios de Diseño en C#</span>
+  <span class="h-counter" id="hcount">1 / 18</span>
+</header>
+<div class="prog-bar"><div class="prog-fill" id="pbar" style="width:5.55%"></div></div>
+
+
+<!-- ═══════════════ S1 PORTADA ═══════════════ -->
+<div class="slide active" id="s1">
+  <div class="cover-deco">
+    <div style="font-family:'Playfair Display',serif;font-size:5rem;color:var(--amber);opacity:0.08;line-height:1;">G</div>
+    <div style="font-family:'Playfair Display',serif;font-size:5rem;color:var(--amber);opacity:0.06;line-height:1;">S</div>
+  </div>
+  <div style="max-width:850px;margin:0 auto;padding-top:2rem;position:relative;">
+    <div class="animate__animated animate__fadeInDown">
+      <span class="s-label">Programación II · Diseño Orientado a Objetos</span>
+      <h1 class="s-title" style="font-size:clamp(2.2rem,6vw,4rem);">
+        <span style="color:var(--amber)">GRASP</span><br>
+        <span style="color:var(--cream-muted);font-weight:400;font-size:70%">&</span>
+        <span style="color:var(--cream)"> SOLID</span>
+      </h1>
+      <p style="font-size:1.05rem;color:var(--cream-muted);max-width:520px;line-height:1.75;margin-bottom:2rem;font-weight:300;">
+        Los dos marcos de principios que definen cómo asignar responsabilidades y estructurar código orientado a objetos de calidad profesional.
+      </p>
+    </div>
+    <div class="t2 animate__animated animate__fadeInUp animate__delay-1s">
+      <div class="card-g amber" style="border-left:3px solid var(--amber);">
+        <div class="ci a"><i class="fa-solid fa-network-wired"></i></div>
+        <div class="ct">GRASP — 9 Principios</div>
+        <div class="cd">General Responsibility Assignment Software Patterns. Patrones para decidir <strong style="color:var(--cream)">quién debe hacer qué</strong> en un sistema orientado a objetos.</div>
+      </div>
+      <div class="card-g green" style="border-left:3px solid var(--green);">
+        <div class="ci g"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="ct">SOLID — 5 Principios</div>
+        <div class="cd">Cinco principios de diseño que producen código más <strong style="color:var(--cream)">mantenible, extensible y testeable</strong>. Propuestos por Robert C. Martin.</div>
+      </div>
+    </div>
+    <div class="animate__animated animate__fadeIn animate__delay-2s" style="margin-top:1.5rem;">
+      <div class="pg">
+        <div class="pg-item"><div class="pg-num">IE</div><div class="pg-name">Information Expert</div></div>
+        <div class="pg-item"><div class="pg-num">Cr</div><div class="pg-name">Creator</div></div>
+        <div class="pg-item"><div class="pg-num">Co</div><div class="pg-name">Controller</div></div>
+        <div class="pg-item"><div class="pg-num">LC</div><div class="pg-name">Low Coupling</div></div>
+        <div class="pg-item"><div class="pg-num">HC</div><div class="pg-name">High Cohesion</div></div>
+        <div class="pg-item"><div class="pg-num">Po</div><div class="pg-name">Polymorphism</div></div>
+      </div>
+      <div class="sg">
+        <div class="sg-item" style="border-color:rgba(240,165,0,0.3)"><div class="sg-letter" style="color:var(--amber)">S</div><div class="sg-name">Single Resp.</div></div>
+        <div class="sg-item" style="border-color:rgba(94,184,138,0.3)"><div class="sg-letter" style="color:var(--green)">O</div><div class="sg-name">Open/Closed</div></div>
+        <div class="sg-item" style="border-color:rgba(91,155,213,0.3)"><div class="sg-letter" style="color:var(--blue)">L</div><div class="sg-name">Liskov Sub.</div></div>
+        <div class="sg-item" style="border-color:rgba(176,127,212,0.3)"><div class="sg-letter" style="color:var(--purple)">I</div><div class="sg-name">Iface Segreg.</div></div>
+        <div class="sg-item" style="border-color:rgba(74,184,168,0.3)"><div class="sg-letter" style="color:var(--teal)">D</div><div class="sg-name">Dep. Inversion</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ S2 ¿POR QUÉ IMPORTAN? ═══════════════ -->
+<div class="slide" id="s2">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label">Motivación</span>
+  <h2 class="s-title">¿Por qué necesitamos <span style="color:var(--amber)">principios</span>?</h2>
+  <p class="s-sub">El código sin principios envejece mal — estos son los síntomas</p>
+
+  <div class="t2" style="margin-bottom:1.25rem;">
+    <div>
+      <h5 style="color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:0.78rem;letter-spacing:0.1em;margin-bottom:0.75rem;">SIN PRINCIPIOS — SÍNTOMAS</h5>
+      <div class="step"><div class="sn r"><i class="fa-solid fa-xmark"></i></div><div class="sc"><div class="stit">Código rígido</div><div class="sdesc">Cambiar una cosa rompe diez. Miedo a modificar porque "quién sabe qué se cae".</div></div></div>
+      <div class="step"><div class="sn r"><i class="fa-solid fa-xmark"></i></div><div class="sc"><div class="stit">Código frágil</div><div class="sdesc">Los cambios causan errores en partes no relacionadas. Bugs en cascada.</div></div></div>
+      <div class="step"><div class="sn r"><i class="fa-solid fa-xmark"></i></div><div class="sc"><div class="stit">Código inmovilizado</div><div class="sdesc">Imposible reutilizar módulos porque vienen "pegados" a otras partes del sistema.</div></div></div>
+      <div class="step"><div class="sn r"><i class="fa-solid fa-xmark"></i></div><div class="sc"><div class="stit">Clases Dios</div><div class="sdesc">Una clase que sabe todo y hace todo. Miles de líneas, responsabilidades mezcladas.</div></div></div>
+    </div>
+    <div>
+      <h5 style="color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:0.78rem;letter-spacing:0.1em;margin-bottom:0.75rem;">CON PRINCIPIOS — BENEFICIOS</h5>
+      <div class="card-g green" style="margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div class="ci g"><i class="fa-solid fa-puzzle-piece"></i></div>
+          <div><div class="ct">Bajo acoplamiento</div><div class="cd">Los módulos son independientes. Cambiás uno sin tocar los demás.</div></div>
+        </div>
+      </div>
+      <div class="card-g amber" style="margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div class="ci a"><i class="fa-solid fa-recycle"></i></div>
+          <div><div class="ct">Alta reutilización</div><div class="cd">Clases enfocadas que podés llevar a otros proyectos sin problema.</div></div>
+        </div>
+      </div>
+      <div class="card-g blue" style="margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div class="ci b"><i class="fa-solid fa-vial"></i></div>
+          <div><div class="ct">Más testeable</div><div class="cd">Clases pequeñas con una responsabilidad son fáciles de testear con xUnit.</div></div>
+        </div>
+      </div>
+      <div class="al al-a">
+        <i class="fa-solid fa-quote-left me-2"></i>
+        GRASP te dice <strong>quién</strong> hace qué. SOLID te dice <strong>cómo</strong> diseñarlo bien.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S3 MAPA GRASP ═══════════════ -->
+<div class="slide" id="s3">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label">GRASP · Panorama</span>
+  <h2 class="s-title">Los 9 Patrones <span style="color:var(--amber)">GRASP</span></h2>
+  <p class="s-sub">General Responsibility Assignment Software Patterns — Craig Larman, 1997</p>
+
+  <div class="pg" style="grid-template-columns:repeat(3,1fr);gap:0.85rem;cursor:pointer;">
+    <div class="pg-item" onclick="showGraspInfo('expert')"><div class="pg-num">01</div><div class="pg-name">Information Expert</div><div class="pg-desc">Asignar donde está la info</div></div>
+    <div class="pg-item" onclick="showGraspInfo('creator')"><div class="pg-num">02</div><div class="pg-name">Creator</div><div class="pg-desc">¿Quién crea los objetos?</div></div>
+    <div class="pg-item" onclick="showGraspInfo('controller')"><div class="pg-num">03</div><div class="pg-name">Controller</div><div class="pg-desc">¿Quién recibe los eventos?</div></div>
+    <div class="pg-item" onclick="showGraspInfo('lowcoupling')"><div class="pg-num">04</div><div class="pg-name">Low Coupling</div><div class="pg-desc">Minimizar dependencias</div></div>
+    <div class="pg-item" onclick="showGraspInfo('highcohesion')"><div class="pg-num">05</div><div class="pg-name">High Cohesion</div><div class="pg-desc">Responsabilidades focalizadas</div></div>
+    <div class="pg-item" onclick="showGraspInfo('polymorphism')"><div class="pg-num">06</div><div class="pg-name">Polymorphism</div><div class="pg-desc">Variar por tipo, no por if</div></div>
+    <div class="pg-item" onclick="showGraspInfo('purefab')"><div class="pg-num">07</div><div class="pg-name">Pure Fabrication</div><div class="pg-desc">Clase de servicio inventada</div></div>
+    <div class="pg-item" onclick="showGraspInfo('indirection')"><div class="pg-num">08</div><div class="pg-name">Indirection</div><div class="pg-desc">Intermediario para desacoplar</div></div>
+    <div class="pg-item" onclick="showGraspInfo('protected')"><div class="pg-num">09</div><div class="pg-name">Protected Variations</div><div class="pg-desc">Encapsular lo que varía</div></div>
+  </div>
+
+  <div class="al al-a" style="margin-top:0.5rem;">
+    <i class="fa-solid fa-hand-pointer me-2"></i>
+    Hacé click en cada patrón para ver su definición. Las siguientes diapositivas profundizan los más importantes con ejemplos en C#.
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S4 INFORMATION EXPERT ═══════════════ -->
+<div class="slide" id="s4">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter">IE</div>
+  <span class="s-label">GRASP · 01</span>
+  <h2 class="s-title">Information <span style="color:var(--amber)">Expert</span></h2>
+  <p class="s-sub">Asignar la responsabilidad a la clase que tiene la información necesaria para cumplirla</p>
+
+  <div class="t2">
+    <div>
+      <div class="al al-a" style="margin-top:0;">
+        <i class="fa-solid fa-lightbulb me-2"></i>
+        <strong>Pregunta clave:</strong> ¿Qué clase tiene la información para resolver esto?<br>Esa clase es la Experta — y es la que debe tener el método.
+      </div>
+
+      <div class="compare-box" style="margin-top:0.85rem;">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>MAL — responsabilidad fuera de lugar</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">// Pedido calcula su propio total
+// ¡pero no tiene los precios!
+public class Pedido
+{
+    public List&lt;string&gt; Items { get; set; }
+    // ❌ No sabe los precios de los items
+    public decimal CalcularTotal() { ... }
+}
+</code></pre>
+        </div>
+      </div>
+
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>BIEN — Information Expert</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">public class LineaPedido
+{
+    public Producto Producto { get; set; }
+    public int Cantidad { get; set; }
+
+    // ✅ LineaPedido TIENE precio y cantidad
+    public decimal CalcularSubtotal()
+        => Producto.Precio * Cantidad;
+}
+
+public class Pedido
+{
+    public List&lt;LineaPedido&gt; Lineas { get; set; }
+
+    // ✅ Pedido TIENE las líneas
+    public decimal CalcularTotal()
+        => Lineas.Sum(l => l.CalcularSubtotal());
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h5 style="color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:0.78rem;letter-spacing:0.1em;margin-bottom:1rem;">¿CÓMO APLICARLO?</h5>
+      <div class="step"><div class="sn">1</div><div class="sc"><div class="stit">Identificá la responsabilidad</div><div class="sdesc">¿Qué cálculo o acción necesitás realizar? Ej: "calcular el subtotal de una línea de pedido".</div></div></div>
+      <div class="step"><div class="sn">2</div><div class="sc"><div class="stit">¿Qué clase tiene esa info?</div><div class="sdesc">¿Quién tiene el precio? ¿Quién tiene la cantidad? Esa clase es la experta.</div></div></div>
+      <div class="step"><div class="sn">3</div><div class="sc"><div class="stit">Asigná el método ahí</div><div class="sdesc">El método va en la clase experta. Si la info está distribuida, componer delegando.</div></div></div>
+
+      <div class="al al-g" style="margin-top:1rem;">
+        <i class="fa-solid fa-check-circle me-2"></i>
+        <strong>Beneficio:</strong> Evita que objetos tengan que "pedir prestada" información de otros para hacer su trabajo, lo que aumenta el acoplamiento.
+      </div>
+
+      <div class="card-g amber" style="margin-top:0.75rem;">
+        <div class="ct"><i class="fa-solid fa-link me-2"></i>Relación con SOLID</div>
+        <div class="cd">Information Expert refuerza el principio <strong style="color:var(--amber)">S</strong> (Single Responsibility): la clase que tiene los datos es la responsable de operar con ellos.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S5 CREATOR ═══════════════ -->
+<div class="slide" id="s5">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter">Cr</div>
+  <span class="s-label">GRASP · 02</span>
+  <h2 class="s-title"><span style="color:var(--amber)">Creator</span></h2>
+  <p class="s-sub">¿Quién debería ser responsable de crear una instancia de clase B?</p>
+
+  <div class="t2">
+    <div>
+      <p style="font-size:0.88rem;color:var(--cream-muted);margin-bottom:1rem;line-height:1.65;">
+        Asignale la responsabilidad de crear B a A si:
+      </p>
+      <div class="step"><div class="sn">A</div><div class="sc"><div class="stit">A <em>contiene</em> o agrega a B</div><div class="sdesc">Un <code>Pedido</code> contiene <code>LineaPedido</code>s → Pedido las crea.</div></div></div>
+      <div class="step"><div class="sn">B</div><div class="sc"><div class="stit">A <em>registra</em> instancias de B</div><div class="sdesc">Una clase que lleva un historial es buena candidata a crear esas entradas.</div></div></div>
+      <div class="step"><div class="sn">C</div><div class="sc"><div class="stit">A <em>usa de cerca</em> a B</div><div class="sdesc">Si A necesita B inmediatamente y lo usa intensamente, puede ser su creador.</div></div></div>
+      <div class="step"><div class="sn">D</div><div class="sc"><div class="stit">A tiene los datos init de B</div><div class="sdesc">Si A tiene todos los datos necesarios para inicializar B, tiene sentido que lo cree.</div></div></div>
+    </div>
+
+    <div>
+      <div class="cw">
+        <div class="ch">
+          <div class="cd2 r"></div><div class="cd2 y"></div><div class="cd2 g"></div>
+          <span class="cfn">Creator — Pedido crea LineaPedido</span>
+          <button class="cbtn" onclick="copyCode2(this)">copiar</button>
+        </div>
+        <pre><code class="language-csharp">public class Pedido
+{
+    private List&lt;LineaPedido&gt; _lineas = new();
+
+    // ✅ Creator: Pedido CONTIENE LineaPedido
+    // Pedido tiene los datos para crearla
+    public void AgregarProducto(
+        Producto producto, int cantidad)
+    {
+        // Pedido es el Creator de LineaPedido
+        var linea = new LineaPedido(
+            producto, cantidad);
+        _lineas.Add(linea);
+    }
+
+    public decimal CalcularTotal()
+        => _lineas.Sum(l => l.CalcularSubtotal());
+}
+
+// ❌ Esto violaría Creator:
+// var linea = new LineaPedido(p, 2);
+// pedido.AgregarLinea(linea); // el cliente crea
+</code></pre>
+      </div>
+
+      <div class="al al-a">
+        <i class="fa-solid fa-lightbulb me-2"></i>
+        <strong>¿Por qué no siempre usar Factory?</strong> Creator es la solución más simple. Solo usás Factory cuando la creación es compleja, hay muchas variantes, o necesitás desacoplar más.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S6 CONTROLLER ═══════════════ -->
+<div class="slide" id="s6">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter">Co</div>
+  <span class="s-label">GRASP · 03</span>
+  <h2 class="s-title"><span style="color:var(--amber)">Controller</span></h2>
+  <p class="s-sub">¿Quién recibe y coordina los eventos del sistema?</p>
+
+  <div class="t2">
+    <div>
+      <div class="al al-a" style="margin-top:0;">
+        <i class="fa-solid fa-gamepad me-2"></i>
+        El Controller <strong>no hace el trabajo</strong> — delega a otros objetos. Es el coordinador, no el trabajador.
+      </div>
+      <div class="card-g amber" style="margin-top:0.85rem;">
+        <div class="ct">Opciones válidas de Controller</div>
+        <div class="cd" style="margin-top:0.5rem;">
+          <div style="margin-bottom:0.4rem;"><i class="fa-solid fa-circle fa-xs me-2" style="color:var(--amber)"></i><strong style="color:var(--cream)">Facade Controller:</strong> representa todo el sistema. Ej: <code>SistemaVentas</code></div>
+          <div><i class="fa-solid fa-circle fa-xs me-2" style="color:var(--amber)"></i><strong style="color:var(--cream)">Use-Case Controller:</strong> uno por caso de uso. Ej: <code>GestionarPedidoController</code></div>
+        </div>
+      </div>
+
+      <div class="compare-box" style="margin-top:0.85rem;">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>MAL — la UI hace la lógica</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">// ❌ El botón de la UI hace cálculos
+private void btnPagar_Click(...)
+{
+    decimal total = 0;
+    foreach (var item in carrito)
+        total += item.Precio * item.Cantidad;
+    if (total > saldo) throw new Exception("...");
+    // toda la lógica de negocio en la UI
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>BIEN — Controller GRASP</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">// ✅ El Controller recibe el evento
+// y delega a los objetos de dominio
+public class GestionarPedidoController
+{
+    private readonly IPedidoServicio _servicio;
+
+    public GestionarPedidoController(
+        IPedidoServicio servicio)
+    {
+        _servicio = servicio;
+    }
+
+    // Recibe el evento del sistema
+    public ResultadoPago ProcesarPago(
+        int pedidoId, MetodoPago metodo)
+    {
+        // Delega — no hace el trabajo
+        var pedido = _servicio.ObtenerPedido(pedidoId);
+        return _servicio.ProcesarPago(pedido, metodo);
+    }
+}
+
+// La UI solo llama al Controller:
+// _controller.ProcesarPago(pedidoId, metodo);
+</code></pre>
+        </div>
+      </div>
+      <div class="al al-b">
+        <i class="fa-solid fa-info-circle me-2"></i>
+        En ASP.NET Core, los <strong>Controllers de MVC</strong> son justamente este patrón aplicado al contexto web.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S7 LOW COUPLING + HIGH COHESION ═══════════════ -->
+<div class="slide" id="s7">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label">GRASP · 04 + 05</span>
+  <h2 class="s-title">Low Coupling <span style="color:var(--cream-muted);font-size:60%;font-weight:400">&</span> <span style="color:var(--amber)">High Cohesion</span></h2>
+  <p class="s-sub">Los dos principios GRASP que funcionan como brújula — guían todas las otras decisiones de diseño</p>
+
+  <div class="t2">
+    <div>
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-top:3px solid var(--red);border-radius:10px;padding:1.1rem;margin-bottom:1rem;">
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:0.4rem;color:var(--cream)">
+          <i class="fa-solid fa-link-slash me-2" style="color:var(--amber)"></i>Low Coupling
+        </div>
+        <div style="font-size:0.85rem;color:var(--cream-muted);line-height:1.6;margin-bottom:0.85rem;">
+          Una clase con <strong style="color:var(--cream)">bajo acoplamiento</strong> tiene pocas dependencias hacia otras clases. Si A cambia, B no se entera.
+        </div>
+        <div class="cw">
+          <div class="ch"><div class="cd2 r"></div><div class="cd2 y"></div><div class="cd2 g"></div><span class="cfn">Inyección de dependencias → bajo acoplamiento</span><button class="cbtn" onclick="copyCode2(this)">copiar</button></div>
+          <pre><code class="language-csharp">// ✅ Bajo acoplamiento: depende de interfaz
+public class PedidoServicio
+{
+    private readonly IRepositorioPedido _repo;
+
+    public PedidoServicio(IRepositorioPedido repo)
+    {
+        _repo = repo; // depende de abstracción
+    }
+}
+// ❌ Alto acoplamiento: new concreto dentro
+// _repo = new SqlRepositorioPedido(); ← mal</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-top:3px solid var(--green);border-radius:10px;padding:1.1rem;">
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:0.4rem;color:var(--cream)">
+          <i class="fa-solid fa-bullseye me-2" style="color:var(--green)"></i>High Cohesion
+        </div>
+        <div style="font-size:0.85rem;color:var(--cream-muted);line-height:1.6;margin-bottom:0.85rem;">
+          Una clase con <strong style="color:var(--cream)">alta cohesión</strong> hace cosas relacionadas entre sí. Sus métodos trabajan con los mismos datos.
+        </div>
+        <div class="cw">
+          <div class="ch"><div class="cd2 r"></div><div class="cd2 y"></div><div class="cd2 g"></div><span class="cfn">Alta cohesión vs. clase Dios</span><button class="cbtn" onclick="copyCode2(this)">copiar</button></div>
+          <pre><code class="language-csharp">// ❌ Baja cohesión — clase Dios
+public class GestorGeneral
+{
+    public void EnviarEmail() { }
+    public decimal CalcularIVA() { }
+    public void GenerarPDF() { }
+    public void ValidarUsuario() { }
+}
+
+// ✅ Alta cohesión — una responsabilidad
+public class EmailSender { 
+    public void Enviar(Email email) { }
+    public void EnviarMasivo(List&lt;Email&gt; e) { }
+}
+public class CalculadorImpuestos {
+    public decimal CalcularIVA(decimal base) { }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="al al-a">
+    <i class="fa-solid fa-balance-scale me-2"></i>
+    Son complementarios: aumentar la cohesión suele reducir el acoplamiento. Si una clase hace poco, tiene menos razones para depender de otras.
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S8 POLYMORPHISM (GRASP) ═══════════════ -->
+<div class="slide" id="s8">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter">Po</div>
+  <span class="s-label">GRASP · 06</span>
+  <h2 class="s-title">Polymorphism <span style="color:var(--cream-muted);font-weight:300;font-size:55%">GRASP</span></h2>
+  <p class="s-sub">Cuando el comportamiento varía según el tipo, usá polimorfismo — no ifs ni switch</p>
+
+  <div class="t2">
+    <div>
+      <div class="compare-box">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>MAL — condicionales por tipo</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">// ❌ Cada nuevo tipo de pago = modificar esto
+public void ProcesarPago(string tipo, decimal monto)
+{
+    if (tipo == "efectivo")
+        PagarEfectivo(monto);
+    else if (tipo == "tarjeta")
+        PagarTarjeta(monto);
+    else if (tipo == "transferencia")
+        PagarTransferencia(monto);
+    // ¿y si agregamos crypto? ← modificar acá
+}
+</code></pre>
+        </div>
+      </div>
+
+      <div class="al al-r">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        Cada nuevo tipo de pago requiere modificar la misma función. Esto viola también Open/Closed (SOLID-O).
+      </div>
+    </div>
+
+    <div>
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>BIEN — Polimorfismo GRASP</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">// ✅ Interfaz / clase abstracta
+public interface IMetodoPago
+{
+    void Procesar(decimal monto);
+    string ObtenerDescripcion();
+}
+
+public class PagoEfectivo : IMetodoPago
+{
+    public void Procesar(decimal monto)
+        => Console.WriteLine($"Efectivo: ${monto}");
+    public string ObtenerDescripcion() => "Efectivo";
+}
+
+public class PagoTarjeta : IMetodoPago
+{
+    private string _numero;
+    public PagoTarjeta(string numero) 
+        => _numero = numero;
+    public void Procesar(decimal monto)
+        => Console.WriteLine($"Tarjeta: ${monto}");
+    public string ObtenerDescripcion() => "Tarjeta";
+}
+
+// El cliente no sabe ni le importa qué tipo es
+public class Caja
+{
+    public void Cobrar(IMetodoPago metodo, decimal m)
+        => metodo.Procesar(m); // ← polimorfismo
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="al al-g" style="margin-top:0.5rem;">
+    <i class="fa-solid fa-link me-2"></i>
+    Polymorphism GRASP + Open/Closed SOLID = agregar un nuevo tipo de pago solo requiere crear una nueva clase. <strong>Cero modificaciones al código existente.</strong>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S9 PF + INDIRECCIÓN + PV ═══════════════ -->
+<div class="slide" id="s9">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label">GRASP · 07 + 08 + 09</span>
+  <h2 class="s-title">Pure Fabrication, <span style="color:var(--amber)">Indirection</span> & Protected Variations</h2>
+  <p class="s-sub">Los tres patrones avanzados de GRASP</p>
+
+  <div class="t3">
+    <div>
+      <div class="card-g amber" style="height:100%;">
+        <div class="ci a"><i class="fa-solid fa-hat-wizard"></i></div>
+        <div class="ct">07 Pure Fabrication</div>
+        <div class="cd">Clase inventada (no del dominio) para lograr bajo acoplamiento y alta cohesión.</div>
+        <div class="div"></div>
+        <div class="cd"><strong style="color:var(--cream)">Ejemplo:</strong> <code>EmailService</code>, <code>LoggerService</code>, <code>RepositorioPedidoSQL</code>. No representan conceptos del mundo real, pero resuelven necesidades técnicas de forma limpia.</div>
+        <div class="cw" style="margin-top:0.75rem;">
+          <pre style="margin:0;"><code class="language-csharp" style="font-size:0.72rem!important;">// Pure Fabrication:
+// EmailService no existe en el dominio
+// del negocio, pero es necesaria
+public class EmailService
+{
+    public void Notificar(string to, 
+                          string msg) { }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card-g blue" style="height:100%;">
+        <div class="ci b"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
+        <div class="ct">08 Indirection</div>
+        <div class="cd">Introducir un intermediario entre dos componentes para desacoplarlos.</div>
+        <div class="div"></div>
+        <div class="cd"><strong style="color:var(--cream)">Ejemplo:</strong> En lugar de que el Controller llame directamente a la DB, introduce un Repositorio como intermediario.</div>
+        <div class="cw" style="margin-top:0.75rem;">
+          <pre style="margin:0;"><code class="language-csharp" style="font-size:0.72rem!important;">// Indirection: Repositorio como
+// intermediario entre Service y DB
+public class PedidoController
+{
+    // No habla con la DB directo
+    private readonly IPedidoRepo _repo;
+    public PedidoController(IPedidoRepo r)
+        => _repo = r;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card-g teal" style="height:100%;">
+        <div class="ci t"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="ct">09 Protected Variations</div>
+        <div class="cd">Envolvé los puntos de variación en una interfaz estable para proteger al resto del sistema.</div>
+        <div class="div"></div>
+        <div class="cd"><strong style="color:var(--cream)">Ejemplo:</strong> Si la forma de calcular impuestos varía (IVA, IRPF, exento), encapsulala detrás de <code>ICalculadorImpuesto</code>.</div>
+        <div class="cw" style="margin-top:0.75rem;">
+          <pre style="margin:0;"><code class="language-csharp" style="font-size:0.72rem!important;">// Protected Variations
+public interface ICalculadorImpuesto
+{
+    decimal Calcular(decimal base);
+}
+// Las variaciones están protegidas
+// detrás de la interfaz</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S10 INTRO SOLID ═══════════════ -->
+<div class="slide" id="s10">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label gr">SOLID · Panorama</span>
+  <h2 class="s-title">Los 5 Principios <span style="color:var(--green)">SOLID</span></h2>
+  <p class="s-sub">Robert C. Martin (Uncle Bob) — cinco principios para código orientado a objetos de calidad</p>
+
+  <div class="sg" style="margin-bottom:1.5rem;">
+    <div class="sg-item" onclick="goToSlide(11)" style="border-color:rgba(240,165,0,0.3);cursor:pointer;">
+      <div class="sg-letter" style="color:var(--amber)">S</div>
+      <div class="sg-name">Single Responsibility</div>
+      <div class="sg-full">Una razón para cambiar</div>
+    </div>
+    <div class="sg-item" onclick="goToSlide(12)" style="border-color:rgba(94,184,138,0.3);cursor:pointer;">
+      <div class="sg-letter" style="color:var(--green)">O</div>
+      <div class="sg-name">Open/Closed</div>
+      <div class="sg-full">Abierto a extensión, cerrado a modificación</div>
+    </div>
+    <div class="sg-item" onclick="goToSlide(13)" style="border-color:rgba(91,155,213,0.3);cursor:pointer;">
+      <div class="sg-letter" style="color:var(--blue)">L</div>
+      <div class="sg-name">Liskov Substitution</div>
+      <div class="sg-full">Subtipos reemplazables</div>
+    </div>
+    <div class="sg-item" onclick="goToSlide(14)" style="border-color:rgba(176,127,212,0.3);cursor:pointer;">
+      <div class="sg-letter" style="color:var(--purple)">I</div>
+      <div class="sg-name">Interface Segregation</div>
+      <div class="sg-full">Interfaces específicas</div>
+    </div>
+    <div class="sg-item" onclick="goToSlide(15)" style="border-color:rgba(74,184,168,0.3);cursor:pointer;">
+      <div class="sg-letter" style="color:var(--teal)">D</div>
+      <div class="sg-name">Dependency Inversion</div>
+      <div class="sg-full">Depender de abstracciones</div>
+    </div>
+  </div>
+
+  <div class="t2">
+    <div class="card-g amber">
+      <div class="ci a"><i class="fa-solid fa-circle-question"></i></div>
+      <div class="ct">¿Cuándo aplicarlos?</div>
+      <div class="cd">No son dogma — son guías. En proyectos pequeños, SOLID puede ser overkill. En sistemas que van a crecer y cambiar, son esenciales para mantener el control.</div>
+    </div>
+    <div class="card-g green">
+      <div class="ci g"><i class="fa-solid fa-arrows-rotate"></i></div>
+      <div class="ct">SOLID y GRASP juntos</div>
+      <div class="cd">GRASP te dice <em>dónde</em> poner cada responsabilidad. SOLID te dice <em>cómo</em> estructurarla. Se complementan perfectamente.</div>
+    </div>
+  </div>
+
+  <div class="al al-g" style="margin-top:0.75rem;">
+    <i class="fa-solid fa-hand-pointer me-2"></i>
+    Hacé click en cada letra para ir directamente a ese principio, o navegá con las flechas.
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S11 SOLID S ═══════════════ -->
+<div class="slide" id="s11">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter" style="color:var(--amber);">S</div>
+  <span class="s-label">SOLID · S</span>
+  <h2 class="s-title"><span style="color:var(--amber)">Single</span> Responsibility Principle</h2>
+  <p class="s-sub">"Una clase debe tener una, y solo una, razón para cambiar"</p>
+
+  <div class="t2">
+    <div>
+      <div class="compare-box">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>VIOLA SRP — múltiples responsabilidades</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">// ❌ Esta clase tiene 3 razones para cambiar:
+// 1. Si cambia el formato del reporte
+// 2. Si cambia la DB
+// 3. Si cambia el formato del email
+public class Empleado
+{
+    public string Nombre { get; set; }
+    public decimal Salario { get; set; }
+
+    // Razón 1: lógica de negocio
+    public decimal CalcularSueldoNeto() { ... }
+
+    // Razón 2: persistencia
+    public void GuardarEnDB() { ... }
+
+    // Razón 3: presentación/comunicación
+    public void EnviarReportePorEmail() { ... }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>CUMPLE SRP</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">// ✅ Cada clase tiene UNA responsabilidad
+
+// Solo datos y lógica de dominio
+public class Empleado
+{
+    public string Nombre { get; set; }
+    public decimal Salario { get; set; }
+    public decimal CalcularSueldoNeto() { ... }
+}
+
+// Solo persistencia
+public class EmpleadoRepositorio
+{
+    public void Guardar(Empleado emp) { ... }
+    public Empleado? ObtenerPorId(int id) { ... }
+}
+
+// Solo comunicación
+public class EmpleadoNotificador
+{
+    private readonly IEmailService _email;
+    public void NotificarSueldo(Empleado emp)
+        => _email.Enviar(emp.Email, "...");
+}
+</code></pre>
+        </div>
+      </div>
+
+      <div class="al al-a" style="margin-top:0.5rem;">
+        <i class="fa-solid fa-lightbulb me-2"></i>
+        <strong>Truco:</strong> Si necesitás "y" para describir lo que hace la clase (persiste Y notifica Y calcula), viola SRP.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S12 SOLID O ═══════════════ -->
+<div class="slide" id="s12">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter" style="color:var(--green);">O</div>
+  <span class="s-label gr">SOLID · O</span>
+  <h2 class="s-title"><span style="color:var(--green)">Open/Closed</span> Principle</h2>
+  <p class="s-sub">"Abierto para extensión, cerrado para modificación"</p>
+
+  <div class="t2">
+    <div>
+      <div class="compare-box">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>VIOLA OCP — switch que crece</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">// ❌ Cada nuevo tipo de descuento
+// obliga a modificar esta clase
+public class CalculadorDescuento
+{
+    public decimal Calcular(
+        string tipo, decimal precio)
+    {
+        switch (tipo)
+        {
+            case "navidad": return precio * 0.8m;
+            case "verano":  return precio * 0.9m;
+            // ← agregar aquí cada vez ← MAL
+            default: return precio;
+        }
+    }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>CUMPLE OCP — extensión por herencia/interfaz</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">// ✅ Interfaz cerrada — no se modifica
+public interface IDescuento
+{
+    decimal Aplicar(decimal precio);
+}
+
+// Extensiones abiertas — nuevas clases
+public class DescuentoNavidad : IDescuento
+{
+    public decimal Aplicar(decimal p) => p * 0.80m;
+}
+
+public class DescuentoVerano : IDescuento
+{
+    public decimal Aplicar(decimal p) => p * 0.90m;
+}
+
+// ✅ Para agregar "BlackFriday":
+// Solo crear nueva clase — cero modificaciones
+public class DescuentoBlackFriday : IDescuento
+{
+    public decimal Aplicar(decimal p) => p * 0.50m;
+}
+
+// Uso — no cambia nunca
+public class Carrito
+{
+    public decimal CalcularTotal(
+        decimal precio, IDescuento descuento)
+        => descuento.Aplicar(precio);
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="al al-g">
+    <i class="fa-solid fa-link me-2"></i>
+    OCP se logra con los mismos mecanismos que Polymorphism GRASP: interfaces o clases abstractas. Son la misma solución vista desde ángulos distintos.
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S13 SOLID L ═══════════════ -->
+<div class="slide" id="s13">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter" style="color:var(--blue);">L</div>
+  <span class="s-label bl">SOLID · L</span>
+  <h2 class="s-title">Liskov <span style="color:var(--blue)">Substitution</span> Principle</h2>
+  <p class="s-sub">"Si S hereda de T, podés usar S donde se esperaba T, sin sorpresas"</p>
+
+  <div class="t2">
+    <div>
+      <div class="al al-b" style="margin-top:0;margin-bottom:0.85rem;">
+        <i class="fa-solid fa-lightbulb me-2"></i>
+        La prueba de Liskov: si reemplazás el padre por el hijo, ¿el programa sigue funcionando igual?
+      </div>
+      <div class="compare-box">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>VIOLA LSP — el hijo rompe el contrato</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">public class Rectangulo
+{
+    public virtual double Ancho  { get; set; }
+    public virtual double Alto   { get; set; }
+    public double Area() => Ancho * Alto;
+}
+
+// ❌ Cuadrado viola el contrato del Rectángulo
+public class Cuadrado : Rectangulo
+{
+    public override double Ancho
+    {
+        set { base.Ancho = value; base.Alto = value; }
+    }
+}
+
+// Este código falla si le pasás un Cuadrado:
+void TestArea(Rectangulo r)
+{
+    r.Ancho = 4; r.Alto = 5;
+    // Esperamos 20, pero Cuadrado da 25 ← bug
+    Assert.Equal(20, r.Area());
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>CUMPLE LSP — jerarquía correcta</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">// ✅ Forma base sin relación problemática
+public abstract class Forma
+{
+    public abstract double Area();
+}
+
+public class Rectangulo : Forma
+{
+    public double Ancho { get; set; }
+    public double Alto  { get; set; }
+    public override double Area() => Ancho * Alto;
+}
+
+public class Cuadrado : Forma
+{
+    public double Lado { get; set; }
+    public override double Area() => Lado * Lado;
+}
+
+// Ahora SÍ podés usar cualquier Forma
+void ImprimirArea(Forma f)
+{
+    Console.WriteLine($"Área: {f.Area()}");
+    // ✅ funciona con Rectangulo y Cuadrado
+}
+</code></pre>
+        </div>
+      </div>
+
+      <div class="al al-b" style="margin-top:0.5rem;">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        LSP no dice "nunca heredes". Dice que la herencia debe representar una relación <strong>ES-UN</strong> real y no romper el comportamiento esperado.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S14 SOLID I ═══════════════ -->
+<div class="slide" id="s14">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter" style="color:var(--purple);">I</div>
+  <span class="s-label pu">SOLID · I</span>
+  <h2 class="s-title">Interface <span style="color:var(--purple)">Segregation</span> Principle</h2>
+  <p class="s-sub">"Los clientes no deberían verse forzados a implementar interfaces que no usan"</p>
+
+  <div class="t2">
+    <div>
+      <div class="compare-box">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>VIOLA ISP — interfaz gorda</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">// ❌ Interfaz que hace todo
+public interface IImpresora
+{
+    void Imprimir(Documento doc);
+    void Escanear(Documento doc);
+    void Faxear(Documento doc);
+    void EnviarEmail(Documento doc);
+}
+
+// ❌ Una impresora básica implementa
+// cosas que no puede hacer
+public class ImpresoraBasica : IImpresora
+{
+    public void Imprimir(Documento doc) { ... }
+    public void Escanear(Documento doc)
+        => throw new NotImplementedException();
+    public void Faxear(Documento doc)
+        => throw new NotImplementedException();
+    // ← código muerto / trampa
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>CUMPLE ISP — interfaces específicas</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">// ✅ Interfaces pequeñas y específicas
+public interface IImprimible
+{
+    void Imprimir(Documento doc);
+}
+
+public interface IEscaneable
+{
+    void Escanear(Documento doc);
+}
+
+public interface IFaxeable
+{
+    void Faxear(Documento doc);
+}
+
+// Impresora básica: solo lo que puede hacer
+public class ImpresoraBasica : IImprimible
+{
+    public void Imprimir(Documento doc) { ... }
+}
+
+// Multifunción: implementa lo que corresponde
+public class ImpresoraMultifuncion
+    : IImprimible, IEscaneable, IFaxeable
+{
+    public void Imprimir(Documento doc) { ... }
+    public void Escanear(Documento doc) { ... }
+    public void Faxear(Documento doc)   { ... }
+}
+</code></pre>
+        </div>
+      </div>
+
+      <div class="al al-p" style="margin-top:0.5rem;">
+        <i class="fa-solid fa-lightbulb me-2"></i>
+        Si tu interfaz tiene métodos que algunos implementadores dejan vacíos o con <code>NotImplementedException</code>, es señal de que viola ISP.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S15 SOLID D ═══════════════ -->
+<div class="slide" id="s15">
+<div style="max-width:880px;margin:0 auto;position:relative;">
+  <div class="big-letter" style="color:var(--teal);">D</div>
+  <span class="s-label te">SOLID · D</span>
+  <h2 class="s-title">Dependency <span style="color:var(--teal)">Inversion</span> Principle</h2>
+  <p class="s-sub">"Depende de abstracciones, no de concreciones"</p>
+
+  <div class="t2">
+    <div>
+      <div class="al al-t" style="margin-top:0;margin-bottom:0.85rem;">
+        <i class="fa-solid fa-rotate me-2"></i>
+        <strong>Dos reglas:</strong><br>
+        1. Los módulos de alto nivel no deben depender de módulos de bajo nivel. Ambos deben depender de abstracciones.<br>
+        2. Las abstracciones no deben depender de detalles. Los detalles deben depender de abstracciones.
+      </div>
+
+      <div class="compare-box">
+        <div class="cb-head bad"><i class="fa-solid fa-xmark me-2"></i>VIOLA DIP — depende del concreto</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <pre><code class="language-csharp">// ❌ Alto nivel depende de bajo nivel
+public class PedidoServicio
+{
+    // ← acoplado a la implementación SQL
+    private readonly SqlPedidoRepositorio _repo
+        = new SqlPedidoRepositorio();
+
+    public Pedido ObtenerPedido(int id)
+        => _repo.ObtenerPorId(id);
+
+    // Si cambiamos a MongoDB... hay que
+    // modificar PedidoServicio. ← MAL
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="compare-box">
+        <div class="cb-head good"><i class="fa-solid fa-check me-2"></i>CUMPLE DIP — inversión de dependencias</div>
+        <div class="cw" style="border:none;border-radius:0;">
+          <button class="cbtn" onclick="copyCode2(this)" style="margin:6px 12px 0;">copiar</button>
+          <pre><code class="language-csharp">// ✅ Abstracción en el medio
+public interface IPedidoRepositorio
+{
+    Pedido? ObtenerPorId(int id);
+    void Guardar(Pedido pedido);
+}
+
+// Alto nivel depende de la abstracción
+public class PedidoServicio
+{
+    private readonly IPedidoRepositorio _repo;
+
+    // La dependencia se INYECTA
+    public PedidoServicio(IPedidoRepositorio repo)
+        => _repo = repo;
+
+    public Pedido ObtenerPedido(int id)
+        => _repo.ObtenerPorId(id) 
+           ?? throw new KeyNotFoundException();
+}
+
+// Bajo nivel implementa la abstracción
+public class SqlPedidoRepositorio 
+    : IPedidoRepositorio { ... }
+
+public class MongoDBPedidoRepositorio 
+    : IPedidoRepositorio { ... }
+
+// En Program.cs (o DI container):
+// services.AddScoped&lt;IPedidoRepositorio,
+//                     SqlPedidoRepositorio&gt;();
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S16 GRASP vs SOLID MAPA ═══════════════ -->
+<div class="slide" id="s16">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label">Relaciones</span>
+  <h2 class="s-title">Cómo se <span style="color:var(--amber)">conectan</span></h2>
+  <p class="s-sub">GRASP y SOLID no son rivales — se refuerzan mutuamente</p>
+
+  <div class="t2" style="margin-bottom:1.25rem;">
+    <div>
+      <h5 style="color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.85rem;">GRASP → SOLID</h5>
+      <div class="step"><div class="sn" style="font-size:0.65rem;font-weight:700;">HC</div><div class="sc"><div class="stit">High Cohesion <i class="fa-solid fa-arrow-right mx-2" style="color:var(--amber)"></i> SRP</div><div class="sdesc">Una clase con alta cohesión hace una sola cosa → tiene una sola razón para cambiar (SRP).</div></div></div>
+      <div class="step"><div class="sn" style="font-size:0.65rem;font-weight:700;">Po</div><div class="sc"><div class="stit">Polymorphism GRASP <i class="fa-solid fa-arrow-right mx-2" style="color:var(--amber)"></i> OCP</div><div class="sdesc">Reemplazar condicionales por polimorfismo hace el código abierto a extensión sin modificación.</div></div></div>
+      <div class="step"><div class="sn" style="font-size:0.65rem;font-weight:700;">PV</div><div class="sc"><div class="stit">Protected Variations <i class="fa-solid fa-arrow-right mx-2" style="color:var(--amber)"></i> OCP</div><div class="sdesc">Encapsular lo que varía detrás de interfaces es exactamente el mecanismo del OCP.</div></div></div>
+      <div class="step"><div class="sn" style="font-size:0.65rem;font-weight:700;">In</div><div class="sc"><div class="stit">Indirection <i class="fa-solid fa-arrow-right mx-2" style="color:var(--amber)"></i> DIP</div><div class="sdesc">Introducir un intermediario (interfaz) entre capas es la base del Dependency Inversion.</div></div></div>
+      <div class="step"><div class="sn" style="font-size:0.65rem;font-weight:700;">LC</div><div class="sc"><div class="stit">Low Coupling <i class="fa-solid fa-arrow-right mx-2" style="color:var(--amber)"></i> DIP + ISP</div><div class="sdesc">Depender de interfaces pequeñas (ISP) reduce el acoplamiento y permite la inversión de dependencias.</div></div></div>
+    </div>
+
+    <div>
+      <h5 style="color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.85rem;">TABLA RESUMEN</h5>
+      <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+        <thead>
+          <tr style="background:var(--bg3);">
+            <th style="padding:7px 10px;text-align:left;border:1px solid var(--border2);color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;">Principio</th>
+            <th style="padding:7px 10px;text-align:left;border:1px solid var(--border2);color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;">Pregunta que responde</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--bg2)"><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--amber)">Expert</td><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--cream-muted)">¿Quién tiene la info para hacer X?</td></tr>
+          <tr style="background:var(--bg3)"><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--amber)">Creator</td><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--cream-muted)">¿Quién debe crear instancias de Y?</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--green)">SRP</td><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--cream-muted)">¿Cuántas razones tiene esta clase para cambiar?</td></tr>
+          <tr style="background:var(--bg3)"><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--green)">OCP</td><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--cream-muted)">¿Puedo extender sin modificar lo existente?</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--blue)">LSP</td><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--cream-muted)">¿El hijo puede reemplazar al padre sin romper nada?</td></tr>
+          <tr style="background:var(--bg3)"><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--purple)">ISP</td><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--cream-muted)">¿Las interfaces son específicas y pequeñas?</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--teal)">DIP</td><td style="padding:6px 10px;border:1px solid var(--border2);color:var(--cream-muted)">¿Dependo de abstracciones o de concretos?</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S17 EJERCICIO INTEGRADOR ═══════════════ -->
+<div class="slide" id="s17">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label rd">Ejercicio Integrador</span>
+  <h2 class="s-title">Sistema de <span style="color:var(--amber)">Notificaciones</span></h2>
+  <p class="s-sub">Aplicá GRASP + SOLID en un ejercicio real — identificá qué principio viola cada fragmento</p>
+
+  <div class="t2">
+    <div>
+      <p style="font-size:0.85rem;color:var(--cream-muted);margin-bottom:0.85rem;">
+        Este sistema tiene múltiples problemas de diseño. Identificalos y refactorizalo:
+      </p>
+      <div class="cw">
+        <div class="ch">
+          <div class="cd2 r"></div><div class="cd2 y"></div><div class="cd2 g"></div>
+          <span class="cfn">NotificadorMal.cs — lleno de problemas</span>
+          <button class="cbtn" onclick="copyCode2(this)">copiar</button>
+        </div>
+        <pre><code class="language-csharp">// ⚠ Este código viola varios principios.
+// Identificá cuáles antes de ver la solución.
+
+public class Notificador
+{
+    // Crea dependencias directamente
+    private SmtpClient _smtp = new SmtpClient();
+    private TwilioClient _twilio = new TwilioClient();
+
+    public void Notificar(
+        string tipo, string usuario, string mensaje)
+    {
+        // Condicional por tipo de notificación
+        if (tipo == "email")
+        {
+            _smtp.Send(usuario, mensaje);
+            Console.WriteLine("Enviado por email");
+            // También persiste en la misma clase
+            File.AppendAllText("log.txt", mensaje);
+        }
+        else if (tipo == "sms")
+        {
+            _twilio.Send(usuario, mensaje);
+            File.AppendAllText("log.txt", mensaje);
+        }
+        // ¿y si agregamos WhatsApp, Push, Slack?
+    }
+}
+</code></pre>
+      </div>
+    </div>
+
+    <div>
+      <h5 style="color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.85rem;">PROBLEMAS IDENTIFICADOS</h5>
+
+      <div class="step"><div class="sn r">S</div><div class="sc"><div class="stit hlr">Viola SRP</div><div class="sdesc">La clase notifica, hace logging y configura transporte — tres responsabilidades.</div></div></div>
+      <div class="step"><div class="sn r">O</div><div class="sc"><div class="stit hlr">Viola OCP</div><div class="sdesc">Agregar WhatsApp requiere modificar el if/else existente.</div></div></div>
+      <div class="step"><div class="sn r">D</div><div class="sc"><div class="stit hlr">Viola DIP</div><div class="sdesc"><code>new SmtpClient()</code> y <code>new TwilioClient()</code> directamente — depende de concreciones.</div></div></div>
+      <div class="step"><div class="sn r">Po</div><div class="sc"><div class="stit hlr">Viola Polymorphism GRASP</div><div class="sdesc">if/else por tipo en lugar de polimorfismo.</div></div></div>
+
+      <button class="nb" onclick="verSolucionNotificador()" style="width:100%;justify-content:center;margin-top:0.85rem;">
+        <i class="fa-solid fa-eye me-2"></i>Ver diseño correcto
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ S18 RESUMEN ═══════════════ -->
+<div class="slide" id="s18">
+<div style="max-width:880px;margin:0 auto;">
+  <span class="s-label">Resumen Final</span>
+  <h2 class="s-title">Lo que <span style="color:var(--amber)">aprendiste</span></h2>
+  <p class="s-sub">Checklist completo de GRASP y SOLID — guarda esto para tus proyectos</p>
+
+  <div class="t2">
+    <div>
+      <h5 style="color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.85rem;">9 PATRONES GRASP</h5>
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:1rem;">
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Information Expert</strong> — asignar donde está la info</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Creator</strong> — crear donde hay contención o uso cercano</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Controller</strong> — recibir eventos del sistema, delegar</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Low Coupling</strong> — pocas dependencias entre clases</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">High Cohesion</strong> — una responsabilidad focalizada</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Polymorphism</strong> — variaciones por tipo, no por if</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Pure Fabrication</strong> — clase técnica para bajo acoplamiento</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Indirection</strong> — intermediario para desacoplar</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check"></i><span><strong class="hl">Protected Variations</strong> — encapsular lo que varía</span></div>
+      </div>
+    </div>
+
+    <div>
+      <h5 style="color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.85rem;">5 PRINCIPIOS SOLID</h5>
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:1rem;">
+        <div class="ck-item"><i class="fa-solid fa-circle-check" style="color:var(--amber)"></i><span><strong class="hl">S</strong> — Una sola razón para cambiar</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i><span><strong class="hlg">O</strong> — Abierto a extensión, cerrado a modificación</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check" style="color:var(--blue)"></i><span><strong class="hlb">L</strong> — El hijo no rompe el contrato del padre</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check" style="color:var(--purple)"></i><span><strong class="hlp">I</strong> — Interfaces pequeñas y específicas</span></div>
+        <div class="ck-item"><i class="fa-solid fa-circle-check" style="color:var(--teal)"></i><span><strong class="hlt">D</strong> — Depender de abstracciones, no de concretos</span></div>
+      </div>
+
+      <div class="al al-a" style="margin-top:1rem;">
+        <i class="fa-solid fa-quote-left me-2"></i>
+        <em>"El buen diseño no es lo que funciona. Es lo que <strong>sobrevive al cambio</strong> sin volverse un desastre."</em>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">
+        <button class="nb pr" onclick="goToSlide(1)"><i class="fa-solid fa-rotate-left me-2"></i>Reiniciar</button>
+        <button class="nb" onclick="mostrarQuiz()"><i class="fa-solid fa-clipboard-question me-2"></i>Quiz rápido</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- NAV -->
+<nav class="nav-bot">
+  <button class="nb" id="prevB" onclick="changeSlide(-1)" disabled><i class="fa-solid fa-chevron-left"></i>&nbsp;Anterior</button>
+  <div class="idx-wrap" id="idxWrap"></div>
+  <button class="nb pr" id="nextB" onclick="changeSlide(1)">Siguiente&nbsp;<i class="fa-solid fa-chevron-right"></i></button>
+</nav>
+
+<!-- SweetAlert2 Custom -->
+<style>
+.swal2-popup{background:#1c1916!important;border:1px solid #3a3228!important;border-radius:12px!important;color:#f5edd8!important;font-family:'DM Sans',sans-serif!important;}
+.swal2-title{color:#f5edd8!important;font-family:'Playfair Display',serif!important;font-weight:700!important;}
+.swal2-html-container{color:#c9bfa8!important;font-size:0.88rem!important;line-height:1.65!important;}
+.swal2-confirm{background:linear-gradient(135deg,#b87800,#f0a500)!important;border-radius:7px!important;font-family:'DM Sans',sans-serif!important;font-weight:600!important;border:none!important;color:#13110f!important;}
+.swal2-cancel{background:#252118!important;border:1px solid #3a3228!important;color:#c9bfa8!important;border-radius:7px!important;font-family:'DM Sans',sans-serif!important;font-weight:600!important;}
+.swal2-icon.swal2-success{border-color:#5eb88a!important;}
+.swal2-icon.swal2-success [class^='swal2-success-line']{background:#5eb88a!important;}
+.swal2-icon.swal2-success .swal2-success-ring{border-color:rgba(94,184,138,0.3)!important;}
+.swal2-icon.swal2-info{border-color:#f0a500!important;color:#f0a500!important;}
+.swal2-icon.swal2-warning{border-color:#e05c4a!important;color:#e05c4a!important;}
+.swal2-icon.swal2-question{border-color:#b07fd4!important;color:#b07fd4!important;}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
+<script>
+hljs.highlightAll();
+
+const TOTAL = 18;
+let cur = 1;
+
+// Build dots
+const iw = document.getElementById('idxWrap');
+for (let i = 1; i <= TOTAL; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===1?' active':'');
+  d.onclick = () => goToSlide(i);
+  d.title = `Diapositiva ${i}`;
+  iw.appendChild(d);
+}
+
+function goToSlide(n) {
+  document.getElementById('s'+cur).classList.remove('active');
+  cur = Math.max(1, Math.min(TOTAL, n));
+  const el = document.getElementById('s'+cur);
+  el.classList.add('active');
+  el.style.animation = 'none';
+  el.offsetHeight; // reflow
+  el.style.animation = '';
+  el.classList.add('animate__animated','animate__fadeIn');
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateNav();
+}
+function changeSlide(d) { goToSlide(cur+d); }
+
+function updateNav() {
+  document.getElementById('prevB').disabled = cur===1;
+  document.getElementById('nextB').disabled = cur===TOTAL;
+  document.getElementById('hcount').textContent = `${cur} / ${TOTAL}`;
+  document.getElementById('pbar').style.width = `${(cur/TOTAL)*100}%`;
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active',i+1===cur));
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') changeSlide(1);
+  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   changeSlide(-1);
+});
+
+function copyCode2(btn) {
+  const pre = btn.closest('.cw')?.querySelector('code') || btn.closest('.compare-box')?.querySelector('code');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ copiado'; btn.style.color='#5eb88a'; btn.style.borderColor='#5eb88a';
+    setTimeout(()=>{btn.textContent='copiar';btn.style.color='';btn.style.borderColor='';},2000);
+  });
+}
+
+// GRASP Info popup
+const graspData = {
+  expert:      { title:'01 · Information Expert', txt:'Asignale la responsabilidad a la clase que tiene la información necesaria para cumplirla. Es el patrón más básico y más utilizado de GRASP.<br><br><strong style="color:#f0a500">Ejemplo:</strong> <code>LineaPedido</code> calcula su subtotal porque tiene el precio y la cantidad.' },
+  creator:     { title:'02 · Creator',             txt:'Asignale a A la responsabilidad de crear instancias de B si: A contiene/agrega a B, A registra a B, A usa a B directamente, o A tiene los datos para inicializar B.<br><br><strong style="color:#f0a500">Ejemplo:</strong> <code>Pedido</code> crea <code>LineaPedido</code> porque la contiene.' },
+  controller:  { title:'03 · Controller',          txt:'Asignale la responsabilidad de recibir y coordinar eventos del sistema a un objeto que no es de UI. Puede ser un controller de façade (representa todo el sistema) o de caso de uso.<br><br><strong style="color:#f0a500">Ejemplo:</strong> <code>GestionarPedidoController</code> recibe el evento "hacer pedido" y delega.' },
+  lowcoupling: { title:'04 · Low Coupling',        txt:'Las clases con bajo acoplamiento tienen pocas dependencias hacia otras. Cuando una clase cambia, pocas otras se ven afectadas.<br><br><strong style="color:#f0a500">Lograr:</strong> Depender de interfaces (no de concreciones), inyección de dependencias, evitar <code>new</code> dentro de constructores de alto nivel.' },
+  highcohesion:{ title:'05 · High Cohesion',       txt:'Una clase con alta cohesión tiene responsabilidades relacionadas y focalizadas. Sus métodos trabajan con los mismos datos.<br><br><strong style="color:#f0a500">Señal de baja cohesión:</strong> necesitás "y" para describir qué hace la clase. Ej: "guarda Y notifica Y calcula".' },
+  polymorphism:{ title:'06 · Polymorphism',        txt:'Cuando el comportamiento varía según el tipo de objeto, usá polimorfismo (interfaces/herencia) en lugar de condicionales por tipo (if/switch).<br><br><strong style="color:#f0a500">Beneficio:</strong> agregar un nuevo tipo no requiere modificar el código existente.' },
+  purefab:     { title:'07 · Pure Fabrication',    txt:'Clase inventada que no representa un concepto del dominio del problema, creada para lograr bajo acoplamiento y alta cohesión.<br><br><strong style="color:#f0a500">Ejemplos:</strong> <code>EmailService</code>, <code>Logger</code>, <code>FileRepository</code>. No existen en el mundo real pero son necesarias técnicamente.' },
+  indirection: { title:'08 · Indirection',         txt:'Introducir un objeto intermediario para desacoplar dos componentes que de otra manera estarían directamente relacionados.<br><br><strong style="color:#f0a500">Ejemplo:</strong> Un repositorio entre el servicio y la base de datos. Una interfaz entre el controller y la implementación concreta.' },
+  protected:   { title:'09 · Protected Variations', txt:'Identificar los puntos de variación o inestabilidad del sistema y asignar responsabilidades para crear una interfaz estable alrededor de ellos.<br><br><strong style="color:#f0a500">Ejemplo:</strong> Si el cálculo de impuestos cambia frecuentemente, encapsularlo detrás de <code>ICalculadorImpuesto</code>.' },
+};
+
+function showGraspInfo(key) {
+  const d = graspData[key];
+  Swal.fire({ title: d.title, icon:'info', html: d.txt, confirmButtonText:'Entendido', width:'500px' });
+}
+
+// Solución Notificador
+function verSolucionNotificador() {
+  Swal.fire({
+    title: 'Diseño correcto — GRASP + SOLID',
+    icon: 'success', width: '640px',
+    html: `<div style="text-align:left;font-size:0.82rem;line-height:1.7;">
+<pre style="background:#0d0b09;border-radius:8px;padding:1rem;overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:#ccc;"><code>// ✅ Interfaz — OCP + DIP + Polymorphism GRASP
+public interface INotificacion {
+    void Enviar(string destinatario, string msg);
+}
+
+// ✅ Cada tipo es una clase — SRP + OCP
+public class NotificacionEmail : INotificacion {
+    private readonly IEmailService _email;
+    public NotificacionEmail(IEmailService e) => _email = e;
+    public void Enviar(string dest, string msg)
+        => _email.Send(dest, msg);
+}
+
+public class NotificacionSMS : INotificacion {
+    private readonly ISMSService _sms;
+    public NotificacionSMS(ISMSService s) => _sms = s;
+    public void Enviar(string dest, string msg)
+        => _sms.Send(dest, msg);
+}
+
+// ✅ Logger separado — SRP
+public class NotificacionLogger {
+    public void Registrar(string msg)
+        => File.AppendAllText("log.txt", msg);
+}
+
+// ✅ Notificador limpio — DIP + Polymorphism
+public class Notificador {
+    private readonly INotificacion _canal;
+    private readonly NotificacionLogger _log;
+    public Notificador(INotificacion canal,
+                       NotificacionLogger log) {
+        _canal = canal; _log = log;
+    }
+    public void Notificar(string dest, string msg) {
+        _canal.Enviar(dest, msg);  // polimorfismo
+        _log.Registrar(msg);       // SRP separado
+    }
+}</code></pre>
+<p style="color:#5eb88a;margin-top:0.5rem;">Agregar WhatsApp = solo crear <code>NotificacionWhatsApp : INotificacion</code>. Cero cambios al resto.</p>
+</div>`,
+    confirmButtonText: '¡Perfecto!'
+  });
+}
+
+// Quiz rápido
+const quizQ = [
+  { q:'¿Qué patrón GRASP indica que la clase con la información debe tener la responsabilidad?', opts:['Creator','Information Expert','Controller','Indirection'], correct:1 },
+  { q:'¿Cuál de estos es un "smell" que viola SRP?', opts:['Una clase con una interfaz','Un método que delega trabajo','Una clase que "guarda Y notifica Y calcula"','Inyección de dependencias'], correct:2 },
+  { q:'Tenés que agregar un nuevo tipo de descuento. ¿Qué principio SOLID dice que no deberías modificar el código existente?', opts:['SRP','DIP','OCP','LSP'], correct:2 },
+  { q:'Una impresora básica implementa una interfaz con Imprimir(), Escanear() y Faxear(), pero lanza NotImplementedException en los últimos dos. ¿Qué viola?', opts:['SRP','ISP','OCP','LSP'], correct:1 },
+  { q:'En Low Coupling GRASP, ¿cuál es la forma correcta de depender de la base de datos?', opts:['new SqlConnection() dentro del constructor','Heredar de DbBase','Inyectar una interfaz como IRepositorio','Usar variables globales'], correct:2 },
+];
+let qi = 0, score = 0;
+
+function mostrarQuiz() {
+  qi = 0; score = 0;
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (qi >= quizQ.length) {
+    Swal.fire({
+      title: `Resultado: ${score}/${quizQ.length}`,
+      icon: score >= 4 ? 'success' : score >= 2 ? 'info' : 'warning',
+      html: `<p>${score === quizQ.length ? '¡Perfecto! Dominás GRASP y SOLID.' : score >= 3 ? 'Muy bien. Repasá los principios que fallaste.' : 'Repasá la presentación y volvé a intentarlo.'}</p>`,
+      confirmButtonText:'Ver presentación',
+      showCancelButton: score < quizQ.length,
+      cancelButtonText:'Cerrar'
+    }).then(r => { if (r.isConfirmed) goToSlide(1); });
+    return;
+  }
+  const q = quizQ[qi];
+  const optHtml = q.opts.map((o,i)=>`<div onclick="checkAnswer(${i})" style="cursor:pointer;background:#252118;border:1px solid #3a3228;border-radius:7px;padding:0.65rem 1rem;margin-bottom:0.5rem;font-size:0.85rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#f0a500'" onmouseout="this.style.borderColor='#3a3228'"><span style="color:#f0a500;font-family:'IBM Plex Mono',monospace;margin-right:8px;">${String.fromCharCode(65+i)}.</span>${o}</div>`).join('');
+  Swal.fire({
+    title: `Pregunta ${qi+1} / ${quizQ.length}`,
+    icon:'question',
+    html: `<p style="margin-bottom:1rem;color:#c9bfa8;text-align:left">${q.q}</p>${optHtml}`,
+    showConfirmButton: false, showCancelButton: false,
+    allowOutsideClick: false, width:'520px'
+  });
+}
+
+function checkAnswer(idx) {
+  const q = quizQ[qi];
+  const correct = idx === q.correct;
+  if (correct) score++;
+  Swal.fire({
+    title: correct ? '✓ Correcto!' : '✗ Incorrecto',
+    icon: correct ? 'success' : 'warning',
+    html: correct ? `<p style="color:#5eb88a">¡Bien! La respuesta es: <strong>${q.opts[q.correct]}</strong></p>` : `<p>La respuesta correcta era: <strong style="color:#f0a500">${q.opts[q.correct]}</strong></p>`,
+    confirmButtonText: qi+1 < quizQ.length ? 'Siguiente →' : 'Ver resultado',
+    allowOutsideClick: false, width:'440px'
+  }).then(()=>{ qi++; nextQuestion(); });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tipos e Interfaces — POO II</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Animate.css -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<!-- SweetAlert2 -->
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+:root {
+  --ink:    #0d1117;
+  --panel:  #161b22;
+  --card:   #1c2330;
+  --border: #30363d;
+  --gold:   #d4a017;
+  --gold2:  #f0c040;
+  --teal:   #39d0c0;
+  --rose:   #ff6b7a;
+  --muted:  #8b949e;
+  --text:   #e6edf3;
+  --code-bg:#0d1117;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── Starfield bg ─────────────────────────── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: .35;
+}
+
+/* ── Layout ───────────────────────────────── */
+#app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ──────────────────────────────── */
+#topbar {
+  background: rgba(22,27,34,.9);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  padding: .55rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+#topbar .logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--gold);
+  letter-spacing: .03em;
+}
+#topbar .section-label {
+  font-size: .75rem;
+  color: var(--muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+#progress-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--teal));
+  transition: width .4s ease;
+  flex-shrink: 0;
+}
+
+/* ── Slide container ──────────────────────── */
+#slide-wrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 2rem 3.5rem;
+  overflow-y: auto;
+  display: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.slide.active { display: block; }
+.slide::-webkit-scrollbar { width: 5px; }
+.slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── Bottom nav ───────────────────────────── */
+#bottombar {
+  background: rgba(22,27,34,.9);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  padding: .7rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .35rem .9rem;
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.nav-btn:hover { background: var(--card); border-color: var(--gold); color: var(--gold); }
+.nav-btn:disabled { opacity: .3; cursor: default; }
+#slide-counter { font-size: .82rem; color: var(--muted); }
+#goto-quiz-btn {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border: none;
+  color: var(--ink);
+  font-weight: 600;
+  padding: .35rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .82rem;
+  transition: opacity .2s;
+}
+#goto-quiz-btn:hover { opacity: .85; }
+
+/* ── TOC menu ─────────────────────────────── */
+#toc-btn { background: transparent; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; }
+#toc-btn:hover { color: var(--gold); }
+#toc-panel {
+  position: fixed;
+  top: 0; left: -320px;
+  width: 300px; height: 100vh;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  z-index: 100;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
+  transition: left .3s ease;
+}
+#toc-panel.open { left: 0; }
+#toc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 99;
+  display: none;
+}
+#toc-overlay.show { display: block; }
+.toc-item {
+  padding: .4rem .7rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: .82rem;
+  color: var(--muted);
+  margin-bottom: .2rem;
+  transition: all .15s;
+  border-left: 2px solid transparent;
+}
+.toc-item:hover { background: var(--card); color: var(--text); }
+.toc-item.active { border-left-color: var(--gold); color: var(--gold); background: rgba(212,160,23,.08); }
+.toc-section { font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 1rem .7rem .3rem; }
+
+/* ── Typography ───────────────────────────── */
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.1;
+  color: var(--gold);
+  margin-bottom: .5rem;
+}
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  color: var(--gold2);
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: .5rem;
+}
+h3 {
+  font-size: 1.1rem;
+  color: var(--teal);
+  margin-bottom: .6rem;
+  font-weight: 500;
+}
+p { color: #c9d1d9; line-height: 1.7; margin-bottom: .8rem; }
+strong { color: var(--gold2); }
+.lead { font-size: 1.1rem; color: #c9d1d9; }
+
+/* ── Cards ────────────────────────────────── */
+.concept-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.concept-card h3 { margin-bottom: .4rem; }
+.concept-card.teal { border-left-color: var(--teal); }
+.concept-card.teal h3 { color: var(--teal); }
+.concept-card.rose { border-left-color: var(--rose); }
+.concept-card.rose h3 { color: var(--rose); }
+
+.tarjeta {
+  background: linear-gradient(135deg, rgba(212,160,23,.1), rgba(57,208,192,.05));
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 1rem 1.3rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.tarjeta::before {
+  content: '🗒';
+  position: absolute;
+  top: .6rem; right: .8rem;
+  font-size: 1rem;
+  opacity: .5;
+}
+.tarjeta-title {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--gold);
+  margin-bottom: .4rem;
+  font-weight: 600;
+}
+.tarjeta p { margin-bottom: 0; font-size: .92rem; }
+
+/* ── Code ─────────────────────────────────── */
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  font-size: .82rem;
+  line-height: 1.6;
+}
+code { font-family: 'JetBrains Mono', monospace; }
+pre code { color: #e6edf3; }
+.kw { color: #ff7b72; }
+.ty { color: #79c0ff; }
+.st { color: #a5d6ff; }
+.cm { color: #8b949e; font-style: italic; }
+.fn { color: #d2a8ff; }
+.nu { color: #79c0ff; }
+.prop { color: #ffa657; }
+.op { color: #ff7b72; }
+
+/* ── Exercise section ─────────────────────── */
+.exercise-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.exercise-header {
+  background: rgba(57,208,192,.08);
+  border-bottom: 1px solid var(--border);
+  padding: .8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  cursor: pointer;
+  user-select: none;
+}
+.exercise-header:hover { background: rgba(57,208,192,.14); }
+.ex-badge {
+  background: var(--teal);
+  color: var(--ink);
+  font-size: .68rem;
+  font-weight: 700;
+  padding: .15rem .5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.exercise-header h3 { margin: 0; color: var(--teal); font-size: .95rem; }
+.exercise-body { padding: 1rem 1.2rem; }
+.solution-toggle {
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  padding: .4rem .9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .8rem;
+  margin-top: .5rem;
+  transition: all .2s;
+}
+.solution-toggle:hover { border-color: var(--gold); color: var(--gold); }
+.solution-block { display: none; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+.solution-block.visible { display: block; }
+
+/* ── Quiz ─────────────────────────────────── */
+#quiz-container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 1rem 0;
+}
+.quiz-header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.q-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+  transition: border-color .2s;
+}
+.q-card.correct { border-color: #3fb950; background: rgba(63,185,80,.07); }
+.q-card.wrong   { border-color: var(--rose); background: rgba(255,107,122,.07); }
+.q-num {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: .4rem;
+}
+.q-text { font-size: .95rem; margin-bottom: .8rem; color: var(--text); }
+.q-options { display: grid; gap: .4rem; }
+.q-opt {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: .5rem .9rem;
+  cursor: pointer;
+  font-size: .88rem;
+  color: var(--text);
+  transition: all .15s;
+  text-align: left;
+  width: 100%;
+}
+.q-opt:hover:not(:disabled) { border-color: var(--teal); background: rgba(57,208,192,.08); }
+.q-opt.selected-correct { border-color: #3fb950; background: rgba(63,185,80,.15); color: #3fb950; }
+.q-opt.selected-wrong   { border-color: var(--rose); background: rgba(255,107,122,.15); color: var(--rose); }
+.q-opt.reveal-correct   { border-color: #3fb950; color: #3fb950; }
+.q-opt:disabled { cursor: default; }
+.q-feedback { font-size: .8rem; margin-top: .5rem; padding: .4rem .7rem; border-radius: 5px; }
+.q-feedback.ok  { background: rgba(63,185,80,.12); color: #3fb950; }
+.q-feedback.err { background: rgba(255,107,122,.12); color: var(--rose); }
+
+#submit-quiz-btn {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border: none;
+  color: var(--ink);
+  font-weight: 700;
+  padding: .7rem 2.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: opacity .2s;
+}
+#submit-quiz-btn:hover { opacity: .85; }
+#score-bar { height: 10px; border-radius: 5px; background: var(--border); overflow: hidden; margin: .6rem 0; }
+#score-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--teal), var(--gold)); transition: width 1s ease; }
+
+/* ── Intro slide ─────────────────────────── */
+.intro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  margin-top: 1.5rem;
+}
+.intro-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.intro-stat .num { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--gold); }
+.intro-stat .lbl { font-size: .8rem; color: var(--muted); }
+
+/* ── Diagram ──────────────────────────────── */
+.uml-box {
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  text-align: center;
+  font-size: .82rem;
+  overflow: hidden;
+  min-width: 140px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.uml-box .uml-head { background: rgba(212,160,23,.15); border-bottom: 1px solid var(--border); padding: .3rem .6rem; font-weight: 600; }
+.uml-box .uml-head.interface { background: rgba(57,208,192,.12); color: var(--teal); }
+.uml-box .uml-head.class-h { background: rgba(210,168,255,.1); color: #d2a8ff; }
+.uml-box .uml-body { padding: .4rem .6rem; text-align: left; line-height: 1.8; color: var(--muted); }
+
+.implements-arrow { font-size: 1.4rem; color: var(--border); display: flex; align-items: center; }
+
+/* ── Highlight box ────────────────────────── */
+.highlight-box {
+  background: rgba(212,160,23,.06);
+  border: 1px solid rgba(212,160,23,.3);
+  border-radius: 8px;
+  padding: .8rem 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Two-col ──────────────────────────────── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+/* ── Animations ───────────────────────────── */
+.slide.active .auto-animate { animation: fadeInUp .5s ease both; }
+.slide.active .auto-animate:nth-child(2) { animation-delay: .1s; }
+.slide.active .auto-animate:nth-child(3) { animation-delay: .2s; }
+.slide.active .auto-animate:nth-child(4) { animation-delay: .3s; }
+.slide.active .auto-animate:nth-child(5) { animation-delay: .4s; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+
+/* ── Util ─────────────────────────────────── */
+.text-gold { color: var(--gold); }
+.text-teal { color: var(--teal); }
+.text-rose { color: var(--rose); }
+.text-muted { color: var(--muted); }
+.badge-pill {
+  display: inline-block;
+  background: rgba(212,160,23,.15);
+  color: var(--gold);
+  border: 1px solid rgba(212,160,23,.3);
+  padding: .15rem .55rem;
+  border-radius: 20px;
+  font-size: .75rem;
+  font-weight: 600;
+  margin-right: .3rem;
+}
+
+/* responsive */
+@media (max-width: 700px) {
+  .slide { padding: 1.2rem 1rem; }
+  .two-col, .intro-grid, .three-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- TOC overlay -->
+<div id="toc-overlay" onclick="closeTOC()"></div>
+
+<!-- TOC panel -->
+<div id="toc-panel">
+  <div style="font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem;font-size:1rem;">Contenidos</div>
+  <div id="toc-list"></div>
+</div>
+
+<div id="app">
+  <!-- Top bar -->
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:.8rem">
+      <button id="toc-btn" onclick="openTOC()" title="Tabla de contenidos"><i class="fa fa-bars"></i></button>
+      <span class="logo"><i class="fa fa-infinity me-1"></i>POO II — Tipos e Interfaces</span>
+    </div>
+    <span class="section-label" id="current-section">Introducción</span>
+    <span style="font-size:.78rem;color:var(--muted);">← → para navegar</span>
+  </div>
+  <div id="progress-bar" style="width:0%"></div>
+
+  <!-- Slides -->
+  <div id="slide-wrap">
+
+    <!-- ════════════════════════════════════════
+         SLIDE 0: PORTADA
+    ═════════════════════════════════════════ -->
+    <div class="slide active" data-section="Introducción">
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;text-align:center;">
+        <div class="animate__animated animate__fadeInDown">
+          <div style="font-size:.75rem;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem;">Programación Orientada a Objetos II</div>
+          <h1 style="font-size:clamp(2.4rem,5vw,4rem);margin-bottom:.3rem;">Tipos e Interfaces</h1>
+          <div style="font-size:1.1rem;color:var(--teal);margin-bottom:2rem;font-family:'JetBrains Mono',monospace;">interface IContrato { ... }</div>
+        </div>
+        <div class="intro-grid animate__animated animate__fadeInUp animate__delay-1s" style="max-width:520px">
+          <div class="intro-stat"><div class="num">2</div><div class="lbl">Temas principales</div></div>
+          <div class="intro-stat"><div class="num">5</div><div class="lbl">Ejercicios prácticos</div></div>
+          <div class="intro-stat"><div class="num">30</div><div class="lbl">Preguntas quiz</div></div>
+          <div class="intro-stat"><div class="num">C#</div><div class="lbl">Lenguaje utilizado</div></div>
+        </div>
+        <div class="animate__animated animate__fadeIn animate__delay-2s" style="margin-top:1.8rem;color:var(--muted);font-size:.85rem;">
+          <i class="fa fa-arrow-right me-1"></i>Usá las teclas <kbd style="background:var(--card);border:1px solid var(--border);padding:.1rem .4rem;border-radius:3px;font-size:.8rem;">←</kbd> <kbd style="background:var(--card);border:1px solid var(--border);padding:.1rem .4rem;border-radius:3px;font-size:.8rem;">→</kbd> para navegar
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 1: CONTRATOS Y COLABORACIÓN
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Tipos — Contratos">
+      <h2><i class="fa fa-handshake me-2 text-gold"></i>Contratos entre Objetos</h2>
+      <div class="auto-animate">
+        <p>Los objetos colaboran entre sí enviando y recibiendo <strong>mensajes</strong>. Para que esta colaboración sea eficaz, existe un <strong>contrato</strong> entre el emisor y el receptor.</p>
+      </div>
+      <div class="two-col auto-animate">
+        <div class="concept-card">
+          <h3><i class="fa fa-paper-plane me-1"></i>Emisor</h3>
+          <p style="font-size:.9rem;"><strong>Obligación:</strong> enviar solo mensajes dentro del contrato.<br><strong>Derecho:</strong> solicitar cualquier operación del contrato.</p>
+        </div>
+        <div class="concept-card teal">
+          <h3><i class="fa fa-inbox me-1"></i>Receptor</h3>
+          <p style="font-size:.9rem;"><strong>Obligación:</strong> tener un método para cada operación del contrato.<br><strong>Derecho:</strong> implementar solo lo que el contrato establece.</p>
+        </div>
+      </div>
+      <div class="tarjeta auto-animate">
+        <div class="tarjeta-title">Tipo</div>
+        <p>Un <strong>tipo</strong> es un conjunto de operaciones que determina los mensajes que pueden ser enviados a los objetos de ese tipo. Es la <em>realización del contrato</em>.</p>
+      </div>
+      <div class="highlight-box auto-animate">
+        <i class="fa fa-lightbulb text-gold me-1"></i>
+        <span style="font-size:.9rem;">Analogía: cuando decimos que algo <em>es un auto</em>, sabemos exactamente qué podemos pedirle (encender, apagar, desplazarse) y qué no (recitar una biografía).</span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 2: FIRMA
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Tipos — Firma">
+      <h2><i class="fa fa-signature me-2 text-gold"></i>Firma de una Operación</h2>
+      <div class="tarjeta auto-animate">
+        <div class="tarjeta-title">Firma</div>
+        <p>La firma de una operación está compuesta por el <strong>nombre</strong>, los <strong>parámetros y sus tipos</strong>, y el <strong>tipo del resultado</strong>. No hay firmas duplicadas dentro de un mismo tipo.</p>
+      </div>
+      <div class="auto-animate">
+        <h3 class="mt-3">Ejemplo en C#</h3>
+        <pre><code><span class="cm">// Firma: nombre="Calcular", parámetros=(double base, double altura),
+//         resultado=double</span>
+<span class="kw">double</span> <span class="fn">Calcular</span>(<span class="kw">double</span> <span class="prop">base</span>, <span class="kw">double</span> <span class="prop">altura</span>);
+
+<span class="cm">// Firma diferente (distinto tipo de resultado)</span>
+<span class="ty">string</span> <span class="fn">Calcular</span>(<span class="kw">double</span> <span class="prop">base</span>, <span class="kw">double</span> <span class="prop">altura</span>);
+
+<span class="cm">// Firma diferente (distinto número de parámetros)</span>
+<span class="kw">double</span> <span class="fn">Calcular</span>(<span class="kw">double</span> <span class="prop">radio</span>);</code></pre>
+      </div>
+      <div class="two-col auto-animate">
+        <div class="concept-card">
+          <h3>Componentes de la firma</h3>
+          <ul style="font-size:.88rem;color:#c9d1d9;line-height:2">
+            <li><i class="fa fa-tag text-gold me-1"></i> Nombre de la operación</li>
+            <li><i class="fa fa-list text-teal me-1"></i> Parámetros (cantidad y tipos)</li>
+            <li><i class="fa fa-arrow-right text-rose me-1"></i> Tipo del resultado</li>
+          </ul>
+        </div>
+        <div class="concept-card rose">
+          <h3>Restricción importante</h3>
+          <p style="font-size:.88rem;">Dentro de un mismo tipo, <strong>no puede haber dos operaciones con la misma firma</strong>. Sí puede haber operaciones con el mismo nombre pero firmas distintas (<em>sobrecarga</em>).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 3: CLASES E IMPLEMENTACIÓN
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Tipos — Clases implementan tipos">
+      <h2><i class="fa fa-layer-group me-2 text-gold"></i>Clases que Implementan Tipos</h2>
+      <div class="tarjeta auto-animate">
+        <div class="tarjeta-title">Clases implementan tipos</div>
+        <p>La clase de un objeto <strong>implementa un tipo</strong> si tiene un método para <em>cada una</em> de las operaciones incluidas en el tipo, con firmas exactamente coincidentes.</p>
+      </div>
+      <div class="two-col auto-animate">
+        <div>
+          <h3>Diferencia: Tipo vs. Clase</h3>
+          <div class="concept-card" style="margin-bottom:.6rem;">
+            <h3><i class="fa fa-scroll me-1"></i>Tipo</h3>
+            <p style="font-size:.85rem;">Solo especifica <em>qué</em> puede hacer un objeto. Sin implementación, sin estado.</p>
+          </div>
+          <div class="concept-card teal">
+            <h3><i class="fa fa-blueprint me-1"></i>Clase</h3>
+            <p style="font-size:.85rem;">Especifica <em>qué</em> y <em>cómo</em>. Incluye código (métodos) y estado (atributos).</p>
+          </div>
+        </div>
+        <div>
+          <h3>Consecuencia clave</h3>
+          <div class="highlight-box">
+            <p style="font-size:.88rem;margin:0;"><i class="fa fa-ban text-rose me-1"></i>No se puede <strong>instanciar un tipo</strong> directamente, porque no define comportamiento ni atributos. Para obtener un objeto de tipo A, necesitamos una clase que lo implemente.</p>
+          </div>
+          <div class="tarjeta" style="margin-top:.8rem;">
+            <div class="tarjeta-title">Un objeto, más de un tipo</div>
+            <p style="font-size:.85rem;">Un objeto puede tener <strong>más de un tipo</strong> si su clase implementa múltiples tipos.</p>
+          </div>
+          <div class="tarjeta">
+            <div class="tarjeta-title">Un tipo, más de un objeto</div>
+            <p style="font-size:.85rem;">Objetos de <strong>clases distintas</strong> pueden compartir el mismo tipo.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 4: SUBTIPO / SUPERTIPO
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Tipos — Subtipo y Supertipo">
+      <h2><i class="fa fa-sitemap me-2 text-gold"></i>Subtipo y Supertipo</h2>
+      <div class="two-col auto-animate">
+        <div class="tarjeta">
+          <div class="tarjeta-title">Subtipo</div>
+          <p>Un tipo <strong>A</strong> es <em>subtipo</em> de <strong>B</strong> si el conjunto de operaciones de A <strong>contiene</strong> el de B.<br><br>
+          A es <em>más concreto</em> que B.</p>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-title">Supertipo</div>
+          <p>Un tipo <strong>A</strong> es <em>supertipo</em> de <strong>B</strong> si el conjunto de operaciones de A está <strong>contenido</strong> en el de B.<br><br>
+          A es <em>más abstracto</em> que B.</p>
+        </div>
+      </div>
+      <div class="auto-animate">
+        <div style="display:flex;gap:2rem;align-items:flex-start;justify-content:center;margin:1.2rem 0;flex-wrap:wrap;">
+          <div class="uml-box" style="min-width:160px">
+            <div class="uml-head interface">«interface»<br>IElectric</div>
+            <div class="uml-body">+ IsOn: bool<br>+ TurnOn()<br>+ TurnOff()</div>
+          </div>
+          <div class="uml-box" style="min-width:160px">
+            <div class="uml-head interface">«interface»<br>ILikeable</div>
+            <div class="uml-body">+ Likes: int<br>+ Like()<br>+ Unlike()</div>
+          </div>
+          <div class="uml-box" style="min-width:180px">
+            <div class="uml-head class-h">Car</div>
+            <div class="uml-body">+ Model: string<br>+ IsOn: bool<br>+ TurnOn()<br>+ TurnOff()<br>+ Likes: int<br>+ Like()<br>+ Unlike()</div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:.85rem;color:var(--muted);">Car es subtipo tanto de IElectric como de ILikeable — contiene las operaciones de ambas</p>
+      </div>
+      <div class="tarjeta auto-animate">
+        <div class="tarjeta-title">Principio de Sustitución</div>
+        <p>En cualquier lugar donde se espera un objeto de un tipo, puede aparecer un objeto de un <strong>subtipo</strong> sin que el comportamiento del programa cambie.</p>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 5: POLIMORFISMO
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Tipos — Polimorfismo">
+      <h2><i class="fa fa-shapes me-2 text-gold"></i>Polimorfismo y Sobrecarga</h2>
+      <div class="tarjeta auto-animate">
+        <div class="tarjeta-title">Polimorfismo</div>
+        <p>Permite que una misma definición pueda ser usada con <strong>diferentes tipos</strong>. Una operación es polimórfica cuando puede actuar sobre un tipo y todos sus subtipos.</p>
+      </div>
+      <div class="auto-animate">
+        <pre><code><span class="cm">// Polimorfismo: el mismo código funciona con Car y con Actor</span>
+<span class="ty">ILikeable</span> <span class="prop">likeable</span>;
+
+likeable <span class="op">=</span> <span class="kw">new</span> <span class="ty">Car</span>(<span class="st">"Citroën C4"</span>);   <span class="cm">// Car implementa ILikeable</span>
+likeable.<span class="fn">Like</span>();
+
+likeable <span class="op">=</span> <span class="kw">new</span> <span class="ty">Actor</span>(<span class="st">"John Travolta"</span>); <span class="cm">// Actor también implementa ILikeable</span>
+likeable.<span class="fn">Like</span>();
+
+<span class="cm">// El mismo método Like() funciona para ambos — eso es polimorfismo</span></code></pre>
+      </div>
+      <div class="tarjeta auto-animate">
+        <div class="tarjeta-title">Sobrecarga</div>
+        <p>Una operación está <strong>sobrecargada</strong> cuando hay más de una con el mismo nombre pero con <em>firmas diferentes</em> (distintos parámetros, tipos o resultado).</p>
+      </div>
+      <div class="auto-animate">
+        <pre><code><span class="cm">// Sobrecarga del método Add en Library</span>
+<span class="kw">public void</span> <span class="fn">Add</span>(<span class="ty">Movie</span> <span class="prop">movie</span>) { ... }  <span class="cm">// firma 1</span>
+<span class="kw">public void</span> <span class="fn">Add</span>(<span class="ty">Song</span> <span class="prop">song</span>)   { ... }  <span class="cm">// firma 2 — mismo nombre, distinto parámetro</span></code></pre>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 6: INTERFACES EN C#
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Interfaces en C#">
+      <h2><i class="fa fa-code me-2 text-gold"></i>Interfaces en C#</h2>
+      <div class="auto-animate">
+        <p>C# provee la palabra clave <code>interface</code> para declarar tipos de forma explícita, separada de las clases.</p>
+      </div>
+      <div class="two-col auto-animate">
+        <div>
+          <h3>IElectric</h3>
+          <pre><code><span class="kw">public interface</span> <span class="ty">IElectric</span>
+{
+    <span class="ty">Boolean</span> <span class="prop">IsOn</span> { <span class="kw">get</span>; }
+    <span class="kw">void</span> <span class="fn">TurnOn</span>();
+    <span class="kw">void</span> <span class="fn">TurnOff</span>();
+}</code></pre>
+        </div>
+        <div>
+          <h3>ILikeable</h3>
+          <pre><code><span class="kw">public interface</span> <span class="ty">ILikeable</span>
+{
+    <span class="ty">Int32</span> <span class="prop">Likes</span> { <span class="kw">get</span>; }
+    <span class="kw">void</span> <span class="fn">Like</span>();
+    <span class="kw">void</span> <span class="fn">Unlike</span>();
+}</code></pre>
+        </div>
+      </div>
+      <div class="auto-animate">
+        <h3>Car implementa ambas interfaces</h3>
+        <pre><code><span class="kw">public class</span> <span class="ty">Car</span> : <span class="ty">IElectric</span>, <span class="ty">ILikeable</span>
+{
+    <span class="kw">private</span> <span class="ty">String</span> <span class="prop">model</span>;
+    <span class="kw">private</span> <span class="ty">Boolean</span> <span class="prop">isOn</span>;
+    <span class="kw">private</span> <span class="ty">Int32</span> <span class="prop">likes</span>;
+
+    <span class="kw">public</span> <span class="ty">Boolean</span> <span class="prop">IsOn</span> => <span class="kw">this</span>.<span class="prop">isOn</span>;
+    <span class="kw">public</span> <span class="ty">Int32</span> <span class="prop">Likes</span> => <span class="kw">this</span>.<span class="prop">likes</span>;
+    <span class="kw">public void</span> <span class="fn">TurnOn</span>()  { <span class="kw">this</span>.<span class="prop">isOn</span> = <span class="kw">true</span>; }
+    <span class="kw">public void</span> <span class="fn">TurnOff</span>() { <span class="kw">this</span>.<span class="prop">isOn</span> = <span class="kw">false</span>; }
+    <span class="kw">public void</span> <span class="fn">Like</span>()    { <span class="kw">this</span>.<span class="prop">likes</span>++; }
+    <span class="kw">public void</span> <span class="fn">Unlike</span>()  { <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">likes</span> > <span class="nu">0</span>) <span class="kw">this</span>.<span class="prop">likes</span>--; }
+}</code></pre>
+      </div>
+      <div class="highlight-box auto-animate">
+        <i class="fa fa-info-circle text-gold me-1"></i>
+        <span style="font-size:.88rem;">Por convención, los nombres de interfaces en C# empiezan con <strong>I</strong> mayúscula.</span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 7: PRINCIPIO DE SUSTITUCIÓN (Liskov)
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Principio de Sustitución">
+      <h2><i class="fa fa-exchange-alt me-2 text-gold"></i>Principio de Sustitución de Liskov</h2>
+      <div class="tarjeta auto-animate" style="border-color:var(--teal)">
+        <div class="tarjeta-title" style="color:var(--teal)">Liskov Substitution Principle (LSP)</div>
+        <p><em>"Si para cada objeto O de tipo S existe un objeto O' de tipo T tal que para todos los programas P definidos en términos de T, el comportamiento de P permanece sin cambios cuando O es sustituido por O', entonces S es subtipo de T."</em></p>
+        <p style="margin-top:.5rem;font-size:.82rem;color:var(--muted);">— Bárbara Liskov, 1987</p>
+      </div>
+      <div class="auto-animate">
+        <pre><code><span class="cm">// T = ILikeable, S = Car y S = Actor</span>
+<span class="ty">ILikeable</span> <span class="prop">likeable</span>;
+
+<span class="cm">// Puedo sustituir Car por Actor (o viceversa) sin cambiar el comportamiento</span>
+likeable <span class="op">=</span> <span class="kw">new</span> <span class="ty">Car</span>(<span class="st">"Citroën"</span>);
+likeable.<span class="fn">Like</span>();
+<span class="ty">Console</span>.<span class="fn">WriteLine</span>(likeable.<span class="prop">Likes</span>); <span class="cm">// 1</span>
+
+likeable <span class="op">=</span> <span class="kw">new</span> <span class="ty">Actor</span>(<span class="st">"John Travolta"</span>);
+likeable.<span class="fn">Like</span>();
+<span class="ty">Console</span>.<span class="fn">WriteLine</span>(likeable.<span class="prop">Likes</span>); <span class="cm">// 1 (mismo comportamiento)</span></code></pre>
+      </div>
+      <div class="two-col auto-animate">
+        <div class="concept-card">
+          <h3><i class="fa fa-check-circle text-teal me-1"></i>Permite</h3>
+          <p style="font-size:.85rem;">Una página web que muestra likes puede usar <em>cualquier</em> ILikeable indistintamente: Car o Actor. El código no cambia.</p>
+        </div>
+        <div class="concept-card rose">
+          <h3><i class="fa fa-times-circle me-1"></i>No confundir con herencia</h3>
+          <p style="font-size:.85rem;">El LSP aplica a <strong>tipos</strong>, no solo a jerarquías de clases. Car y Actor no se heredan entre sí, pero comparten un subtipo común.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 8: HERENCIA DE INTERFACES
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Herencia de Interfaces">
+      <h2><i class="fa fa-code-branch me-2 text-gold"></i>Herencia de Interfaces</h2>
+      <div class="auto-animate">
+        <p>Una interfaz puede heredar de una o varias interfaces. Una clase que implementa la interfaz derivada debe implementar <strong>todos</strong> los miembros, tanto de la derivada como de sus bases.</p>
+      </div>
+      <div class="two-col auto-animate">
+        <div>
+          <pre><code><span class="kw">interface</span> <span class="ty">IDrawable</span>
+{
+    <span class="kw">void</span> <span class="fn">Draw</span>();
+}
+
+<span class="kw">interface</span> <span class="ty">IShape</span> : <span class="ty">IDrawable</span>
+{
+    <span class="kw">double</span> <span class="prop">Area</span> { <span class="kw">get</span>; }
+}
+
+<span class="kw">public class</span> <span class="ty">Circle</span>(<span class="kw">double</span> <span class="prop">radius</span>) : <span class="ty">IShape</span>
+{
+    <span class="kw">public double</span> <span class="prop">Area</span> =>
+        <span class="ty">Math</span>.<span class="prop">PI</span> * radius * radius;
+
+    <span class="kw">public void</span> <span class="fn">Draw</span>() =>
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"Círculo área {Area:F2}"</span>);
+}</code></pre>
+        </div>
+        <div>
+          <h3>Diagrama</h3>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
+            <div class="uml-box" style="width:150px">
+              <div class="uml-head interface">«interface»<br>IDrawable</div>
+              <div class="uml-body">+ Draw()</div>
+            </div>
+            <div style="font-size:1.2rem;color:var(--border)">▲</div>
+            <div class="uml-box" style="width:150px">
+              <div class="uml-head interface">«interface»<br>IShape</div>
+              <div class="uml-body">+ Area: double</div>
+            </div>
+            <div style="font-size:1.2rem;color:var(--border)">▲</div>
+            <div class="uml-box" style="width:150px">
+              <div class="uml-head class-h">Circle</div>
+              <div class="uml-body">- radius: double<br>+ Area: double<br>+ Draw()</div>
+            </div>
+          </div>
+          <div class="highlight-box" style="margin-top:.8rem;">
+            <p style="font-size:.82rem;margin:0;">Circle implementa IShape → también es IDrawable por herencia</p>
+          </div>
+        </div>
+      </div>
+      <div class="concept-card auto-animate">
+        <h3>Interface vs. Clase Abstracta</h3>
+        <p style="font-size:.85rem;"><strong>Usá interfaz</strong> cuando el tipo se implementará en jerarquías no relacionadas o se necesitan varios contratos.<br><strong>Usá clase abstracta</strong> cuando los tipos relacionados comparten estado (campos) o constructores.</p>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 9: IMPLEMENTACIÓN EXPLÍCITA
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Implementación Explícita">
+      <h2><i class="fa fa-layer-group me-2 text-gold"></i>Implementación Explícita de Interfaces</h2>
+      <div class="auto-animate">
+        <p>Cuando dos interfaces declaran un miembro con el <strong>mismo nombre</strong>, la implementación explícita vincula el miembro directamente al nombre de la interfaz. Solo es accesible a través de una variable del tipo de interfaz.</p>
+      </div>
+      <div class="auto-animate">
+        <pre><code><span class="kw">interface</span> <span class="ty">IMetric</span>  { <span class="kw">double</span> <span class="fn">GetDistance</span>(); } <span class="cm">// en metros</span>
+<span class="kw">interface</span> <span class="ty">IImperial</span> { <span class="kw">double</span> <span class="fn">GetDistance</span>(); } <span class="cm">// en pies</span>
+
+<span class="kw">public class</span> <span class="ty">Runway</span>(<span class="kw">double</span> <span class="prop">meters</span>) : <span class="ty">IMetric</span>, <span class="ty">IImperial</span>
+{
+    <span class="cm">// Implementación explícita — nombre de interfaz + punto</span>
+    <span class="kw">double</span> <span class="ty">IMetric</span>.<span class="fn">GetDistance</span>()   => meters;
+    <span class="kw">double</span> <span class="ty">IImperial</span>.<span class="fn">GetDistance</span>() => meters * <span class="nu">3.28084</span>;
+}
+
+<span class="cm">// Uso:</span>
+<span class="ty">Runway</span> <span class="prop">r</span> = <span class="kw">new</span> <span class="ty">Runway</span>(<span class="nu">100</span>);
+<span class="ty">IMetric</span> <span class="prop">m</span> = r;   <span class="ty">Console</span>.<span class="fn">WriteLine</span>(m.<span class="fn">GetDistance</span>());   <span class="cm">// 100</span>
+<span class="ty">IImperial</span> <span class="prop">i</span> = r; <span class="ty">Console</span>.<span class="fn">WriteLine</span>(i.<span class="fn">GetDistance</span>());   <span class="cm">// 328.084</span></code></pre>
+      </div>
+      <div class="two-col auto-animate">
+        <div class="concept-card">
+          <h3><i class="fa fa-check-circle text-teal me-1"></i>Casos de uso</h3>
+          <ul style="font-size:.85rem;color:#c9d1d9;line-height:1.9">
+            <li>Dos interfaces con el mismo nombre de miembro</li>
+            <li>Mantener limpia la API pública de la clase</li>
+            <li>Interfaces internas con tipos no públicos</li>
+          </ul>
+        </div>
+        <div class="concept-card rose">
+          <h3><i class="fa fa-exclamation-triangle me-1"></i>Restricción</h3>
+          <p style="font-size:.85rem;">Un miembro implementado explícitamente <strong>no es accesible</strong> directamente a través de una variable del tipo de la clase — solo mediante una variable del tipo de interfaz.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 10: TIPOS GENÉRICOS
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Tipos Genéricos">
+      <h2><i class="fa fa-cubes me-2 text-gold"></i>Tipos Genéricos</h2>
+      <div class="tarjeta auto-animate">
+        <div class="tarjeta-title">Genéricos</div>
+        <p>Mecanismo para implementar declarativamente relaciones de generalización entre un <strong>tipo base</strong> y uno o más tipos mediante el uso de <strong>tipos parámetro</strong>.</p>
+      </div>
+      <div class="two-col auto-animate">
+        <div>
+          <h3>Sin genéricos — problema</h3>
+          <pre style="font-size:.78rem;"><code><span class="cm">// ArrayList acepta cualquier objeto → typecast necesario</span>
+<span class="ty">IList</span> songs = <span class="kw">new</span> <span class="ty">ArrayList</span>();
+songs.<span class="fn">Add</span>(<span class="st">"Bohemian Rhapsody"</span>);
+songs.<span class="fn">Add</span>(<span class="nu">42</span>); <span class="cm">// ¡Error silencioso!</span>
+
+<span class="ty">string</span> s = (<span class="ty">string</span>)songs[<span class="nu">0</span>]; <span class="cm">// typecast requerido</span></code></pre>
+        </div>
+        <div>
+          <h3>Con genéricos — solución</h3>
+          <pre style="font-size:.78rem;"><code><span class="cm">// List&lt;T&gt; controla el tipo en compilación</span>
+<span class="ty">List</span>&lt;<span class="ty">string</span>&gt; songs = <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">string</span>&gt;();
+songs.<span class="fn">Add</span>(<span class="st">"Bohemian Rhapsody"</span>);
+<span class="cm">// songs.Add(42); → error de compilación ✓</span>
+
+<span class="ty">string</span> s = songs[<span class="nu">0</span>]; <span class="cm">// sin typecast</span></code></pre>
+        </div>
+      </div>
+      <div class="auto-animate">
+        <h3>GenericContainer&lt;T&gt; — ejemplo completo</h3>
+        <pre><code><span class="kw">public class</span> <span class="ty">GenericContainer</span>&lt;<span class="ty">T</span>&gt;
+{
+    <span class="kw">private</span> <span class="ty">IList</span>&lt;<span class="ty">T</span>&gt; items = <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">T</span>&gt;();
+
+    <span class="kw">public void</span> <span class="fn">Add</span>(<span class="ty">T</span> <span class="prop">item</span>) { items.<span class="fn">Add</span>(<span class="prop">item</span>); }
+    <span class="kw">public</span> <span class="ty">IEnumerator</span>&lt;<span class="ty">T</span>&gt; <span class="fn">GetEnumerator</span>() => items.<span class="fn">GetEnumerator</span>();
+}
+
+<span class="cm">// Uso:</span>
+<span class="ty">GenericContainer</span>&lt;<span class="ty">Movie</span>&gt; movies = <span class="kw">new</span> <span class="ty">GenericContainer</span>&lt;<span class="ty">Movie</span>&gt;();
+<span class="ty">GenericContainer</span>&lt;<span class="ty">Song</span>&gt;  songs  = <span class="kw">new</span> <span class="ty">GenericContainer</span>&lt;<span class="ty">Song</span>&gt;();
+<span class="cm">// Una sola clase, dos usos seguros en tiempo de compilación</span></code></pre>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 11: RESUMEN DE INTERFACES
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Resumen">
+      <h2><i class="fa fa-list-check me-2 text-gold"></i>Resumen — Interfaces en C#</h2>
+      <div class="three-col auto-animate">
+        <div class="concept-card">
+          <h3><i class="fa fa-file-contract me-1"></i>Contrato</h3>
+          <p style="font-size:.85rem;">Define métodos, propiedades, eventos e indexadores. No puede declarar campos ni constructores de instancia.</p>
+        </div>
+        <div class="concept-card teal">
+          <h3><i class="fa fa-i-cursor me-1"></i>Nomenclatura</h3>
+          <p style="font-size:.85rem;">Los nombres de interfaz empiezan convencionalmente con <strong>I</strong> mayúscula: IEnumerable, IComparable, IDisposable.</p>
+        </div>
+        <div class="concept-card rose">
+          <h3><i class="fa fa-ban me-1"></i>Sin instancia</h3>
+          <p style="font-size:.85rem;">No se puede instanciar una interfaz directamente. Se necesita una clase que la implemente.</p>
+        </div>
+      </div>
+      <div class="two-col auto-animate">
+        <div class="tarjeta">
+          <div class="tarjeta-title">Múltiples interfaces</div>
+          <p style="font-size:.85rem;">Una clase puede implementar varias interfaces y heredar de una clase base simultáneamente. Esto suple la falta de herencia múltiple de clases en C#.</p>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-title">Declaración de tipos</div>
+          <p style="font-size:.85rem;">Los tipos pueden declararse <strong>explícitamente</strong> (con <code>interface</code>) o <strong>implícitamente</strong> (las clases siempre declaran un tipo implícito).</p>
+        </div>
+      </div>
+      <div class="highlight-box auto-animate">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">
+          <span class="badge-pill"><i class="fa fa-check me-1"></i>Polimorfismo</span>
+          <span class="badge-pill"><i class="fa fa-check me-1"></i>Sustitución de Liskov</span>
+          <span class="badge-pill"><i class="fa fa-check me-1"></i>Abstracción</span>
+          <span class="badge-pill"><i class="fa fa-check me-1"></i>Bajo acoplamiento</span>
+          <span class="badge-pill"><i class="fa fa-check me-1"></i>Genéricos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 12: EJERCICIOS
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Ejercicios Prácticos">
+      <h2><i class="fa fa-laptop-code me-2 text-gold"></i>Ejercicios Prácticos — VSCode / C#</h2>
+      <p style="margin-bottom:1.2rem;color:var(--muted);font-size:.88rem;">Creá un proyecto con <code>dotnet new console</code> y resolvé cada ejercicio. Hacé clic en <em>"Ver solución"</em> solo después de intentarlo.</p>
+
+      <!-- EJ 1 -->
+      <div class="exercise-block auto-animate">
+        <div class="exercise-header" onclick="toggleExBody(this)">
+          <span class="ex-badge">EJ 1</span>
+          <h3>Formas Geométricas — IShape</h3>
+          <i class="fa fa-chevron-down ms-auto" style="color:var(--muted)"></i>
+        </div>
+        <div class="exercise-body">
+          <p style="font-size:.88rem;">Definí la interfaz <code>IShape</code> con las propiedades <code>Area</code> y <code>Perimeter</code> (ambas <code>double</code>, solo lectura). Implementá las clases <code>Circle</code> (radio), <code>Rectangle</code> (ancho y alto) y <code>Triangle</code> (tres lados, usá fórmula de Herón). Creá una lista de <code>IShape</code> con instancias de cada tipo, iterá e imprimí área y perímetro.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)"><i class="fa fa-eye me-1"></i>Ver solución</button>
+          <div class="solution-block">
+            <pre><code><span class="kw">public interface</span> <span class="ty">IShape</span>
+{
+    <span class="kw">double</span> <span class="prop">Area</span>      { <span class="kw">get</span>; }
+    <span class="kw">double</span> <span class="prop">Perimeter</span> { <span class="kw">get</span>; }
+    <span class="ty">string</span> <span class="prop">Name</span>      { <span class="kw">get</span>; }
+}
+
+<span class="kw">public class</span> <span class="ty">Circle</span>(<span class="kw">double</span> <span class="prop">radius</span>) : <span class="ty">IShape</span>
+{
+    <span class="kw">public double</span> <span class="prop">Area</span>      => <span class="ty">Math</span>.<span class="prop">PI</span> * radius * radius;
+    <span class="kw">public double</span> <span class="prop">Perimeter</span> => <span class="nu">2</span> * <span class="ty">Math</span>.<span class="prop">PI</span> * radius;
+    <span class="kw">public string</span> <span class="prop">Name</span>      => <span class="st">"Círculo"</span>;
+}
+
+<span class="kw">public class</span> <span class="ty">Rectangle</span>(<span class="kw">double</span> <span class="prop">width</span>, <span class="kw">double</span> <span class="prop">height</span>) : <span class="ty">IShape</span>
+{
+    <span class="kw">public double</span> <span class="prop">Area</span>      => <span class="prop">width</span> * <span class="prop">height</span>;
+    <span class="kw">public double</span> <span class="prop">Perimeter</span> => <span class="nu">2</span> * (<span class="prop">width</span> + <span class="prop">height</span>);
+    <span class="kw">public string</span> <span class="prop">Name</span>      => <span class="st">"Rectángulo"</span>;
+}
+
+<span class="kw">public class</span> <span class="ty">Triangle</span>(<span class="kw">double</span> <span class="prop">a</span>, <span class="kw">double</span> <span class="prop">b</span>, <span class="kw">double</span> <span class="prop">c</span>) : <span class="ty">IShape</span>
+{
+    <span class="kw">public double</span> <span class="prop">Perimeter</span> => <span class="prop">a</span> + <span class="prop">b</span> + <span class="prop">c</span>;
+    <span class="kw">public double</span> <span class="prop">Area</span> {
+        <span class="kw">get</span> {
+            <span class="kw">double</span> s = <span class="prop">Perimeter</span> / <span class="nu">2</span>;
+            <span class="kw">return</span> <span class="ty">Math</span>.<span class="fn">Sqrt</span>(s*(s-<span class="prop">a</span>)*(s-<span class="prop">b</span>)*(s-<span class="prop">c</span>));
+        }
+    }
+    <span class="kw">public string</span> <span class="prop">Name</span> => <span class="st">"Triángulo"</span>;
+}
+
+<span class="cm">// Program.cs</span>
+<span class="ty">List</span>&lt;<span class="ty">IShape</span>&gt; shapes = [
+    <span class="kw">new</span> <span class="ty">Circle</span>(<span class="nu">5</span>),
+    <span class="kw">new</span> <span class="ty">Rectangle</span>(<span class="nu">4</span>, <span class="nu">6</span>),
+    <span class="kw">new</span> <span class="ty">Triangle</span>(<span class="nu">3</span>, <span class="nu">4</span>, <span class="nu">5</span>)
+];
+
+<span class="kw">foreach</span> (<span class="ty">IShape</span> s <span class="kw">in</span> shapes)
+    <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"{s.Name}: Área={s.Area:F2}, Perímetro={s.Perimeter:F2}"</span>);</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- EJ 2 -->
+      <div class="exercise-block auto-animate">
+        <div class="exercise-header" onclick="toggleExBody(this)">
+          <span class="ex-badge">EJ 2</span>
+          <h3>Sistema de Notificaciones — INotifiable</h3>
+          <i class="fa fa-chevron-down ms-auto" style="color:var(--muted)"></i>
+        </div>
+        <div class="exercise-body">
+          <p style="font-size:.88rem;">Creá la interfaz <code>INotifiable</code> con el método <code>Notify(string message)</code> y la propiedad <code>Recipient</code>. Implementá: <code>EmailNotifier</code>, <code>SmsNotifier</code> y <code>ConsoleNotifier</code>. Creá un método estático <code>BroadCast(IEnumerable&lt;INotifiable&gt; notifiers, string msg)</code> que notifique a todos.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)"><i class="fa fa-eye me-1"></i>Ver solución</button>
+          <div class="solution-block">
+            <pre><code><span class="kw">public interface</span> <span class="ty">INotifiable</span>
+{
+    <span class="ty">string</span> <span class="prop">Recipient</span> { <span class="kw">get</span>; }
+    <span class="kw">void</span> <span class="fn">Notify</span>(<span class="ty">string</span> <span class="prop">message</span>);
+}
+
+<span class="kw">public class</span> <span class="ty">EmailNotifier</span>(<span class="ty">string</span> <span class="prop">email</span>) : <span class="ty">INotifiable</span>
+{
+    <span class="kw">public string</span> <span class="prop">Recipient</span> => <span class="prop">email</span>;
+    <span class="kw">public void</span> <span class="fn">Notify</span>(<span class="ty">string</span> <span class="prop">message</span>) =>
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"[EMAIL → {email}] {message}"</span>);
+}
+
+<span class="kw">public class</span> <span class="ty">SmsNotifier</span>(<span class="ty">string</span> <span class="prop">phone</span>) : <span class="ty">INotifiable</span>
+{
+    <span class="kw">public string</span> <span class="prop">Recipient</span> => <span class="prop">phone</span>;
+    <span class="kw">public void</span> <span class="fn">Notify</span>(<span class="ty">string</span> <span class="prop">message</span>) =>
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"[SMS → {phone}] {message}"</span>);
+}
+
+<span class="kw">public class</span> <span class="ty">ConsoleNotifier</span>(<span class="ty">string</span> <span class="prop">name</span>) : <span class="ty">INotifiable</span>
+{
+    <span class="kw">public string</span> <span class="prop">Recipient</span> => <span class="prop">name</span>;
+    <span class="kw">public void</span> <span class="fn">Notify</span>(<span class="ty">string</span> <span class="prop">message</span>) =>
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"[CONSOLA → {name}] {message}"</span>);
+}
+
+<span class="kw">static void</span> <span class="fn">BroadCast</span>(<span class="ty">IEnumerable</span>&lt;<span class="ty">INotifiable</span>&gt; notifiers, <span class="ty">string</span> <span class="prop">msg</span>)
+{
+    <span class="kw">foreach</span> (<span class="kw">var</span> n <span class="kw">in</span> notifiers) n.<span class="fn">Notify</span>(<span class="prop">msg</span>);
+}
+
+<span class="cm">// Uso:</span>
+<span class="ty">List</span>&lt;<span class="ty">INotifiable</span>&gt; notifiers = [
+    <span class="kw">new</span> <span class="ty">EmailNotifier</span>(<span class="st">"fer@uni.edu.uy"</span>),
+    <span class="kw">new</span> <span class="ty">SmsNotifier</span>(<span class="st">"099123456"</span>),
+    <span class="kw">new</span> <span class="ty">ConsoleNotifier</span>(<span class="st">"Admin"</span>)
+];
+<span class="fn">BroadCast</span>(notifiers, <span class="st">"¡Sistema iniciado!"</span>);</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- EJ 3 -->
+      <div class="exercise-block auto-animate">
+        <div class="exercise-header" onclick="toggleExBody(this)">
+          <span class="ex-badge">EJ 3</span>
+          <h3>Implementación Explícita — Conversión de Temperatura</h3>
+          <i class="fa fa-chevron-down ms-auto" style="color:var(--muted)"></i>
+        </div>
+        <div class="exercise-body">
+          <p style="font-size:.88rem;">Creá dos interfaces: <code>ICelsius</code> con <code>GetTemperature()</code> y <code>IFahrenheit</code> también con <code>GetTemperature()</code>. Implementá la clase <code>WeatherStation</code> usando <strong>implementación explícita</strong> para retornar la temperatura en la escala correcta según la interfaz usada.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)"><i class="fa fa-eye me-1"></i>Ver solución</button>
+          <div class="solution-block">
+            <pre><code><span class="kw">public interface</span> <span class="ty">ICelsius</span>
+{
+    <span class="kw">double</span> <span class="fn">GetTemperature</span>(); <span class="cm">// retorna en °C</span>
+}
+
+<span class="kw">public interface</span> <span class="ty">IFahrenheit</span>
+{
+    <span class="kw">double</span> <span class="fn">GetTemperature</span>(); <span class="cm">// retorna en °F</span>
+}
+
+<span class="kw">public class</span> <span class="ty">WeatherStation</span>(<span class="kw">double</span> <span class="prop">celsius</span>) : <span class="ty">ICelsius</span>, <span class="ty">IFahrenheit</span>
+{
+    <span class="cm">// Implementación explícita para ICelsius</span>
+    <span class="kw">double</span> <span class="ty">ICelsius</span>.<span class="fn">GetTemperature</span>() => <span class="prop">celsius</span>;
+
+    <span class="cm">// Implementación explícita para IFahrenheit</span>
+    <span class="kw">double</span> <span class="ty">IFahrenheit</span>.<span class="fn">GetTemperature</span>() => <span class="prop">celsius</span> * <span class="nu">9.0</span> / <span class="nu">5.0</span> + <span class="nu">32</span>;
+}
+
+<span class="cm">// Uso:</span>
+<span class="ty">WeatherStation</span> station = <span class="kw">new</span> <span class="ty">WeatherStation</span>(<span class="nu">100</span>);
+
+<span class="ty">ICelsius</span> c = station;
+<span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"Celsius: {c.GetTemperature()}°C"</span>);    <span class="cm">// 100°C</span>
+
+<span class="ty">IFahrenheit</span> f = station;
+<span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"Fahrenheit: {f.GetTemperature()}°F"</span>); <span class="cm">// 212°F</span></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- EJ 4 -->
+      <div class="exercise-block auto-animate">
+        <div class="exercise-header" onclick="toggleExBody(this)">
+          <span class="ex-badge">EJ 4</span>
+          <h3>Contenedor Genérico con Restricción</h3>
+          <i class="fa fa-chevron-down ms-auto" style="color:var(--muted)"></i>
+        </div>
+        <div class="exercise-body">
+          <p style="font-size:.88rem;">Implementá la clase genérica <code>TypedStack&lt;T&gt;</code> (pila LIFO) con los métodos <code>Push(T)</code>, <code>T Pop()</code>, <code>T Peek()</code>, <code>int Count</code> y <code>bool IsEmpty</code>. Utilizá <code>List&lt;T&gt;</code> internamente. Probala con <code>int</code> y con <code>string</code>.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)"><i class="fa fa-eye me-1"></i>Ver solución</button>
+          <div class="solution-block">
+            <pre><code><span class="kw">public class</span> <span class="ty">TypedStack</span>&lt;<span class="ty">T</span>&gt;
+{
+    <span class="kw">private readonly</span> <span class="ty">List</span>&lt;<span class="ty">T</span>&gt; _items = <span class="kw">new</span>();
+
+    <span class="kw">public int</span>  <span class="prop">Count</span>   => _items.<span class="prop">Count</span>;
+    <span class="kw">public bool</span> <span class="prop">IsEmpty</span> => _items.<span class="prop">Count</span> == <span class="nu">0</span>;
+
+    <span class="kw">public void</span> <span class="fn">Push</span>(<span class="ty">T</span> <span class="prop">item</span>) => _items.<span class="fn">Add</span>(<span class="prop">item</span>);
+
+    <span class="kw">public</span> <span class="ty">T</span> <span class="fn">Pop</span>()
+    {
+        <span class="kw">if</span> (<span class="prop">IsEmpty</span>) <span class="kw">throw new</span> <span class="ty">InvalidOperationException</span>(<span class="st">"Pila vacía"</span>);
+        <span class="ty">T</span> top = _items[^<span class="nu">1</span>];
+        _items.<span class="fn">RemoveAt</span>(_items.<span class="prop">Count</span> - <span class="nu">1</span>);
+        <span class="kw">return</span> top;
+    }
+
+    <span class="kw">public</span> <span class="ty">T</span> <span class="fn">Peek</span>()
+    {
+        <span class="kw">if</span> (<span class="prop">IsEmpty</span>) <span class="kw">throw new</span> <span class="ty">InvalidOperationException</span>(<span class="st">"Pila vacía"</span>);
+        <span class="kw">return</span> _items[^<span class="nu">1</span>];
+    }
+}
+
+<span class="cm">// Prueba con int</span>
+<span class="kw">var</span> stack = <span class="kw">new</span> <span class="ty">TypedStack</span>&lt;<span class="kw">int</span>&gt;();
+stack.<span class="fn">Push</span>(<span class="nu">10</span>); stack.<span class="fn">Push</span>(<span class="nu">20</span>); stack.<span class="fn">Push</span>(<span class="nu">30</span>);
+<span class="ty">Console</span>.<span class="fn">WriteLine</span>(stack.<span class="fn">Pop</span>()); <span class="cm">// 30</span>
+<span class="ty">Console</span>.<span class="fn">WriteLine</span>(stack.<span class="fn">Peek</span>()); <span class="cm">// 20</span>
+
+<span class="cm">// Prueba con string</span>
+<span class="kw">var</span> strStack = <span class="kw">new</span> <span class="ty">TypedStack</span>&lt;<span class="ty">string</span>&gt;();
+strStack.<span class="fn">Push</span>(<span class="st">"hola"</span>); strStack.<span class="fn">Push</span>(<span class="st">"mundo"</span>);
+<span class="ty">Console</span>.<span class="fn">WriteLine</span>(strStack.<span class="fn">Pop</span>()); <span class="cm">// mundo</span></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- EJ 5 -->
+      <div class="exercise-block auto-animate">
+        <div class="exercise-header" onclick="toggleExBody(this)">
+          <span class="ex-badge">EJ 5</span>
+          <h3>Herencia de Interfaces — Sistema de Pagos</h3>
+          <i class="fa fa-chevron-down ms-auto" style="color:var(--muted)"></i>
+        </div>
+        <div class="exercise-body">
+          <p style="font-size:.88rem;">Definí: <code>IPayable</code> con <code>Pay(decimal amount)</code> y <code>Balance</code>. <code>IRefundable</code> extiende <code>IPayable</code> y agrega <code>Refund(decimal amount)</code>. Implementá <code>CreditCard : IRefundable</code> y <code>BankTransfer : IPayable</code> (sin refund). Mostrá polimorfismo: una función que recibe <code>IPayable</code> y procesa el pago.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)"><i class="fa fa-eye me-1"></i>Ver solución</button>
+          <div class="solution-block">
+            <pre><code><span class="kw">public interface</span> <span class="ty">IPayable</span>
+{
+    <span class="kw">decimal</span> <span class="prop">Balance</span> { <span class="kw">get</span>; }
+    <span class="kw">void</span> <span class="fn">Pay</span>(<span class="kw">decimal</span> <span class="prop">amount</span>);
+}
+
+<span class="kw">public interface</span> <span class="ty">IRefundable</span> : <span class="ty">IPayable</span>
+{
+    <span class="kw">void</span> <span class="fn">Refund</span>(<span class="kw">decimal</span> <span class="prop">amount</span>);
+}
+
+<span class="kw">public class</span> <span class="ty">CreditCard</span>(<span class="kw">decimal</span> <span class="prop">limit</span>) : <span class="ty">IRefundable</span>
+{
+    <span class="kw">public decimal</span> <span class="prop">Balance</span>   { <span class="kw">get; private set</span>; } = <span class="prop">limit</span>;
+    <span class="kw">public void</span> <span class="fn">Pay</span>(<span class="kw">decimal</span> a) {
+        <span class="kw">if</span> (a > <span class="prop">Balance</span>) <span class="kw">throw new</span> <span class="ty">Exception</span>(<span class="st">"Saldo insuficiente"</span>);
+        <span class="prop">Balance</span> -= a;
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"[Tarjeta] Pagado ${a}. Saldo: ${Balance}"</span>);
+    }
+    <span class="kw">public void</span> <span class="fn">Refund</span>(<span class="kw">decimal</span> a) {
+        <span class="prop">Balance</span> += a;
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"[Tarjeta] Reintegro ${a}. Saldo: ${Balance}"</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="ty">BankTransfer</span>(<span class="kw">decimal</span> <span class="prop">funds</span>) : <span class="ty">IPayable</span>
+{
+    <span class="kw">public decimal</span> <span class="prop">Balance</span> { <span class="kw">get; private set</span>; } = <span class="prop">funds</span>;
+    <span class="kw">public void</span> <span class="fn">Pay</span>(<span class="kw">decimal</span> a) {
+        <span class="prop">Balance</span> -= a;
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"[Transferencia] Pagado ${a}. Saldo: ${Balance}"</span>);
+    }
+}
+
+<span class="kw">static void</span> <span class="fn">ProcessPayment</span>(<span class="ty">IPayable</span> <span class="prop">method</span>, <span class="kw">decimal</span> <span class="prop">amount</span>) =>
+    <span class="prop">method</span>.<span class="fn">Pay</span>(<span class="prop">amount</span>);
+
+<span class="cm">// Uso polimórfico:</span>
+<span class="ty">IPayable</span> card  = <span class="kw">new</span> <span class="ty">CreditCard</span>(<span class="nu">1000</span>m);
+<span class="ty">IPayable</span> bank  = <span class="kw">new</span> <span class="ty">BankTransfer</span>(<span class="nu">500</span>m);
+<span class="fn">ProcessPayment</span>(card, <span class="nu">200</span>m);
+<span class="fn">ProcessPayment</span>(bank, <span class="nu">150</span>m);
+<span class="kw">if</span> (card <span class="kw">is</span> <span class="ty">IRefundable</span> r) r.<span class="fn">Refund</span>(<span class="nu">50</span>m); <span class="cm">// solo tarjeta</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SLIDE 13: QUIZ
+    ═════════════════════════════════════════ -->
+    <div class="slide" data-section="Cuestionario">
+      <div id="quiz-container">
+        <div class="quiz-header-info">
+          <h2 style="border:none;padding:0;margin:0;"><i class="fa fa-clipboard-question me-2 text-gold"></i>Cuestionario</h2>
+          <div style="text-align:right;">
+            <div style="font-size:.8rem;color:var(--muted);">Seleccioná una opción por pregunta</div>
+            <div id="q-progress" style="font-size:.85rem;color:var(--teal);">0 / 30 respondidas</div>
+          </div>
+        </div>
+        <div id="questions-list"></div>
+        <div style="text-align:center;padding-bottom:2rem;">
+          <button id="submit-quiz-btn" onclick="submitQuiz()"><i class="fa fa-paper-plane me-2"></i>Entregar Cuestionario</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /slide-wrap -->
+
+  <!-- Bottom nav -->
+  <div id="bottombar">
+    <button class="nav-btn" id="prev-btn" onclick="navigate(-1)" disabled>
+      <i class="fa fa-arrow-left"></i> Anterior
+    </button>
+    <div style="display:flex;align-items:center;gap:.8rem;">
+      <span id="slide-counter">1 / 14</span>
+      <button id="goto-quiz-btn" onclick="goToQuiz()"><i class="fa fa-clipboard-question me-1"></i>Ir al Quiz</button>
+    </div>
+    <button class="nav-btn" id="next-btn" onclick="navigate(1)">
+      Siguiente <i class="fa fa-arrow-right"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// ─── Starfield ────────────────────────────────────────
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  stars = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.2,
+    speed: Math.random() * .3 + .05,
+    opacity: Math.random() * .6 + .2
+  }));
+}
+
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(212,160,23,${s.opacity})`;
+    ctx.fill();
+    s.y += s.speed;
+    if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
+  });
+  requestAnimationFrame(animateStars);
+}
+
+resizeCanvas();
+animateStars();
+window.addEventListener('resize', resizeCanvas);
+
+// ─── Slides ───────────────────────────────────────────
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let current = 0;
+
+const sectionNames = [
+  'Portada', 'Contratos', 'Firma', 'Clases e Implementación',
+  'Subtipo y Supertipo', 'Polimorfismo', 'Interfaces en C#',
+  'Principio de Sustitución', 'Herencia de Interfaces',
+  'Implementación Explícita', 'Tipos Genéricos', 'Resumen',
+  'Ejercicios Prácticos', 'Cuestionario'
+];
+
+function showSlide(n) {
+  slides[current].classList.remove('active');
+  current = Math.max(0, Math.min(n, totalSlides - 1));
+  slides[current].classList.add('active');
+  slides[current].scrollTop = 0;
+
+  document.getElementById('slide-counter').textContent = `${current + 1} / ${totalSlides}`;
+  document.getElementById('progress-bar').style.width = `${((current + 1) / totalSlides) * 100}%`;
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === totalSlides - 1;
+  document.getElementById('current-section').textContent = sectionNames[current] || '';
+
+  document.querySelectorAll('.toc-item').forEach((el, i) => {
+    el.classList.toggle('active', i === current);
+  });
+}
+
+function navigate(dir) { showSlide(current + dir); }
+function goToQuiz() { showSlide(totalSlides - 1); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+});
+
+// ─── TOC ──────────────────────────────────────────────
+function buildTOC() {
+  const list = document.getElementById('toc-list');
+  const sections = {
+    0: 'Introducción', 1: 'Tipos', 5: 'Polimorfismo',
+    6: 'Interfaces en C#', 9: 'Implementación Explícita',
+    10: 'Tipos Genéricos', 12: 'Ejercicios', 13: 'Cuestionario'
+  };
+  sectionNames.forEach((name, i) => {
+    if (sections[i]) {
+      const sec = document.createElement('div');
+      sec.className = 'toc-section';
+      sec.textContent = sections[i];
+      list.appendChild(sec);
+    }
+    const item = document.createElement('div');
+    item.className = 'toc-item' + (i === 0 ? ' active' : '');
+    item.textContent = name;
+    item.onclick = () => { showSlide(i); closeTOC(); };
+    list.appendChild(item);
+  });
+}
+buildTOC();
+
+function openTOC()  { document.getElementById('toc-panel').classList.add('open'); document.getElementById('toc-overlay').classList.add('show'); }
+function closeTOC() { document.getElementById('toc-panel').classList.remove('open'); document.getElementById('toc-overlay').classList.remove('show'); }
+
+// ─── Exercise helpers ─────────────────────────────────
+function toggleExBody(header) {
+  const body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+document.querySelectorAll('.exercise-body').forEach(b => b.style.display = 'none');
+
+function toggleSolution(btn) {
+  const sol = btn.nextElementSibling;
+  sol.classList.toggle('visible');
+  btn.innerHTML = sol.classList.contains('visible')
+    ? '<i class="fa fa-eye-slash me-1"></i>Ocultar solución'
+    : '<i class="fa fa-eye me-1"></i>Ver solución';
+}
+
+// ─── Quiz Data ────────────────────────────────────────
+const quizData = [
+  {
+    q: "¿Qué es un tipo en POO?",
+    opts: ["Una instancia de un objeto", "Un conjunto de operaciones que determina los mensajes que pueden enviarse a los objetos de ese tipo", "Un atributo de clase", "Un método especial"],
+    ans: 1,
+    feedback: "Un tipo es un conjunto de operaciones que define el contrato entre objetos."
+  },
+  {
+    q: "¿Cuáles son los componentes de la firma de una operación?",
+    opts: ["Solo el nombre y el resultado", "Solo los parámetros", "Nombre, parámetros (y sus tipos) y tipo del resultado", "Nombre y modificador de acceso"],
+    ans: 2,
+    feedback: "La firma incluye nombre, parámetros con sus tipos y el tipo del resultado."
+  },
+  {
+    q: "¿Cuándo se dice que una clase implementa un tipo?",
+    opts: ["Cuando hereda de otra clase", "Cuando tiene un método para cada operación del tipo con firmas exactamente coincidentes", "Cuando tiene el mismo nombre que el tipo", "Cuando está en el mismo namespace"],
+    ans: 1,
+    feedback: "La clase implementa un tipo si tiene un método para cada operación con firmas idénticas."
+  },
+  {
+    q: "¿Se puede instanciar directamente un tipo (interface)?",
+    opts: ["Sí, como cualquier clase", "No, porque no define comportamiento ni atributos", "Solo si tiene implementaciones por defecto", "Sí, con la palabra clave new"],
+    ans: 1,
+    feedback: "No se puede instanciar una interfaz directamente porque no define implementación ni estado."
+  },
+  {
+    q: "Un objeto puede tener más de un tipo cuando...",
+    opts: ["Hereda de varias clases", "Su clase implementa más de un tipo (interfaz)", "Está en varios namespaces", "Se declara con var"],
+    ans: 1,
+    feedback: "Un objeto tiene tantos tipos como interfaces implemente su clase."
+  },
+  {
+    q: "¿Cuál es la diferencia entre tipo y clase?",
+    opts: ["No hay diferencia", "El tipo especifica qué puede hacer; la clase especifica qué y cómo, incluyendo estado", "La clase no puede tener métodos", "El tipo puede instanciarse, la clase no"],
+    ans: 1,
+    feedback: "El tipo es el contrato (qué); la clase es la implementación completa (qué + cómo + estado)."
+  },
+  {
+    q: "Un tipo A es subtipo de B si...",
+    opts: ["A tiene menos operaciones que B", "El conjunto de operaciones de A contiene el de B", "A hereda de B directamente", "A y B tienen el mismo nombre"],
+    ans: 1,
+    feedback: "A es subtipo de B si sus operaciones contienen (incluyen y pueden superar) las de B."
+  },
+  {
+    q: "¿Qué establece el Principio de Sustitución de Liskov?",
+    opts: ["Una clase puede heredar de varias clases", "En cualquier lugar donde se espera un objeto de un tipo puede aparecer uno de un subtipo sin cambiar el comportamiento", "Los métodos deben tener nombres únicos", "Toda interfaz debe tener implementación por defecto"],
+    ans: 1,
+    feedback: "El LSP garantiza que los subtipos pueden usarse donde se espera el supertipo sin romper el programa."
+  },
+  {
+    q: "¿Qué es el polimorfismo?",
+    opts: ["Tener varios constructores", "La capacidad de una misma definición para ser usada con diferentes tipos", "Heredar de múltiples clases", "Tener propiedades privadas"],
+    ans: 1,
+    feedback: "Polimorfismo permite que una operación funcione con un tipo y todos sus subtipos."
+  },
+  {
+    q: "¿Cuándo ocurre sobrecarga (overloading)?",
+    opts: ["Cuando un método llama a otro método", "Cuando hay más de un método con el mismo nombre pero distintas firmas", "Cuando una interfaz hereda de otra", "Cuando se usa genéricos"],
+    ans: 1,
+    feedback: "Sobrecarga: mismo nombre, distintos parámetros o tipos."
+  },
+  {
+    q: "¿Cuál es la convención de nomenclatura para interfaces en C#?",
+    opts: ["Empezar con 'A'", "Empezar con 'I' mayúscula", "Terminar con 'Type'", "Usar solo minúsculas"],
+    ans: 1,
+    feedback: "Por convención, las interfaces en C# comienzan con I mayúscula: IEnumerable, IDisposable, etc."
+  },
+  {
+    q: "En C#, ¿cuántas interfaces puede implementar una clase?",
+    opts: ["Solo una", "Máximo dos", "Máximo cinco", "Tantas como se quiera"],
+    ans: 3,
+    feedback: "Una clase puede implementar tantas interfaces como sea necesario, separadas por comas."
+  },
+  {
+    q: "¿Qué ocurre en C# si una clase implementa una interfaz pero no define alguno de sus métodos?",
+    opts: ["El programa funciona igual", "Se genera un error de compilación", "Se genera un error solo en ejecución", "El método se hereda automáticamente"],
+    ans: 1,
+    feedback: "C# exige que todos los miembros de la interfaz estén implementados, o habrá error de compilación."
+  },
+  {
+    q: "¿Para qué sirve la implementación explícita de interfaces?",
+    opts: ["Para mejorar el rendimiento", "Para resolver conflictos cuando dos interfaces tienen miembros con el mismo nombre, o para mantener limpia la API pública", "Para crear instancias de interfaces", "Para heredar de varias clases"],
+    ans: 1,
+    feedback: "La implementación explícita resuelve conflictos de nombres entre interfaces y limpia la API pública."
+  },
+  {
+    q: "¿Cómo se accede a un miembro implementado explícitamente?",
+    opts: ["A través de una variable del tipo de la clase", "A través de una variable del tipo de la interfaz", "Con la palabra clave base", "Con reflection únicamente"],
+    ans: 1,
+    feedback: "Los miembros con implementación explícita solo son accesibles mediante una variable del tipo de interfaz."
+  },
+  {
+    q: "¿Qué es un tipo genérico?",
+    opts: ["Un tipo que acepta solo strings", "Un tipo que se define en términos de otro tipo parámetro", "Una clase sin constructor", "Un tipo con más de cinco métodos"],
+    ans: 1,
+    feedback: "Los genéricos definen tipos en términos de un parámetro que se especifica al usar el tipo."
+  },
+  {
+    q: "¿Cuál es el problema principal de usar ArrayList sin genéricos?",
+    opts: ["Es más lento que List<T>", "Requiere typecast para recuperar objetos, lo cual puede generar errores en tiempo de ejecución", "No soporta el bucle foreach", "No puede almacenar números enteros"],
+    ans: 1,
+    feedback: "ArrayList devuelve object, obligando a typecast que puede fallar en runtime si el tipo es incorrecto."
+  },
+  {
+    q: "¿Qué es un tipo construido (constructed type)?",
+    opts: ["Un tipo creado con una clase abstracta", "Un tipo genérico al cual se le ha provisto un tipo argumento", "Un tipo sin parámetros", "Una interfaz con implementación por defecto"],
+    ans: 1,
+    feedback: "Al declarar List<string>, string es el tipo argumento y List<string> es el tipo construido."
+  },
+  {
+    q: "¿Qué es una abstracción?",
+    opts: ["Una clase sin métodos", "Las características esenciales de un objeto que lo distinguen de otros tipos y definen límites conceptuales claros", "Un método que no retorna valor", "Una interfaz con más de 10 métodos"],
+    ans: 1,
+    feedback: "La abstracción expresa las características esenciales relativas a la perspectiva del usuario."
+  },
+  {
+    q: "¿Qué diferencia hay entre supertipo y subtipo en cuanto a abstracción?",
+    opts: ["No hay diferencia", "El supertipo es más abstracto; el subtipo es más concreto", "El subtipo es más abstracto; el supertipo es más concreto", "Ambos son igualmente abstractos"],
+    ans: 1,
+    feedback: "El supertipo es más abstracto (menos operaciones); el subtipo es más concreto (más operaciones)."
+  },
+  {
+    q: "Si Car implementa IElectric e ILikeable, ¿cuántos tipos tiene un objeto Car?",
+    opts: ["Uno (solo Car)", "Dos (IElectric e ILikeable)", "Tres (Car, IElectric, ILikeable)", "Cuatro"],
+    ans: 2,
+    feedback: "Car tiene tres tipos: su propio tipo implícito (Car), más los dos explícitos que implementa."
+  },
+  {
+    q: "En la herencia de interfaces, si IShape hereda de IDrawable, una clase que implementa IShape debe...",
+    opts: ["Solo implementar los miembros de IShape", "Implementar los miembros de IShape y también los de IDrawable", "Implementar solo IDrawable", "No necesita implementar nada adicional"],
+    ans: 1,
+    feedback: "Debe implementar todos los miembros: los propios de IShape más los heredados de IDrawable."
+  },
+  {
+    q: "¿Cuándo es preferible usar una clase abstracta en lugar de una interfaz?",
+    opts: ["Cuando el tipo se implementará en jerarquías no relacionadas", "Cuando los tipos relacionados comparten estado (campos) o constructores", "Cuando se necesitan múltiples contratos", "Cuando se quiere usar genéricos"],
+    ans: 1,
+    feedback: "Las clases abstractas son mejores cuando los tipos derivados comparten estado o implementaciones comunes."
+  },
+  {
+    q: "¿Puede una interfaz declarar campos de instancia o constructores?",
+    opts: ["Sí, siempre", "No, las interfaces no pueden declarar campos de instancia ni constructores", "Solo puede declarar campos estáticos", "Solo si usa la palabra clave sealed"],
+    ans: 1,
+    feedback: "Las interfaces no pueden tener campos de instancia ni constructores; solo métodos, propiedades, eventos e indexadores."
+  },
+  {
+    q: "¿Qué es el polimorfismo paramétrico?",
+    opts: ["Tener múltiples constructores con parámetros distintos", "El que proveen los genéricos, permitiendo usar una misma declaración con distintos tipos especificados como parámetro", "Pasar parámetros por referencia", "Sobrecarga de operadores"],
+    ans: 1,
+    feedback: "Los genéricos proveen polimorfismo paramétrico: una definición, múltiples usos con distintos tipos."
+  },
+  {
+    q: "¿Qué ocurre si se intenta enviar un mensaje que el tipo del receptor no reconoce?",
+    opts: ["El mensaje se ignora silenciosamente", "Se genera un error (en tiempo de compilación en lenguajes tipados fuertemente, o en ejecución en débilmente tipados)", "El objeto crea el método automáticamente", "Se llama al constructor por defecto"],
+    ans: 1,
+    feedback: "En C# (fuertemente tipado) el error ocurre en compilación. En lenguajes débilmente tipados, en ejecución."
+  },
+  {
+    q: "¿Cuál de los siguientes es un ejemplo correcto de sobrecarga?",
+    opts: [
+      "Dos métodos con el mismo nombre, mismos parámetros y distinto cuerpo",
+      "void Add(Movie m) y void Add(Song s) en la misma clase",
+      "Dos interfaces con el mismo nombre",
+      "Una clase con el mismo nombre en dos namespaces"
+    ],
+    ans: 1,
+    feedback: "Add(Movie) y Add(Song) tienen el mismo nombre pero distinto tipo de parámetro — eso es sobrecarga."
+  },
+  {
+    q: "¿Qué ventaja ofrece programar contra una interfaz en lugar de una clase concreta?",
+    opts: [
+      "El código es más rápido",
+      "Permite sustituir implementaciones sin cambiar el código cliente (bajo acoplamiento)",
+      "Se pueden instanciar objetos sin new",
+      "Elimina la necesidad de constructores"
+    ],
+    ans: 1,
+    feedback: "Programar contra interfaces permite cambiar implementaciones libremente sin afectar al código cliente."
+  },
+  {
+    q: "¿Qué palabra clave se usa en C# para indicar que una clase implementa una interfaz?",
+    opts: ["implements", "extends", ":", "using"],
+    ans: 2,
+    feedback: "En C# se usa ':' para implementar interfaces y heredar clases: public class Car : IElectric, ILikeable"
+  },
+  {
+    q: "¿Cuál es el resultado de ILikeable likeable = new Car(...) si Car implementa ILikeable?",
+    opts: [
+      "Error de compilación",
+      "Error en tiempo de ejecución",
+      "Correcto — el Principio de Sustitución permite usar Car donde se espera ILikeable",
+      "Solo funciona si Car es abstracta"
+    ],
+    ans: 2,
+    feedback: "Car es subtipo de ILikeable, por lo que puede asignarse a una variable de tipo ILikeable."
+  }
+];
+
+// ─── Build Quiz ───────────────────────────────────────
+let answered = new Array(30).fill(null);
+
+function buildQuiz() {
+  const list = document.getElementById('questions-list');
+  quizData.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `qcard-${qi}`;
+    card.innerHTML = `
+      <div class="q-num">Pregunta ${qi + 1} de 30</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-options" id="qopts-${qi}">
+        ${q.opts.map((opt, oi) =>
+          `<button class="q-opt" onclick="selectOpt(${qi},${oi})">${String.fromCharCode(65+oi)}. ${opt}</button>`
+        ).join('')}
+      </div>
+      <div class="q-feedback" id="qfeedback-${qi}" style="display:none"></div>
+    `;
+    list.appendChild(card);
+  });
+}
+buildQuiz();
+
+function selectOpt(qi, oi) {
+  if (answered[qi] !== null) return;
+  answered[qi] = oi;
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = answered.filter(a => a !== null).length;
+  document.getElementById('q-progress').textContent = `${done} / 30 respondidas`;
+}
+
+function submitQuiz() {
+  const unanswered = answered.filter(a => a === null).length;
+  if (unanswered > 0) {
+    Swal.fire({
+      title: 'Preguntas sin responder',
+      text: `Todavía te quedan ${unanswered} preguntas sin responder. ¿Querés entregar igual?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, entregar',
+      cancelButtonText: 'Seguir respondiendo',
+      background: '#1c2330',
+      color: '#e6edf3',
+      confirmButtonColor: '#d4a017',
+      cancelButtonColor: '#30363d'
+    }).then(r => { if (r.isConfirmed) gradeQuiz(); });
+    return;
+  }
+  gradeQuiz();
+}
+
+function gradeQuiz() {
+  let score = 0;
+  quizData.forEach((q, qi) => {
+    const card = document.getElementById(`qcard-${qi}`);
+    const opts = document.querySelectorAll(`#qopts-${qi} .q-opt`);
+    const fb   = document.getElementById(`qfeedback-${qi}`);
+    const sel  = answered[qi];
+    const correct = q.ans;
+
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === correct) btn.classList.add('reveal-correct');
+    });
+
+    if (sel === correct) {
+      score++;
+      if (sel !== null) opts[sel].classList.add('selected-correct');
+      card.classList.add('correct');
+      fb.className = 'q-feedback ok';
+      fb.innerHTML = `<i class="fa fa-check-circle me-1"></i>${q.feedback}`;
+    } else {
+      card.classList.add('wrong');
+      if (sel !== null) opts[sel].classList.add('selected-wrong');
+      fb.className = 'q-feedback err';
+      fb.innerHTML = `<i class="fa fa-times-circle me-1"></i>Respuesta correcta: ${String.fromCharCode(65+correct)}. ${q.feedback}`;
+    }
+    fb.style.display = 'block';
+  });
+
+  document.getElementById('submit-quiz-btn').style.display = 'none';
+
+  const pct = Math.round((score / 30) * 100);
+  let icon, title, text, color;
+
+  if (pct >= 90) {
+    icon = 'success'; title = '¡Excelente! 🏆';
+    text = `Obtuviste ${score}/30 (${pct}%). Dominio sobresaliente de tipos e interfaces.`;
+    color = '#3fb950';
+  } else if (pct >= 70) {
+    icon = 'success'; title = '¡Muy bien! 👍';
+    text = `Obtuviste ${score}/30 (${pct}%). Buen manejo del tema, repasá los conceptos marcados en rojo.`;
+    color = '#d4a017';
+  } else if (pct >= 50) {
+    icon = 'warning'; title = 'En progreso 📚';
+    text = `Obtuviste ${score}/30 (${pct}%). Revisá las diapositivas y volvé a intentarlo.`;
+    color = '#ffa657';
+  } else {
+    icon = 'error'; title = 'A seguir estudiando 💪';
+    text = `Obtuviste ${score}/30 (${pct}%). Te recomendamos repasar todo el material.`;
+    color = '#ff6b7a';
+  }
+
+  const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '';
+
+  Swal.fire({
+    title,
+    html: `
+      <div style="text-align:left;font-family:'DM Sans',sans-serif;">
+        <p style="font-size:1rem;color:#c9d1d9;margin-bottom:1rem;">${text}</p>
+        <div style="font-size:1.5rem;text-align:center;margin-bottom:.5rem;">${stars}</div>
+        <div id="swal-score-bar" style="height:10px;border-radius:5px;background:#30363d;overflow:hidden;margin:.8rem 0">
+          <div id="swal-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#39d0c0,#d4a017);border-radius:5px;transition:width 1.2s ease"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#8b949e;">
+          <span>0%</span><span style="color:${color};font-weight:700;">${pct}%</span><span>100%</span>
+        </div>
+        <div style="margin-top:1rem;font-size:.85rem;color:#8b949e;border-top:1px solid #30363d;padding-top:.8rem;">
+          <strong style="color:#d4a017;">Consejo:</strong> Revisá las respuestas en rojo en la pantalla para identificar tus áreas de mejora.
+        </div>
+      </div>`,
+    icon,
+    background: '#1c2330',
+    color: '#e6edf3',
+    confirmButtonText: 'Ver correcciones',
+    confirmButtonColor: '#d4a017',
+    didOpen: () => {
+      setTimeout(() => {
+        const fill = document.getElementById('swal-fill');
+        if (fill) fill.style.width = pct + '%';
+      }, 200);
+    }
+  });
+}
+</script>
+</body>
+</html>

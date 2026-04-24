@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Implementación explícita de interfaces en C#</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1e293b;
+      --accent: #38bdf8;
+      --accent-2: #a78bfa;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #1e3a8a 0%, var(--bg) 35%, #020617 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      background: rgba(15, 23, 42, 0.86);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 18px var(--accent);
+      margin-right: .5rem;
+    }
+
+    .slide {
+      min-height: 100vh;
+      display: none;
+      padding: 7rem 1rem 5rem;
+    }
+
+    .slide.active {
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 6vw, 5.7rem);
+      font-weight: 900;
+      line-height: .95;
+      letter-spacing: -0.06em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #67e8f9, #c084fc, #f9a8d4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow: 0 30px 80px rgba(0,0,0,.35);
+      border-radius: 28px;
+    }
+
+    .topic-icon {
+      width: 76px;
+      height: 76px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(56,189,248,.18), rgba(167,139,250,.18));
+      color: #7dd3fc;
+      font-size: 2.2rem;
+      border: 1px solid rgba(125, 211, 252, .22);
+    }
+
+    .code-block {
+      background: #020617;
+      color: #dbeafe;
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, .22);
+      padding: 1.2rem;
+      font-family: Consolas, Monaco, 'Courier New', monospace;
+      font-size: .93rem;
+      overflow-x: auto;
+      line-height: 1.55;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+
+    .code-keyword { color: #c084fc; }
+    .code-type { color: #67e8f9; }
+    .code-string { color: #86efac; }
+    .code-comment { color: #64748b; }
+    .code-number { color: #fbbf24; }
+
+    .pill {
+      display: inline-flex;
+      gap: .45rem;
+      align-items: center;
+      border-radius: 999px;
+      padding: .45rem .85rem;
+      background: rgba(56,189,248,.12);
+      color: #bae6fd;
+      border: 1px solid rgba(56,189,248,.24);
+      font-weight: 600;
+    }
+
+    .big-arrow {
+      color: var(--accent);
+      font-size: 2rem;
+    }
+
+    .diagram-box {
+      border-radius: 22px;
+      padding: 1.2rem;
+      background: rgba(30, 41, 59, .78);
+      border: 1px solid rgba(148, 163, 184, .2);
+      min-height: 180px;
+    }
+
+    .progress {
+      height: 8px;
+      background: rgba(148, 163, 184, .2);
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .nav-controls {
+      position: fixed;
+      left: 50%;
+      bottom: 1.25rem;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(15, 23, 42, .82);
+      border: 1px solid rgba(148, 163, 184, .24);
+      border-radius: 999px;
+      padding: .5rem;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+
+    .btn-glow {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #020617;
+      border: none;
+      font-weight: 800;
+      box-shadow: 0 12px 30px rgba(56,189,248,.25);
+    }
+
+    .btn-ghost {
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, .24);
+      background: rgba(15, 23, 42, .4);
+    }
+
+    .swal2-popup.custom-swal {
+      background: #0f172a !important;
+      color: #e5e7eb !important;
+      border: 1px solid rgba(56,189,248,.35);
+      border-radius: 28px;
+      box-shadow: 0 35px 100px rgba(0,0,0,.6);
+    }
+
+    .swal2-confirm.custom-confirm {
+      background: linear-gradient(135deg, #38bdf8, #a78bfa) !important;
+      color: #020617 !important;
+      border-radius: 999px !important;
+      font-weight: 800 !important;
+      padding: .75rem 1.4rem !important;
+    }
+
+    .mini-label {
+      color: var(--muted);
+      font-size: .88rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 800;
+    }
+
+    .wrong { color: #fca5a5; }
+    .right { color: #86efac; }
+
+    @media print {
+      .slide { display: block !important; min-height: auto; page-break-after: always; }
+      .navbar, .nav-controls { display: none !important; }
+      body { background: #0f172a; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg fixed-top navbar-dark">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand fw-bold" href="#"><span class="brand-dot"></span>Interfaces C#</a>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="text-secondary small"><span id="slideNumber">1</span>/<span id="slideTotal">7</span></span>
+        <button class="btn btn-sm btn-outline-info rounded-pill" onclick="showHelp()"><i class="fa-solid fa-circle-question me-1"></i> Ayuda</button>
+      </div>
+    </div>
+    <div class="progress position-absolute bottom-0 start-0 w-100 rounded-0">
+      <div id="progressBar" class="progress-bar" style="width: 14%"></div>
+    </div>
+  </nav>
+
+  <!-- Slide 1 -->
+  <section class="slide active" data-title="Portada">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7 animate__animated animate__fadeInLeft">
+          <span class="pill mb-4"><i class="fa-solid fa-code"></i> C# · Interfaces · VS Code</span>
+          <h1 class="hero-title mb-4">Implementación <span class="gradient-text">explícita</span> de interfaces</h1>
+          <p class="lead text-secondary fs-3">Cómo resolver dos interfaces que tienen el mismo método, pero deben comportarse distinto.</p>
+          <button class="btn btn-glow btn-lg rounded-pill mt-3" onclick="nextSlide()">
+            Empezar <i class="fa-solid fa-arrow-right ms-2"></i>
+          </button>
+        </div>
+        <div class="col-lg-5 animate__animated animate__zoomIn animate__delay-1s">
+          <div class="glass-card p-4">
+            <div class="topic-icon mb-4"><i class="fa-solid fa-temperature-half"></i></div>
+            <h3>Ejemplo principal</h3>
+            <p class="text-secondary mb-0">Una estación meteorológica entrega la temperatura en Celsius y Fahrenheit usando el mismo nombre de método: <code>GetTemperature()</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 2 -->
+  <section class="slide" data-title="Problema">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-5">
+          <div class="topic-icon mb-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <h2 class="display-4 fw-black mb-3">El problema</h2>
+          <p class="fs-4 text-secondary">Dos interfaces tienen un método con la misma firma:</p>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="pill"><i class="fa-solid fa-c"></i> ICelsius.GetTemperature()</span>
+            <span class="pill"><i class="fa-solid fa-f"></i> IFahrenheit.GetTemperature()</span>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="code-block animate__animated animate__fadeInUp">
+<pre class="mb-0"><span class="code-keyword">interface</span> <span class="code-type">ICelsius</span> 
+{
+    <span class="code-type">double</span> GetTemperature();
+}
+
+<span class="code-keyword">interface</span> <span class="code-type">IFahrenheit</span> 
+{
+    <span class="code-type">double</span> GetTemperature();
+}</pre>
+          </div>
+          <div class="alert alert-warning border-0 mt-4 rounded-4">
+            <i class="fa-solid fa-lightbulb me-2"></i>
+            La clase necesita responder diferente dependiendo de la interfaz usada.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3 -->
+  <section class="slide" data-title="Concepto">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="mini-label">Idea central</span>
+        <h2 class="display-4 fw-bold">El método queda “oculto” detrás de cada interfaz</h2>
+      </div>
+      <div class="row g-4 align-items-stretch text-center">
+        <div class="col-md-4">
+          <div class="diagram-box h-100 animate__animated animate__fadeInLeft">
+            <div class="topic-icon mx-auto mb-3"><i class="fa-solid fa-building-columns"></i></div>
+            <h4>Clase</h4>
+            <p class="text-secondary mb-0"><code>WheatherStation</code> guarda la temperatura base en Celsius.</p>
+          </div>
+        </div>
+        <div class="col-md-4 d-flex align-items-center justify-content-center">
+          <i class="fa-solid fa-arrows-left-right big-arrow animate__animated animate__pulse animate__infinite"></i>
+        </div>
+        <div class="col-md-4">
+          <div class="diagram-box h-100 animate__animated animate__fadeInRight">
+            <div class="topic-icon mx-auto mb-3"><i class="fa-solid fa-plug-circle-bolt"></i></div>
+            <h4>Interfaces</h4>
+            <p class="text-secondary mb-0">Cada interfaz expone su propia versión de <code>GetTemperature()</code>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card p-4 mt-5 text-center">
+        <p class="fs-3 mb-0"><span class="right">Sí funciona:</span> <code>ICelsius c = w;</code> · <code>IFahrenheit f = w;</code></p>
+        <p class="fs-4 mt-2 mb-0"><span class="wrong">No funciona:</span> <code>w.GetTemperature()</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4 -->
+  <section class="slide" data-title="Código correcto">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-4">
+          <span class="mini-label">Solución</span>
+          <h2 class="display-5 fw-bold mb-3">Código correcto con implementación explícita</h2>
+          <p class="fs-5 text-secondary">Observá que los métodos no tienen <code>public</code>. Se escriben con el nombre de la interfaz delante.</p>
+          <button class="btn btn-glow rounded-pill" onclick="explainExplicit()"><i class="fa-solid fa-wand-magic-sparkles me-2"></i> Explicar línea clave</button>
+        </div>
+        <div class="col-lg-8">
+          <div class="code-block">
+<pre class="mb-0"><span class="code-keyword">using</span> System;
+
+<span class="code-keyword">interface</span> <span class="code-type">ICelsius</span> 
+{
+    <span class="code-type">double</span> GetTemperature();
+}
+
+<span class="code-keyword">interface</span> <span class="code-type">IFahrenheit</span> 
+{
+    <span class="code-type">double</span> GetTemperature();
+}
+
+<span class="code-keyword">public class</span> <span class="code-type">WheatherStation</span> : <span class="code-type">ICelsius</span>, <span class="code-type">IFahrenheit</span>
+{
+    <span class="code-keyword">private</span> <span class="code-type">double</span> celsius;
+
+    <span class="code-keyword">public</span> WheatherStation(<span class="code-type">double</span> celsius)
+    {
+        <span class="code-keyword">this</span>.celsius = celsius;
+    }
+
+    <span class="code-type">double</span> <span class="code-type">ICelsius</span>.GetTemperature() => celsius;
+
+    <span class="code-type">double</span> <span class="code-type">IFahrenheit</span>.GetTemperature() => celsius * <span class="code-number">9.0</span> / <span class="code-number">5.0</span> + <span class="code-number">32</span>;
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5 -->
+  <section class="slide" data-title="Main">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <div class="code-block">
+<pre class="mb-0"><span class="code-keyword">class</span> <span class="code-type">Program</span>
+{
+    <span class="code-keyword">static void</span> Main()
+    {
+        <span class="code-type">WheatherStation</span> w = <span class="code-keyword">new</span> <span class="code-type">WheatherStation</span>(<span class="code-number">30</span>);
+
+        <span class="code-type">ICelsius</span> c = w;
+        Console.WriteLine(<span class="code-string">$"Celsius: {c.GetTemperature()}"</span>);
+
+        <span class="code-type">IFahrenheit</span> f = w;
+        Console.WriteLine(<span class="code-string">$"Fahrenheit: {f.GetTemperature()}"</span>);
+    }
+}</pre>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="topic-icon mb-4"><i class="fa-solid fa-terminal"></i></div>
+          <h2 class="display-5 fw-bold">Forma clásica con <code>Main</code></h2>
+          <p class="fs-5 text-secondary">Es la opción más segura para evitar el error de top-level statements en VS Code.</p>
+          <div class="glass-card p-4 mt-4">
+            <h5><i class="fa-solid fa-circle-check text-success me-2"></i> Salida esperada</h5>
+            <pre class="mb-0 text-light">Celsius: 30
+Fahrenheit: 86</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 6 -->
+  <section class="slide" data-title="Error VS Code">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-5">
+          <div class="topic-icon mb-4"><i class="fa-solid fa-bug"></i></div>
+          <h2 class="display-5 fw-bold">El error de VS Code</h2>
+          <p class="fs-5 text-secondary">“Las instrucciones de nivel superior deben preceder a las declaraciones de espacio de nombres y de tipos.”</p>
+        </div>
+        <div class="col-lg-7">
+          <div class="glass-card p-4 mb-4">
+            <h4 class="wrong"><i class="fa-solid fa-xmark me-2"></i> Causa</h4>
+            <p class="fs-5 mb-0">Pusiste código ejecutable después de declarar interfaces o clases usando top-level statements.</p>
+          </div>
+          <div class="glass-card p-4">
+            <h4 class="right"><i class="fa-solid fa-check me-2"></i> Solución recomendada</h4>
+            <p class="fs-5 mb-0">Usá <code>class Program</code> con <code>static void Main()</code>, especialmente si estás aprendiendo o haciendo ejercicios académicos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 7 -->
+  <section class="slide" data-title="Resumen">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="mini-label">Resumen final</span>
+        <h2 class="display-4 fw-bold">Qué tenés que recordar</h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInUp">
+            <div class="topic-icon mb-3"><i class="fa-solid fa-signature"></i></div>
+            <h4>Misma firma</h4>
+            <p class="text-secondary">Dos interfaces pueden tener el mismo método: <code>GetTemperature()</code>.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInUp animate__delay-1s">
+            <div class="topic-icon mb-3"><i class="fa-solid fa-eye-slash"></i></div>
+            <h4>Método oculto</h4>
+            <p class="text-secondary">Con implementación explícita, el método solo se llama desde la interfaz.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="glass-card p-4 h-100 animate__animated animate__fadeInUp animate__delay-2s">
+            <div class="topic-icon mb-3"><i class="fa-solid fa-graduation-cap"></i></div>
+            <h4>Ideal para exámenes</h4>
+            <p class="text-secondary">Usá <code>Main()</code> para evitar errores de orden con top-level statements.</p>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-5">
+        <button class="btn btn-glow btn-lg rounded-pill" onclick="finishPresentation()">
+          Finalizar <i class="fa-solid fa-trophy ms-2"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="nav-controls d-flex gap-2 align-items-center">
+    <button class="btn btn-ghost rounded-pill" onclick="prevSlide()"><i class="fa-solid fa-arrow-left"></i></button>
+    <button class="btn btn-glow rounded-pill px-4" onclick="nextSlide()">Siguiente</button>
+    <button class="btn btn-ghost rounded-pill" onclick="nextSlide()"><i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    let current = 0;
+
+    document.getElementById('slideTotal').textContent = total;
+
+    function renderSlide() {
+      slides.forEach((slide, index) => {
+        slide.classList.toggle('active', index === current);
+        if (index === current) {
+          slide.classList.remove('animate__animated', 'animate__fadeIn');
+          void slide.offsetWidth;
+          slide.classList.add('animate__animated', 'animate__fadeIn');
+        }
+      });
+
+      document.getElementById('slideNumber').textContent = current + 1;
+      document.getElementById('progressBar').style.width = `${((current + 1) / total) * 100}%`;
+    }
+
+    function nextSlide() {
+      current = (current + 1) % total;
+      renderSlide();
+    }
+
+    function prevSlide() {
+      current = (current - 1 + total) % total;
+      renderSlide();
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === ' ') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+      if (event.key.toLowerCase() === 'h') showHelp();
+    });
+
+    function showHelp() {
+      Swal.fire({
+        title: '<i class="fa-solid fa-keyboard"></i> Controles',
+        html: `
+          <div class="text-start">
+            <p><b>→</b> o <b>Espacio</b>: siguiente diapositiva</p>
+            <p><b>←</b>: diapositiva anterior</p>
+            <p><b>H</b>: abrir esta ayuda</p>
+          </div>
+        `,
+        icon: 'info',
+        customClass: {
+          popup: 'custom-swal animate__animated animate__zoomIn',
+          confirmButton: 'custom-confirm'
+        },
+        buttonsStyling: false,
+        confirmButtonText: 'Entendido'
+      });
+    }
+
+    function explainExplicit() {
+      Swal.fire({
+        title: 'Línea clave',
+        html: `
+          <div class="text-start">
+            <pre class="code-block">double ICelsius.GetTemperature() => celsius;</pre>
+            <p>Esto significa: <b>este método pertenece a ICelsius</b>, no se llama directamente desde <code>w</code>.</p>
+            <p>Por eso necesitás:</p>
+            <pre class="code-block">ICelsius c = w;\nc.GetTemperature();</pre>
+          </div>
+        `,
+        icon: 'success',
+        customClass: {
+          popup: 'custom-swal animate__animated animate__bounceIn',
+          confirmButton: 'custom-confirm'
+        },
+        buttonsStyling: false,
+        confirmButtonText: 'Perfecto'
+      });
+    }
+
+    function finishPresentation() {
+      Swal.fire({
+        title: '¡Concepto dominado!',
+        text: 'Ya sabés cuándo usar implementación explícita y cómo evitar el error de VS Code.',
+        icon: 'success',
+        customClass: {
+          popup: 'custom-swal animate__animated animate__tada',
+          confirmButton: 'custom-confirm'
+        },
+        buttonsStyling: false,
+        confirmButtonText: 'Genial'
+      });
+    }
+  </script>
+</body>
+</html>

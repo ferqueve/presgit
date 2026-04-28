@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programación II - Inicio Proyecto Recomendador</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    :root {
+      --bg-main: #101828;
+      --bg-card: #182230;
+      --accent: #7c3aed;
+      --accent-2: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --code-bg: #0b1220;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #27364f, var(--bg-main) 45%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .slide {
+      min-height: calc(100vh - 76px);
+      display: none;
+      align-items: center;
+      padding: 3rem 0;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    .slide-card {
+      background: rgba(24, 34, 48, 0.9);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+      padding: 2.4rem;
+    }
+
+    .badge-topic {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-size: 0.9rem;
+      padding: 0.55rem 0.8rem;
+      border-radius: 999px;
+    }
+
+    .big-icon {
+      font-size: 4rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .muted {
+      color: var(--text-muted);
+    }
+
+    .step-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      padding: 1rem;
+      height: 100%;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 1rem;
+      font-size: 0.92rem;
+      overflow-x: auto;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .code-block code {
+      white-space: pre;
+    }
+
+    .nav-buttons {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .nav-buttons .container {
+      pointer-events: auto;
+    }
+
+    .btn-glow {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none;
+      color: white;
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.35);
+    }
+
+    .btn-glow:hover {
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .progress {
+      height: 8px;
+      background-color: rgba(255,255,255,0.08);
+    }
+
+    .progress-bar {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .mini-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 1.2rem;
+    }
+
+    .table-dark-custom {
+      --bs-table-bg: rgba(255,255,255,0.04);
+      --bs-table-color: #f8fafc;
+      --bs-table-border-color: rgba(255,255,255,0.12);
+    }
+
+    .footer-space {
+      height: 100px;
+    }
+
+    @media (max-width: 768px) {
+      .slide-card {
+        padding: 1.4rem;
+      }
+
+      .slide {
+        padding: 1.5rem 0;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+  <div class="container">
+    <span class="navbar-brand fw-bold">
+      <i class="fa-solid fa-code me-2"></i>Programación II · Proyecto Recomendador
+    </span>
+    <div class="d-flex align-items-center gap-3">
+      <span id="slideCounter" class="small muted">1 / 14</span>
+      <button class="btn btn-sm btn-outline-light" onclick="showHelp()">
+        <i class="fa-solid fa-circle-question me-1"></i>Ayuda
+      </button>
+    </div>
+  </div>
+  <div class="progress position-absolute bottom-0 start-0 w-100 rounded-0">
+    <div id="progressBar" class="progress-bar" style="width: 7%"></div>
+  </div>
+</nav>
+
+<main class="container">
+
+  <!-- Slide 1 -->
+  <section class="slide active">
+    <div class="slide-card w-100 animate__animated animate__fadeIn">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span class="badge-topic mb-3 d-inline-block">
+            <i class="fa-solid fa-robot me-1"></i> Proyecto del semestre
+          </span>
+          <h1 class="display-4 fw-bold">Sistema de recomendaciones para un chatbot</h1>
+          <p class="lead muted mt-3">
+            Primer acercamiento en C# usando .NET 8 y Visual Studio Code.
+          </p>
+          <p>
+            Hoy no vamos a construir el bot completo. Vamos a crear el núcleo del sistema:
+            usuarios, ítems, preferencias, historial y recomendaciones.
+          </p>
+          <button class="btn btn-glow btn-lg mt-3" onclick="startClass()">
+            <i class="fa-solid fa-play me-2"></i>Comenzar
+          </button>
+        </div>
+        <div class="col-lg-5 text-center">
+          <i class="fa-solid fa-brain big-icon animate__animated animate__pulse animate__infinite"></i>
+          <h3 class="mt-4">Primero la lógica</h3>
+          <p class="muted">Después vendrán el bot, los patrones y las mejoras.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 2 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-bullseye me-1"></i> Objetivo
+      </span>
+      <h2 class="fw-bold mb-4">¿Qué vamos a iniciar hoy?</h2>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="step-box">
+            <i class="fa-solid fa-user-plus fa-2x mb-3"></i>
+            <h5>Usuarios</h5>
+            <p class="muted">Representar personas que usarán el sistema.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="step-box">
+            <i class="fa-solid fa-music fa-2x mb-3"></i>
+            <h5>Ítems</h5>
+            <p class="muted">Trabajaremos con canciones, pero el motor no debe depender de canciones.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="step-box">
+            <i class="fa-solid fa-star fa-2x mb-3"></i>
+            <h5>Recomendaciones</h5>
+            <p class="muted">Generar una lista de sugerencias según preferencias e historial.</p>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-info mt-4">
+        <i class="fa-solid fa-circle-info me-2"></i>
+        Esta primera versión será una aplicación de consola.
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-layer-group me-1"></i> Alcance inicial
+      </span>
+      <h2 class="fw-bold mb-4">Qué sí y qué no haremos hoy</h2>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card">
+            <h4><i class="fa-solid fa-check text-success me-2"></i>Sí</h4>
+            <ul class="mt-3">
+              <li>Crear un proyecto en .NET 8.</li>
+              <li>Definir clases simples.</li>
+              <li>Usar una interfaz.</li>
+              <li>Recorrer listas con bucles.</li>
+              <li>Excluir contenido ya consumido.</li>
+              <li>Mostrar recomendaciones.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card">
+            <h4><i class="fa-solid fa-xmark text-danger me-2"></i>No todavía</h4>
+            <ul class="mt-3">
+              <li>No usaremos LINQ.</li>
+              <li>No usaremos patrón Strategy.</li>
+              <li>No conectaremos Telegram o Discord todavía.</li>
+              <li>No usaremos base de datos en esta primera etapa.</li>
+              <li>No haremos inteligencia artificial todavía.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-diagram-project me-1"></i> Idea central
+      </span>
+      <h2 class="fw-bold">El motor debe estar desacoplado</h2>
+      <p class="lead muted">
+        El recomendador no debería depender directamente de una clase llamada <strong>Cancion</strong>.
+      </p>
+      <div class="row g-3 mt-3">
+        <div class="col-md-6">
+          <div class="mini-card">
+            <h5 class="text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Diseño limitado</h5>
+            <pre class="code-block"><code>public class Recomendador
+{
+    public List&lt;Cancion&gt; Recomendar(List&lt;Cancion&gt; canciones)
+    {
+        // Solo sirve para canciones
+    }
+}</code></pre>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card">
+            <h5 class="text-success"><i class="fa-solid fa-check me-2"></i>Diseño reutilizable</h5>
+            <pre class="code-block"><code>public class Recomendador
+{
+    public List&lt;IRecomendable&gt; Recomendar(List&lt;IRecomendable&gt; items)
+    {
+        // Sirve para canciones, películas, productos...
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-terminal me-1"></i> Crear el proyecto
+      </span>
+      <h2 class="fw-bold mb-4">Paso 1: iniciar en VS Code</h2>
+      <p>Desde una terminal:</p>
+      <pre class="code-block"><code>dotnet --version
+
+dotnet new console -n RecomendadorBot
+cd RecomendadorBot
+code .</code></pre>
+
+      <div class="alert alert-warning mt-4">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        La versión debe ser 8.x. Ejemplo: <strong>8.0.204</strong>.
+      </div>
+
+      <button class="btn btn-outline-light mt-2" onclick="showDotnetTip()">
+        <i class="fa-solid fa-lightbulb me-2"></i>Tip para problemas comunes
+      </button>
+    </div>
+  </section>
+
+  <!-- Slide 6 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-folder-tree me-1"></i> Estructura
+      </span>
+      <h2 class="fw-bold mb-4">Paso 2: organizar carpetas</h2>
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <pre class="code-block"><code>RecomendadorBot/
+│
+├── Interfaces/
+│   └── IRecomendable.cs
+│
+├── Models/
+│   ├── Cancion.cs
+│   └── Usuario.cs
+│
+├── Services/
+│   └── Recomendador.cs
+│
+└── Program.cs</code></pre>
+        </div>
+        <div class="col-lg-7">
+          <div class="mini-card">
+            <h5>¿Por qué separar?</h5>
+            <p class="muted">
+              Porque permite que el proyecto crezca sin mezclar todo en un solo archivo.
+            </p>
+            <ul>
+              <li><strong>Models:</strong> clases que representan datos.</li>
+              <li><strong>Interfaces:</strong> contratos que otras clases deben cumplir.</li>
+              <li><strong>Services:</strong> clases que realizan acciones o procesos.</li>
+              <li><strong>Program.cs:</strong> punto de entrada para probar.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 7 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-file-code me-1"></i> Interfaz
+      </span>
+      <h2 class="fw-bold mb-4">Paso 3: crear IRecomendable</h2>
+      <p>
+        La interfaz define qué debe tener cualquier cosa que pueda ser recomendada.
+      </p>
+      <pre class="code-block"><code>namespace RecomendadorBot.Interfaces;
+
+public interface IRecomendable
+{
+    int Id { get; }
+    string Nombre { get; }
+    List&lt;string&gt; Atributos { get; }
+}</code></pre>
+
+      <div class="alert alert-info mt-4">
+        <i class="fa-solid fa-chalkboard-user me-2"></i>
+        Una canción, una película o un producto podrían implementar esta interfaz.
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-music me-1"></i> Modelo de dominio
+      </span>
+      <h2 class="fw-bold mb-4">Paso 4: crear Cancion</h2>
+      <pre class="code-block"><code>using RecomendadorBot.Interfaces;
+
+namespace RecomendadorBot.Models;
+
+public class Cancion : IRecomendable
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = "";
+    public string Artista { get; set; } = "";
+    public List&lt;string&gt; Atributos { get; set; } = new();
+}</code></pre>
+
+      <p class="muted mt-3">
+        En esta versión, los atributos pueden ser géneros como rock, pop, clásica, jazz, metal, etc.
+      </p>
+    </div>
+  </section>
+
+  <!-- Slide 9 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-user me-1"></i> Usuario
+      </span>
+      <h2 class="fw-bold mb-4">Paso 5: crear Usuario</h2>
+      <pre class="code-block"><code>namespace RecomendadorBot.Models;
+
+public class Usuario
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = "";
+    public List&lt;string&gt; Preferencias { get; set; } = new();
+    public List&lt;int&gt; HistorialIds { get; set; } = new();
+}</code></pre>
+
+      <div class="row g-3 mt-3">
+        <div class="col-md-6">
+          <div class="step-box">
+            <h5>Preferencias</h5>
+            <p class="muted">Qué le gusta al usuario. Ejemplo: rock, pop.</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="step-box">
+            <h5>Historial</h5>
+            <p class="muted">IDs de canciones que ya consumió.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 10 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-gears me-1"></i> Recomendador
+      </span>
+      <h2 class="fw-bold mb-4">Paso 6: crear Recomendador sin LINQ</h2>
+      <p>Primero escribimos la lógica paso a paso.</p>
+      <pre class="code-block"><code>using RecomendadorBot.Interfaces;
+using RecomendadorBot.Models;
+
+namespace RecomendadorBot.Services;
+
+public class Recomendador
+{
+    public List&lt;IRecomendable&gt; RecomendarPorPreferencias(
+        Usuario usuario,
+        List&lt;IRecomendable&gt; catalogo)
+    {
+        List&lt;IRecomendable&gt; resultado = new List&lt;IRecomendable&gt;();
+
+        foreach (IRecomendable item in catalogo)
+        {
+            bool yaConsumido = false;
+
+            foreach (int id in usuario.HistorialIds)
+            {
+                if (id == item.Id)
+                {
+                    yaConsumido = true;
+                    break;
+                }
+            }
+
+            if (yaConsumido)
+            {
+                continue;
+            }
+
+            bool coincide = false;
+
+            foreach (string atributo in item.Atributos)
+            {
+                foreach (string preferencia in usuario.Preferencias)
+                {
+                    if (atributo == preferencia)
+                    {
+                        coincide = true;
+                        break;
+                    }
+                }
+
+                if (coincide)
+                {
+                    break;
+                }
+            }
+
+            if (coincide)
+            {
+                resultado.Add(item);
+            }
+        }
+
+        return resultado;
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- Slide 11 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-flask me-1"></i> Prueba
+      </span>
+      <h2 class="fw-bold mb-4">Paso 7: probar en Program.cs</h2>
+      <pre class="code-block"><code>using RecomendadorBot.Interfaces;
+using RecomendadorBot.Models;
+using RecomendadorBot.Services;
+
+Usuario usuario = new Usuario
+{
+    Id = 1,
+    Nombre = "Ana",
+    Preferencias = new List&lt;string&gt; { "rock", "pop" },
+    HistorialIds = new List&lt;int&gt; { 1 }
+};
+
+List&lt;IRecomendable&gt; canciones = new List&lt;IRecomendable&gt;
+{
+    new Cancion { Id = 1, Nombre = "Ya escuchada", Artista = "Banda A", Atributos = new() { "rock" } },
+    new Cancion { Id = 2, Nombre = "Rock nuevo", Artista = "Banda B", Atributos = new() { "rock" } },
+    new Cancion { Id = 3, Nombre = "Clásica", Artista = "Banda C", Atributos = new() { "clasica" } },
+    new Cancion { Id = 4, Nombre = "Pop moderno", Artista = "Banda D", Atributos = new() { "pop" } }
+};
+
+Recomendador recomendador = new Recomendador();
+
+List&lt;IRecomendable&gt; recomendaciones =
+    recomendador.RecomendarPorPreferencias(usuario, canciones);
+
+Console.WriteLine($"Recomendaciones para {usuario.Nombre}:");
+
+foreach (IRecomendable item in recomendaciones)
+{
+    Console.WriteLine($"- {item.Nombre}");
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- Slide 12 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-display me-1"></i> Resultado esperado
+      </span>
+      <h2 class="fw-bold mb-4">Al ejecutar:</h2>
+      <pre class="code-block"><code>dotnet run</code></pre>
+      <h4 class="mt-4">Salida esperada:</h4>
+      <pre class="code-block"><code>Recomendaciones para Ana:
+- Rock nuevo
+- Pop moderno</code></pre>
+
+      <div class="alert alert-success mt-4">
+        <i class="fa-solid fa-check-circle me-2"></i>
+        La canción "Ya escuchada" no aparece porque ya está en el historial.
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 13 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-list-check me-1"></i> Historias cubiertas
+      </span>
+      <h2 class="fw-bold mb-4">¿Qué parte de la consigna empezamos a cubrir?</h2>
+
+      <table class="table table-dark table-dark-custom align-middle">
+        <thead>
+          <tr>
+            <th>Historia</th>
+            <th>Avance inicial</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>HU2 - Preferencias</td>
+            <td>El usuario tiene una lista de preferencias.</td>
+          </tr>
+          <tr>
+            <td>HU3 - Ver recomendaciones</td>
+            <td>Se muestra una lista final por consola.</td>
+          </tr>
+          <tr>
+            <td>HU5 - Recomendar por preferencias</td>
+            <td>Se comparan atributos del ítem con preferencias del usuario.</td>
+          </tr>
+          <tr>
+            <td>HU13 - No recomendar consumidos</td>
+            <td>Se excluyen elementos cuyo ID está en el historial.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="muted">
+        Esto no es la entrega final. Es la base sobre la que se puede construir.
+      </p>
+    </div>
+  </section>
+
+  <!-- Slide 14 -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-road me-1"></i> Próximos pasos
+      </span>
+      <h2 class="fw-bold mb-4">Después de esta clase</h2>
+
+      <div class="row g-3">
+        <div class="col-md-6 col-lg-3">
+          <div class="step-box">
+            <h5>1. Registrar usuarios</h5>
+            <p class="muted">Crear una lista de usuarios y agregar nuevos.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="step-box">
+            <h5>2. Registrar interacciones</h5>
+            <p class="muted">Guardar reproducciones, likes y dislikes.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="step-box">
+            <h5>3. Ordenar resultados</h5>
+            <p class="muted">Agregar ranking por nombre, popularidad o score.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="step-box">
+            <h5>4. Crear fachada</h5>
+            <p class="muted">Centralizar las operaciones del sistema.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-primary mt-4">
+        <i class="fa-solid fa-graduation-cap me-2"></i>
+        Frase final para clase: “Primero hacemos que funcione; después hacemos que quede elegante.”
+      </div>
+
+      <button class="btn btn-glow btn-lg mt-3" onclick="finishClass()">
+        <i class="fa-solid fa-flag-checkered me-2"></i>Finalizar
+      </button>
+    </div>
+  </section>
+
+  <div class="footer-space"></div>
+</main>
+
+<div class="nav-buttons">
+  <div class="container d-flex justify-content-between">
+    <button class="btn btn-outline-light" onclick="prevSlide()">
+      <i class="fa-solid fa-arrow-left me-2"></i>Anterior
+    </button>
+    <button class="btn btn-glow" onclick="nextSlide()">
+      Siguiente<i class="fa-solid fa-arrow-right ms-2"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll(".slide");
+  const counter = document.getElementById("slideCounter");
+  const progressBar = document.getElementById("progressBar");
+  let currentSlide = 0;
+
+  function updateSlide() {
+    slides.forEach((slide, index) => {
+      slide.classList.remove("active", "animate__animated", "animate__fadeIn");
+      if (index === currentSlide) {
+        slide.classList.add("active", "animate__animated", "animate__fadeIn");
+      }
+    });
+
+    counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+    const progress = ((currentSlide + 1) / slides.length) * 100;
+    progressBar.style.width = `${progress}%`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function nextSlide() {
+    if (currentSlide < slides.length - 1) {
+      currentSlide++;
+      updateSlide();
+    } else {
+      finishClass();
+    }
+  }
+
+  function prevSlide() {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateSlide();
+    }
+  }
+
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "ArrowRight") {
+      nextSlide();
+    }
+
+    if (event.key === "ArrowLeft") {
+      prevSlide();
+    }
+  });
+
+  function startClass() {
+    Swal.fire({
+      title: "Comenzamos",
+      text: "Hoy construiremos la base del sistema de recomendaciones, sin LINQ y sin patrones avanzados.",
+      icon: "success",
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#7c3aed",
+      confirmButtonText: "Vamos"
+    });
+  }
+
+  function showDotnetTip() {
+    Swal.fire({
+      title: "Problemas comunes",
+      html: `
+        <div class="text-start">
+          <p><strong>Si dotnet no se reconoce:</strong> revisar que el SDK esté instalado.</p>
+          <p><strong>Si VS Code no autocompleta:</strong> instalar la extensión C# Dev Kit.</p>
+          <p><strong>Si hay errores de namespace:</strong> verificar que el nombre del proyecto sea RecomendadorBot.</p>
+        </div>
+      `,
+      icon: "info",
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#06b6d4",
+      confirmButtonText: "Entendido"
+    });
+  }
+
+  function showHelp() {
+    Swal.fire({
+      title: "Controles",
+      html: `
+        <div class="text-start">
+          <p><i class="fa-solid fa-arrow-right"></i> Flecha derecha: siguiente diapositiva.</p>
+          <p><i class="fa-solid fa-arrow-left"></i> Flecha izquierda: diapositiva anterior.</p>
+          <p><i class="fa-solid fa-computer-mouse"></i> También puedes usar los botones inferiores.</p>
+        </div>
+      `,
+      icon: "question",
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#7c3aed",
+      confirmButtonText: "Perfecto"
+    });
+  }
+
+  function finishClass() {
+    Swal.fire({
+      title: "Cierre de la clase",
+      html: `
+        <p>Ya tenemos una base funcional para el proyecto.</p>
+        <p><strong>Próxima mejora:</strong> registrar interacciones y comenzar a pensar en una fachada.</p>
+      `,
+      icon: "success",
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#7c3aed",
+      confirmButtonText: "Finalizar"
+    });
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

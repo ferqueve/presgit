@@ -57,15 +57,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
-    opacity: 0;
-    transition: opacity 0.4s ease;
+    padding: 2rem 2rem 52px;
     overflow-y: auto;
   }
 
   .slide.active {
     display: flex;
-    opacity: 1;
   }
 
   /* ── GRID BG ── */
@@ -419,7 +416,7 @@
   }
 
   /* ── SCROLL INSIDE SLIDE ── */
-  .slide-scroll { overflow-y: auto; height: calc(100vh - 52px); padding-top: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+  .slide-scroll { justify-content: flex-start; padding-top: 1.5rem; }
 
   /* ── HERO GLOW ── */
   .hero-glow {
@@ -1095,11 +1092,6 @@ function navigate(dir) {
   current = next;
   slides[current].classList.add('active');
 
-  // Re-trigger animate on new slide
-  slides[current].classList.remove('animate__animated','animate__fadeIn');
-  void slides[current].offsetWidth;
-  slides[current].classList.add('animate__animated','animate__fadeIn');
-
   document.getElementById('slideNum').textContent = current + 1;
   document.getElementById('btnPrev').disabled = current === 0;
   document.getElementById('btnNext').disabled = current === total - 1;
@@ -1114,7 +1106,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
 });
 
-navigate(0); // init
+// Init
+document.getElementById('btnPrev').disabled = true;
+document.getElementById('slideNum').textContent = 1;
+document.getElementById('progressBar').style.width = '0%';
 
 // ── SOLUTIONS ───────────────────────────────────
 const solutions = {

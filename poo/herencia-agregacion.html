@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herencia & Agregación — POO II</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- FontAwesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<!-- Animate.css -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- SweetAlert2 -->
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #0f1628;
+    --bg-panel: #131d35;
+    --accent-cyan: #00d4ff;
+    --accent-violet: #7c3aed;
+    --accent-green: #10d97a;
+    --accent-orange: #ff6b35;
+    --accent-gold: #f0c040;
+    --text-primary: #e8eaf6;
+    --text-secondary: #8892b0;
+    --text-muted: #4a5580;
+    --border: #1e2d4d;
+    --code-bg: #060b16;
+    --gradient-hero: linear-gradient(135deg, #0a0e1a 0%, #0d1b3e 50%, #0a1628 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  /* ── SLIDE ENGINE ── */
+  .slide-container {
+    width: 100vw; height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    overflow-y: auto;
+  }
+
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* ── GRID BG ── */
+  .slide::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .slide > * { position: relative; z-index: 1; }
+
+  /* ── NAV BAR ── */
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 52px;
+    background: rgba(10,14,26,.96);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: .35rem .9rem;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .nav-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+
+  .slide-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    color: var(--text-muted);
+  }
+
+  .slide-counter span { color: var(--accent-cyan); }
+
+  /* ── INDEX DOTS ── */
+  .dots-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .dots-progress {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+    transition: width .4s ease;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--accent-cyan);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    margin-bottom: .6rem;
+    opacity: .8;
+  }
+
+  /* ── HERO TITLE ── */
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 60%, var(--accent-violet) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: .8rem;
+  }
+
+  .slide-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.2rem;
+    line-height: 1.2;
+  }
+
+  .slide-title .hl { color: var(--accent-cyan); }
+  .slide-title .hl-v { color: var(--accent-violet); }
+  .slide-title .hl-g { color: var(--accent-green); }
+  .slide-title .hl-o { color: var(--accent-orange); }
+
+  /* ── CARD ── */
+  .card-glass {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem 1.8rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-glass::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,212,255,.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .card-accent-cyan { border-left: 3px solid var(--accent-cyan); }
+  .card-accent-violet { border-left: 3px solid var(--accent-violet); }
+  .card-accent-green { border-left: 3px solid var(--accent-green); }
+  .card-accent-orange { border-left: 3px solid var(--accent-orange); }
+  .card-accent-gold { border-left: 3px solid var(--accent-gold); }
+
+  /* ── TARJETA CONCEPTO ── */
+  .tarjeta {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-bottom: .8rem;
+  }
+  .tarjeta-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: .4rem;
+  }
+  .tarjeta p {
+    font-size: .9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    line-height: 1.7;
+    color: #abb2bf;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block .kw { color: #c678dd; }
+  .code-block .type { color: #e5c07b; }
+  .code-block .str { color: #98c379; }
+  .code-block .cmt { color: #5c6370; font-style: italic; }
+  .code-block .met { color: #61afef; }
+  .code-block .prop { color: #e06c75; }
+  .code-block .num { color: #d19a66; }
+  .code-block .iface { color: #56b6c2; }
+
+  .code-label {
+    position: absolute; top: .5rem; right: .8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    color: var(--text-muted);
+    letter-spacing: .1em;
+  }
+
+  /* ── BODY TEXT ── */
+  .body-text {
+    font-size: .95rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 820px;
+  }
+
+  .body-text strong { color: var(--text-primary); }
+
+  /* ── BADGES ── */
+  .badge-cyan { background: rgba(0,212,255,.12); color: var(--accent-cyan); border: 1px solid rgba(0,212,255,.25); padding: .25rem .6rem; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: .73rem; }
+  .badge-violet { background: rgba(124,58,237,.12); color: #a78bfa; border: 1px solid rgba(124,58,237,.25); padding: .25rem .6rem; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: .73rem; }
+  .badge-green { background: rgba(16,217,122,.12); color: var(--accent-green); border: 1px solid rgba(16,217,122,.25); padding: .25rem .6rem; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: .73rem; }
+
+  /* ── TABLE COMPARATIVA ── */
+  .comp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: .85rem;
+  }
+  .comp-table th {
+    background: var(--bg-panel);
+    color: var(--accent-cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .7rem 1rem;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+  }
+  .comp-table th:last-child { color: var(--accent-violet); }
+  .comp-table td {
+    padding: .65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .comp-table td:first-child { color: var(--accent-gold); font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 600; }
+  .comp-table td:nth-child(2) { color: var(--text-secondary); }
+  .comp-table td:last-child { color: #a78bfa; }
+  .comp-table tr:hover td { background: rgba(255,255,255,.02); }
+
+  /* ── UML DIAGRAM (SVG inline) ── */
+  .uml-svg { max-width: 100%; }
+
+  /* ── EXERCISES ── */
+  .exercise-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color .2s;
+  }
+  .exercise-card:hover { border-color: var(--accent-cyan); }
+  .exercise-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--accent-orange);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: .4rem;
+  }
+  .exercise-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: .6rem;
+  }
+  .btn-sol {
+    background: rgba(0,212,255,.08);
+    border: 1px solid rgba(0,212,255,.3);
+    color: var(--accent-cyan);
+    padding: .4rem 1rem;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: all .2s;
+    margin-top: .8rem;
+  }
+  .btn-sol:hover { background: rgba(0,212,255,.2); }
+
+  /* ── QUIZ ── */
+  #quiz-slide { overflow-y: auto; }
+  .quiz-wrap { max-width: 780px; width: 100%; margin: 0 auto; padding-bottom: 4rem; }
+  .quiz-header { text-align: center; margin-bottom: 2rem; }
+  .quiz-q-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+  .quiz-q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--text-muted);
+    margin-bottom: .4rem;
+  }
+  .quiz-q-text {
+    font-size: .95rem;
+    color: var(--text-primary);
+    margin-bottom: .9rem;
+    line-height: 1.55;
+  }
+  .quiz-option {
+    display: block;
+    width: 100%;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    text-align: left;
+    padding: .6rem 1rem;
+    border-radius: 8px;
+    font-size: .87rem;
+    cursor: pointer;
+    margin-bottom: .4rem;
+    transition: all .15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--accent-cyan); color: var(--text-primary); background: rgba(0,212,255,.06); }
+  .quiz-option.correct { border-color: var(--accent-green); background: rgba(16,217,122,.1); color: var(--accent-green); }
+  .quiz-option.wrong { border-color: var(--accent-orange); background: rgba(255,107,53,.08); color: var(--accent-orange); }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-feedback { font-size: .82rem; margin-top: .5rem; padding: .4rem .8rem; border-radius: 6px; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(16,217,122,.1); color: var(--accent-green); border: 1px solid rgba(16,217,122,.2); }
+  .quiz-feedback.err { background: rgba(255,107,53,.08); color: #ff9f7a; border: 1px solid rgba(255,107,53,.2); }
+  .quiz-score-bar { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 2rem; overflow: hidden; }
+  .quiz-score-fill { height: 100%; background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan)); width: 0; transition: width .5s; border-radius: 3px; }
+  .btn-submit-quiz {
+    background: linear-gradient(135deg, var(--accent-violet), #4f46e5);
+    border: none;
+    color: #fff;
+    padding: .75rem 2rem;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s;
+    display: block;
+    margin: 1.5rem auto 0;
+    width: fit-content;
+  }
+  .btn-submit-quiz:hover { opacity: .88; }
+
+  /* ── ICON BIG ── */
+  .icon-big { font-size: 3.5rem; margin-bottom: 1rem; }
+
+  /* ── LIST STYLED ── */
+  .styled-list { list-style: none; padding: 0; }
+  .styled-list li {
+    padding: .45rem 0 .45rem 1.6rem;
+    position: relative;
+    color: var(--text-secondary);
+    font-size: .92rem;
+    line-height: 1.55;
+  }
+  .styled-list li::before {
+    content: '▸';
+    position: absolute; left: 0;
+    color: var(--accent-cyan);
+    font-size: .8rem;
+  }
+
+  /* ── SCROLL INSIDE SLIDE ── */
+  .slide-scroll { overflow-y: auto; height: calc(100vh - 52px); padding-top: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+
+  /* ── HERO GLOW ── */
+  .hero-glow {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,.15) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+  .hero-glow2 {
+    position: fixed;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,255,.08) 0%, transparent 70%);
+    bottom: -100px; left: -100px;
+    pointer-events: none;
+  }
+
+  /* ── KEYBOARD HINT ── */
+  .kbd-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--text-muted);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    padding: .15rem .4rem;
+    border-radius: 4px;
+  }
+
+  /* ── WIDE CONTENT ── */
+  .content-wide { max-width: 1000px; width: 100%; }
+  .content-narrow { max-width: 760px; width: 100%; }
+
+  /* ── 2-COL GRID ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="hero-glow"></div>
+<div class="hero-glow2"></div>
+
+<!-- PROGRESS BAR -->
+<div class="dots-bar"><div class="dots-progress" id="progressBar"></div></div>
+
+<!-- SLIDE CONTAINER -->
+<div class="slide-container">
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 0 — PORTADA
+══════════════════════════════════════════════════ -->
+<div class="slide active animate__animated animate__fadeIn" id="slide-0">
+  <div class="text-center content-narrow">
+    <div class="section-tag mb-3">POO II &nbsp;·&nbsp; Unidad 5</div>
+    <div class="icon-big">
+      <i class="fa-solid fa-sitemap" style="color:var(--accent-cyan)"></i>
+    </div>
+    <div class="hero-title">Herencia &<br>Agregación</div>
+    <p class="body-text text-center mx-auto mb-4" style="max-width:560px;">
+      Relaciones taxonómicas, reutilización de código, encadenamiento dinámico y el
+      eterno debate <strong>composición vs. herencia</strong>.
+    </p>
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+      <span class="badge-cyan"><i class="fa-solid fa-code-branch me-1"></i>Herencia</span>
+      <span class="badge-violet"><i class="fa-solid fa-object-group me-1"></i>Agregación</span>
+      <span class="badge-green"><i class="fa-solid fa-bolt me-1"></i>Encadenamiento</span>
+      <span class="badge-cyan"><i class="fa-brands fa-microsoft me-1"></i>C#</span>
+    </div>
+    <p class="kbd-hint">← → o botones para navegar</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 1 — RELACIONES ENTRE CLASES
+══════════════════════════════════════════════════ -->
+<div class="slide" id="slide-1">
+  <div class="content-wide">
+    <div class="section-tag">Introducción</div>
+    <div class="slide-title">Dos tipos de <span class="hl">relaciones</span> entre clases</div>
+    <div class="two-col">
+      <div class="card-glass card-accent-cyan">
+        <h5 style="font-family:'Syne',sans-serif; color:var(--accent-cyan); margin-bottom:.8rem;">
+          <i class="fa-solid fa-code-branch me-2"></i>«es un» (is-a)
+        </h5>
+        <p class="body-text mb-3">
+          Clasificación taxonómica. Una clase <strong>es un tipo de</strong> otra clase más abstracta.
+        </p>
+        <div class="tarjeta">
+          <ul class="styled-list mb-0">
+            <li>Un <strong>puma</strong> es un mamífero</li>
+            <li>Un <strong>mamífero</strong> es un animal</li>
+            <li>Un <strong>CD</strong> es un Disco</li>
+            <li>Un <strong>DVD</strong> es un Disco</li>
+          </ul>
+        </div>
+        <div class="mt-2 text-center">
+          <span class="badge-cyan">→ Herencia / Generalización</span>
+        </div>
+      </div>
+      <div class="card-glass card-accent-violet">
+        <h5 style="font-family:'Syne',sans-serif; color:#a78bfa; margin-bottom:.8rem;">
+          <i class="fa-solid fa-puzzle-piece me-2"></i>«es parte de» (has-a)
+        </h5>
+        <p class="body-text mb-3">
+          Relación todo-parte. Un objeto <strong>está compuesto por</strong> otros objetos.
+        </p>
+        <div class="tarjeta">
+          <ul class="styled-list mb-0">
+            <li>Un <strong>auto</strong> tiene un motor</li>
+            <li>Una <strong>discoteca</strong> tiene discos</li>
+            <li>Un <strong>edificio</strong> tiene departamentos</li>
+            <li>Una <strong>orden</strong> tiene ítems</li>
+          </ul>
+        </div>
+        <div class="mt-2 text-center">
+          <span class="badge-violet">→ Agregación / Composición</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-glass mt-3" style="border-color:rgba(240,192,64,.2);">
+      <p class="mb-0" style="font-size:.9rem; color:var(--text-secondary);">
+        <i class="fa-solid fa-lightbulb me-2" style="color:var(--accent-gold)"></i>
+        Ambas relaciones crean una <strong style="color:var(--text-primary);">ilusión de simplicidad</strong>:
+        trabajamos con el todo sin preocuparnos por los detalles de las partes o de la jerarquía.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 2 — GENERALIZACIÓN
+══════════════════════════════════════════════════ -->
+<div class="slide" id="slide-2">
+  <div class="content-narrow">
+    <div class="section-tag">Herencia</div>
+    <div class="slide-title"><span class="hl">Generalización</span> y Especialización</div>
+
+    <div class="tarjeta mb-3">
+      <div class="tarjeta-title"><i class="fa-solid fa-bookmark me-1"></i>Definición</div>
+      <p>La <strong style="color:var(--text-primary)">generalización</strong> es una relación taxonómica entre una <em>clase base</em> más general o abstracta y otra <em>clase sucesora</em> más específica o concreta. La clase base es completamente consistente con la clase sucesora.</p>
+    </div>
+
+    <div class="two-col mb-3">
+      <div class="tarjeta">
+        <div class="tarjeta-title">Clase Base / Superclase</div>
+        <p>Clase más <strong style="color:var(--accent-cyan)">abstracta</strong> y general. También llamada: <em>clase ancestral, superclase, clase madre</em>.</p>
+      </div>
+      <div class="tarjeta">
+        <div class="tarjeta-title">Clase Sucesora / Subclase</div>
+        <p>Clase más <strong style="color:var(--accent-violet)">concreta</strong> y específica. También llamada: <em>clase derivada, subclase, clase hija</em>.</p>
+      </div>
+    </div>
+
+    <div class="card-glass card-accent-green">
+      <h6 style="font-family:'JetBrains Mono',monospace; color:var(--accent-green); font-size:.8rem; margin-bottom:.7rem;">JERARQUÍA DE EJEMPLO</h6>
+      <div class="text-center">
+        <svg width="380" height="130" viewBox="0 0 380 130" xmlns="http://www.w3.org/2000/svg" class="uml-svg">
+          <!-- Animal -->
+          <rect x="140" y="4" width="100" height="36" rx="6" fill="#131d35" stroke="#1e2d4d"/>
+          <text x="190" y="27" text-anchor="middle" font-family="JetBrains Mono" font-size="13" fill="#e8eaf6">Animal</text>
+          <!-- Mamifero -->
+          <rect x="50" y="70" width="120" height="36" rx="6" fill="#131d35" stroke="#1e2d4d"/>
+          <text x="110" y="93" text-anchor="middle" font-family="JetBrains Mono" font-size="13" fill="#e8eaf6">Mamífero</text>
+          <!-- Ave -->
+          <rect x="210" y="70" width="120" height="36" rx="6" fill="#131d35" stroke="#1e2d4d"/>
+          <text x="270" y="93" text-anchor="middle" font-family="JetBrains Mono" font-size="13" fill="#e8eaf6">Ave</text>
+          <!-- Lines -->
+          <line x1="190" y1="40" x2="110" y2="70" stroke="#00d4ff" stroke-width="1.5"/>
+          <line x1="190" y1="40" x2="270" y2="70" stroke="#00d4ff" stroke-width="1.5"/>
+          <!-- Arrows -->
+          <polygon points="110,70 103,57 117,57" fill="#00d4ff"/>
+          <polygon points="270,70 263,57 277,57" fill="#00d4ff"/>
+          <!-- Labels -->
+          <text x="135" y="126" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5c6370">«extends»</text>
+          <text x="245" y="126" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5c6370">«extends»</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="tarjeta mt-3">
+      <div class="tarjeta-title"><i class="fa-solid fa-recycle me-1"></i>Herencia y Reutilización</div>
+      <p>La herencia permite crear nuevas clases a partir de clases existentes. Una subclase hereda <strong style="color:var(--text-primary)">atributos y métodos</strong> de su superclase y habitualmente agrega nuevos. <span style="color:var(--accent-orange)">Importante:</span> no usar la herencia <em>solo</em> por reutilización; las clases también deben estar en relación taxonómica real.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 3 — EJEMPLO: CLASE DISK
+══════════════════════════════════════════════════ -->
+<div class="slide slide-scroll" id="slide-3">
+  <div class="content-wide pt-3">
+    <div class="section-tag">Herencia en C#</div>
+    <div class="slide-title">La clase <span class="hl">Disk</span></div>
+
+    <p class="body-text mb-3">Tengo una discoteca con CD de música y DVD de películas. Ambos son <strong>discos</strong>: tienen nombre, género y año. Extraemos esas características comunes a una clase base.</p>
+
+    <div class="two-col">
+      <div>
+        <div class="code-block">
+          <span class="code-label">Disk.cs</span>
+<span class="kw">public class</span> <span class="type">Disk</span>
+{
+    <span class="kw">protected</span> <span class="type">Disk</span>(<span class="iface">string</span> name)
+    {
+        <span class="kw">this</span>.<span class="prop">Name</span> = name;
+    }
+
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Name</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Genre</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="iface">int</span>    <span class="prop">Year</span>  { <span class="kw">get</span>; <span class="kw">set</span>; }
+}</div>
+
+        <div class="code-block mt-3">
+          <span class="code-label">CD.cs</span>
+<span class="kw">public class</span> <span class="type">CD</span> : <span class="type">Disk</span>   <span class="cmt">// CD "extiende" Disk</span>
+{
+    <span class="kw">private</span> <span class="type">List</span>&lt;<span class="iface">string</span>&gt; songs = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="type">CD</span>(<span class="iface">string</span> name, <span class="iface">string</span>[] songs)
+        : <span class="kw">base</span>(name)  <span class="cmt">// llama ctor de Disk</span>
+    {
+        <span class="kw">this</span>.songs.<span class="met">AddRange</span>(songs);
+    }
+
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Player</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="type">IEnumerable</span>&lt;<span class="iface">string</span>&gt; <span class="prop">Songs</span>
+        =&gt; songs;
+}</div>
+      </div>
+
+      <div>
+        <div class="tarjeta mb-3">
+          <div class="tarjeta-title">Sintaxis C#</div>
+          <ul class="styled-list">
+            <li><code style="color:var(--accent-cyan)">CD : Disk</code> — CD hereda de Disk</li>
+            <li><code style="color:var(--accent-cyan)">: base(name)</code> — llama al constructor de la superclase</li>
+            <li>CD hereda <code>Name</code>, <code>Genre</code>, <code>Year</code> sin redeclararlos</li>
+            <li>CD agrega <code>Player</code> y <code>Songs</code></li>
+          </ul>
+        </div>
+
+        <div class="code-block">
+          <span class="code-label">DVD.cs</span>
+<span class="kw">public class</span> <span class="type">DVD</span> : <span class="type">Disk</span>
+{
+    <span class="kw">public</span> <span class="type">DVD</span>(<span class="iface">string</span> name)
+        : <span class="kw">base</span>(name) { }
+
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Director</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="type">List</span>&lt;<span class="iface">string</span>&gt; <span class="prop">Cast</span>
+        = <span class="kw">new</span>();
+    <span class="kw">public bool</span> <span class="met">IsActorInCast</span>(<span class="iface">string</span> a)
+        =&gt; <span class="prop">Cast</span>.<span class="met">Contains</span>(a);
+}</div>
+
+        <div class="card-glass mt-3" style="border-color:rgba(0,212,255,.2);">
+          <p style="font-size:.85rem; color:var(--text-secondary); margin:0;">
+            <i class="fa-solid fa-info-circle me-2" style="color:var(--accent-cyan)"></i>
+            <strong style="color:var(--text-primary)">Herencia múltiple</strong> — Cuando una clase sucesora puede tener más de una clase base. C# <em>no soporta</em> herencia múltiple de clases, pero sí de interfaces.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 4 — CLASES ABSTRACTAS
+══════════════════════════════════════════════════ -->
+<div class="slide slide-scroll" id="slide-4">
+  <div class="content-wide pt-3">
+    <div class="section-tag">Herencia avanzada</div>
+    <div class="slide-title">Clases y métodos <span class="hl-v">abstractos</span></div>
+
+    <p class="body-text mb-3">
+      Queremos que todo <code style="color:var(--accent-cyan)">Disk</code> pueda decir si es <em>favorito</em>, pero el criterio es diferente para CD (por intérprete) y DVD (por género, director y actores).
+      Usamos <strong>métodos abstractos</strong> para obligar a las subclases a implementar el método.
+    </p>
+
+    <div class="two-col mb-3">
+      <div>
+        <div class="code-block">
+          <span class="code-label">Disk.cs — abstracta</span>
+<span class="cmt">// No se puede instanciar Disk directamente</span>
+<span class="kw">public abstract class</span> <span class="type">Disk</span>
+{
+    <span class="kw">protected</span> <span class="type">Disk</span>(<span class="iface">string</span> name)
+    { <span class="kw">this</span>.<span class="prop">Name</span> = name; }
+
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Name</span>  { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Genre</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="iface">int</span>    <span class="prop">Year</span>  { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cmt">// Sin implementación — las subclases DEBEN</span>
+    <span class="cmt">// proveer una implementación con override</span>
+    <span class="kw">public abstract bool</span> <span class="met">IsFavorite</span>();
+}</div>
+      </div>
+      <div>
+        <div class="tarjeta mb-2">
+          <div class="tarjeta-title">Reglas clave</div>
+          <ul class="styled-list">
+            <li>Una clase con <em>al menos un</em> método abstracto es <strong style="color:var(--text-primary)">clase abstracta</strong></li>
+            <li>No se pueden crear instancias de clases abstractas</li>
+            <li>Las subclases deben implementar todos los métodos abstractos (o también ser abstractas)</li>
+            <li>En C#: <code style="color:var(--accent-cyan)">abstract</code> para declarar, <code style="color:var(--accent-cyan)">override</code> para implementar</li>
+          </ul>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-title">Métodos virtuales</div>
+          <p>Un método <code style="color:var(--accent-cyan)">virtual</code> <em>tiene</em> implementación pero puede ser sobreescrito. Un método <code style="color:var(--accent-cyan)">abstract</code> no tiene implementación y <em>debe</em> ser sobreescrito.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="code-block">
+        <span class="code-label">CD.cs — override</span>
+<span class="kw">public class</span> <span class="type">CD</span> : <span class="type">Disk</span>
+{
+  <span class="kw">private</span> <span class="type">List</span>&lt;<span class="iface">string</span>&gt; favPlayers
+    = <span class="kw">new</span>() { <span class="str">"Carlos Santana"</span>, <span class="str">"Pink Floyd"</span> };
+
+  <span class="kw">public override bool</span> <span class="met">IsFavorite</span>()
+    =&gt; favPlayers.<span class="met">Contains</span>(<span class="kw">this</span>.<span class="prop">Player</span>);
+}</div>
+      <div class="code-block">
+        <span class="code-label">DVD.cs — override</span>
+<span class="kw">public class</span> <span class="type">DVD</span> : <span class="type">Disk</span>
+{
+  <span class="kw">public</span> <span class="iface">string</span> FavActor  = <span class="str">"John Travolta"</span>;
+  <span class="kw">public</span> <span class="iface">string</span> FavDir    = <span class="str">"Tarantino"</span>;
+  <span class="kw">public</span> <span class="iface">string</span> FavGenre  = <span class="str">"Acción"</span>;
+
+  <span class="kw">public override bool</span> <span class="met">IsFavorite</span>() =&gt;
+    (<span class="met">IsActorInCast</span>(FavActor) ||
+     <span class="prop">Director</span>.<span class="met">Equals</span>(FavDir)) &&
+    <span class="prop">Genre</span>.<span class="met">Equals</span>(FavGenre);
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 5 — AGREGACIÓN
+══════════════════════════════════════════════════ -->
+<div class="slide" id="slide-5">
+  <div class="content-wide">
+    <div class="section-tag">Agregación</div>
+    <div class="slide-title">Relación <span class="hl-g">todo-parte</span></div>
+
+    <div class="two-col mb-3">
+      <div>
+        <div class="tarjeta mb-3">
+          <div class="tarjeta-title"><i class="fa-solid fa-bookmark me-1"></i>Definición</div>
+          <p>La <strong style="color:var(--text-primary)">agregación</strong> es una relación todo-parte entre una clase compuesta y una clase componente. Las instancias del componente suelen existir independientemente de la existencia del compuesto.</p>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-title">DiskLibrary contiene Disks</div>
+          <p>Una <code style="color:var(--accent-cyan)">DiskLibrary</code> puede contener <strong>0 o muchos</strong> <code>Disk</code>. Un <code>Disk</code> puede estar en <strong>0 o 1</strong> <code>DiskLibrary</code>.</p>
+        </div>
+      </div>
+      <div>
+        <!-- UML Agregación -->
+        <div class="card-glass" style="text-align:center;">
+          <div class="section-tag mb-2">Diagrama UML — Agregación</div>
+          <svg width="320" height="110" viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
+            <!-- DiskLibrary -->
+            <rect x="10" y="30" width="120" height="40" rx="6" fill="#0f1628" stroke="#1e2d4d"/>
+            <text x="70" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#e8eaf6">DiskLibrary</text>
+            <!-- Disk -->
+            <rect x="190" y="30" width="120" height="40" rx="6" fill="#0f1628" stroke="#1e2d4d"/>
+            <text x="250" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#e8eaf6">Disk</text>
+            <!-- Diamond -->
+            <polygon points="130,50 143,43 156,50 143,57" fill="none" stroke="#10d97a" stroke-width="1.5"/>
+            <!-- Line -->
+            <line x1="156" y1="50" x2="190" y2="50" stroke="#10d97a" stroke-width="1.5"/>
+            <!-- Multiplicidades -->
+            <text x="162" y="44" font-family="JetBrains Mono" font-size="10" fill="#5c6370">0..1</text>
+            <text x="173" y="68" font-family="JetBrains Mono" font-size="10" fill="#5c6370">0..*</text>
+          </svg>
+          <p style="font-size:.78rem; color:var(--text-muted); margin-top:.3rem;">Diamante vacío = Agregación</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <span class="code-label">DiskLibrary.cs</span>
+<span class="kw">public class</span> <span class="type">DiskLibrary</span>
+{
+    <span class="kw">private</span> <span class="type">IList</span>&lt;<span class="type">Disk</span>&gt; discs = <span class="kw">new</span> <span class="type">List</span>&lt;<span class="type">Disk</span>&gt;();
+
+    <span class="kw">public void</span> <span class="met">AddDisc</span>(<span class="type">Disk</span> disc)  { discs.<span class="met">Add</span>(disc); }
+
+    <span class="kw">public</span> <span class="type">IList</span>&lt;<span class="type">Disk</span>&gt; <span class="met">GetDiscsByGenre</span>(<span class="iface">string</span> genre)
+        =&gt; discs.<span class="met">Where</span>(d =&gt; d.Genre.<span class="met">Equals</span>(genre,
+               <span class="type">StringComparison</span>.<span class="prop">OrdinalIgnoreCase</span>)).<span class="met">ToList</span>();
+
+    <span class="kw">public</span> <span class="type">IList</span>&lt;<span class="type">Disk</span>&gt; <span class="met">GetFavorites</span>()  <span class="cmt">// ← usa polimorfismo</span>
+        =&gt; discs.<span class="met">Where</span>(d =&gt; d.<span class="met">IsFavorite</span>()).<span class="met">ToList</span>();
+}</div>
+
+    <div class="card-glass mt-3" style="border-color:rgba(16,217,122,.2);">
+      <p style="font-size:.87rem; color:var(--text-secondary); margin:0;">
+        <i class="fa-solid fa-eye me-2" style="color:var(--accent-green)"></i>
+        Noten que <code>GetFavorites()</code> usa <strong style="color:var(--text-primary)">polimorfismo</strong>: llama <code>d.IsFavorite()</code> sin saber si <code>d</code> es un <code>CD</code> o un <code>DVD</code>. El encadenamiento dinámico resuelve qué método ejecutar en tiempo de ejecución.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 6 — ENCADENAMIENTO DINÁMICO
+══════════════════════════════════════════════════ -->
+<div class="slide" id="slide-6">
+  <div class="content-wide">
+    <div class="section-tag">Polimorfismo</div>
+    <div class="slide-title">Encadenamiento <span class="hl">dinámico</span> vs <span class="hl-o">estático</span></div>
+
+    <div class="two-col mb-3">
+      <div class="card-glass card-accent-cyan">
+        <h5 style="font-family:'Syne',sans-serif; color:var(--accent-cyan); font-size:1rem; margin-bottom:.7rem;">
+          <i class="fa-solid fa-bolt me-2"></i>Encadenamiento Dinámico (Tardío)
+        </h5>
+        <p class="body-text mb-2">El método a ejecutar se determina en <strong>tiempo de ejecución</strong> buscando en la clase del objeto receptor y en sus ancestras.</p>
+        <ul class="styled-list">
+          <li>Necesario para el <strong>polimorfismo</strong></li>
+          <li>Métodos <code style="color:var(--accent-cyan)">virtual</code> y <code style="color:var(--accent-cyan)">abstract</code> en C#</li>
+          <li>Genera código que busca el método en runtime</li>
+          <li>Ligero overhead de ejecución</li>
+        </ul>
+      </div>
+      <div class="card-glass card-accent-orange">
+        <h5 style="font-family:'Syne',sans-serif; color:var(--accent-orange); font-size:1rem; margin-bottom:.7rem;">
+          <i class="fa-solid fa-lock me-2"></i>Encadenamiento Estático (Temprano)
+        </h5>
+        <p class="body-text mb-2">El método a ejecutar se determina en <strong>tiempo de compilación</strong> según el tipo declarado de la variable.</p>
+        <ul class="styled-list">
+          <li><strong>Default</strong> en C# para métodos no virtuales</li>
+          <li>Mayor rendimiento</li>
+          <li>Certeza de qué código se ejecuta</li>
+          <li>No permite polimorfismo real</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block mb-3">
+      <span class="code-label">polimorfismo en acción</span>
+<span class="type">Disk</span> d1 = <span class="kw">new</span> <span class="type">CD</span>(<span class="str">"The Wall"</span>, <span class="kw">new</span>[] { <span class="str">"Another Brick"</span> }) { <span class="prop">Player</span> = <span class="str">"Pink Floyd"</span> };
+<span class="type">Disk</span> d2 = <span class="kw">new</span> <span class="type">DVD</span>(<span class="str">"Pulp Fiction"</span>) { <span class="prop">Director</span> = <span class="str">"Tarantino"</span>, <span class="prop">Genre</span> = <span class="str">"Acción"</span> };
+
+<span class="cmt">// ¿Qué IsFavorite() se llama? Depende del TIPO REAL del objeto (runtime)</span>
+<span class="type">Console</span>.<span class="met">WriteLine</span>(d1.<span class="met">IsFavorite</span>()); <span class="cmt">// Ejecuta CD.IsFavorite()  → true</span>
+<span class="type">Console</span>.<span class="met">WriteLine</span>(d2.<span class="met">IsFavorite</span>()); <span class="cmt">// Ejecuta DVD.IsFavorite() → true</span></div>
+
+    <div class="card-glass" style="border-color:rgba(255,107,53,.2);">
+      <p style="font-size:.87rem; margin-bottom:.3rem;"><i class="fa-solid fa-triangle-exclamation me-2" style="color:var(--accent-orange)"></i><strong>Downcast / Typecast</strong> — Evitarlo cuando sea posible:</p>
+      <div class="code-block" style="font-size:.78rem;">
+<span class="cmt">// ⚠️ Evitar: preguntar la clase rompe el polimorfismo</span>
+<span class="kw">if</span> (disc <span class="kw">is</span> <span class="type">CD</span>) { ((<span class="type">CD</span>)disc).<span class="prop">Player</span> ... }
+
+<span class="cmt">// ✅ Mejor: aprovechar el polimorfismo con métodos virtuales</span>
+disc.<span class="met">IsFavorite</span>(); <span class="cmt">// sin preguntar la clase</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7 — COMPOSICIÓN VS HERENCIA
+══════════════════════════════════════════════════ -->
+<div class="slide slide-scroll" id="slide-7">
+  <div class="content-wide pt-2">
+    <div class="section-tag">Diseño OO</div>
+    <div class="slide-title"><span class="hl-g">Composición</span> vs <span class="hl-v">Herencia</span></div>
+
+    <p class="body-text mb-3">La composición y delegación es una alternativa a la herencia para la reutilización. En el contexto de la reutilización, toda implementación que use herencia se puede cambiar por una equivalente que use composición.</p>
+
+    <div class="card-glass mb-3" style="overflow-x:auto;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Aspecto</th>
+            <th><i class="fa-solid fa-object-group me-1"></i>Composición</th>
+            <th><i class="fa-solid fa-code-branch me-1"></i>Herencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Visibilidad</td><td>Caja negra — no requiere conocer la implementación interna</td><td>Caja blanca — requiere conocer los detalles internos</td></tr>
+          <tr><td>Momento</td><td>Dinámica — puede cambiar en tiempo de ejecución</td><td>Estática — se define en tiempo de compilación</td></tr>
+          <tr><td>Implementación</td><td>Por código, requiere código adicional del programador</td><td>Declarativa, una palabra clave basta</td></tr>
+          <tr><td>Cantidad de código</td><td>Más código (mayor posibilidad de errores)</td><td>Menos código</td></tr>
+          <tr><td>Reutilización</td><td>Selectiva — elige qué reutilizar</td><td>Todo o nada — hereda todo</td></tr>
+          <tr><td>Clases</td><td>Puede reutilizar 1 o más simultáneamente</td><td>Simple: 1; Múltiple: 2+ (poco soportada)</td></tr>
+          <tr><td>Tipos</td><td>Sin relación impuesta entre los tipos</td><td>Impone relación supertipo/subtipo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <span class="code-label">composición + delegación</span>
+<span class="cmt">// En vez de: class CD : Disk { ... }</span>
+<span class="cmt">// Composición: CD "tiene" un Disk</span>
+<span class="kw">public class</span> <span class="type">CD</span>
+{
+    <span class="kw">private readonly</span> <span class="type">Disk</span> _disk;  <span class="cmt">// ← referencia al componente</span>
+
+    <span class="kw">public</span> <span class="type">CD</span>(<span class="type">Disk</span> disk) { _disk = disk; }
+
+    <span class="cmt">// Delegación: CD delega en _disk</span>
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Name</span>  =&gt; _disk.<span class="prop">Name</span>;
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Genre</span> =&gt; _disk.<span class="prop">Genre</span>;
+
+    <span class="cmt">// Comportamiento propio de CD</span>
+    <span class="kw">public</span> <span class="iface">string</span> <span class="prop">Player</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+}</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 8 — EJERCICIOS
+══════════════════════════════════════════════════ -->
+<div class="slide slide-scroll" id="slide-8">
+  <div class="content-wide pt-2">
+    <div class="section-tag">Práctica</div>
+    <div class="slide-title"><i class="fa-solid fa-terminal me-2" style="color:var(--accent-orange)"></i>Ejercicios en <span class="hl-o">C# Consola</span></div>
+    <p class="body-text mb-4">Proyectos <strong>modo consola</strong> para realizar en VSCode. Hacé click en <strong>Ver Solución</strong> cuando termines.</p>
+
+    <!-- EJ 1 -->
+    <div class="exercise-card">
+      <div class="exercise-num">Ejercicio 01</div>
+      <div class="exercise-title"><i class="fa-solid fa-car me-2" style="color:var(--accent-cyan)"></i>Jerarquía de Vehículos</div>
+      <p class="body-text mb-2">Crea una jerarquía de clases:
+        <code>Vehicle</code> (abstracta) con propiedades <code>Make</code>, <code>Model</code>, <code>Year</code> y método abstracto <code>Describe()</code>.
+        Subclases <code>Car</code> (agrega <code>NumDoors</code>) y <code>Motorcycle</code> (agrega <code>HasSidecar</code>).
+        Implementar <code>Describe()</code> en cada una e instanciar ambas desde <code>Program.cs</code>.
+      </p>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge-cyan">abstract class</span>
+        <span class="badge-violet">override</span>
+        <span class="badge-green">polimorfismo</span>
+      </div>
+      <button class="btn-sol" onclick="showSolution(1)"><i class="fa-solid fa-code me-2"></i>Ver Solución</button>
+    </div>
+
+    <!-- EJ 2 -->
+    <div class="exercise-card">
+      <div class="exercise-num">Ejercicio 02</div>
+      <div class="exercise-title"><i class="fa-solid fa-shapes me-2" style="color:var(--accent-violet)"></i>Figuras Geométricas con Área</div>
+      <p class="body-text mb-2">Clase abstracta <code>Shape</code> con método abstracto <code>double Area()</code> y método virtual <code>Describe()</code>.
+        Subclases: <code>Circle</code> (radio), <code>Rectangle</code> (ancho, alto), <code>Triangle</code> (base, altura).
+        Crear un <code>List&lt;Shape&gt;</code>, agregar distintas figuras y mostrar todas las áreas con polimorfismo.
+      </p>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge-cyan">List&lt;Shape&gt;</span>
+        <span class="badge-violet">foreach polimórfico</span>
+        <span class="badge-green">Math.PI</span>
+      </div>
+      <button class="btn-sol" onclick="showSolution(2)"><i class="fa-solid fa-code me-2"></i>Ver Solución</button>
+    </div>
+
+    <!-- EJ 3 -->
+    <div class="exercise-card">
+      <div class="exercise-num">Ejercicio 03</div>
+      <div class="exercise-title"><i class="fa-solid fa-university me-2" style="color:var(--accent-green)"></i>Sistema Bancario con Agregación</div>
+      <p class="body-text mb-2">Clase <code>BankAccount</code> (abstracta) con <code>Owner</code>, <code>Balance</code> y métodos <code>Deposit()</code>, <code>Withdraw()</code> abstracto.
+        Subclases: <code>SavingsAccount</code> (retiro con validación de saldo) y <code>CheckingAccount</code> (permite sobregiro hasta -500).
+        Clase <code>Bank</code> que agrega cuentas (agregación) y tiene <code>TotalBalance()</code> y <code>PrintReport()</code>.
+      </p>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge-cyan">agregación</span>
+        <span class="badge-violet">abstract withdraw</span>
+        <span class="badge-green">polimorfismo</span>
+      </div>
+      <button class="btn-sol" onclick="showSolution(3)"><i class="fa-solid fa-code me-2"></i>Ver Solución</button>
+    </div>
+
+    <!-- EJ 4 -->
+    <div class="exercise-card">
+      <div class="exercise-num">Ejercicio 04</div>
+      <div class="exercise-title"><i class="fa-solid fa-gamepad me-2" style="color:var(--accent-orange)"></i>Personajes de Videojuego</div>
+      <p class="body-text mb-2">Clase abstracta <code>Character</code> con <code>Name</code>, <code>Health</code>, <code>Attack</code> y método abstracto <code>SpecialAttack()</code>.
+        Subclases: <code>Warrior</code> (SpecialAttack: daño doble), <code>Mage</code> (SpecialAttack: daño mágico con descripción), <code>Archer</code> (SpecialAttack: ataque a distancia).
+        Simulá un combate entre 2 personajes elegidos por el usuario con un menú de consola.
+      </p>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge-cyan">menú consola</span>
+        <span class="badge-violet">SpecialAttack polimórfico</span>
+        <span class="badge-green">Random</span>
+      </div>
+      <button class="btn-sol" onclick="showSolution(4)"><i class="fa-solid fa-code me-2"></i>Ver Solución</button>
+    </div>
+
+    <!-- EJ 5 -->
+    <div class="exercise-card">
+      <div class="exercise-num">Ejercicio 05</div>
+      <div class="exercise-title"><i class="fa-solid fa-music me-2" style="color:var(--accent-gold)"></i>Discoteca Completa (del ejemplo)</div>
+      <p class="body-text mb-2">Implementar el ejemplo completo del PDF: <code>Disk</code> abstracta, <code>CD</code>, <code>DVD</code>, <code>DiskLibrary</code> con agregación.
+        Agregar mínimo 5 discos (mix de CD y DVD), luego mostrar menú para: buscar por género, listar favoritos, buscar por intérprete (CD), buscar por actor (DVD).
+        Incluir al menos 1 CD favorito y 1 DVD favorito según los criterios del ejemplo.
+      </p>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge-cyan">ejercicio integrador</span>
+        <span class="badge-violet">agregación + herencia</span>
+        <span class="badge-green">menú completo</span>
+      </div>
+      <button class="btn-sol" onclick="showSolution(5)"><i class="fa-solid fa-code me-2"></i>Ver Solución</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 9 — CUESTIONARIO
+══════════════════════════════════════════════════ -->
+<div class="slide slide-scroll" id="slide-9">
+  <div class="quiz-wrap">
+    <div class="quiz-header">
+      <div class="section-tag text-center">Evaluación</div>
+      <div class="slide-title text-center" style="font-size:2rem;">Cuestionario <span class="hl">30 Preguntas</span></div>
+      <div class="quiz-score-bar"><div class="quiz-score-fill" id="quizScoreFill"></div></div>
+      <p style="font-size:.82rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;" id="quizProgress">Respondé todas las preguntas y luego enviá.</p>
+    </div>
+    <div id="quizQuestions"></div>
+    <button class="btn-submit-quiz" onclick="submitQuiz()">
+      <i class="fa-solid fa-paper-plane me-2"></i>Ver Resultados
+    </button>
+  </div>
+</div>
+
+</div><!-- end slide-container -->
+
+<!-- NAV BAR -->
+<div class="nav-bar">
+  <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">
+    <i class="fa-solid fa-chevron-left"></i> Anterior
+  </button>
+  <div class="d-flex flex-column align-items-center">
+    <div class="slide-counter">Diapositiva <span id="slideNum">1</span> / <span id="slideTotal"></span></div>
+    <div class="d-flex gap-1 mt-1">
+      <span class="kbd-hint">←</span>
+      <span class="kbd-hint">→</span>
+    </div>
+  </div>
+  <button class="nav-btn" id="btnNext" onclick="navigate(1)">
+    Siguiente <i class="fa-solid fa-chevron-right"></i>
+  </button>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// ── NAVIGATION ──────────────────────────────────
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+document.getElementById('slideTotal').textContent = total;
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= total) return;
+
+  slides[current].classList.remove('active');
+  current = next;
+  slides[current].classList.add('active');
+
+  // Re-trigger animate on new slide
+  slides[current].classList.remove('animate__animated','animate__fadeIn');
+  void slides[current].offsetWidth;
+  slides[current].classList.add('animate__animated','animate__fadeIn');
+
+  document.getElementById('slideNum').textContent = current + 1;
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').disabled = current === total - 1;
+
+  // Progress bar
+  const pct = ((current) / (total - 1)) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+});
+
+navigate(0); // init
+
+// ── SOLUTIONS ───────────────────────────────────
+const solutions = {
+  1: `<b>Program.cs</b>
+<pre style="text-align:left;font-size:.8rem;line-height:1.7;">
+using System;
+
+abstract class Vehicle
+{
+    public string Make  { get; set; }
+    public string Model { get; set; }
+    public int    Year  { get; set; }
+
+    protected Vehicle(string make, string model, int year)
+    { Make = make; Model = model; Year = year; }
+
+    public abstract void Describe();
+}
+
+class Car : Vehicle
+{
+    public int NumDoors { get; set; }
+    public Car(string make, string model, int year, int doors)
+        : base(make, model, year) { NumDoors = doors; }
+
+    public override void Describe() =>
+        Console.WriteLine($"🚗 Auto: {Year} {Make} {Model} — {NumDoors} puertas");
+}
+
+class Motorcycle : Vehicle
+{
+    public bool HasSidecar { get; set; }
+    public Motorcycle(string make, string model, int year, bool sidecar)
+        : base(make, model, year) { HasSidecar = sidecar; }
+
+    public override void Describe() =>
+        Console.WriteLine($"🏍️ Moto: {Year} {Make} {Model}" +
+            (HasSidecar ? " (con sidecar)" : ""));
+}
+
+// Program
+var vehicles = new List&lt;Vehicle&gt;
+{
+    new Car("Toyota","Corolla",2022,4),
+    new Motorcycle("Honda","CBR",2021,false),
+    new Car("Ford","Fiesta",2020,2),
+    new Motorcycle("Ural","Gear-Up",2019,true)
+};
+
+Console.WriteLine("=== FLOTA DE VEHÍCULOS ===");
+foreach (var v in vehicles)
+    v.Describe();   // Polimorfismo: cada uno describe a su manera
+</pre>`,
+
+  2: `<b>Program.cs</b>
+<pre style="text-align:left;font-size:.8rem;line-height:1.7;">
+using System;
+using System.Collections.Generic;
+
+abstract class Shape
+{
+    public abstract double Area();
+    public virtual void Describe() =>
+        Console.WriteLine($"{GetType().Name}: Área = {Area():F2}");
+}
+
+class Circle : Shape
+{
+    public double Radius { get; }
+    public Circle(double r) { Radius = r; }
+    public override double Area() => Math.PI * Radius * Radius;
+    public override void Describe() =>
+        Console.WriteLine($"⭕ Círculo (r={Radius}): Área = {Area():F2}");
+}
+
+class Rectangle : Shape
+{
+    public double Width { get; }
+    public double Height { get; }
+    public Rectangle(double w, double h) { Width = w; Height = h; }
+    public override double Area() => Width * Height;
+    public override void Describe() =>
+        Console.WriteLine($"⬜ Rectángulo ({Width}x{Height}): Área = {Area():F2}");
+}
+
+class Triangle : Shape
+{
+    public double Base { get; }
+    public double Height { get; }
+    public Triangle(double b, double h) { Base = b; Height = h; }
+    public override double Area() => Base * Height / 2;
+    public override void Describe() =>
+        Console.WriteLine($"🔺 Triángulo (b={Base}, h={Height}): Área = {Area():F2}");
+}
+
+// Program
+var shapes = new List&lt;Shape&gt;
+{
+    new Circle(5),
+    new Rectangle(4, 6),
+    new Triangle(3, 8),
+    new Circle(2.5),
+    new Rectangle(10, 2)
+};
+
+Console.WriteLine("=== FIGURAS GEOMÉTRICAS ===");
+foreach (var s in shapes)
+    s.Describe();
+
+double total = 0;
+foreach (var s in shapes) total += s.Area();
+Console.WriteLine($"\nÁrea total: {total:F2}");
+</pre>`,
+
+  3: `<b>Program.cs</b>
+<pre style="text-align:left;font-size:.8rem;line-height:1.7;">
+using System;
+using System.Collections.Generic;
+
+abstract class BankAccount
+{
+    public string Owner   { get; }
+    public decimal Balance { get; protected set; }
+
+    protected BankAccount(string owner, decimal initial)
+    { Owner = owner; Balance = initial; }
+
+    public void Deposit(decimal amount)
+    {
+        if (amount &lt;= 0) { Console.WriteLine("Monto inválido."); return; }
+        Balance += amount;
+        Console.WriteLine($"  Depósito \${amount} → Saldo: \${Balance}");
+    }
+
+    public abstract void Withdraw(decimal amount);
+    public override string ToString() =>
+        $"{Owner} [{GetType().Name}]: \${Balance:F2}";
+}
+
+class SavingsAccount : BankAccount
+{
+    public SavingsAccount(string owner, decimal initial)
+        : base(owner, initial) { }
+
+    public override void Withdraw(decimal amount)
+    {
+        if (amount > Balance)
+        { Console.WriteLine("  ❌ Fondos insuficientes."); return; }
+        Balance -= amount;
+        Console.WriteLine($"  Extracción \${amount} → Saldo: \${Balance}");
+    }
+}
+
+class CheckingAccount : BankAccount
+{
+    private const decimal OverdraftLimit = -500m;
+    public CheckingAccount(string owner, decimal initial)
+        : base(owner, initial) { }
+
+    public override void Withdraw(decimal amount)
+    {
+        if (Balance - amount &lt; OverdraftLimit)
+        { Console.WriteLine("  ❌ Límite de sobregiro alcanzado."); return; }
+        Balance -= amount;
+        Console.WriteLine($"  Extracción \${amount} → Saldo: \${Balance}");
+    }
+}
+
+class Bank
+{
+    private readonly List&lt;BankAccount&gt; accounts = new();
+    public string Name { get; }
+    public Bank(string name) { Name = name; }
+
+    public void AddAccount(BankAccount acc) { accounts.Add(acc); }
+
+    public decimal TotalBalance()
+    {
+        decimal total = 0;
+        foreach (var acc in accounts) total += acc.Balance;
+        return total;
+    }
+
+    public void PrintReport()
+    {
+        Console.WriteLine($"\n=== REPORTE {Name.ToUpper()} ===");
+        foreach (var acc in accounts)
+            Console.WriteLine("  " + acc);
+        Console.WriteLine($"  TOTAL BANCO: \${TotalBalance():F2}\n");
+    }
+}
+
+// Program
+var bank = new Bank("Banco Olimpo");
+bank.AddAccount(new SavingsAccount("Zeus", 1000m));
+bank.AddAccount(new CheckingAccount("Atenea", 500m));
+bank.AddAccount(new SavingsAccount("Hermes", 250m));
+
+bank.PrintReport();
+
+Console.WriteLine("Operaciones:");
+bank.AddAccount(new SavingsAccount("Zeus",0)); // solo demo
+// Zeus deposita 200
+var acc1 = new SavingsAccount("Zeus", 1000m);
+acc1.Deposit(200m);
+acc1.Withdraw(1500m); // falla
+
+bank.PrintReport();
+</pre>`,
+
+  4: `<b>Program.cs</b>
+<pre style="text-align:left;font-size:.8rem;line-height:1.7;">
+using System;
+
+abstract class Character
+{
+    public string Name   { get; }
+    public int    Health { get; protected set; }
+    public int    Attack { get; }
+    protected static Random rng = new Random();
+
+    protected Character(string name, int health, int attack)
+    { Name = name; Health = health; Attack = attack; }
+
+    public abstract void SpecialAttack(Character target);
+
+    public void BasicAttack(Character target)
+    {
+        int dmg = Attack + rng.Next(-5, 6);
+        target.Health -= dmg;
+        Console.WriteLine($"  ⚔️  {Name} ataca a {target.Name} por {dmg} de daño");
+    }
+
+    public bool IsAlive => Health > 0;
+    public override string ToString() => $"{Name} (❤️ {Health})";
+}
+
+class Warrior : Character
+{
+    public Warrior(string name) : base(name, 120, 25) { }
+    public override void SpecialAttack(Character target)
+    {
+        int dmg = Attack * 2;
+        target.Health -= dmg;
+        Console.WriteLine($"  🗡️  {Name} usa GOLPE BRUTAL sobre {target.Name} por {dmg}!");
+    }
+}
+
+class Mage : Character
+{
+    public Mage(string name) : base(name, 80, 35) { }
+    public override void SpecialAttack(Character target)
+    {
+        int dmg = Attack + 20;
+        target.Health -= dmg;
+        Console.WriteLine($"  🔮 {Name} lanza BOLA DE FUEGO sobre {target.Name} por {dmg}!");
+    }
+}
+
+class Archer : Character
+{
+    public Archer(string name) : base(name, 100, 30) { }
+    public override void SpecialAttack(Character target)
+    {
+        int dmg = Attack + rng.Next(10, 25);
+        target.Health -= dmg;
+        Console.WriteLine($"  🏹 {Name} dispara FLECHA PRECISA sobre {target.Name} por {dmg}!");
+    }
+}
+
+// Program
+Console.WriteLine("=== ARENA DE COMBATE ===\n");
+Console.WriteLine("Elige tu personaje:\n 1. Guerrero\n 2. Mago\n 3. Arquero");
+int choice = int.Parse(Console.ReadLine() ?? "1");
+
+Character player = choice switch {
+    2 => new Mage("Héroe"),
+    3 => new Archer("Héroe"),
+    _ => new Warrior("Héroe")
+};
+Character enemy = new Mage("Enemigo Oscuro");
+
+Console.WriteLine($"\n⚡ {player} vs {enemy}\n");
+
+int turn = 0;
+while (player.IsAlive &amp;&amp; enemy.IsAlive)
+{
+    turn++;
+    Console.WriteLine($"--- Turno {turn} ---");
+    if (turn % 3 == 0) player.SpecialAttack(enemy);
+    else                player.BasicAttack(enemy);
+
+    if (!enemy.IsAlive) break;
+
+    if (turn % 4 == 0) enemy.SpecialAttack(player);
+    else                enemy.BasicAttack(player);
+
+    Console.WriteLine($"  Estado: {player}  |  {enemy}");
+}
+
+Console.WriteLine(player.IsAlive ? $"\n🏆 ¡{player.Name} ganó!" : $"\n💀 {enemy.Name} ganó.");
+</pre>`,
+
+  5: `<b>Program.cs (integrador)</b>
+<pre style="text-align:left;font-size:.8rem;line-height:1.7;">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+abstract class Disk
+{
+    protected Disk(string name) { Name = name; }
+    public string Name  { get; set; }
+    public string Genre { get; set; }
+    public int    Year  { get; set; }
+    public abstract bool IsFavorite();
+}
+
+class CD : Disk
+{
+    private List&lt;string&gt; songs;
+    private List&lt;string&gt; favPlayers = new() { "Carlos Santana", "Pink Floyd" };
+
+    public CD(string name, string[] songs) : base(name) { this.songs = new(songs); }
+    public string Player { get; set; }
+    public IEnumerable&lt;string&gt; Songs => songs;
+    public override bool IsFavorite() => favPlayers.Contains(Player);
+    public override string ToString() => $"💿 CD: \"{Name}\" ({Year}) - {Player} [{Genre}]";
+}
+
+class DVD : Disk
+{
+    public DVD(string name) : base(name) { }
+    public string       Director { get; set; }
+    public List&lt;string&gt; Cast     { get; } = new();
+    public string FavActor    = "John Travolta";
+    public string FavDirector = "Quentin Tarantino";
+    public string FavGenre    = "Acción";
+    public bool IsActorInCast(string a) => Cast.Contains(a);
+    public override bool IsFavorite() =>
+        (IsActorInCast(FavActor) || Director.Equals(FavDirector,
+         StringComparison.OrdinalIgnoreCase))
+        &amp;&amp; Genre.Equals(FavGenre, StringComparison.OrdinalIgnoreCase);
+    public override string ToString() =>
+        $"📀 DVD: \"{Name}\" ({Year}) - Dir: {Director} [{Genre}]";
+}
+
+class DiskLibrary
+{
+    private List&lt;Disk&gt; discs = new();
+    public void AddDisc(Disk d) => discs.Add(d);
+    public IList&lt;Disk&gt; GetByGenre(string g) =>
+        discs.Where(d => d.Genre.Equals(g, StringComparison.OrdinalIgnoreCase)).ToList();
+    public IList&lt;Disk&gt; GetFavorites() => discs.Where(d => d.IsFavorite()).ToList();
+    public IList&lt;CD&gt;   GetByPlayer(string p) =>
+        discs.OfType&lt;CD&gt;().Where(c => c.Player.Equals(p, StringComparison.OrdinalIgnoreCase)).ToList();
+    public IList&lt;DVD&gt;  GetByActor(string a) =>
+        discs.OfType&lt;DVD&gt;().Where(d => d.IsActorInCast(a)).ToList();
+    public IList&lt;Disk&gt; All => discs;
+}
+
+// Program
+var lib = new DiskLibrary();
+
+var cd1 = new CD("The Wall", new[]{"Another Brick","Comfortably Numb"})
+    { Player="Pink Floyd", Genre="Rock", Year=1979 };
+var cd2 = new CD("Abraxas", new[]{"Black Magic Woman","Oye Como Va"})
+    { Player="Carlos Santana", Genre="Rock", Year=1970 };
+var cd3 = new CD("Thriller", new[]{"Thriller","Beat It"})
+    { Player="Michael Jackson", Genre="Pop", Year=1982 };
+
+var dvd1 = new DVD("Pulp Fiction") { Director="Quentin Tarantino", Genre="Acción", Year=1994 };
+dvd1.Cast.AddRange(new[]{"John Travolta","Uma Thurman","Samuel L. Jackson"});
+
+var dvd2 = new DVD("Casablanca") { Director="Michael Curtiz", Genre="Romance", Year=1942 };
+dvd2.Cast.AddRange(new[]{"Humphrey Bogart","Ingrid Bergman"});
+
+lib.AddDisc(cd1); lib.AddDisc(cd2); lib.AddDisc(cd3);
+lib.AddDisc(dvd1); lib.AddDisc(dvd2);
+
+bool running = true;
+while (running)
+{
+    Console.WriteLine("\n=== DISCOTECA DIGITAL ===");
+    Console.WriteLine("1. Todos los discos");
+    Console.WriteLine("2. Buscar por género");
+    Console.WriteLine("3. Ver favoritos");
+    Console.WriteLine("4. Buscar CD por intérprete");
+    Console.WriteLine("5. Buscar DVD por actor");
+    Console.WriteLine("0. Salir");
+    Console.Write("Opción: ");
+
+    switch (Console.ReadLine())
+    {
+        case "1":
+            foreach (var d in lib.All) Console.WriteLine("  " + d);
+            break;
+        case "2":
+            Console.Write("Género: ");
+            foreach (var d in lib.GetByGenre(Console.ReadLine())) Console.WriteLine("  " + d);
+            break;
+        case "3":
+            foreach (var d in lib.GetFavorites()) Console.WriteLine("  ⭐ " + d);
+            break;
+        case "4":
+            Console.Write("Intérprete: ");
+            foreach (var d in lib.GetByPlayer(Console.ReadLine())) Console.WriteLine("  " + d);
+            break;
+        case "5":
+            Console.Write("Actor: ");
+            foreach (var d in lib.GetByActor(Console.ReadLine())) Console.WriteLine("  " + d);
+            break;
+        case "0": running = false; break;
+    }
+}
+</pre>`
+};
+
+function showSolution(num) {
+  Swal.fire({
+    title: `Solución — Ejercicio ${String(num).padStart(2,'0')}`,
+    html: `<div style="text-align:left;background:#060b16;border-radius:8px;padding:1rem;overflow-x:auto;max-height:60vh;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;color:#abb2bf;">${solutions[num]}</div>`,
+    background: '#0f1628',
+    color: '#e8eaf6',
+    confirmButtonColor: '#7c3aed',
+    confirmButtonText: 'Cerrar',
+    width: '860px',
+    customClass: { popup: 'swal-dark' }
+  });
+}
+
+// ── QUIZ DATA ──────────────────────────────────
+const quizData = [
+  { q: "¿Qué tipo de relación expresa «un puma ES UN mamífero»?", opts: ["Agregación","Herencia / Generalización","Composición","Interfaz"], ans: 1, exp: "La relación «es un» (is-a) indica clasificación taxonómica, que se implementa mediante herencia." },
+  { q: "¿Cuál es el sinónimo correcto de 'clase base'?", opts: ["Subclase","Clase derivada","Superclase","Clase abstracta"], ans: 2, exp: "Clase base, superclase y clase ancestral son sinónimos. Clase derivada/subclase es lo opuesto." },
+  { q: "En C#, ¿cómo se declara que la clase CD hereda de Disk?", opts: ["class CD extends Disk","class CD implements Disk","class CD : Disk","class CD(Disk)"], ans: 2, exp: "En C# la herencia se declara con dos puntos: class CD : Disk." },
+  { q: "Un método abstracto en C#...", opts: ["Tiene implementación y puede ser sobreescrito","No tiene implementación y debe ser sobreescrito","No puede ser sobreescrito","Es privado por defecto"], ans: 1, exp: "Un método abstracto no tiene cuerpo/implementación y obliga a las subclases a implementarlo con override." },
+  { q: "¿Qué palabra clave se usa en la subclase para implementar un método abstracto?", opts: ["virtual","abstract","override","new"], ans: 2, exp: "Se usa 'override' para indicar que la subclase provee una implementación del método abstracto/virtual." },
+  { q: "¿Cuál es la relación representada por un diamante vacío en UML?", opts: ["Herencia","Composición fuerte","Agregación","Implementación de interfaz"], ans: 2, exp: "El diamante vacío en UML representa agregación (relación todo-parte débil)." },
+  { q: "¿Qué garantiza el encadenamiento dinámico (tardío)?", opts: ["El método se elige en tiempo de compilación","El método se elige en tiempo de ejecución según la clase real del objeto","Solo funciona con clases abstractas","Los métodos son más rápidos"], ans: 1, exp: "El encadenamiento dinámico resuelve qué método ejecutar en runtime, buscando en la clase real del receptor." },
+  { q: "En C#, los métodos son por defecto:", opts: ["Virtuales (dinámicos)","Abstractos","Estáticos (encadenamiento estático)","Protected"], ans: 2, exp: "En C# los métodos son encadenados estáticamente por defecto, salvo que se declaren virtual o abstract." },
+  { q: "¿Qué se puede crear a partir de una clase abstracta?", opts: ["Objetos directamente con new","Subclases que la implementen","Interfaces equivalentes","Nada, son inútiles"], ans: 1, exp: "No se puede instanciar una clase abstracta directamente, pero sí crear subclases que implementen sus métodos abstractos." },
+  { q: "La composición se considera reutilización de 'caja negra' porque:", opts: ["No requiere conocer la implementación interna del componente","Usa colores negros en el diagrama UML","Es más lenta que la herencia","Requiere herencia múltiple"], ans: 0, exp: "Con composición se usa el componente sin necesidad de conocer sus detalles internos, solo su interfaz pública." },
+  { q: "¿Cuál es una desventaja de la composición vs herencia?", opts: ["No soporta polimorfismo","Requiere más código escrito manualmente","No funciona en C#","Es estática"], ans: 1, exp: "La composición requiere más código (delegación manual), lo que aumenta el tamaño del código y la posibilidad de errores." },
+  { q: "La herencia es reutilización de 'caja blanca' porque:", opts: ["Se necesita conocer los detalles internos de la superclase para usarla eficientemente","Usa el color blanco en los diagramas","Es más rápida","No requiere código adicional"], ans: 0, exp: "Para usar la herencia de forma efectiva se necesita conocer cómo está implementada la superclase (caja blanca)." },
+  { q: "¿Qué permite hacer el encadenamiento dinámico que el estático no puede?", opts: ["Mayor velocidad de ejecución","Determinar el método en compilación","Polimorfismo real","Herencia múltiple"], ans: 2, exp: "El encadenamiento dinámico es necesario para soportar polimorfismo, ya que el método varía según la clase real del objeto." },
+  { q: "¿Cuál es el riesgo de preguntar la clase de un objeto con 'is' para diferencias subclases?", opts: ["Es ilegal en C#","Generalmente indica que no se está aprovechando el polimorfismo","Genera errores de compilación","Es ineficiente en memoria"], ans: 1, exp: "Preguntar la clase para diferencias subclases generalmente indica que el objeto de la subclase no cumple plenamente el tipo de la superclase y que debería usarse polimorfismo." },
+  { q: "¿Cuál de las siguientes es una relación de agregación?", opts: ["Un CD es un Disk","Una DiskLibrary contiene Disks","CD hereda de Disk","DVD implementa IPlayable"], ans: 1, exp: "La DiskLibrary contiene Disks — relación todo-parte, «tiene». Las otras son relaciones «es un» o de implementación." },
+  { q: "¿Qué palabra clave llama al constructor de la superclase en C#?", opts: ["super()","parent()","base()","this()"], ans: 2, exp: "En C# se usa ': base(args)' en el constructor de la subclase para llamar al constructor de la superclase." },
+  { q: "La herencia es _______ (puede cambiar en tiempo de ejecución):", opts: ["Dinámica","Estática","Selectiva","Opcional"], ans: 1, exp: "La herencia es estática — se define en tiempo de compilación y el comportamiento es inmutable una vez compilado." },
+  { q: "¿Qué relación establece la herencia entre la clase base y la sucesora?", opts: ["Solo reutilización de código","Relación supertipo/subtipo","Relación de composición","Relación de implementación solamente"], ans: 1, exp: "La herencia impone una relación supertipo/subtipo: la clase sucesora es un subtipo de la clase base." },
+  { q: "¿Qué es el downcast (typecast)?", opts: ["Convertir un tipo primitivo en objeto","Convertir una referencia de superclase en referencia de subclase","Heredar de múltiples clases","Declarar una clase abstracta"], ans: 1, exp: "El downcast convierte una referencia al tipo de la superclase en una referencia al tipo de la subclase específica." },
+  { q: "Un sistema monomórfico es aquel donde:", opts: ["Se usa herencia múltiple","Siempre se ejecuta el mismo código en cada llamada, sin polimorfismo","Las clases no tienen atributos","Se usan interfaces en lugar de herencia"], ans: 1, exp: "Los sistemas monomórficos no tienen polimorfismo — siempre ejecutan el mismo código para una llamada dada." },
+  { q: "¿Para qué sirve la herencia además de la relación taxonómica?", opts: ["Solo para relaciones taxonómicas","Reutilización de código","Para reemplazar composición siempre","Para crear interfaces"], ans: 1, exp: "La herencia sirve tanto para expresar relaciones taxonómicas (is-a) como para reutilizar código, aunque no debe usarse solo por esto último." },
+  { q: "¿Cuál es la multiplicidad del lado de Disk en la relación con DiskLibrary?", opts: ["1..1","0..1","0..*","1..*"], ans: 2, exp: "Una DiskLibrary puede contener 0 o muchos Disks (0..*). Un Disk puede estar en 0 o 1 DiskLibrary (0..1)." },
+  { q: "¿Cuándo NO es correcto usar herencia?", opts: ["Cuando hay relación taxonómica entre clases","Cuando una clase es un tipo de otra","Solo por reutilización de código, sin relación taxonómica","Cuando la superclase es abstracta"], ans: 2, exp: "No es correcto usar herencia solo por reutilización si no existe una relación taxonómica real entre las clases." },
+  { q: "¿Cuál es la ventaja del encadenamiento estático sobre el dinámico?", opts: ["Soporta más polimorfismo","Es más lento","Mayor velocidad y certeza de qué método se ejecuta","Permite cambiar comportamiento en runtime"], ans: 2, exp: "El encadenamiento estático es más rápido (no requiere búsqueda en runtime) y da certeza de qué método se ejecutará." },
+  { q: "¿Qué ocurre si una subclase no implementa todos los métodos abstractos de su superclase?", opts: ["Hereda las implementaciones vacías","Error en tiempo de ejecución","La subclase también debe ser abstracta","El compilador ignora los métodos sin implementar"], ans: 2, exp: "Si una subclase no implementa todos los métodos abstractos, debe también declararse como abstracta, o habrá error de compilación." },
+  { q: "La composición permite cambiar el comportamiento de una clase compuesta:", opts: ["Solo en tiempo de compilación","En tiempo de ejecución, cambiando la clase componente","Nunca","Solo con herencia múltiple"], ans: 1, exp: "Una ventaja clave de la composición es que es dinámica: se puede cambiar el comportamiento en runtime reemplazando el componente." },
+  { q: "¿Cuál describe mejor la diferencia entre agregación y composición fuerte?", opts: ["No hay diferencia","En agregación el componente puede existir independientemente; en composición fuerte no","En composición fuerte hay herencia","La composición fuerte usa diamante vacío en UML"], ans: 1, exp: "En agregación el componente puede existir sin el compuesto. En composición fuerte (diamante relleno), el componente no existe sin el todo." },
+  { q: "¿Cuál de estos NO es un sinónimo de 'clase sucesora'?", opts: ["Clase derivada","Subclase","Clase hija","Superclase"], ans: 3, exp: "Superclase es sinónimo de clase base/ancestral, no de clase sucesora. Clase derivada, subclase y clase hija son sinónimos de clase sucesora." },
+  { q: "¿Por qué el encadenamiento dinámico es necesario cuando se trabaja con interfaces?", opts: ["Las interfaces son más lentas","El tipo de la variable es la interfaz y no hay código directamente asociado para encadenar estáticamente","Las interfaces no soportan herencia","El compilador siempre usa encadenamiento estático con interfaces"], ans: 1, exp: "Con interfaces, el tipo de la variable no tiene código concreto asociado, por lo que el método debe resolverse en runtime (encadenamiento dinámico)." },
+  { q: "La herencia con 'reutilización todo o nada' significa que:", opts: ["Se puede elegir qué atributos heredar","La subclase hereda todos los miembros de la superclase sin poder elegir","Se puede desactivar métodos heredados","Solo se heredan los métodos, no los atributos"], ans: 1, exp: "Con herencia se heredan todos los miembros de la superclase. No se puede elegir qué heredar y qué no (en la mayoría de lenguajes)." }
+];
+
+// ── RENDER QUIZ ──────────────────────────────────
+const container = document.getElementById('quizQuestions');
+const answered = new Array(quizData.length).fill(null);
+let score = 0;
+let submitted = false;
+
+quizData.forEach((q, i) => {
+  const card = document.createElement('div');
+  card.className = 'quiz-q-card';
+  card.id = `q-${i}`;
+  card.innerHTML = `
+    <div class="quiz-q-num">Pregunta ${i+1} / ${quizData.length}</div>
+    <div class="quiz-q-text">${q.q}</div>
+    ${q.opts.map((o, j) => `
+      <button class="quiz-option" onclick="selectOption(${i},${j},this)">${o}</button>
+    `).join('')}
+    <div class="quiz-feedback" id="fb-${i}"></div>
+  `;
+  container.appendChild(card);
+});
+
+function selectOption(qi, oi, btn) {
+  if (submitted || answered[qi] !== null) return;
+  answered[qi] = oi;
+
+  const card = document.getElementById(`q-${qi}`);
+  const opts = card.querySelectorAll('.quiz-option');
+  const fb   = document.getElementById(`fb-${qi}`);
+
+  opts.forEach(b => b.disabled = true);
+
+  if (oi === quizData[qi].ans) {
+    btn.classList.add('correct');
+    fb.className = 'quiz-feedback show ok';
+    fb.innerHTML = `<i class="fa-solid fa-check-circle me-1"></i> ¡Correcto! ${quizData[qi].exp}`;
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    opts[quizData[qi].ans].classList.add('correct');
+    fb.className = 'quiz-feedback show err';
+    fb.innerHTML = `<i class="fa-solid fa-times-circle me-1"></i> Incorrecto. ${quizData[qi].exp}`;
+  }
+
+  // update progress
+  const answered_count = answered.filter(a => a !== null).length;
+  document.getElementById('quizProgress').textContent =
+    `Respondidas: ${answered_count} / ${quizData.length}`;
+  document.getElementById('quizScoreFill').style.width =
+    (answered_count / quizData.length * 100) + '%';
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  const unanswered = answered.filter(a => a === null).length;
+  if (unanswered > 0) {
+    Swal.fire({
+      title: '¡Atención!',
+      html: `Todavía tenés <strong>${unanswered} preguntas sin responder</strong>.<br>¿Querés enviar de todas formas?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Seguir respondiendo',
+      background: '#0f1628',
+      color: '#e8eaf6',
+      confirmButtonColor: '#7c3aed',
+    }).then(r => { if (r.isConfirmed) finalizeQuiz(); });
+  } else {
+    finalizeQuiz();
+  }
+}
+
+function finalizeQuiz() {
+  submitted = true;
+  const pct = Math.round(score / quizData.length * 100);
+  let icon, msg, color;
+  if (pct >= 90) { icon='🏆'; msg='¡Excelente! Dominás el tema.'; color='var(--accent-green)'; }
+  else if (pct >= 70) { icon='👍'; msg='Muy bien. Repasá los errores.'; color='var(--accent-cyan)'; }
+  else if (pct >= 50) { icon='📚'; msg='Aprobado. Conviene repasar.'; color='var(--accent-gold)'; }
+  else { icon='🔄'; msg='Necesitás repasar el material.'; color='var(--accent-orange)'; }
+
+  Swal.fire({
+    title: `${icon} Resultado Final`,
+    html: `
+      <div style="text-align:center;">
+        <div style="font-size:3.5rem; font-weight:800; color:${color}; font-family:'Syne',sans-serif;">${pct}%</div>
+        <div style="color:#8892b0; margin:.5rem 0;">${score} correctas de ${quizData.length}</div>
+        <div style="color:#e8eaf6; font-size:1rem; margin-top:.5rem;">${msg}</div>
+        <div style="margin-top:1rem; padding:.8rem; background:#131d35; border-radius:8px; border:1px solid #1e2d4d;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:.78rem; color:#5c6370;">
+            ${pct >= 60 ? '✅ Aprobado' : '❌ Insuficiente'}
+          </div>
+        </div>
+      </div>`,
+    background: '#0f1628',
+    color: '#e8eaf6',
+    confirmButtonColor: '#7c3aed',
+    confirmButtonText: 'Ver respuestas',
+    width: '480px',
+  }).then(() => {
+    // Reveal unanswered
+    quizData.forEach((q, i) => {
+      if (answered[i] === null) {
+        const card = document.getElementById(`q-${i}`);
+        const opts = card.querySelectorAll('.quiz-option');
+        opts.forEach(b => b.disabled = true);
+        opts[q.ans].classList.add('correct');
+        const fb = document.getElementById(`fb-${i}`);
+        fb.className = 'quiz-feedback show err';
+        fb.innerHTML = `<i class="fa-solid fa-info-circle me-1"></i> No respondida. ${q.exp}`;
+      }
+    });
+  });
+}
+</script>
+</body>
+</html>

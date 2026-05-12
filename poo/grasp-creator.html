@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRASP – Creator | Guía 3</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #ffffff;
+    --text-dark: #0f1c2e;
+    --blue-deep: #0d3b7a;
+    --blue-mid: #1a5cbf;
+    --blue-light: #3a90e0;
+    --sky: #67c2f5;
+    --sky-pale: #e8f5fe;
+    --sky-card: #f0f9ff;
+    --accent: #0ea5e9;
+    --border-light: #c9e6f8;
+    --code-bg: #f0f6ff;
+    --code-border: #b3d4f5;
+    --gray-soft: #f7fafd;
+    --shadow: 0 4px 24px rgba(13,59,122,0.09);
+    --shadow-strong: 0 8px 40px rgba(13,59,122,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text-dark); }
+
+  /* ── PROGRESS BAR ── */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 4px; z-index: 999;
+    background: linear-gradient(90deg, var(--blue-mid), var(--sky));
+    transition: width 0.4s ease;
+  }
+
+  /* ── NAV HEADER ── */
+  #nav-header {
+    position: fixed; top: 4px; left: 0; right: 0; z-index: 998;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 24px;
+    background: rgba(255,255,255,0.97);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 2px 12px rgba(13,59,122,0.07);
+  }
+  .nav-brand { font-size: 0.85rem; font-weight: 800; color: var(--blue-deep); letter-spacing: 0.5px; }
+  .nav-brand span { color: var(--blue-light); }
+  .nav-controls { display: flex; align-items: center; gap: 8px; }
+  .nav-btn {
+    border: 1px solid var(--border-light); background: var(--sky-pale);
+    color: var(--blue-deep); border-radius: 8px; padding: 4px 12px;
+    font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .nav-btn:hover { background: var(--blue-light); color: #fff; border-color: var(--blue-light); }
+  .slide-counter { font-size: 0.78rem; font-weight: 700; color: var(--blue-mid); min-width: 60px; text-align: center; }
+
+  /* ── SLIDES CONTAINER ── */
+  #slides-wrapper { position: fixed; top: 52px; left: 0; right: 0; bottom: 40px; overflow: hidden; }
+  .slide {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: none; overflow-y: auto; padding: 28px 32px 20px;
+    animation-duration: 0.45s;
+  }
+  .slide.active { display: block; }
+
+  /* ── FOOTER ── */
+  #footer {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 40px;
+    background: var(--blue-deep); color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; font-size: 0.72rem;
+  }
+  .footer-keys { display: flex; gap: 12px; }
+  .key-badge {
+    background: rgba(255,255,255,0.15); border-radius: 5px;
+    padding: 2px 8px; font-size: 0.68rem; display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ── SLIDE COMPONENTS ── */
+  .slide-title {
+    font-size: 1.65rem; font-weight: 900; color: var(--blue-deep);
+    border-bottom: 3px solid var(--sky); padding-bottom: 10px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .slide-title .icon-title {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue-mid), var(--sky));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.1rem; flex-shrink: 0;
+  }
+
+  /* COVER SLIDE */
+  .cover-wrap {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: calc(100vh - 120px); text-align: center; padding: 20px;
+  }
+  .cover-badge {
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: #fff; border-radius: 14px; padding: 8px 22px;
+    font-size: 0.82rem; font-weight: 800; letter-spacing: 1.5px;
+    margin-bottom: 18px; display: inline-block;
+  }
+  .cover-title {
+    font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900;
+    color: var(--blue-deep); line-height: 1.05; margin-bottom: 10px;
+  }
+  .cover-title .highlight { color: var(--blue-light); }
+  .cover-subtitle { font-size: 1rem; color: #4a7ab5; font-weight: 600; margin-bottom: 30px; max-width: 520px; }
+  .cover-tags { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; }
+  .tag {
+    padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+    border: 1.5px solid var(--border-light); background: var(--sky-pale); color: var(--blue-deep);
+  }
+  .cover-book {
+    background: var(--sky-card); border: 1px solid var(--border-light); border-radius: 12px;
+    padding: 14px 22px; font-size: 0.85rem; color: var(--blue-mid); font-weight: 600;
+    max-width: 440px;
+  }
+  .cover-book i { color: var(--sky); }
+
+  /* INFO CARDS */
+  .info-card {
+    background: var(--sky-card); border: 1.5px solid var(--border-light);
+    border-left: 5px solid var(--blue-light); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 14px;
+  }
+  .info-card .card-label {
+    font-size: 0.7rem; font-weight: 800; color: var(--blue-light);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .info-card p { font-size: 0.92rem; color: var(--text-dark); line-height: 1.6; }
+
+  /* CONDITION CARDS */
+  .cond-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+  .cond-card {
+    background: #fff; border: 1.5px solid var(--border-light);
+    border-radius: 12px; padding: 14px 16px; transition: all 0.25s;
+    cursor: default;
+  }
+  .cond-card:hover { border-color: var(--blue-light); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .cond-number {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-mid), var(--sky));
+    color: #fff; font-size: 0.78rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+  }
+  .cond-card h6 { font-size: 0.82rem; font-weight: 800; color: var(--blue-deep); margin-bottom: 4px; }
+  .cond-card p { font-size: 0.8rem; color: #3a5a7a; line-height: 1.5; }
+
+  /* TIP BOX */
+  .tip-box {
+    background: linear-gradient(135deg, #dff3fd, #e8f5fe);
+    border: 1.5px solid var(--sky); border-radius: 12px;
+    padding: 14px 18px; margin-top: 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .tip-box i { color: var(--blue-light); font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; }
+  .tip-box p { font-size: 0.88rem; color: var(--blue-deep); font-weight: 600; line-height: 1.6; }
+
+  /* CODE BLOCKS */
+  .code-wrapper { margin-bottom: 16px; }
+  .code-header {
+    background: var(--blue-deep); color: #fff;
+    border-radius: 10px 10px 0 0; padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.78rem; font-weight: 700;
+  }
+  .code-header .lang-badge {
+    background: var(--blue-light); border-radius: 5px;
+    padding: 2px 8px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.5px;
+  }
+  pre {
+    background: var(--code-bg); border: 1.5px solid var(--code-border);
+    border-top: none; border-radius: 0 0 10px 10px;
+    padding: 14px 18px; font-family: 'Fira Code', monospace;
+    font-size: 0.8rem; line-height: 1.65; overflow-x: auto; margin: 0;
+    color: var(--text-dark);
+  }
+  .kw { color: #0d3b7a; font-weight: 700; }
+  .cm { color: #6b8db5; font-style: italic; }
+  .cl { color: #1a5cbf; font-weight: 700; }
+  .str { color: #0e7a52; }
+  .num { color: #c05621; }
+  .mth { color: #6b21a8; }
+
+  /* COMPARISON LAYOUT */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+  @media (max-width: 768px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-col h6 {
+    font-size: 0.8rem; font-weight: 800; text-align: center;
+    padding: 6px 0; border-radius: 8px; margin-bottom: 8px;
+  }
+  .bad-label { background: #fee2e2; color: #b91c1c; }
+  .good-label { background: #dcfce7; color: #15803d; }
+
+  /* PROJECT CARDS */
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 10px; }
+  .project-card {
+    background: #fff; border: 1.5px solid var(--border-light); border-radius: 14px;
+    overflow: hidden; transition: all 0.25s; cursor: pointer;
+  }
+  .project-card:hover { box-shadow: var(--shadow-strong); transform: translateY(-3px); border-color: var(--blue-light); }
+  .project-card-head {
+    padding: 14px 18px;
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: #fff;
+  }
+  .project-card-head h5 { font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; }
+  .project-card-head p { font-size: 0.75rem; opacity: 0.85; }
+  .project-card-body { padding: 14px 18px; }
+  .file-list { list-style: none; padding: 0; }
+  .file-list li {
+    font-size: 0.78rem; padding: 5px 0; border-bottom: 1px solid var(--border-light);
+    color: var(--blue-mid); font-family: 'Fira Code', monospace; font-weight: 500;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .file-list li:last-child { border-bottom: none; }
+  .file-list li i { color: var(--sky); font-size: 0.75rem; }
+
+  /* UML DIAGRAM */
+  .uml-box {
+    background: var(--sky-card); border: 2px solid var(--border-light);
+    border-radius: 12px; padding: 20px; text-align: center;
+  }
+  .uml-class {
+    display: inline-block; border: 2px solid var(--blue-mid); border-radius: 8px;
+    overflow: hidden; min-width: 160px; vertical-align: top;
+    background: #fff; box-shadow: var(--shadow);
+  }
+  .uml-class-name {
+    background: var(--blue-deep); color: #fff;
+    padding: 8px 16px; font-weight: 800; font-size: 0.9rem;
+  }
+  .uml-section { padding: 8px 14px; font-size: 0.75rem; font-family: 'Fira Code', monospace; text-align: left; }
+  .uml-section + .uml-section { border-top: 1px solid var(--border-light); }
+  .uml-arrow {
+    display: inline-flex; align-items: center; padding: 0 20px;
+    font-size: 1.4rem; color: var(--blue-light); font-weight: 900;
+    vertical-align: middle; margin-top: 30px;
+  }
+  .uml-label { font-size: 0.7rem; color: var(--blue-mid); font-weight: 700; display: block; margin-top: 4px; }
+
+  /* QUIZ */
+  .quiz-q { font-size: 0.95rem; font-weight: 700; color: var(--blue-deep); margin-bottom: 14px; line-height: 1.5; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    background: #fff; border: 1.5px solid var(--border-light); border-radius: 10px;
+    padding: 11px 16px; cursor: pointer; transition: all 0.2s;
+    font-size: 0.87rem; font-weight: 600; color: var(--text-dark);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .quiz-opt:hover:not(.answered) { border-color: var(--blue-light); background: var(--sky-pale); }
+  .quiz-opt.correct { background: #dcfce7; border-color: #15803d; color: #14532d; }
+  .quiz-opt.wrong { background: #fee2e2; border-color: #b91c1c; color: #7f1d1d; }
+  .quiz-opt .opt-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--sky-pale); border: 1.5px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; flex-shrink: 0; }
+  .quiz-panel { background: var(--sky-card); border: 1.5px solid var(--border-light); border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+  .quiz-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+  .quiz-score { font-size: 0.85rem; font-weight: 700; color: var(--blue-mid); }
+  #quiz-result { display: none; text-align: center; padding: 20px; }
+  #quiz-result .score-big { font-size: 3rem; font-weight: 900; color: var(--blue-deep); }
+
+  /* STEP FLOW */
+  .step-flow { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+  .step-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: #fff; border: 1.5px solid var(--border-light);
+    border-radius: 12px; padding: 14px 18px; transition: all 0.25s;
+  }
+  .step-item:hover { border-color: var(--sky); box-shadow: var(--shadow); }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--blue-mid), var(--sky));
+    color: #fff; font-weight: 900; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-content h6 { font-size: 0.88rem; font-weight: 800; color: var(--blue-deep); margin-bottom: 4px; }
+  .step-content p { font-size: 0.82rem; color: #4a6785; line-height: 1.5; }
+
+  /* ALERT BOX */
+  .alert-creator {
+    background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-mid) 100%);
+    color: #fff; border-radius: 14px; padding: 18px 22px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .alert-creator i { font-size: 1.8rem; opacity: 0.85; flex-shrink: 0; }
+  .alert-creator div h6 { font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; }
+  .alert-creator div p { font-size: 0.83rem; opacity: 0.9; line-height: 1.5; }
+
+  /* SCROLLBAR */
+  .slide::-webkit-scrollbar { width: 5px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<div id="nav-header">
+  <div class="nav-brand">GRASP · <span>Creator</span> &nbsp;|&nbsp; Guía 3</div>
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <span class="slide-counter" id="slide-counter">1 / 10</span>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+    <button class="nav-btn" onclick="showIndex()"><i class="fa fa-list"></i></button>
+  </div>
+</div>
+
+<div id="slides-wrapper">
+
+<!-- ════════════════════════════════════════════
+     SLIDE 1 – PORTADA
+════════════════════════════════════════════ -->
+<div class="slide active" id="slide-1">
+  <div class="cover-wrap animate__animated animate__fadeIn">
+    <div class="cover-badge"><i class="fa fa-puzzle-piece me-2"></i>GRASP · GUÍA 3 DE 9</div>
+    <h1 class="cover-title animate__animated animate__fadeInUp animate__delay-1s">
+      <span class="highlight">Creator</span><br>Creador
+    </h1>
+    <p class="cover-subtitle animate__animated animate__fadeInUp animate__delay-1s">
+      ¿Quién es responsable de <strong>crear instancias</strong> de una clase?
+    </p>
+    <div class="cover-tags animate__animated animate__fadeInUp animate__delay-1s">
+      <span class="tag"><i class="fa fa-layer-group me-1"></i>GRASP Patterns</span>
+      <span class="tag"><i class="fab fa-microsoft me-1"></i>C# / .NET</span>
+      <span class="tag"><i class="fa fa-code me-1"></i>VSCode</span>
+      <span class="tag"><i class="fa fa-sitemap me-1"></i>OOP</span>
+    </div>
+    <div class="cover-book animate__animated animate__fadeInUp animate__delay-1s">
+      <i class="fa fa-book-open me-2"></i>
+      Basado en <strong>"Applying UML and Patterns"</strong> – Craig Larman, 1998.<br>
+      <small>Tercera guía GRASP • Anterior: <em>Expert</em> y <em>Polymorphism</em></small>
+    </div>
+    <div class="mt-3 animate__animated animate__fadeIn animate__delay-1s">
+      <small style="color:#6b8db5;"><i class="fa fa-keyboard me-1"></i> Navega con las teclas <kbd>←</kbd> <kbd>→</kbd> o los botones</small>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 2 – CONTEXTO
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-2">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-compass"></i></div>
+    Contexto GRASP
+  </div>
+
+  <div class="info-card animate__animated animate__fadeInLeft">
+    <div class="card-label"><i class="fa fa-history"></i> Origen</div>
+    <p>Las guías <strong>GRASP</strong> (General Responsibility Assignment Software Patterns) fueron planteadas por <strong>Craig Larman</strong> en el libro <em>"Applying UML and Patterns"</em> (1998). Son principios para asignar responsabilidades a clases y objetos en diseño orientado a objetos.</p>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-md-4">
+      <div class="cond-card text-center animate__animated animate__fadeInUp">
+        <div class="cond-number mx-auto">1</div>
+        <h6><i class="fa fa-user-check me-1"></i>Expert</h6>
+        <p>Asignar responsabilidades al que tiene la información necesaria.</p>
+        <div class="mt-2"><span class="badge" style="background:var(--sky-pale);color:var(--blue-deep);font-size:0.7rem;">Guía 1</span></div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="cond-card text-center animate__animated animate__fadeInUp" style="animation-delay:0.1s">
+        <div class="cond-number mx-auto">2</div>
+        <h6><i class="fa fa-shapes me-1"></i>Polymorphism</h6>
+        <p>Usar polimorfismo para manejar variaciones de comportamiento.</p>
+        <div class="mt-2"><span class="badge" style="background:var(--sky-pale);color:var(--blue-deep);font-size:0.7rem;">Guía 2</span></div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="cond-card text-center animate__animated animate__fadeInUp" style="animation-delay:0.2s;border-color:var(--blue-light);background:var(--sky-pale);">
+        <div class="cond-number mx-auto" style="background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid));">3</div>
+        <h6 style="color:var(--blue-deep);"><i class="fa fa-hammer me-1"></i>Creator</h6>
+        <p>Asignar la responsabilidad de crear instancias al que "contiene" u agrega.</p>
+        <div class="mt-2"><span class="badge" style="background:var(--blue-light);color:#fff;font-size:0.7rem;">← Esta guía</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box mt-3 animate__animated animate__fadeIn">
+    <i class="fa fa-lightbulb"></i>
+    <p>Tanto el patrón <strong>Creator</strong> como el ejemplo de este documento están tomados del libro de Larman. Se recomienda su consulta para profundizar.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 3 – PROBLEMA
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-3">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-question"></i></div>
+    El Problema
+  </div>
+
+  <div class="alert-creator animate__animated animate__fadeInDown">
+    <i class="fa fa-exclamation-circle"></i>
+    <div>
+      <h6>Pregunta central de Creator</h6>
+      <p>Todos los objetos deben ser <strong>creados</strong> para poder enviarles mensajes que hagan uso de sus responsabilidades de <em>hacer</em> y de <em>conocer</em>. ¿Quién debería ser responsable de crear una nueva instancia de cierta clase?</p>
+    </div>
+  </div>
+
+  <div class="step-flow animate__animated animate__fadeIn">
+    <div class="step-item">
+      <div class="step-num"><i class="fa fa-cube"></i></div>
+      <div class="step-content">
+        <h6>Objetos necesitan ser instanciados</h6>
+        <p>Antes de enviar mensajes a un objeto, este debe existir en memoria. Alguien debe ser responsable de invocar <code>new ClaseA()</code>.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><i class="fa fa-random"></i></div>
+      <div class="step-content">
+        <h6>Sin guía → decisiones arbitrarias</h6>
+        <p>Si no hay criterio claro, la responsabilidad de crear se asigna al azar: a <code>Program</code>, a clases de utilidad, o dispersada por todo el sistema.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><i class="fa fa-link"></i></div>
+      <div class="step-content">
+        <h6>Consecuencias del mal diseño</h6>
+        <p>Alta dependencia entre clases no relacionadas, objetos creados que no pertenecen a nadie, dificultad para mantener invariantes del sistema.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><i class="fa fa-check"></i></div>
+      <div class="step-content">
+        <h6>Creator responde la pregunta</h6>
+        <p>Provee un criterio <strong>basado en relaciones existentes</strong> entre clases para determinar quién debe crear a quién.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 4 – SOLUCIÓN / CONDICIONES
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-4">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-lightbulb"></i></div>
+    La Solución – Condiciones de Creator
+  </div>
+
+  <div class="info-card animate__animated animate__fadeInLeft">
+    <div class="card-label"><i class="fa fa-ruler-combined"></i> Principio general</div>
+    <p>Asignar a la clase <strong>B</strong> la responsabilidad de crear una instancia de la clase <strong>A</strong> si <em>una o más</em> de las siguientes condiciones son verdaderas:</p>
+  </div>
+
+  <div class="cond-grid animate__animated animate__fadeIn">
+    <div class="cond-card">
+      <div class="cond-number">1</div>
+      <h6><i class="fa fa-layer-group me-1"></i>B agrega objetos A</h6>
+      <p>B es una colección o lista que <em>agrega</em> instancias de A. Ej: <code>Pedido</code> agrega <code>LineaPedido</code>.</p>
+    </div>
+    <div class="cond-card">
+      <div class="cond-number">2</div>
+      <h6><i class="fa fa-box me-1"></i>B contiene objetos A</h6>
+      <p>B tiene a A como parte de su composición. La relación es de <em>contenencia</em> o composición fuerte.</p>
+    </div>
+    <div class="cond-card">
+      <div class="cond-number">3</div>
+      <h6><i class="fa fa-database me-1"></i>B guarda instancias de A</h6>
+      <p>B actúa como repositorio, almacén o registro que persiste instancias de A.</p>
+    </div>
+    <div class="cond-card">
+      <div class="cond-number">4</div>
+      <h6><i class="fa fa-handshake me-1"></i>B usa de forma cercana A</h6>
+      <p>B tiene una relación de uso muy estrecha con A: siempre los usa juntos, no uno sin el otro.</p>
+    </div>
+    <div class="cond-card">
+      <div class="cond-number">5</div>
+      <h6><i class="fa fa-key me-1"></i>B tiene los datos para crear A</h6>
+      <p>B posee toda la información necesaria para inicializar las instancias de A. B es el <em>Expert</em> en crear A.</p>
+    </div>
+  </div>
+
+  <div class="tip-box animate__animated animate__fadeIn">
+    <i class="fa fa-star"></i>
+    <p><strong>Preferencia:</strong> Cuando se pueda aplicar más de una alternativa, prefieran la clase B que <em>agrega</em> o <em>contiene</em> instancias de A. En cualquier caso, B tiene una variable de instancia de A o un contenedor capaz de almacenar instancias de A.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 5 – EJEMPLO PUNTO DE VENTA (v1 - MAL)
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-5">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-cash-register"></i></div>
+    Ejemplo – Punto de Venta (Antes)
+  </div>
+
+  <div class="info-card animate__animated animate__fadeInLeft">
+    <div class="card-label"><i class="fa fa-info-circle"></i> Contexto</div>
+    <p>Del ejemplo <strong>Expert y SRP</strong>: tenemos una aplicación de <em>punto de venta</em>. La clase <code>Sale</code> agrega instancias de <code>SalesLineItem</code>. Originalmente, <code>Program</code> crea las instancias de <code>SalesLineItem</code>.</p>
+  </div>
+
+  <div class="compare-grid animate__animated animate__fadeIn">
+    <div class="compare-col">
+      <h6 class="bad-label"><i class="fa fa-times-circle me-1"></i> v1 — Program crea SalesLineItem (MAL)</h6>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span><i class="fab fa-microsoft me-1"></i> Program.cs</span>
+          <span class="lang-badge">C#</span>
+        </div>
+        <pre><span class="kw">public class</span> <span class="cl">Program</span>
+{
+    <span class="kw">public static void</span> <span class="mth">Main</span>(<span class="kw">string</span>[] args)
+    {
+        <span class="cm">// Program crea SalesLineItem</span>
+        <span class="cm">// → VIOLA Creator</span>
+        sale.<span class="mth">AddLineItem</span>(
+          <span class="kw">new</span> <span class="cl">SalesLineItem</span>(<span class="num">1</span>, <span class="mth">ProductAt</span>(<span class="num">0</span>)));
+        sale.<span class="mth">AddLineItem</span>(
+          <span class="kw">new</span> <span class="cl">SalesLineItem</span>(<span class="num">2</span>, <span class="mth">ProductAt</span>(<span class="num">1</span>)));
+        sale.<span class="mth">AddLineItem</span>(
+          <span class="kw">new</span> <span class="cl">SalesLineItem</span>(<span class="num">3</span>, <span class="mth">ProductAt</span>(<span class="num">2</span>)));
+    }
+}</pre>
+      </div>
+      <div class="info-card" style="border-left-color:#b91c1c;background:#fff5f5;">
+        <div class="card-label" style="color:#b91c1c;"><i class="fa fa-bug"></i> Problema</div>
+        <p><code>Program</code> no agrega, contiene ni usa directamente a <code>SalesLineItem</code>. La clase que realmente lo hace es <code>Sale</code>. Esto genera acoplamiento innecesario.</p>
+      </div>
+    </div>
+    <div class="compare-col">
+      <div class="uml-box mt-0">
+        <h6 style="font-size:0.8rem;font-weight:800;color:var(--blue-deep);margin-bottom:14px;">Diagrama v1</h6>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
+          <div class="uml-class">
+            <div class="uml-class-name" style="background:#b91c1c;">Program</div>
+            <div class="uml-section">Main()</div>
+            <div class="uml-section" style="font-size:0.68rem;color:#b91c1c;">✗ crea SalesLineItem</div>
+          </div>
+          <div style="font-size:1.2rem;color:#b91c1c;font-weight:900;">→</div>
+          <div class="uml-class">
+            <div class="uml-class-name">SalesLineItem</div>
+            <div class="uml-section">quantity<br>product</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;font-size:0.75rem;color:#b91c1c;font-weight:700;">
+          <i class="fa fa-exclamation-triangle me-1"></i>Program NO tiene relación natural con SalesLineItem
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 6 – EJEMPLO (v2 - BIEN)
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-6">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-check-circle"></i></div>
+    Ejemplo – Punto de Venta (Después)
+  </div>
+
+  <div class="compare-grid animate__animated animate__fadeIn">
+    <div class="compare-col">
+      <h6 class="good-label"><i class="fa fa-check-circle me-1"></i> v2 — Sale crea SalesLineItem (BIEN)</h6>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span><i class="fab fa-microsoft me-1"></i> Sale.cs</span>
+          <span class="lang-badge">C#</span>
+        </div>
+        <pre><span class="kw">public class</span> <span class="cl">Sale</span>
+{
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">SalesLineItem</span>&gt; lineItems
+      = <span class="kw">new</span> <span class="cl">List</span>&lt;<span class="cl">SalesLineItem</span>&gt;();
+
+  <span class="kw">public</span> <span class="cl">SalesLineItem</span> <span class="mth">AddLineItem</span>(
+      <span class="kw">double</span> quantity,
+      <span class="cl">ProductSpecification</span> product)
+  {
+    <span class="cl">SalesLineItem</span> item =
+        <span class="kw">new</span> <span class="cl">SalesLineItem</span>(quantity, product);
+    <span class="kw">this</span>.lineItems.<span class="mth">Add</span>(item);
+    <span class="kw">return</span> item; <span class="cm">// menos huérfanos</span>
+  }
+}</pre>
+      </div>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span><i class="fab fa-microsoft me-1"></i> Program.cs (refactored)</span>
+          <span class="lang-badge">C#</span>
+        </div>
+        <pre><span class="cm">// Program ya no crea SalesLineItem</span>
+sale.<span class="mth">AddLineItem</span>(<span class="num">1</span>, <span class="mth">ProductAt</span>(<span class="num">0</span>));
+sale.<span class="mth">AddLineItem</span>(<span class="num">2</span>, <span class="mth">ProductAt</span>(<span class="num">1</span>));
+sale.<span class="mth">AddLineItem</span>(<span class="num">3</span>, <span class="mth">ProductAt</span>(<span class="num">2</span>));</pre>
+      </div>
+    </div>
+    <div class="compare-col">
+      <div class="uml-box">
+        <h6 style="font-size:0.8rem;font-weight:800;color:var(--blue-deep);margin-bottom:14px;">Diagrama v2</h6>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <div class="uml-class" style="width:100%;max-width:220px;">
+            <div class="uml-class-name">Sale</div>
+            <div class="uml-section">- lineItems: List&lt;SalesLineItem&gt;</div>
+            <div class="uml-section">+ AddLineItem(qty, prod)<br>+ RemoveLineItem(item)</div>
+          </div>
+          <div style="font-size:1.3rem;color:#15803d;font-weight:900;">↓ <small style="font-size:0.65rem;color:#15803d;display:block;text-align:center;">crea y agrega</small></div>
+          <div class="uml-class" style="width:100%;max-width:220px;">
+            <div class="uml-class-name">SalesLineItem</div>
+            <div class="uml-section">- quantity: double<br>- product: ProductSpec</div>
+            <div class="uml-section">+ GetTotal()</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;font-size:0.75rem;color:#15803d;font-weight:700;">
+          <i class="fa fa-check-circle me-1"></i>Sale agrega SalesLineItem → es su Creator natural
+        </div>
+      </div>
+      <div class="tip-box mt-2">
+        <i class="fa fa-star"></i>
+        <p>El método <code>AddLineItem</code> también garantiza que <strong>no existan instancias de SalesLineItem huérfanas</strong>, pues las agrega inmediatamente.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 7 – RESUMEN VISUAL
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-7">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-map"></i></div>
+    Resumen – Regla Creator
+  </div>
+
+  <div class="alert-creator animate__animated animate__pulse">
+    <i class="fa fa-ruler-combined"></i>
+    <div>
+      <h6>Fórmula del patrón</h6>
+      <p>Si <strong>B agrega, contiene, guarda, usa cercanamente A</strong>, o tiene los datos para inicializar A → entonces <strong>B es el Creator de A</strong>.</p>
+    </div>
+  </div>
+
+  <div class="row g-3 animate__animated animate__fadeIn">
+    <div class="col-md-6">
+      <div class="info-card" style="border-left-color:#15803d;">
+        <div class="card-label" style="color:#15803d;"><i class="fa fa-check"></i> Beneficios</div>
+        <ul style="font-size:0.85rem;line-height:2;padding-left:18px;">
+          <li>Reduce el <strong>acoplamiento</strong> entre clases no relacionadas</li>
+          <li>Los objetos creados son automáticamente parte de una estructura</li>
+          <li>Soporta la <strong>encapsulación</strong> y los invariantes del sistema</li>
+          <li>Hace más difícil la creación de objetos <em>huérfanos</em></li>
+          <li>Facilita la comprensión del modelo de dominio</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="info-card" style="border-left-color:#b91c1c;background:#fff8f8;">
+        <div class="card-label" style="color:#b91c1c;"><i class="fa fa-times"></i> Anti-patrones a evitar</div>
+        <ul style="font-size:0.85rem;line-height:2;padding-left:18px;">
+          <li>Que <code>Program</code> cree objetos que "pertenecen" a otra clase</li>
+          <li>Clases de utilidad crean objetos de dominio</li>
+          <li>Objetos creados sin ser asignados a ningún contenedor</li>
+          <li>Lógica de construcción dispersa por todo el sistema</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1 animate__animated animate__fadeIn">
+    <div class="col-12">
+      <div class="info-card">
+        <div class="card-label"><i class="fa fa-arrows-alt-h"></i> Relación con otros patrones</div>
+        <p><strong>Expert:</strong> Creator a veces usa Expert para decidir quién crea. El que tiene los datos (<em>Expert</em>) suele ser también el que debe crear (<em>Creator</em>).<br>
+        <strong>Factory:</strong> Cuando la creación es compleja, Creator puede delegar a una Factory, pero el iniciador de la creación sigue siendo el que contiene o agrega.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 8 – PROYECTO 1: BIBLIOTECA
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-8">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-book"></i></div>
+    Proyecto 1 – Sistema de Biblioteca (.NET / VSCode)
+  </div>
+
+  <div class="info-card animate__animated animate__fadeInLeft">
+    <div class="card-label"><i class="fab fa-microsoft"></i> Estructura del Proyecto</div>
+    <p>Proyecto <strong>consola .NET</strong> con múltiples clases. <code>Library</code> agrega colecciones de <code>Book</code>, y <code>Book</code> agrega instancias de <code>BookCopy</code>. Aplicamos Creator en dos niveles.</p>
+  </div>
+
+  <div class="project-grid animate__animated animate__fadeIn">
+    <div class="project-card" onclick="showProjectDetail('biblioteca')">
+      <div class="project-card-head" style="background:linear-gradient(135deg,#0d3b7a,#1a5cbf);">
+        <h5><i class="fa fa-folder-open me-2"></i>BibliotecaApp/</h5>
+        <p>Sistema de gestión de una biblioteca</p>
+      </div>
+      <div class="project-card-body">
+        <ul class="file-list">
+          <li><i class="fa fa-file-code"></i>BibliotecaApp.csproj</li>
+          <li><i class="fa fa-file-code"></i>Program.cs</li>
+          <li><i class="fa fa-file-code"></i>Library.cs</li>
+          <li><i class="fa fa-file-code"></i>Book.cs</li>
+          <li><i class="fa fa-file-code"></i>BookCopy.cs</li>
+          <li><i class="fa fa-file-code"></i>Member.cs</li>
+          <li><i class="fa fa-file-code"></i>Loan.cs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="compare-grid mt-3 animate__animated animate__fadeIn">
+    <div class="compare-col">
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span><i class="fa fa-file-code me-1"></i>Book.cs — Creator de BookCopy</span>
+          <span class="lang-badge">C#</span>
+        </div>
+        <pre><span class="kw">namespace</span> BibliotecaApp;
+
+<span class="kw">public class</span> <span class="cl">Book</span>
+{
+  <span class="kw">public string</span> Title { <span class="kw">get</span>; }
+  <span class="kw">public string</span> Author { <span class="kw">get</span>; }
+  <span class="kw">public string</span> ISBN { <span class="kw">get</span>; }
+
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">BookCopy</span>&gt; copies =
+      <span class="kw">new</span> <span class="cl">List</span>&lt;<span class="cl">BookCopy</span>&gt;();
+
+  <span class="kw">public</span> <span class="cl">Book</span>(<span class="kw">string</span> title,
+               <span class="kw">string</span> author,
+               <span class="kw">string</span> isbn)
+  {
+    Title = title;
+    Author = author;
+    ISBN = isbn;
+  }
+
+  <span class="cm">// Creator: Book agrega BookCopy</span>
+  <span class="kw">public</span> <span class="cl">BookCopy</span> <span class="mth">AddCopy</span>(<span class="kw">string</span> copyId)
+  {
+    <span class="cl">BookCopy</span> copy = <span class="kw">new</span> <span class="cl">BookCopy</span>(copyId, <span class="kw">this</span>);
+    copies.<span class="mth">Add</span>(copy);
+    <span class="kw">return</span> copy;
+  }
+
+  <span class="kw">public</span> <span class="cl">IEnumerable</span>&lt;<span class="cl">BookCopy</span>&gt; <span class="mth">GetCopies</span>()
+      =&gt; copies.<span class="mth">AsReadOnly</span>();
+
+  <span class="kw">public</span> <span class="cl">BookCopy</span>? <span class="mth">GetAvailableCopy</span>()
+      =&gt; copies.<span class="mth">FirstOrDefault</span>(c =&gt; c.IsAvailable);
+}</pre>
+      </div>
+    </div>
+    <div class="compare-col">
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span><i class="fa fa-file-code me-1"></i>Library.cs — Creator de Book</span>
+          <span class="lang-badge">C#</span>
+        </div>
+        <pre><span class="kw">namespace</span> BibliotecaApp;
+
+<span class="kw">public class</span> <span class="cl">Library</span>
+{
+  <span class="kw">public string</span> Name { <span class="kw">get</span>; }
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">Book</span>&gt; catalog =
+      <span class="kw">new</span> <span class="cl">List</span>&lt;<span class="cl">Book</span>&gt;();
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">Member</span>&gt; members =
+      <span class="kw">new</span> <span class="cl">List</span>&lt;<span class="cl">Member</span>&gt;();
+
+  <span class="kw">public</span> <span class="cl">Library</span>(<span class="kw">string</span> name)
+  { Name = name; }
+
+  <span class="cm">// Creator: Library agrega Book</span>
+  <span class="kw">public</span> <span class="cl">Book</span> <span class="mth">AddBook</span>(<span class="kw">string</span> title,
+      <span class="kw">string</span> author, <span class="kw">string</span> isbn)
+  {
+    <span class="cl">Book</span> book = <span class="kw">new</span> <span class="cl">Book</span>(title,
+                           author, isbn);
+    catalog.<span class="mth">Add</span>(book);
+    <span class="kw">return</span> book;
+  }
+
+  <span class="cm">// Creator: Library agrega Member</span>
+  <span class="kw">public</span> <span class="cl">Member</span> <span class="mth">RegisterMember</span>(
+      <span class="kw">string</span> name, <span class="kw">string</span> id)
+  {
+    <span class="cl">Member</span> m = <span class="kw">new</span> <span class="cl">Member</span>(name, id);
+    members.<span class="mth">Add</span>(m);
+    <span class="kw">return</span> m;
+  }
+}</pre>
+      </div>
+      <div class="code-wrapper mt-2">
+        <div class="code-header">
+          <span><i class="fa fa-file-code me-1"></i>BookCopy.cs</span>
+          <span class="lang-badge">C#</span>
+        </div>
+        <pre><span class="kw">namespace</span> BibliotecaApp;
+
+<span class="kw">public class</span> <span class="cl">BookCopy</span>
+{
+  <span class="kw">public string</span> CopyId { <span class="kw">get</span>; }
+  <span class="kw">public</span> <span class="cl">Book</span> Book { <span class="kw">get</span>; }
+  <span class="kw">public bool</span> IsAvailable { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">true</span>;
+
+  <span class="cm">// Internal: creado por Book</span>
+  <span class="kw">internal</span> <span class="cl">BookCopy</span>(<span class="kw">string</span> copyId, <span class="cl">Book</span> book)
+  { CopyId = copyId; Book = book; }
+
+  <span class="kw">public void</span> <span class="mth">CheckOut</span>()
+      =&gt; IsAvailable = <span class="kw">false</span>;
+  <span class="kw">public void</span> <span class="mth">Return</span>()
+      =&gt; IsAvailable = <span class="kw">true</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 9 – PROYECTOS 2 y 3
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-9">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-th-large"></i></div>
+    Más Proyectos de Ejemplo con Creator
+  </div>
+
+  <div class="row g-3 animate__animated animate__fadeIn">
+
+    <!-- PROYECTO 2 -->
+    <div class="col-md-6">
+      <div class="project-card h-100" onclick="showProj2()">
+        <div class="project-card-head" style="background:linear-gradient(135deg,#0a4d8a,#0ea5e9);">
+          <h5><i class="fa fa-shopping-cart me-2"></i>Proyecto 2 – E-Commerce</h5>
+          <p>Carrito de compras con productos</p>
+        </div>
+        <div class="project-card-body">
+          <ul class="file-list">
+            <li><i class="fa fa-file-code"></i>Program.cs</li>
+            <li><i class="fa fa-file-code"></i>ShoppingCart.cs <span style="color:var(--blue-light);font-size:0.7rem;">← Creator de CartItem</span></li>
+            <li><i class="fa fa-file-code"></i>CartItem.cs</li>
+            <li><i class="fa fa-file-code"></i>Product.cs</li>
+            <li><i class="fa fa-file-code"></i>Order.cs <span style="color:var(--blue-light);font-size:0.7rem;">← Creator de OrderLine</span></li>
+            <li><i class="fa fa-file-code"></i>OrderLine.cs</li>
+          </ul>
+          <div class="mt-3">
+            <div class="code-wrapper">
+              <div class="code-header"><span>ShoppingCart.cs</span><span class="lang-badge">C#</span></div>
+              <pre style="font-size:0.73rem;"><span class="kw">public class</span> <span class="cl">ShoppingCart</span>
+{
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">CartItem</span>&gt; items = <span class="kw">new</span>();
+  <span class="kw">public string</span> CustomerId { <span class="kw">get</span>; }
+
+  <span class="kw">public</span> <span class="cl">ShoppingCart</span>(<span class="kw">string</span> customerId)
+  { CustomerId = customerId; }
+
+  <span class="cm">// Creator: agrega CartItem</span>
+  <span class="kw">public</span> <span class="cl">CartItem</span> <span class="mth">AddItem</span>(
+      <span class="cl">Product</span> product, <span class="kw">int</span> qty)
+  {
+    <span class="kw">var</span> item = <span class="kw">new</span> <span class="cl">CartItem</span>(product, qty);
+    items.<span class="mth">Add</span>(item);
+    <span class="kw">return</span> item;
+  }
+
+  <span class="kw">public decimal</span> <span class="mth">GetTotal</span>()
+    =&gt; items.<span class="mth">Sum</span>(i =&gt; i.<span class="mth">GetSubtotal</span>());
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROYECTO 3 -->
+    <div class="col-md-6">
+      <div class="project-card h-100" onclick="showProj3()">
+        <div class="project-card-head" style="background:linear-gradient(135deg,#0d3b7a,#3a90e0);">
+          <h5><i class="fa fa-hospital me-2"></i>Proyecto 3 – Hospital</h5>
+          <p>Gestión de pacientes y turnos médicos</p>
+        </div>
+        <div class="project-card-body">
+          <ul class="file-list">
+            <li><i class="fa fa-file-code"></i>Program.cs</li>
+            <li><i class="fa fa-file-code"></i>Hospital.cs <span style="color:var(--blue-light);font-size:0.7rem;">← Creator de Patient</span></li>
+            <li><i class="fa fa-file-code"></i>Patient.cs <span style="color:var(--blue-light);font-size:0.7rem;">← Creator de MedicalRecord</span></li>
+            <li><i class="fa fa-file-code"></i>MedicalRecord.cs</li>
+            <li><i class="fa fa-file-code"></i>Doctor.cs <span style="color:var(--blue-light);font-size:0.7rem;">← Creator de Appointment</span></li>
+            <li><i class="fa fa-file-code"></i>Appointment.cs</li>
+          </ul>
+          <div class="mt-3">
+            <div class="code-wrapper">
+              <div class="code-header"><span>Patient.cs</span><span class="lang-badge">C#</span></div>
+              <pre style="font-size:0.73rem;"><span class="kw">public class</span> <span class="cl">Patient</span>
+{
+  <span class="kw">public string</span> Name { <span class="kw">get</span>; }
+  <span class="kw">public string</span> PatientId { <span class="kw">get</span>; }
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">MedicalRecord</span>&gt; records = <span class="kw">new</span>();
+
+  <span class="kw">public</span> <span class="cl">Patient</span>(<span class="kw">string</span> name, <span class="kw">string</span> id)
+  { Name = name; PatientId = id; }
+
+  <span class="cm">// Creator: guarda y agrega registros</span>
+  <span class="kw">public</span> <span class="cl">MedicalRecord</span> <span class="mth">AddRecord</span>(
+      <span class="cl">DateTime</span> date, <span class="kw">string</span> diagnosis)
+  {
+    <span class="kw">var</span> record = <span class="kw">new</span> <span class="cl">MedicalRecord</span>(
+        date, diagnosis, <span class="kw">this</span>);
+    records.<span class="mth">Add</span>(record);
+    <span class="kw">return</span> record;
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box mt-3 animate__animated animate__fadeIn">
+    <i class="fa fa-terminal"></i>
+    <p><strong>Para crear un proyecto en VSCode:</strong> <code>dotnet new console -n NombreProyecto</code> → agrega los archivos de clase → <code>dotnet run</code>. Cada clase en su propio archivo <code>.cs</code>.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 10 – QUIZ
+════════════════════════════════════════════ -->
+<div class="slide" id="slide-10">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-brain"></i></div>
+    Quiz – ¿Cuánto aprendiste?
+  </div>
+
+  <div id="quiz-container">
+    <div class="quiz-panel" id="quiz-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <span style="font-size:0.75rem;font-weight:800;color:var(--blue-mid);">PREGUNTA <span id="q-num">1</span> DE 6</span>
+        <div style="display:flex;gap:4px;" id="q-dots"></div>
+      </div>
+      <div class="quiz-q" id="quiz-question"></div>
+      <div class="quiz-opts" id="quiz-options"></div>
+      <div class="quiz-nav">
+        <div class="quiz-score">Correctas: <strong id="score-val">0</strong></div>
+        <button class="nav-btn" id="next-q-btn" style="display:none;" onclick="nextQuestion()">
+          Siguiente <i class="fa fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+    <div id="quiz-result">
+      <div class="score-big" id="final-score"></div>
+      <div style="font-size:1rem;font-weight:700;color:var(--blue-mid);margin-bottom:16px;" id="result-msg"></div>
+      <button class="nav-btn" onclick="resetQuiz()" style="padding:10px 24px;font-size:0.9rem;">
+        <i class="fa fa-redo me-1"></i>Intentar de nuevo
+      </button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end slides-wrapper -->
+
+<div id="footer">
+  <span><i class="fab fa-microsoft me-1"></i>GRASP – Creator &nbsp;|&nbsp; Craig Larman, 1998</span>
+  <div class="footer-keys">
+    <span class="key-badge"><i class="fa fa-arrow-left"></i> Anterior</span>
+    <span class="key-badge">Siguiente <i class="fa fa-arrow-right"></i></span>
+    <span class="key-badge"><i class="fa fa-list"></i> Índice</span>
+  </div>
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.11.0/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ── NAVIGATION ──
+let currentSlide = 1;
+const totalSlides = 10;
+
+function goToSlide(n) {
+  const prev = document.getElementById(`slide-${currentSlide}`);
+  if (prev) { prev.classList.remove('active'); prev.classList.remove('animate__fadeIn','animate__fadeInLeft','animate__fadeInRight'); }
+  currentSlide = Math.max(1, Math.min(n, totalSlides));
+  const next = document.getElementById(`slide-${currentSlide}`);
+  if (next) {
+    next.classList.add('active', 'animate__animated', 'animate__fadeIn');
+  }
+  document.getElementById('slide-counter').textContent = `${currentSlide} / ${totalSlides}`;
+  const pct = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevSlide();
+});
+
+goToSlide(1);
+
+// ── INDEX ──
+function showIndex() {
+  const slides = [
+    {n:1,  icon:'fa-home',         title:'Portada'},
+    {n:2,  icon:'fa-compass',      title:'Contexto GRASP'},
+    {n:3,  icon:'fa-question',     title:'El Problema'},
+    {n:4,  icon:'fa-lightbulb',    title:'La Solución – Condiciones'},
+    {n:5,  icon:'fa-cash-register',title:'Ejemplo v1 (Antes – MAL)'},
+    {n:6,  icon:'fa-check-circle', title:'Ejemplo v2 (Después – BIEN)'},
+    {n:7,  icon:'fa-map',          title:'Resumen Visual'},
+    {n:8,  icon:'fa-book',         title:'Proyecto 1 – Biblioteca'},
+    {n:9,  icon:'fa-th-large',     title:'Proyectos 2 y 3'},
+    {n:10, icon:'fa-brain',        title:'Quiz'},
+  ];
+  const html = slides.map(s =>
+    `<button class="btn btn-sm w-100 text-start mb-1 ${s.n===currentSlide?'btn-primary':'btn-outline-primary'}"
+      onclick="Swal.close();goToSlide(${s.n})">
+      <i class="fa ${s.icon} me-2"></i>${s.n}. ${s.title}
+    </button>`
+  ).join('');
+  Swal.fire({
+    title: '<span style="color:#0d3b7a;font-family:Nunito;font-weight:900;">Índice de Slides</span>',
+    html: `<div style="font-family:Nunito;">${html}</div>`,
+    showConfirmButton: false,
+    showCloseButton: true,
+    width: '380px',
+  });
+}
+
+// ── PROJECT DETAIL DIALOGS ──
+function showProjectDetail(p) {
+  Swal.fire({
+    title: '<span style="color:#0d3b7a;font-family:Nunito;font-weight:900;"><i class="fa fa-book me-2"></i>Biblioteca – Archivos del Proyecto</span>',
+    html: `
+      <div style="font-family:Nunito;font-size:0.82rem;text-align:left;">
+        <p style="color:#1a5cbf;font-weight:700;margin-bottom:8px;">Creator aplicado en dos niveles:</p>
+        <ul style="line-height:2.2;color:#0f1c2e;">
+          <li><code>Library</code> → Creator de <code>Book</code> (lo agrega al catálogo)</li>
+          <li><code>Book</code> → Creator de <code>BookCopy</code> (lo agrega a sus copias)</li>
+          <li><code>Library</code> → Creator de <code>Member</code> (registra miembros)</li>
+          <li><code>Member</code> → Creator de <code>Loan</code> (el préstamo le pertenece)</li>
+        </ul>
+        <hr>
+        <p style="color:#6b8db5;">dotnet new console -n BibliotecaApp</p>
+      </div>`,
+    confirmButtonText: 'Entendido',
+    confirmButtonColor: '#1a5cbf',
+    width: '420px',
+  });
+}
+function showProj2() {
+  Swal.fire({
+    icon:'info',
+    title:'<span style="font-family:Nunito;color:#0d3b7a;">E-Commerce – Creator Pattern</span>',
+    html:`<div style="font-family:Nunito;font-size:0.85rem;text-align:left;">
+      <ul style="line-height:2.2;">
+        <li><code>ShoppingCart</code> → Creator de <code>CartItem</code></li>
+        <li><code>Order</code> → Creator de <code>OrderLine</code></li>
+        <li><code>Catalog</code> → Creator de <code>Product</code></li>
+      </ul>
+      <code style="font-size:0.78rem;">dotnet new console -n ECommerceApp</code>
+    </div>`,
+    confirmButtonColor:'#1a5cbf'
+  });
+}
+function showProj3() {
+  Swal.fire({
+    icon:'info',
+    title:'<span style="font-family:Nunito;color:#0d3b7a;">Hospital – Creator Pattern</span>',
+    html:`<div style="font-family:Nunito;font-size:0.85rem;text-align:left;">
+      <ul style="line-height:2.2;">
+        <li><code>Hospital</code> → Creator de <code>Patient</code> y <code>Doctor</code></li>
+        <li><code>Patient</code> → Creator de <code>MedicalRecord</code></li>
+        <li><code>Doctor</code> → Creator de <code>Appointment</code></li>
+      </ul>
+      <code style="font-size:0.78rem;">dotnet new console -n HospitalApp</code>
+    </div>`,
+    confirmButtonColor:'#1a5cbf'
+  });
+}
+
+// ── QUIZ ──
+const questions = [
+  {
+    q: '¿Cuál es la pregunta central que responde el patrón Creator?',
+    opts: [
+      '¿Qué clase debería calcular el total de una venta?',
+      '¿Quién debería ser responsable de crear una nueva instancia de cierta clase?',
+      '¿Qué interfaz debe implementar una clase?',
+      '¿Cómo delegar comportamiento mediante polimorfismo?'
+    ],
+    correct: 1
+  },
+  {
+    q: 'En el ejemplo de punto de venta, ¿por qué Sale es el Creator natural de SalesLineItem?',
+    opts: [
+      'Porque Sale tiene un método estático de fábrica',
+      'Porque Program delega la creación a Sale',
+      'Porque Sale agrega instancias de SalesLineItem en su lista lineItems',
+      'Porque SalesLineItem hereda de Sale'
+    ],
+    correct: 2
+  },
+  {
+    q: 'Si B agrega objetos A, B contiene objetos A Y B tiene los datos para crear A, ¿cuál condición se prefiere?',
+    opts: [
+      'La que tiene los datos (Expert)',
+      'La que usa de forma cercana (uso cercano)',
+      'La que agrega o contiene instancias de A',
+      'Cualquiera de las tres, son equivalentes'
+    ],
+    correct: 2
+  },
+  {
+    q: 'En el proyecto Biblioteca, ¿quién es el Creator de BookCopy?',
+    opts: [
+      'Library, porque es la clase más general',
+      'Program, porque inicia la aplicación',
+      'Member, porque usa los libros',
+      'Book, porque agrega copias de sí mismo'
+    ],
+    correct: 3
+  },
+  {
+    q: '¿Cuál es un beneficio clave de aplicar Creator correctamente?',
+    opts: [
+      'Permite tener más herencia múltiple',
+      'Se eliminan los constructores de todas las clases',
+      'Reduce el acoplamiento y evita objetos huérfanos',
+      'Aumenta el número de clases del sistema'
+    ],
+    correct: 2
+  },
+  {
+    q: 'En el proyecto Hospital, la clase Doctor crea instancias de Appointment. ¿Qué condición de Creator aplica principalmente?',
+    opts: [
+      'Doctor guarda instancias de Appointment',
+      'Doctor agrega y usa cercanamente a Appointment',
+      'Doctor hereda de Appointment',
+      'Appointment usa datos de Doctor para crearse'
+    ],
+    correct: 1
+  },
+];
+
+let qIndex = 0;
+let score = 0;
+let answered = false;
+
+function renderQuestion() {
+  const q = questions[qIndex];
+  document.getElementById('q-num').textContent = qIndex + 1;
+  document.getElementById('quiz-question').textContent = q.q;
+  answered = false;
+  document.getElementById('next-q-btn').style.display = 'none';
+
+  const opts = document.getElementById('quiz-options');
+  opts.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-opt';
+    btn.innerHTML = `<div class="opt-icon">${letters[i]}</div><span>${opt}</span>`;
+    btn.onclick = () => checkAnswer(i, btn);
+    opts.appendChild(btn);
+  });
+
+  const dots = document.getElementById('q-dots');
+  dots.innerHTML = questions.map((_,i) =>
+    `<div style="width:10px;height:10px;border-radius:50%;background:${i<qIndex?'var(--blue-light)':i===qIndex?'var(--blue-deep)':'var(--border-light)'};"></div>`
+  ).join('');
+}
+
+function checkAnswer(idx, btn) {
+  if (answered) return;
+  answered = true;
+  const q = questions[qIndex];
+  const allOpts = document.querySelectorAll('.quiz-opt');
+  allOpts.forEach(o => o.classList.add('answered'));
+
+  if (idx === q.correct) {
+    btn.classList.add('correct');
+    btn.querySelector('.opt-icon').innerHTML = '<i class="fa fa-check"></i>';
+    score++;
+    document.getElementById('score-val').textContent = score;
+    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: '¡Correcto!', showConfirmButton: false, timer: 1200, timerProgressBar: true });
+  } else {
+    btn.classList.add('wrong');
+    btn.querySelector('.opt-icon').innerHTML = '<i class="fa fa-times"></i>';
+    allOpts[q.correct].classList.add('correct');
+    allOpts[q.correct].querySelector('.opt-icon').innerHTML = '<i class="fa fa-check"></i>';
+    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Incorrecto', showConfirmButton: false, timer: 1400, timerProgressBar: true });
+  }
+  document.getElementById('next-q-btn').style.display = qIndex < questions.length - 1 ? 'block' : 'none';
+  if (qIndex === questions.length - 1) setTimeout(showResult, 1600);
+}
+
+function nextQuestion() {
+  qIndex++;
+  renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-panel').style.display = 'none';
+  const r = document.getElementById('quiz-result');
+  r.style.display = 'block';
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  const msgs = [
+    [0,49,'Repasá la teoría de Creator y volvé a intentarlo 💪'],
+    [50,74,'Buen intento, ¡casi! Revisá las condiciones de Creator 🔍'],
+    [75,89,'¡Muy bien! Dominás el patrón Creator 👏'],
+    [90,100,'¡Excelente! Creator dominado al 100% 🏆'],
+  ];
+  const msg = msgs.find(([lo,hi]) => pct >= lo && pct <= hi);
+  document.getElementById('result-msg').textContent = msg ? msg[2] : '';
+
+  if (pct === 100) {
+    Swal.fire({ title:'🏆 ¡Perfecto!', text:'Respondiste todo correctamente. Sos un experto en Creator.', icon:'success', confirmButtonColor:'#1a5cbf' });
+  }
+}
+
+function resetQuiz() {
+  qIndex = 0; score = 0; answered = false;
+  document.getElementById('score-val').textContent = '0';
+  document.getElementById('quiz-panel').style.display = 'block';
+  document.getElementById('quiz-result').style.display = 'none';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

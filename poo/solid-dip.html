@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLID – DIP | Dependency Inversion Principle</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #ffffff;
+    --text-dark: #0f1c2e;
+    --blue-deep: #0d3b7a;
+    --blue-mid: #1a5cbf;
+    --blue-light: #3a90e0;
+    --sky: #67c2f5;
+    --sky-pale: #e8f5fe;
+    --sky-card: #f0f9ff;
+    --border-light: #c9e6f8;
+    --code-bg: #f0f6ff;
+    --code-border: #b3d4f5;
+    --shadow: 0 4px 24px rgba(13,59,122,0.09);
+    --shadow-strong: 0 8px 40px rgba(13,59,122,0.16);
+    --green: #15803d; --green-bg: #dcfce7;
+    --red: #b91c1c;   --red-bg: #fee2e2;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; overflow:hidden; font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text-dark); }
+
+  #progress-bar{ position:fixed; top:0; left:0; height:4px; z-index:999; background:linear-gradient(90deg,var(--blue-mid),var(--sky)); transition:width .4s ease; }
+
+  #nav-header{ position:fixed; top:4px; left:0; right:0; z-index:998; display:flex; align-items:center; justify-content:space-between; padding:8px 24px; background:rgba(255,255,255,.97); border-bottom:1px solid var(--border-light); box-shadow:0 2px 12px rgba(13,59,122,.07); }
+  .nav-brand{ font-size:.85rem; font-weight:800; color:var(--blue-deep); letter-spacing:.5px; }
+  .nav-brand span{ color:var(--blue-light); }
+  .nav-controls{ display:flex; align-items:center; gap:8px; }
+  .nav-btn{ border:1px solid var(--border-light); background:var(--sky-pale); color:var(--blue-deep); border-radius:8px; padding:4px 12px; font-size:.78rem; font-weight:700; cursor:pointer; transition:all .2s; font-family:'Nunito',sans-serif; }
+  .nav-btn:hover{ background:var(--blue-light); color:#fff; border-color:var(--blue-light); }
+  .slide-counter{ font-size:.78rem; font-weight:700; color:var(--blue-mid); min-width:60px; text-align:center; }
+
+  #slides-wrapper{ position:fixed; top:52px; left:0; right:0; bottom:40px; overflow:hidden; }
+  .slide{ position:absolute; top:0; left:0; right:0; bottom:0; display:none; overflow-y:auto; padding:28px 32px 20px; animation-duration:.45s; }
+  .slide.active{ display:block; }
+
+  #footer{ position:fixed; bottom:0; left:0; right:0; height:40px; background:var(--blue-deep); color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 24px; font-size:.72rem; }
+  .key-badge{ background:rgba(255,255,255,.15); border-radius:5px; padding:2px 8px; font-size:.68rem; display:flex; align-items:center; gap:4px; }
+  .footer-keys{ display:flex; gap:12px; }
+
+  /* SLIDE COMPONENTS */
+  .slide-title{ font-size:1.65rem; font-weight:900; color:var(--blue-deep); border-bottom:3px solid var(--sky); padding-bottom:10px; margin-bottom:20px; display:flex; align-items:center; gap:12px; }
+  .slide-title .icon-title{ width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg,var(--blue-mid),var(--sky)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.1rem; flex-shrink:0; }
+
+  /* COVER */
+  .cover-wrap{ display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 120px); text-align:center; padding:20px; }
+  .cover-badge{ background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid)); color:#fff; border-radius:14px; padding:8px 22px; font-size:.82rem; font-weight:800; letter-spacing:1.5px; margin-bottom:18px; display:inline-block; }
+  .cover-title{ font-size:clamp(2.2rem,6vw,3.8rem); font-weight:900; color:var(--blue-deep); line-height:1.05; margin-bottom:8px; }
+  .cover-title .hl{ color:var(--blue-light); }
+  .cover-subtitle{ font-size:1rem; color:#4a7ab5; font-weight:600; margin-bottom:24px; max-width:540px; }
+  .cover-tags{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:24px; }
+  .tag{ padding:5px 14px; border-radius:20px; font-size:.78rem; font-weight:700; border:1.5px solid var(--border-light); background:var(--sky-pale); color:var(--blue-deep); }
+  .cover-book{ background:var(--sky-card); border:1px solid var(--border-light); border-radius:12px; padding:14px 22px; font-size:.85rem; color:var(--blue-mid); font-weight:600; max-width:480px; }
+
+  /* CARDS */
+  .info-card{ background:var(--sky-card); border:1.5px solid var(--border-light); border-left:5px solid var(--blue-light); border-radius:12px; padding:16px 20px; margin-bottom:14px; }
+  .info-card .card-label{ font-size:.7rem; font-weight:800; color:var(--blue-light); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+  .info-card p,.info-card ul{ font-size:.88rem; color:var(--text-dark); line-height:1.7; }
+
+  .tip-box{ background:linear-gradient(135deg,#dff3fd,#e8f5fe); border:1.5px solid var(--sky); border-radius:12px; padding:14px 18px; margin-top:14px; display:flex; align-items:flex-start; gap:12px; }
+  .tip-box i{ color:var(--blue-light); font-size:1.2rem; margin-top:2px; flex-shrink:0; }
+  .tip-box p{ font-size:.88rem; color:var(--blue-deep); font-weight:600; line-height:1.6; }
+
+  .alert-dip{ background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid)); color:#fff; border-radius:14px; padding:18px 22px; margin-bottom:16px; display:flex; align-items:center; gap:16px; }
+  .alert-dip i{ font-size:1.8rem; opacity:.85; flex-shrink:0; }
+  .alert-dip div h6{ font-size:.95rem; font-weight:800; margin-bottom:4px; }
+  .alert-dip div p{ font-size:.83rem; opacity:.9; line-height:1.55; }
+
+  /* CODE */
+  .code-wrapper{ margin-bottom:14px; }
+  .code-header{ background:var(--blue-deep); color:#fff; border-radius:10px 10px 0 0; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; font-size:.78rem; font-weight:700; }
+  .code-header .lang-badge{ background:var(--blue-light); border-radius:5px; padding:2px 8px; font-size:.68rem; font-weight:800; }
+  pre{ background:var(--code-bg); border:1.5px solid var(--code-border); border-top:none; border-radius:0 0 10px 10px; padding:14px 18px; font-family:'Fira Code',monospace; font-size:.79rem; line-height:1.7; overflow-x:auto; margin:0; color:var(--text-dark); }
+  .kw{ color:#0d3b7a; font-weight:700; }
+  .cm{ color:#6b8db5; font-style:italic; }
+  .cl{ color:#1a5cbf; font-weight:700; }
+  .str{ color:#0e7a52; }
+  .num{ color:#c05621; }
+  .mth{ color:#6b21a8; }
+  .iface{ color:#0e6b8a; font-weight:700; }
+  .add{ background:#d1fae5; color:#065f46; }
+  .rem{ background:#fee2e2; color:#7f1d1d; text-decoration:line-through; }
+
+  /* COMPARE */
+  .compare-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px; }
+  @media(max-width:768px){ .compare-grid{ grid-template-columns:1fr; } }
+  .compare-col h6{ font-size:.8rem; font-weight:800; text-align:center; padding:6px 0; border-radius:8px; margin-bottom:8px; }
+  .bad-label{ background:#fee2e2; color:#b91c1c; }
+  .good-label{ background:#dcfce7; color:#15803d; }
+
+  /* UML SVG diagrams */
+  .uml-wrap{ background:var(--sky-card); border:1.5px solid var(--border-light); border-radius:12px; padding:18px; text-align:center; }
+  .uml-wrap h6{ font-size:.78rem; font-weight:800; color:var(--blue-deep); margin-bottom:12px; }
+
+  /* STEP FLOW */
+  .step-flow{ display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+  .step-item{ display:flex; align-items:flex-start; gap:14px; background:#fff; border:1.5px solid var(--border-light); border-radius:12px; padding:13px 16px; transition:all .25s; }
+  .step-item:hover{ border-color:var(--sky); box-shadow:var(--shadow); }
+  .step-num{ width:34px; height:34px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--blue-mid),var(--sky)); color:#fff; font-weight:900; font-size:.85rem; display:flex; align-items:center; justify-content:center; }
+  .step-content h6{ font-size:.86rem; font-weight:800; color:var(--blue-deep); margin-bottom:3px; }
+  .step-content p{ font-size:.81rem; color:#4a6785; line-height:1.5; }
+
+  /* COND GRID */
+  .cond-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:12px; }
+  .cond-card{ background:#fff; border:1.5px solid var(--border-light); border-radius:12px; padding:14px 16px; transition:all .25s; }
+  .cond-card:hover{ border-color:var(--blue-light); box-shadow:var(--shadow); transform:translateY(-2px); }
+  .cond-number{ width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--blue-mid),var(--sky)); color:#fff; font-size:.75rem; font-weight:900; display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
+  .cond-card h6{ font-size:.82rem; font-weight:800; color:var(--blue-deep); margin-bottom:4px; }
+  .cond-card p{ font-size:.79rem; color:#3a5a7a; line-height:1.5; }
+
+  /* PROJECT CARDS */
+  .project-card{ background:#fff; border:1.5px solid var(--border-light); border-radius:14px; overflow:hidden; transition:all .25s; cursor:pointer; }
+  .project-card:hover{ box-shadow:var(--shadow-strong); transform:translateY(-3px); border-color:var(--blue-light); }
+  .project-card-head{ padding:14px 18px; background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid)); color:#fff; }
+  .project-card-head h5{ font-size:.95rem; font-weight:800; margin-bottom:4px; }
+  .project-card-head p{ font-size:.75rem; opacity:.85; }
+  .project-card-body{ padding:14px 18px; }
+  .file-list{ list-style:none; padding:0; }
+  .file-list li{ font-size:.78rem; padding:5px 0; border-bottom:1px solid var(--border-light); color:var(--blue-mid); font-family:'Fira Code',monospace; font-weight:500; display:flex; align-items:center; gap:8px; }
+  .file-list li:last-child{ border-bottom:none; }
+  .file-list li i{ color:var(--sky); font-size:.75rem; }
+  .file-list .iface-file{ color:#0e6b8a; font-style:italic; }
+
+  /* SOLID PILLS */
+  .solid-pills{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:12px 0; }
+  .solid-pill{ width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem; border:2px solid var(--border-light); background:var(--sky-pale); color:var(--blue-deep); transition:all .2s; }
+  .solid-pill.active{ background:var(--blue-deep); color:#fff; border-color:var(--blue-deep); box-shadow:var(--shadow); }
+
+  /* QUIZ */
+  .quiz-q{ font-size:.93rem; font-weight:700; color:var(--blue-deep); margin-bottom:14px; line-height:1.55; }
+  .quiz-opts{ display:flex; flex-direction:column; gap:8px; }
+  .quiz-opt{ background:#fff; border:1.5px solid var(--border-light); border-radius:10px; padding:11px 16px; cursor:pointer; transition:all .2s; font-size:.86rem; font-weight:600; color:var(--text-dark); display:flex; align-items:center; gap:10px; }
+  .quiz-opt:hover:not(.answered){ border-color:var(--blue-light); background:var(--sky-pale); }
+  .quiz-opt.correct{ background:#dcfce7; border-color:#15803d; color:#14532d; }
+  .quiz-opt.wrong{ background:#fee2e2; border-color:#b91c1c; color:#7f1d1d; }
+  .quiz-opt .opt-icon{ width:24px; height:24px; border-radius:50%; background:var(--sky-pale); border:1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:800; flex-shrink:0; }
+  .quiz-panel{ background:var(--sky-card); border:1.5px solid var(--border-light); border-radius:14px; padding:20px; }
+  .quiz-nav{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; }
+  .quiz-score{ font-size:.85rem; font-weight:700; color:var(--blue-mid); }
+  #quiz-result{ display:none; text-align:center; padding:20px; }
+  #quiz-result .score-big{ font-size:3rem; font-weight:900; color:var(--blue-deep); }
+
+  /* SCROLLBAR */
+  .slide::-webkit-scrollbar{ width:5px; }
+  .slide::-webkit-scrollbar-track{ background:transparent; }
+  .slide::-webkit-scrollbar-thumb{ background:var(--border-light); border-radius:10px; }
+
+  /* VERSION TABS */
+  .ver-tabs{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .ver-tab{ padding:5px 16px; border-radius:20px; font-size:.78rem; font-weight:800; border:1.5px solid var(--border-light); background:var(--sky-pale); color:var(--blue-deep); cursor:pointer; transition:all .2s; }
+  .ver-tab.active{ background:var(--blue-deep); color:#fff; border-color:var(--blue-deep); }
+  .ver-content{ display:none; }
+  .ver-content.active{ display:block; }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<div id="nav-header">
+  <div class="nav-brand">SOLID · <span>DIP</span> &nbsp;|&nbsp; Dependency Inversion Principle</div>
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()"><i class="fa fa-chevron-left"></i> Anterior</button>
+    <span class="slide-counter" id="slide-counter">1 / 11</span>
+    <button class="nav-btn" onclick="nextSlide()">Siguiente <i class="fa fa-chevron-right"></i></button>
+    <button class="nav-btn" onclick="showIndex()"><i class="fa fa-list"></i></button>
+  </div>
+</div>
+
+<div id="slides-wrapper">
+
+<!-- ══════════════════════════════════════
+     SLIDE 1 – PORTADA
+══════════════════════════════════════ -->
+<div class="slide active" id="slide-1">
+  <div class="cover-wrap animate__animated animate__fadeIn">
+    <div class="cover-badge"><i class="fa fa-layer-group me-2"></i>SOLID · Quinto Principio</div>
+    <h1 class="cover-title animate__animated animate__fadeInUp animate__delay-1s">
+      <span class="hl">D</span>ependency<br><span class="hl">I</span>nversion <span class="hl">P</span>rinciple
+    </h1>
+    <p class="cover-subtitle animate__animated animate__fadeInUp animate__delay-1s">
+      Las clases de alto nivel no deben depender de las de bajo nivel.<br>
+      <strong>Ambas deben depender de abstracciones.</strong>
+    </p>
+    <div class="solid-pills animate__animated animate__fadeInUp animate__delay-1s">
+      <div class="solid-pill" title="Single Responsibility">S</div>
+      <div class="solid-pill" title="Open/Closed">O</div>
+      <div class="solid-pill" title="Liskov Substitution">L</div>
+      <div class="solid-pill" title="Interface Segregation">I</div>
+      <div class="solid-pill active" title="Dependency Inversion">D</div>
+    </div>
+    <div class="cover-tags animate__animated animate__fadeInUp animate__delay-1s">
+      <span class="tag"><i class="fa fa-cubes me-1"></i>SOLID</span>
+      <span class="tag"><i class="fa fa-project-diagram me-1"></i>Abstracciones</span>
+      <span class="tag"><i class="fab fa-microsoft me-1"></i>C# / .NET</span>
+      <span class="tag"><i class="fa fa-code me-1"></i>VSCode</span>
+    </div>
+    <div class="cover-book animate__animated animate__fadeInUp animate__delay-1s">
+      <i class="fa fa-book-open me-2" style="color:var(--sky);"></i>
+      Basado en <strong>"Agile Principles, Patterns and Practices in C#"</strong><br>
+      Robert C. Martin &amp; Micah Martin, 2007
+    </div>
+    <div class="mt-3 animate__animated animate__fadeIn animate__delay-1s">
+      <small style="color:#6b8db5;"><i class="fa fa-keyboard me-1"></i> Navega con <kbd>←</kbd> <kbd>→</kbd> o los botones</small>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 2 – CONTEXTO SOLID
+══════════════════════════════════════ -->
+<div class="slide" id="slide-2">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-compass"></i></div>
+    Contexto – Los Principios SOLID
+  </div>
+
+  <div class="info-card animate__animated animate__fadeInLeft">
+    <div class="card-label"><i class="fa fa-history"></i> Origen</div>
+    <p>El término <strong>SOLID</strong> es un acrónimo mnemónico introducido por <strong>Robert C. Martin</strong> en su documento <em>"Design Principles and Design Patterns"</em>. Son cinco principios para diseños OO más comprensibles, flexibles y fáciles de mantener.</p>
+  </div>
+
+  <div class="cond-grid animate__animated animate__fadeIn">
+    <div class="cond-card">
+      <div class="cond-number" style="background:linear-gradient(135deg,#4a7ab5,#67c2f5);">S</div>
+      <h6>Single Responsibility</h6>
+      <p>Una clase debe tener una única razón para cambiar.</p>
+    </div>
+    <div class="cond-card">
+      <div class="cond-number" style="background:linear-gradient(135deg,#4a7ab5,#67c2f5);">O</div>
+      <h6>Open / Closed</h6>
+      <p>Abierto para extensión, cerrado para modificación.</p>
+    </div>
+    <div class="cond-card">
+      <div class="cond-number" style="background:linear-gradient(135deg,#4a7ab5,#67c2f5);">L</div>
+      <h6>Liskov Substitution</h6>
+      <p>Los subtipos deben poder sustituir a sus supertipos.</p>
+    </div>
+    <div class="cond-card">
+      <div class="cond-number" style="background:linear-gradient(135deg,#4a7ab5,#67c2f5);">I</div>
+      <h6>Interface Segregation</h6>
+      <p>Muchas interfaces específicas mejor que una general.</p>
+    </div>
+    <div class="cond-card" style="border-color:var(--blue-light);background:var(--sky-pale);">
+      <div class="cond-number">D</div>
+      <h6 style="color:var(--blue-deep);">Dependency Inversion</h6>
+      <p>Depender de abstracciones, no de clases concretas.</p>
+      <div class="mt-2"><span class="badge" style="background:var(--blue-light);color:#fff;font-size:.68rem;">← Este documento</span></div>
+    </div>
+  </div>
+
+  <div class="tip-box animate__animated animate__fadeIn">
+    <i class="fa fa-exclamation-triangle"></i>
+    <p>Martin identificó que una de las causas de los <strong>malos diseños</strong> son las <em>interdependencias indeseadas</em> entre clases, que producen <strong>rigidez</strong>, <strong>fragilidad</strong> e <strong>inmovilidad</strong>.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 3 – EL PROBLEMA
+══════════════════════════════════════ -->
+<div class="slide" id="slide-3">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-bug"></i></div>
+    El Problema – Interdependencias Indeseadas
+  </div>
+
+  <div class="alert-dip animate__animated animate__fadeInDown">
+    <i class="fa fa-link"></i>
+    <div>
+      <h6>Dependencia directa entre clases concretas</h6>
+      <p>Cuando una clase de <strong>alto nivel A</strong> depende directamente de una clase de <strong>bajo nivel B</strong>, surgen problemas graves que afectan la calidad del diseño.</p>
+    </div>
+  </div>
+
+  <div class="row g-3 animate__animated animate__fadeIn">
+    <div class="col-md-4">
+      <div class="cond-card" style="border-left:4px solid var(--red);">
+        <div class="cond-number" style="background:linear-gradient(135deg,#b91c1c,#ef4444);">
+          <i class="fa fa-lock"></i>
+        </div>
+        <h6 style="color:var(--red);">Rigidez</h6>
+        <p>El diseño es difícil de cambiar porque <strong>cada cambio afecta muchas partes</strong> del programa. Un cambio en B obliga a cambiar A.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="cond-card" style="border-left:4px solid #c05621;">
+        <div class="cond-number" style="background:linear-gradient(135deg,#c05621,#f97316);">
+          <i class="fa fa-shatter"></i>
+        </div>
+        <h6 style="color:#c05621;">Fragilidad</h6>
+        <p>Al hacer un cambio, <strong>partes inesperadas del programa dejan de funcionar</strong>, incluso en responsabilidades que A no consume directamente.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="cond-card" style="border-left:4px solid #6b21a8;">
+        <div class="cond-number" style="background:linear-gradient(135deg,#6b21a8,#a855f7);">
+          <i class="fa fa-anchor"></i>
+        </div>
+        <h6 style="color:#6b21a8;">Inmovilidad</h6>
+        <p>Es muy difícil <strong>reutilizar clases en otro programa</strong>, porque no pueden "desenredarse" del programa actual sin arrastrar a B.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3 animate__animated animate__fadeIn">
+    <div class="uml-wrap">
+      <h6><i class="fa fa-times-circle me-1" style="color:var(--red);"></i> Dependencia directa (MAL)</h6>
+      <svg viewBox="0 0 500 110" xmlns="http://www.w3.org/2000/svg" style="max-width:440px;width:100%;">
+        <!-- Clase A -->
+        <rect x="20" y="20" width="160" height="70" rx="8" fill="#fff" stroke="#1a5cbf" stroke-width="2"/>
+        <rect x="20" y="20" width="160" height="30" rx="8" fill="#0d3b7a"/>
+        <rect x="20" y="42" width="160" height="8" fill="#0d3b7a"/>
+        <text x="100" y="41" text-anchor="middle" font-family="Nunito" font-size="13" font-weight="800" fill="#fff">ClaseA</text>
+        <text x="100" y="70" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#1a5cbf">responsabilidades()</text>
+        <text x="100" y="84" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#6b8db5">alto nivel</text>
+        <!-- Arrow dashed -->
+        <line x1="184" y1="55" x2="298" y2="55" stroke="#b91c1c" stroke-width="2" stroke-dasharray="6,3"/>
+        <polygon points="298,55 288,50 288,60" fill="#b91c1c"/>
+        <text x="241" y="48" text-anchor="middle" font-family="Nunito" font-size="9" fill="#b91c1c" font-weight="700">«depende de»</text>
+        <!-- Clase B -->
+        <rect x="300" y="20" width="160" height="70" rx="8" fill="#fff" stroke="#b91c1c" stroke-width="2"/>
+        <rect x="300" y="20" width="160" height="30" rx="8" fill="#b91c1c"/>
+        <rect x="300" y="42" width="160" height="8" fill="#b91c1c"/>
+        <text x="380" y="41" text-anchor="middle" font-family="Nunito" font-size="13" font-weight="800" fill="#fff">ClaseB</text>
+        <text x="380" y="70" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#b91c1c">operaciones()</text>
+        <text x="380" y="84" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#6b8db5">bajo nivel</text>
+      </svg>
+      <p style="font-size:.75rem;color:var(--red);font-weight:700;margin-top:8px;"><i class="fa fa-exclamation-triangle me-1"></i>Cambios en B rompen A · A no puede reutilizarse sin B</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 4 – ENUNCIADO
+══════════════════════════════════════ -->
+<div class="slide" id="slide-4">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-scroll"></i></div>
+    Enunciado del DIP
+  </div>
+
+  <div class="row g-3 mb-3 animate__animated animate__fadeIn">
+    <div class="col-md-6">
+      <div class="info-card" style="border-left-color:var(--blue-deep);">
+        <div class="card-label"><i class="fa fa-arrow-up"></i> Regla 1 – Clases</div>
+        <p style="font-size:.95rem;font-weight:700;color:var(--blue-deep);">"Las clases de <em>alto nivel</em> no deben depender de clases de <em>bajo nivel</em>; <strong>ambas deben depender de abstracciones</strong>."</p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="info-card" style="border-left-color:var(--sky);">
+        <div class="card-label"><i class="fa fa-project-diagram"></i> Regla 2 – Abstracciones</div>
+        <p style="font-size:.95rem;font-weight:700;color:var(--blue-deep);">"Las <em>abstracciones</em> no deben depender de detalles; <strong>los detalles deben depender de abstracciones</strong>."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="uml-wrap animate__animated animate__fadeIn">
+    <h6><i class="fa fa-check-circle me-1" style="color:var(--green);"></i> Diseño con Inversión de Dependencias (BIEN)</h6>
+    <svg viewBox="0 0 600 170" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;width:100%;">
+      <!-- Interfaz / Abstracción B -->
+      <rect x="200" y="10" width="200" height="65" rx="8" fill="#fff" stroke="#0ea5e9" stroke-width="2.5"/>
+      <rect x="200" y="10" width="200" height="30" rx="8" fill="#0e6b8a"/>
+      <rect x="200" y="32" width="200" height="8" fill="#0e6b8a"/>
+      <text x="300" y="30" text-anchor="middle" font-family="Nunito" font-size="10" fill="#a5f3fc">«interface»</text>
+      <text x="300" y="46" text-anchor="middle" font-family="Nunito" font-size="13" font-weight="800" fill="#fff">«Abstracción B»</text>
+      <text x="300" y="67" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#0e6b8a">+ operacion(): void</text>
+      <!-- Clase A -->
+      <rect x="10" y="95" width="160" height="65" rx="8" fill="#fff" stroke="#1a5cbf" stroke-width="2"/>
+      <rect x="10" y="95" width="160" height="30" rx="8" fill="#0d3b7a"/>
+      <rect x="10" y="117" width="160" height="8" fill="#0d3b7a"/>
+      <text x="90" y="115" text-anchor="middle" font-family="Nunito" font-size="13" font-weight="800" fill="#fff">Clase A</text>
+      <text x="90" y="137" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#1a5cbf">usaAbstraccionB()</text>
+      <text x="90" y="151" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#6b8db5">alto nivel</text>
+      <!-- A → Abstracción (depende) -->
+      <line x1="170" y1="127" x2="230" y2="60" stroke="#1a5cbf" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <polygon points="230,60 218,65 222,54" fill="#1a5cbf"/>
+      <text x="175" y="90" font-family="Nunito" font-size="8.5" fill="#1a5cbf" font-weight="700">depende</text>
+      <!-- Clase B -->
+      <rect x="430" y="95" width="155" height="65" rx="8" fill="#fff" stroke="#15803d" stroke-width="2"/>
+      <rect x="430" y="95" width="155" height="30" rx="8" fill="#15803d"/>
+      <rect x="430" y="117" width="155" height="8" fill="#15803d"/>
+      <text x="507" y="115" text-anchor="middle" font-family="Nunito" font-size="13" font-weight="800" fill="#fff">Clase B</text>
+      <text x="507" y="137" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#15803d">operacion()</text>
+      <text x="507" y="151" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#6b8db5">bajo nivel</text>
+      <!-- B → Abstracción (implementa, triangle) -->
+      <line x1="430" y1="127" x2="372" y2="60" stroke="#15803d" stroke-width="1.5"/>
+      <polygon points="372,60 380,72 362,72" fill="#fff" stroke="#15803d" stroke-width="1.5"/>
+      <text x="415" y="90" font-family="Nunito" font-size="8.5" fill="#15803d" font-weight="700" text-anchor="middle">implementa</text>
+    </svg>
+    <p style="font-size:.75rem;color:var(--green);font-weight:700;margin-top:8px;"><i class="fa fa-check me-1"></i>A y B dependen de la abstracción · B puede cambiar sin afectar A</p>
+  </div>
+
+  <div class="tip-box animate__animated animate__fadeIn">
+    <i class="fa fa-lightbulb"></i>
+    <p>El principio <strong>no invierte la dirección de la dependencia</strong>; introduce una <em>abstracción</em> (interfaz o clase abstracta) de la que tanto A como B dependen, eliminando el vínculo directo entre ellas.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 5 – BENEFICIOS DEL NUEVO DISEÑO
+══════════════════════════════════════ -->
+<div class="slide" id="slide-5">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-check-double"></i></div>
+    Beneficios de Depender de Abstracciones
+  </div>
+
+  <div class="row g-3 animate__animated animate__fadeIn">
+    <div class="col-md-6">
+      <div class="info-card" style="border-left-color:var(--red);background:#fff8f8;">
+        <div class="card-label" style="color:var(--red);"><i class="fa fa-times-circle"></i> Sin DIP — A depende de B directamente</div>
+        <ul style="padding-left:18px;">
+          <li>Cambios en B <strong>obligan</strong> a cambiar A</li>
+          <li>Cambios en B, aunque A no los consuma, pueden <strong>romper A</strong></li>
+          <li>No es posible reutilizar A sin B</li>
+          <li>Tests unitarios de A requieren una instancia real de B</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="info-card" style="border-left-color:var(--green);background:#f0fdf4;">
+        <div class="card-label" style="color:var(--green);"><i class="fa fa-check-circle"></i> Con DIP — A depende de Abstracción</div>
+        <ul style="padding-left:18px;">
+          <li>B puede cambiar libremente <strong>sin afectar A</strong>, siempre que respete el contrato</li>
+          <li>Es más difícil que A deje de funcionar por cambios en B</li>
+          <li>A puede reutilizarse con <strong>cualquier clase</strong> que implemente la abstracción</li>
+          <li>Tests de A usan un <em>mock/stub</em> de la interfaz</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-flow mt-2 animate__animated animate__fadeIn">
+    <div class="step-item">
+      <div class="step-num"><i class="fa fa-puzzle-piece"></i></div>
+      <div class="step-content">
+        <h6>Las abstracciones en C# son interfaces y clases abstractas</h6>
+        <p>Tanto <code>interface</code> como <code>abstract class</code> pueden servir. Las interfaces son preferidas cuando no hay estado compartido.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><i class="fa fa-plug"></i></div>
+      <div class="step-content">
+        <h6>Permite inyectar dependencias</h6>
+        <p>DIP habilita el patrón <em>Dependency Injection</em>: en lugar de crear instancias dentro de la clase, se reciben por constructor o propiedad.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num"><i class="fa fa-flask"></i></div>
+      <div class="step-content">
+        <h6>Facilita las pruebas unitarias</h6>
+        <p>Al depender de una interfaz, podemos pasar objetos <em>mock</em> o <em>stub</em> durante los tests, sin necesidad de instanciar la clase concreta.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 6 – EJEMPLO v1: ConsolePrinter → Sale (MAL)
+══════════════════════════════════════ -->
+<div class="slide" id="slide-6">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-cash-register"></i></div>
+    Ejemplo – Punto de Venta v1 (Antes)
+  </div>
+
+  <div class="info-card animate__animated animate__fadeInLeft">
+    <div class="card-label"><i class="fa fa-info-circle"></i> Contexto</div>
+    <p>En la aplicación de punto de venta, <code>ConsolePrinter</code> y <code>FilePrinter</code> dependen directamente de la clase concreta <code>Sale</code> para obtener el texto del ticket. Esto viola DIP.</p>
+  </div>
+
+  <div class="compare-grid animate__animated animate__fadeIn">
+    <div class="compare-col">
+      <h6 class="bad-label"><i class="fa fa-times-circle me-1"></i> ConsolePrinter.cs — depende de Sale (MAL)</h6>
+      <div class="code-wrapper">
+        <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> ConsolePrinter.cs</span><span class="lang-badge">C#</span></div>
+        <pre><span class="kw">public class</span> <span class="cl">ConsolePrinter</span> : <span class="iface">IPrinter</span>
+{
+  <span class="cm">// Depende de clase concreta Sale ✗</span>
+  <span class="kw">public void</span> <span class="mth">PrintTicket</span>(<span class="cl">Sale</span> sale)
+  {
+    Console.<span class="mth">WriteLine</span>(sale.<span class="mth">GetTextToPrint</span>());
+  }
+}</pre>
+      </div>
+      <div class="code-wrapper mt-2">
+        <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> FilePrinter.cs</span><span class="lang-badge">C#</span></div>
+        <pre><span class="kw">public class</span> <span class="cl">FilePrinter</span> : <span class="iface">IPrinter</span>
+{
+  <span class="cm">// También depende de Sale ✗</span>
+  <span class="kw">public void</span> <span class="mth">PrintTicket</span>(<span class="cl">Sale</span> sale)
+  {
+    File.<span class="mth">WriteAllText</span>(<span class="str">"Ticket.txt"</span>,
+        sale.<span class="mth">GetTextToPrint</span>());
+  }
+}</pre>
+      </div>
+    </div>
+    <div class="compare-col">
+      <div class="uml-wrap mt-0">
+        <h6><i class="fa fa-times-circle me-1" style="color:var(--red);"></i> Diagrama v1</h6>
+        <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:310px;">
+          <!-- ConsolePrinter -->
+          <rect x="10" y="10" width="140" height="55" rx="7" fill="#fff" stroke="#1a5cbf" stroke-width="2"/>
+          <rect x="10" y="10" width="140" height="24" rx="7" fill="#0d3b7a"/>
+          <rect x="10" y="26" width="140" height="8" fill="#0d3b7a"/>
+          <text x="80" y="25" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#fff">ConsolePrinter</text>
+          <text x="80" y="45" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1a5cbf">PrintTicket(Sale)</text>
+          <text x="80" y="58" text-anchor="middle" font-family="Fira Code" font-size="8.5" fill="#b91c1c">depende de Sale ✗</text>
+          <!-- FilePrinter -->
+          <rect x="10" y="100" width="140" height="55" rx="7" fill="#fff" stroke="#1a5cbf" stroke-width="2"/>
+          <rect x="10" y="100" width="140" height="24" rx="7" fill="#0d3b7a"/>
+          <rect x="10" y="116" width="140" height="8" fill="#0d3b7a"/>
+          <text x="80" y="115" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#fff">FilePrinter</text>
+          <text x="80" y="135" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1a5cbf">PrintTicket(Sale)</text>
+          <text x="80" y="148" text-anchor="middle" font-family="Fira Code" font-size="8.5" fill="#b91c1c">depende de Sale ✗</text>
+          <!-- Sale -->
+          <rect x="185" y="50" width="120" height="65" rx="7" fill="#fff" stroke="#b91c1c" stroke-width="2"/>
+          <rect x="185" y="50" width="120" height="24" rx="7" fill="#b91c1c"/>
+          <rect x="185" y="66" width="120" height="8" fill="#b91c1c"/>
+          <text x="245" y="65" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#fff">Sale</text>
+          <text x="245" y="84" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#b91c1c">GetTextToPrint()</text>
+          <text x="245" y="108" text-anchor="middle" font-family="Fira Code" font-size="8" fill="#6b8db5">lineItems, Total...</text>
+          <!-- arrows dashed red -->
+          <line x1="152" y1="38" x2="185" y2="70" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <polygon points="185,70 177,63 188,62" fill="#b91c1c"/>
+          <line x1="152" y1="128" x2="185" y2="100" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <polygon points="185,100 177,107 188,108" fill="#b91c1c"/>
+        </svg>
+      </div>
+      <div class="info-card mt-2" style="border-left-color:var(--red);background:#fff5f5;">
+        <div class="card-label" style="color:var(--red);"><i class="fa fa-bug"></i> Problemas</div>
+        <p>Si <code>Sale</code> cambia, también deben cambiar <code>ConsolePrinter</code> y <code>FilePrinter</code>. No podemos reutilizar los printers con otras clases de contenido.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 7 – EJEMPLO v2: Introduciendo ISaleContent
+══════════════════════════════════════ -->
+<div class="slide" id="slide-7">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-project-diagram"></i></div>
+    Ejemplo – Introduciendo la Abstracción (v2)
+  </div>
+
+  <div class="info-card animate__animated animate__fadeInLeft">
+    <div class="card-label"><i class="fa fa-lightbulb"></i> Solución</div>
+    <p>Definimos la interfaz <code>ISaleContent</code> de la que dependerán <strong>tanto</strong> <code>ConsolePrinter</code> <strong>como</strong> <code>Sale</code>. Luego modificamos las firmas de los métodos y la clase <code>Sale</code> para que la implemente.</p>
+  </div>
+
+  <div class="compare-grid animate__animated animate__fadeIn">
+    <div class="compare-col">
+      <div class="code-wrapper">
+        <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> ISaleContent.cs — Nueva interfaz</span><span class="lang-badge">C#</span></div>
+        <pre><span class="cm">// Nueva abstracción</span>
+<span class="kw">public interface</span> <span class="iface">ISaleContent</span>
+{
+  <span class="kw">string</span> <span class="mth">GetTextToPrint</span>();
+}</pre>
+      </div>
+      <div class="code-wrapper mt-2">
+        <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> ConsolePrinter.cs (v2)</span><span class="lang-badge">C#</span></div>
+        <pre><span class="kw">public class</span> <span class="cl">ConsolePrinter</span> : <span class="iface">IPrinter</span>
+{
+  <span class="cm">// Ahora recibe ISaleContent ✓</span>
+  <span class="kw">public void</span> <span class="mth">PrintTicket</span>(
+      <span class="iface">ISaleContent</span> saleContent)
+  {
+    Console.<span class="mth">WriteLine</span>(
+        saleContent.<span class="mth">GetTextToPrint</span>());
+  }
+}</pre>
+      </div>
+      <div class="code-wrapper mt-2">
+        <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> Sale.cs (v2) — implementa ISaleContent</span><span class="lang-badge">C#</span></div>
+        <pre><span class="kw">public class</span> <span class="cl">Sale</span> : <span class="iface">ISaleContent</span>
+{
+  <span class="cm">// Implementa el contrato de la interfaz</span>
+  <span class="kw">public string</span> <span class="mth">GetTextToPrint</span>()
+  {
+    <span class="kw">string</span> result =
+        $<span class="str">"Fecha: {this.DateTime}\n"</span>;
+    <span class="kw">foreach</span> (<span class="cl">SalesLineItem</span> item
+             <span class="kw">in</span> <span class="kw">this</span>.lineItems)
+    {
+      result += item.<span class="mth">GetTextToPrint</span>();
+    }
+    result += $<span class="str">"Total: ${this.Total}"</span>;
+    <span class="kw">return</span> result;
+  }
+}</pre>
+      </div>
+    </div>
+    <div class="compare-col">
+      <div class="uml-wrap">
+        <h6><i class="fa fa-check-circle me-1" style="color:var(--green);"></i> Diagrama v2</h6>
+        <svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px;">
+          <!-- ISaleContent -->
+          <rect x="75" y="5" width="155" height="60" rx="7" fill="#fff" stroke="#0ea5e9" stroke-width="2.5"/>
+          <rect x="75" y="5" width="155" height="26" rx="7" fill="#0e6b8a"/>
+          <rect x="75" y="23" width="155" height="8" fill="#0e6b8a"/>
+          <text x="152" y="20" text-anchor="middle" font-family="Nunito" font-size="9" fill="#a5f3fc">«interface»</text>
+          <text x="152" y="35" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#fff">ISaleContent</text>
+          <text x="152" y="55" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#0e6b8a">+ GetTextToPrint(): string</text>
+          <!-- ConsolePrinter -->
+          <rect x="5" y="140" width="130" height="55" rx="7" fill="#fff" stroke="#1a5cbf" stroke-width="2"/>
+          <rect x="5" y="140" width="130" height="24" rx="7" fill="#0d3b7a"/>
+          <rect x="5" y="156" width="130" height="8" fill="#0d3b7a"/>
+          <text x="70" y="155" text-anchor="middle" font-family="Nunito" font-size="10" font-weight="800" fill="#fff">ConsolePrinter</text>
+          <text x="70" y="174" text-anchor="middle" font-family="Fira Code" font-size="8.5" fill="#1a5cbf">PrintTicket(ISaleContent)</text>
+          <text x="70" y="188" text-anchor="middle" font-family="Fira Code" font-size="8" fill="#6b8db5">alto nivel</text>
+          <!-- Sale -->
+          <rect x="165" y="140" width="125" height="55" rx="7" fill="#fff" stroke="#15803d" stroke-width="2"/>
+          <rect x="165" y="140" width="125" height="24" rx="7" fill="#15803d"/>
+          <rect x="165" y="156" width="125" height="8" fill="#15803d"/>
+          <text x="227" y="155" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#fff">Sale</text>
+          <text x="227" y="174" text-anchor="middle" font-family="Fira Code" font-size="8.5" fill="#15803d">GetTextToPrint()</text>
+          <text x="227" y="188" text-anchor="middle" font-family="Fira Code" font-size="8" fill="#6b8db5">implementa ↑</text>
+          <!-- ConsolePrinter → ISaleContent (dashed) -->
+          <line x1="70" y1="140" x2="120" y2="68" stroke="#1a5cbf" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="120,68 112,76 122,78" fill="#1a5cbf"/>
+          <!-- Sale → ISaleContent (implements, hollow triangle) -->
+          <line x1="227" y1="140" x2="185" y2="68" stroke="#15803d" stroke-width="1.5"/>
+          <polygon points="185,68 177,80 194,80" fill="#fff" stroke="#15803d" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="tip-box mt-2">
+        <i class="fa fa-check-circle"></i>
+        <p><code>Program</code> no necesita modificarse en esta versión — los cambios quedaron limitados a <code>ConsolePrinter</code>, <code>FilePrinter</code> y <code>Sale</code>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 8 – EJEMPLO v3: PlainSaleContent y MarkdownSaleContent
+══════════════════════════════════════ -->
+<div class="slide" id="slide-8">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-file-alt"></i></div>
+    Ejemplo – Nuevos Formatos sin Tocar los Printers (v3)
+  </div>
+
+  <div class="alert-dip animate__animated animate__fadeInDown" style="margin-bottom:12px;">
+    <i class="fa fa-magic"></i>
+    <div>
+      <h6>Flexibilidad total</h6>
+      <p>Podemos cambiar completamente cómo se imprime el ticket introduciendo <strong>nuevas clases de contenido</strong>, sin modificar <code>ConsolePrinter</code>, <code>FilePrinter</code> ni <code>Sale</code>.</p>
+    </div>
+  </div>
+
+  <div class="ver-tabs animate__animated animate__fadeIn" id="v3-tabs">
+    <div class="ver-tab active" onclick="showVer('plain')"><i class="fa fa-file-alt me-1"></i>PlainSaleContent</div>
+    <div class="ver-tab" onclick="showVer('markdown')"><i class="fab fa-markdown me-1"></i>MarkdownSaleContent</div>
+    <div class="ver-tab" onclick="showVer('program')"><i class="fa fa-terminal me-1"></i>Program.cs</div>
+  </div>
+
+  <div class="ver-content active animate__animated animate__fadeIn" id="ver-plain">
+    <div class="code-wrapper">
+      <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> PlainSaleContent.cs</span><span class="lang-badge">C#</span></div>
+      <pre><span class="kw">public class</span> <span class="cl">PlainSaleContent</span> : <span class="iface">ISaleContent</span>
+{
+  <span class="kw">private</span> <span class="cl">Sale</span> sale;
+
+  <span class="kw">public</span> <span class="cl">PlainSaleContent</span>(<span class="cl">Sale</span> sale)
+  { <span class="kw">this</span>.sale = sale; }
+
+  <span class="kw">public string</span> <span class="mth">GetTextToPrint</span>()
+  {
+    <span class="kw">string</span> result =
+        $<span class="str">"Fecha: {this.sale.DateTime}\n"</span>;
+    <span class="kw">foreach</span> (<span class="cl">SalesLineItem</span> item <span class="kw">in</span> <span class="kw">this</span>.sale)
+    {
+      result += item.<span class="mth">GetTextToPrint</span>();
+    }
+    result += $<span class="str">"Total: ${this.sale.Total}"</span>;
+    <span class="kw">return</span> result;
+  }
+}</pre>
+    </div>
+    <div class="tip-box">
+      <i class="fa fa-info-circle"></i>
+      <p><code>PlainSaleContent</code> implementa <code>ISaleContent</code> y <em>tiene una</em> instancia de <code>Sale</code> para acceder al contenido de la venta. Retorna el texto en formato plano.</p>
+    </div>
+  </div>
+
+  <div class="ver-content" id="ver-markdown">
+    <div class="code-wrapper">
+      <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> MarkdownSaleContent.cs</span><span class="lang-badge">C#</span></div>
+      <pre><span class="kw">public class</span> <span class="cl">MarkdownSaleContent</span> : <span class="iface">ISaleContent</span>
+{
+  <span class="kw">private</span> <span class="cl">Sale</span> sale;
+
+  <span class="kw">public</span> <span class="cl">MarkdownSaleContent</span>(<span class="cl">Sale</span> sale)
+  { <span class="kw">this</span>.sale = sale; }
+
+  <span class="kw">public string</span> <span class="mth">GetTextToPrint</span>()
+  {
+    <span class="kw">string</span> result =
+        $<span class="str">"Fecha: {this.sale.DateTime}\n"</span> +
+        <span class="str">"Qty|Prod|Price|\n"</span> +
+        <span class="str">"|---|:---------:|-----:|\n"</span>;
+
+    <span class="kw">foreach</span> (<span class="cl">SalesLineItem</span> item
+             <span class="kw">in</span> <span class="kw">this</span>.sale)
+    {
+      result += $<span class="str">"|{item.Quantity}"</span> +
+          $<span class="str">"|{item.Product.Description}"</span> +
+          $<span class="str">"|${item.Product.Price}|\n"</span>;
+    }
+    result += $<span class="str">"**Total: ${this.sale.Total}**"</span>;
+    <span class="kw">return</span> result;
+  }
+}</pre>
+    </div>
+    <div class="tip-box">
+      <i class="fab fa-markdown"></i>
+      <p><code>MarkdownSaleContent</code> retorna el contenido en formato <strong>Markdown</strong> (tablas, negrita) sin modificar ninguno de los printers existentes.</p>
+    </div>
+  </div>
+
+  <div class="ver-content" id="ver-program">
+    <div class="code-wrapper">
+      <div class="code-header"><span><i class="fab fa-microsoft me-1"></i> Program.cs — Usando los nuevos content</span><span class="lang-badge">C#</span></div>
+      <pre><span class="cl">IPrinter</span> consolePrinter = <span class="kw">new</span> <span class="cl">ConsolePrinter</span>();
+<span class="cl">IPrinter</span> filePrinter   = <span class="kw">new</span> <span class="cl">FilePrinter</span>(<span class="str">"Ticket.txt"</span>);
+
+<span class="cm">// v3: creamos el content y lo pasamos</span>
+<span class="iface">ISaleContent</span> saleContent =
+    <span class="kw">new</span> <span class="cl">PlainSaleContent</span>(sale);
+
+consolePrinter.<span class="mth">PrintTicket</span>(saleContent);
+filePrinter.<span class="mth">PrintTicket</span>(saleContent);
+
+<span class="cm">// Mismo printer, diferente formato!</span>
+filePrinter   = <span class="kw">new</span> <span class="cl">FilePrinter</span>(<span class="str">"Ticket.md"</span>);
+saleContent   = <span class="kw">new</span> <span class="cl">MarkdownSaleContent</span>(sale);
+
+consolePrinter.<span class="mth">PrintTicket</span>(saleContent);
+filePrinter.<span class="mth">PrintTicket</span>(saleContent);</pre>
+    </div>
+    <div class="tip-box">
+      <i class="fa fa-star"></i>
+      <p><code>ConsolePrinter</code> y <code>FilePrinter</code> <strong>no cambiaron</strong>. Solo se crearon nuevas clases de contenido. Esto es DIP en acción: extendemos el sistema sin modificar las clases existentes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 9 – RESUMEN VISUAL DIP
+══════════════════════════════════════ -->
+<div class="slide" id="slide-9">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-map"></i></div>
+    Resumen Visual – DIP Aplicado
+  </div>
+
+  <div class="uml-wrap animate__animated animate__fadeIn mb-3">
+    <h6><i class="fa fa-check-circle me-1" style="color:var(--green);"></i> Diagrama final v3 — Todo depende de ISaleContent</h6>
+    <svg viewBox="0 0 580 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;">
+      <!-- ISaleContent -->
+      <rect x="195" y="5" width="185" height="60" rx="7" fill="#fff" stroke="#0ea5e9" stroke-width="2.5"/>
+      <rect x="195" y="5" width="185" height="26" rx="7" fill="#0e6b8a"/>
+      <rect x="195" y="23" width="185" height="8" fill="#0e6b8a"/>
+      <text x="287" y="20" text-anchor="middle" font-family="Nunito" font-size="9" fill="#a5f3fc">«interface»</text>
+      <text x="287" y="36" text-anchor="middle" font-family="Nunito" font-size="12" font-weight="800" fill="#fff">ISaleContent</text>
+      <text x="287" y="57" text-anchor="middle" font-family="Fira Code" font-size="9.5" fill="#0e6b8a">+ GetTextToPrint(): string</text>
+      <!-- ConsolePrinter -->
+      <rect x="5" y="120" width="130" height="55" rx="7" fill="#fff" stroke="#1a5cbf" stroke-width="2"/>
+      <rect x="5" y="120" width="130" height="22" rx="7" fill="#0d3b7a"/>
+      <rect x="5" y="134" width="130" height="8" fill="#0d3b7a"/>
+      <text x="70" y="133" text-anchor="middle" font-family="Nunito" font-size="10" font-weight="800" fill="#fff">ConsolePrinter</text>
+      <text x="70" y="155" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1a5cbf">PrintTicket(ISaleContent)</text>
+      <text x="70" y="168" text-anchor="middle" font-family="Fira Code" font-size="8" fill="#6b8db5">depende ↑</text>
+      <!-- FilePrinter -->
+      <rect x="150" y="120" width="120" height="55" rx="7" fill="#fff" stroke="#1a5cbf" stroke-width="2"/>
+      <rect x="150" y="120" width="120" height="22" rx="7" fill="#0d3b7a"/>
+      <rect x="150" y="134" width="120" height="8" fill="#0d3b7a"/>
+      <text x="210" y="133" text-anchor="middle" font-family="Nunito" font-size="10" font-weight="800" fill="#fff">FilePrinter</text>
+      <text x="210" y="155" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1a5cbf">PrintTicket(ISaleContent)</text>
+      <text x="210" y="168" text-anchor="middle" font-family="Fira Code" font-size="8" fill="#6b8db5">depende ↑</text>
+      <!-- PlainSaleContent -->
+      <rect x="285" y="120" width="130" height="55" rx="7" fill="#fff" stroke="#15803d" stroke-width="2"/>
+      <rect x="285" y="120" width="130" height="22" rx="7" fill="#15803d"/>
+      <rect x="285" y="134" width="130" height="8" fill="#15803d"/>
+      <text x="350" y="133" text-anchor="middle" font-family="Nunito" font-size="9.5" font-weight="800" fill="#fff">PlainSaleContent</text>
+      <text x="350" y="155" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#15803d">GetTextToPrint()</text>
+      <text x="350" y="168" text-anchor="middle" font-family="Fira Code" font-size="8" fill="#6b8db5">implementa ↑</text>
+      <!-- MarkdownSaleContent -->
+      <rect x="428" y="120" width="145" height="55" rx="7" fill="#fff" stroke="#15803d" stroke-width="2"/>
+      <rect x="428" y="120" width="145" height="22" rx="7" fill="#15803d"/>
+      <rect x="428" y="134" width="145" height="8" fill="#15803d"/>
+      <text x="500" y="133" text-anchor="middle" font-family="Nunito" font-size="9" font-weight="800" fill="#fff">MarkdownSaleContent</text>
+      <text x="500" y="155" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#15803d">GetTextToPrint()</text>
+      <text x="500" y="168" text-anchor="middle" font-family="Fira Code" font-size="8" fill="#6b8db5">implementa ↑</text>
+      <!-- Arrows: printers dependen (dashed) -->
+      <line x1="70" y1="120" x2="220" y2="66" stroke="#1a5cbf" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <polygon points="220,66 210,73 218,62" fill="#1a5cbf"/>
+      <line x1="210" y1="120" x2="255" y2="66" stroke="#1a5cbf" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <polygon points="255,66 246,72 253,62" fill="#1a5cbf"/>
+      <!-- Arrows: implementations (hollow triangle) -->
+      <line x1="350" y1="120" x2="315" y2="66" stroke="#15803d" stroke-width="1.5"/>
+      <polygon points="315,66 308,76 324,76" fill="#fff" stroke="#15803d" stroke-width="1.5"/>
+      <line x1="500" y1="120" x2="362" y2="66" stroke="#15803d" stroke-width="1.5"/>
+      <polygon points="362,66 355,76 371,76" fill="#fff" stroke="#15803d" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <div class="row g-3 animate__animated animate__fadeIn">
+    <div class="col-md-6">
+      <div class="info-card" style="border-left-color:var(--green);background:#f0fdf4;">
+        <div class="card-label" style="color:var(--green);"><i class="fa fa-trophy"></i> Resultado</div>
+        <ul style="padding-left:18px;">
+          <li><code>ConsolePrinter</code> y <code>FilePrinter</code> nunca cambiaron</li>
+          <li><code>Sale</code> no necesitó modificarse en v3</li>
+          <li>Se agregaron dos formatos nuevos <strong>sin tocar nada existente</strong></li>
+          <li>Cualquier nueva clase que implemente <code>ISaleContent</code> funcionará</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="info-card">
+        <div class="card-label"><i class="fa fa-code-branch"></i> Versiones del ejemplo</div>
+        <ul style="padding-left:18px;">
+          <li><strong>v1:</strong> Printers dependen de <code>Sale</code> directamente ✗</li>
+          <li><strong>v2:</strong> Se introduce <code>ISaleContent</code>, <code>Sale</code> la implementa ✓</li>
+          <li><strong>v3:</strong> Nuevas clases de contenido, sin cambiar los printers ✓✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 10 – PROYECTOS DE EJEMPLO
+══════════════════════════════════════ -->
+<div class="slide" id="slide-10">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-th-large"></i></div>
+    Proyectos de Ejemplo con DIP en .NET / VSCode
+  </div>
+
+  <div class="row g-3 animate__animated animate__fadeIn">
+
+    <!-- PROYECTO 1: NOTIFICACIONES -->
+    <div class="col-md-4">
+      <div class="project-card h-100" onclick="showProj(1)">
+        <div class="project-card-head" style="background:linear-gradient(135deg,#0d3b7a,#3a90e0);">
+          <h5><i class="fa fa-bell me-2"></i>Proyecto 1 – Notificaciones</h5>
+          <p>Sistema de envío de notificaciones multi-canal</p>
+        </div>
+        <div class="project-card-body">
+          <ul class="file-list">
+            <li><i class="fa fa-file-code iface-file"></i><span class="iface-file">INotificationSender.cs</span></li>
+            <li><i class="fa fa-file-code"></i>EmailSender.cs</li>
+            <li><i class="fa fa-file-code"></i>SmsSender.cs</li>
+            <li><i class="fa fa-file-code"></i>PushSender.cs</li>
+            <li><i class="fa fa-file-code"></i>NotificationService.cs</li>
+            <li><i class="fa fa-file-code"></i>Program.cs</li>
+          </ul>
+          <div class="mt-3">
+            <div class="code-wrapper">
+              <div class="code-header"><span>INotificationSender.cs</span><span class="lang-badge">C#</span></div>
+              <pre style="font-size:.73rem;"><span class="kw">public interface</span> <span class="iface">INotificationSender</span>
+{
+  <span class="kw">void</span> <span class="mth">Send</span>(<span class="kw">string</span> to,
+           <span class="kw">string</span> message);
+}
+
+<span class="cm">// Alto nivel depende de la interfaz</span>
+<span class="kw">public class</span> <span class="cl">NotificationService</span>
+{
+  <span class="kw">private</span> <span class="iface">INotificationSender</span> _sender;
+
+  <span class="kw">public</span> <span class="cl">NotificationService</span>(
+      <span class="iface">INotificationSender</span> sender)
+  { _sender = sender; }
+
+  <span class="kw">public void</span> <span class="mth">Notify</span>(<span class="kw">string</span> to,
+                        <span class="kw">string</span> msg)
+      =&gt; _sender.<span class="mth">Send</span>(to, msg);
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROYECTO 2: REPORTES -->
+    <div class="col-md-4">
+      <div class="project-card h-100" onclick="showProj(2)">
+        <div class="project-card-head" style="background:linear-gradient(135deg,#0a4d8a,#0ea5e9);">
+          <h5><i class="fa fa-file-chart-bar me-2"></i>Proyecto 2 – Reportes</h5>
+          <p>Generador de reportes en múltiples formatos</p>
+        </div>
+        <div class="project-card-body">
+          <ul class="file-list">
+            <li><i class="fa fa-file-code iface-file"></i><span class="iface-file">IReportFormatter.cs</span></li>
+            <li><i class="fa fa-file-code"></i>HtmlFormatter.cs</li>
+            <li><i class="fa fa-file-code"></i>PdfFormatter.cs</li>
+            <li><i class="fa fa-file-code"></i>CsvFormatter.cs</li>
+            <li><i class="fa fa-file-code"></i>ReportGenerator.cs</li>
+            <li><i class="fa fa-file-code"></i>Program.cs</li>
+          </ul>
+          <div class="mt-3">
+            <div class="code-wrapper">
+              <div class="code-header"><span>ReportGenerator.cs</span><span class="lang-badge">C#</span></div>
+              <pre style="font-size:.73rem;"><span class="kw">public interface</span> <span class="iface">IReportFormatter</span>
+{
+  <span class="kw">string</span> <span class="mth">Format</span>(<span class="cl">ReportData</span> data);
+}
+
+<span class="cm">// Alto nivel: no importa el formato</span>
+<span class="kw">public class</span> <span class="cl">ReportGenerator</span>
+{
+  <span class="kw">private</span> <span class="iface">IReportFormatter</span> _fmt;
+
+  <span class="kw">public</span> <span class="cl">ReportGenerator</span>(
+      <span class="iface">IReportFormatter</span> formatter)
+  { _fmt = formatter; }
+
+  <span class="kw">public void</span> <span class="mth">Generate</span>(<span class="cl">ReportData</span> d)
+  {
+    <span class="kw">string</span> output = _fmt.<span class="mth">Format</span>(d);
+    Console.<span class="mth">WriteLine</span>(output);
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROYECTO 3: PAGOS -->
+    <div class="col-md-4">
+      <div class="project-card h-100" onclick="showProj(3)">
+        <div class="project-card-head" style="background:linear-gradient(135deg,#0d3b7a,#1a5cbf);">
+          <h5><i class="fa fa-credit-card me-2"></i>Proyecto 3 – Pagos</h5>
+          <p>Gateway de pagos con múltiples proveedores</p>
+        </div>
+        <div class="project-card-body">
+          <ul class="file-list">
+            <li><i class="fa fa-file-code iface-file"></i><span class="iface-file">IPaymentGateway.cs</span></li>
+            <li><i class="fa fa-file-code"></i>PayPalGateway.cs</li>
+            <li><i class="fa fa-file-code"></i>MercadoPagoGateway.cs</li>
+            <li><i class="fa fa-file-code"></i>StripeGateway.cs</li>
+            <li><i class="fa fa-file-code"></i>CheckoutService.cs</li>
+            <li><i class="fa fa-file-code"></i>Program.cs</li>
+          </ul>
+          <div class="mt-3">
+            <div class="code-wrapper">
+              <div class="code-header"><span>CheckoutService.cs</span><span class="lang-badge">C#</span></div>
+              <pre style="font-size:.73rem;"><span class="kw">public interface</span> <span class="iface">IPaymentGateway</span>
+{
+  <span class="kw">bool</span> <span class="mth">ProcessPayment</span>(
+      <span class="kw">decimal</span> amount,
+      <span class="kw">string</span> currency);
+}
+
+<span class="cm">// Alto nivel: desconoce el proveedor</span>
+<span class="kw">public class</span> <span class="cl">CheckoutService</span>
+{
+  <span class="kw">private</span> <span class="iface">IPaymentGateway</span> _gateway;
+
+  <span class="kw">public</span> <span class="cl">CheckoutService</span>(
+      <span class="iface">IPaymentGateway</span> gateway)
+  { _gateway = gateway; }
+
+  <span class="kw">public bool</span> <span class="mth">Checkout</span>(<span class="kw">decimal</span> total)
+      =&gt; _gateway.<span class="mth">ProcessPayment</span>(
+             total, <span class="str">"UYU"</span>);
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box mt-2 animate__animated animate__fadeIn">
+    <i class="fa fa-terminal"></i>
+    <p><strong>Crear proyecto:</strong> <code>dotnet new console -n NombreProyecto</code> &nbsp;→&nbsp; agrega tus archivos .cs &nbsp;→&nbsp; <code>dotnet run</code>. Cada interfaz y clase en su propio archivo.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SLIDE 11 – QUIZ
+══════════════════════════════════════ -->
+<div class="slide" id="slide-11">
+  <div class="slide-title">
+    <div class="icon-title"><i class="fa fa-brain"></i></div>
+    Quiz – Dependency Inversion Principle
+  </div>
+
+  <div id="quiz-container">
+    <div class="quiz-panel" id="quiz-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <span style="font-size:.75rem;font-weight:800;color:var(--blue-mid);">PREGUNTA <span id="q-num">1</span> DE 6</span>
+        <div style="display:flex;gap:4px;" id="q-dots"></div>
+      </div>
+      <div class="quiz-q" id="quiz-question"></div>
+      <div class="quiz-opts" id="quiz-options"></div>
+      <div class="quiz-nav">
+        <div class="quiz-score">Correctas: <strong id="score-val">0</strong></div>
+        <button class="nav-btn" id="next-q-btn" style="display:none;" onclick="nextQuestion()">Siguiente <i class="fa fa-arrow-right"></i></button>
+      </div>
+    </div>
+    <div id="quiz-result">
+      <div class="score-big" id="final-score"></div>
+      <div style="font-size:1rem;font-weight:700;color:var(--blue-mid);margin-bottom:16px;" id="result-msg"></div>
+      <button class="nav-btn" onclick="resetQuiz()" style="padding:10px 24px;font-size:.9rem;"><i class="fa fa-redo me-1"></i>Intentar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end slides-wrapper -->
+
+<div id="footer">
+  <span><i class="fab fa-microsoft me-1"></i>SOLID – DIP &nbsp;|&nbsp; Robert C. Martin</span>
+  <div class="footer-keys">
+    <span class="key-badge"><i class="fa fa-arrow-left"></i> Anterior</span>
+    <span class="key-badge">Siguiente <i class="fa fa-arrow-right"></i></span>
+    <span class="key-badge"><i class="fa fa-list"></i> Índice</span>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.11.0/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ── NAVIGATION ──
+let currentSlide = 1;
+const totalSlides = 11;
+
+function goToSlide(n) {
+  const prev = document.getElementById(`slide-${currentSlide}`);
+  if (prev) prev.classList.remove('active','animate__animated','animate__fadeIn');
+  currentSlide = Math.max(1, Math.min(n, totalSlides));
+  const next = document.getElementById(`slide-${currentSlide}`);
+  if (next) next.classList.add('active','animate__animated','animate__fadeIn');
+  document.getElementById('slide-counter').textContent = `${currentSlide} / ${totalSlides}`;
+  document.getElementById('progress-bar').style.width = ((currentSlide-1)/(totalSlides-1)*100) + '%';
+}
+const nextSlide = () => goToSlide(currentSlide+1);
+const prevSlide = () => goToSlide(currentSlide-1);
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') nextSlide();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') prevSlide();
+});
+goToSlide(1);
+
+// ── INDEX ──
+function showIndex() {
+  const slides = [
+    {n:1,  icon:'fa-home',          title:'Portada'},
+    {n:2,  icon:'fa-compass',       title:'Contexto SOLID'},
+    {n:3,  icon:'fa-bug',           title:'El Problema – Interdependencias'},
+    {n:4,  icon:'fa-scroll',        title:'Enunciado del DIP'},
+    {n:5,  icon:'fa-check-double',  title:'Beneficios de Abstracciones'},
+    {n:6,  icon:'fa-cash-register', title:'Ejemplo v1 – Antes (MAL)'},
+    {n:7,  icon:'fa-project-diagram','title':'Ejemplo v2 – Introduciendo ISaleContent'},
+    {n:8,  icon:'fa-file-alt',      title:'Ejemplo v3 – Nuevos Formatos'},
+    {n:9,  icon:'fa-map',           title:'Resumen Visual'},
+    {n:10, icon:'fa-th-large',      title:'Proyectos de Ejemplo .NET'},
+    {n:11, icon:'fa-brain',         title:'Quiz'},
+  ];
+  const html = slides.map(s =>
+    `<button class="btn btn-sm w-100 text-start mb-1 ${s.n===currentSlide?'btn-primary':'btn-outline-primary'}"
+      onclick="Swal.close();goToSlide(${s.n})">
+      <i class="fa ${s.icon} me-2"></i>${s.n}. ${s.title}
+    </button>`
+  ).join('');
+  Swal.fire({ title:'<span style="color:#0d3b7a;font-family:Nunito;font-weight:900;">Índice de Slides</span>', html:`<div style="font-family:Nunito;">${html}</div>`, showConfirmButton:false, showCloseButton:true, width:'400px' });
+}
+
+// ── VERSION TABS (Slide 8) ──
+function showVer(id) {
+  document.querySelectorAll('.ver-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ver-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`ver-${id}`).classList.add('active','animate__animated','animate__fadeIn');
+  event.target.classList.add('active');
+}
+
+// ── PROJECT DIALOGS ──
+const projData = {
+  1: {
+    title:'<i class="fa fa-bell me-2"></i>Proyecto 1 – Sistema de Notificaciones',
+    body:`<div style="font-family:Nunito;font-size:.83rem;text-align:left;">
+      <p style="color:#1a5cbf;font-weight:700;margin-bottom:8px;">DIP aplicado:</p>
+      <ul style="line-height:2.2;color:#0f1c2e;">
+        <li><code>NotificationService</code> depende de <code>INotificationSender</code></li>
+        <li><code>EmailSender</code>, <code>SmsSender</code>, <code>PushSender</code> implementan la interfaz</li>
+        <li>Para agregar WhatsApp: solo crear <code>WhatsAppSender : INotificationSender</code></li>
+        <li><code>NotificationService</code> no cambia nunca</li>
+      </ul>
+      <hr><code>dotnet new console -n NotificacionesApp</code>
+    </div>`
+  },
+  2: {
+    title:'<i class="fa fa-chart-bar me-2"></i>Proyecto 2 – Generador de Reportes',
+    body:`<div style="font-family:Nunito;font-size:.83rem;text-align:left;">
+      <p style="color:#1a5cbf;font-weight:700;margin-bottom:8px;">DIP aplicado:</p>
+      <ul style="line-height:2.2;color:#0f1c2e;">
+        <li><code>ReportGenerator</code> depende de <code>IReportFormatter</code></li>
+        <li><code>HtmlFormatter</code>, <code>PdfFormatter</code>, <code>CsvFormatter</code> implementan la interfaz</li>
+        <li>Para agregar formato JSON: solo crear <code>JsonFormatter : IReportFormatter</code></li>
+        <li><code>ReportGenerator</code> no cambia</li>
+      </ul>
+      <hr><code>dotnet new console -n ReportesApp</code>
+    </div>`
+  },
+  3: {
+    title:'<i class="fa fa-credit-card me-2"></i>Proyecto 3 – Gateway de Pagos',
+    body:`<div style="font-family:Nunito;font-size:.83rem;text-align:left;">
+      <p style="color:#1a5cbf;font-weight:700;margin-bottom:8px;">DIP aplicado:</p>
+      <ul style="line-height:2.2;color:#0f1c2e;">
+        <li><code>CheckoutService</code> depende de <code>IPaymentGateway</code></li>
+        <li><code>PayPalGateway</code>, <code>MercadoPagoGateway</code>, <code>StripeGateway</code> implementan la interfaz</li>
+        <li>Para agregar Visa: solo crear <code>VisaGateway : IPaymentGateway</code></li>
+        <li><code>CheckoutService</code> no cambia</li>
+      </ul>
+      <hr><code>dotnet new console -n PagosApp</code>
+    </div>`
+  }
+};
+function showProj(n) {
+  const d = projData[n];
+  Swal.fire({ title:`<span style="font-family:Nunito;color:#0d3b7a;font-size:.95rem;">${d.title}</span>`, html:d.body, confirmButtonText:'Entendido', confirmButtonColor:'#1a5cbf', width:'420px' });
+}
+
+// ── QUIZ ──
+const questions = [
+  {
+    q:'¿Cuál es la idea central del Dependency Inversion Principle?',
+    opts:['Las clases concretas deben heredar de otras concretas','Las clases de alto y bajo nivel deben depender de abstracciones, no entre sí','Solo las clases de bajo nivel deben cambiar','Las interfaces deben depender de las clases concretas'],
+    correct:1
+  },
+  {
+    q:'¿Por qué la dependencia directa de A sobre B causa "rigidez"?',
+    opts:['Porque A no puede tener métodos','Porque cada cambio en B obliga a cambiar A también','Porque B no puede ser instanciada','Porque A no puede ser compilada sin B en el mismo ensamblado'],
+    correct:1
+  },
+  {
+    q:'En el ejemplo del punto de venta, ¿qué elemento cumple el rol de "abstracción" que soluciona el problema?',
+    opts:['La clase Sale','La clase Program','La interfaz ISaleContent','La clase ConsolePrinter'],
+    correct:2
+  },
+  {
+    q:'En la versión v3 del ejemplo, se agregan PlainSaleContent y MarkdownSaleContent. ¿Qué clases NO necesitan modificarse?',
+    opts:['Solo Sale','Sale, ConsolePrinter y FilePrinter','Solo ISaleContent','Program y ISaleContent'],
+    correct:1
+  },
+  {
+    q:'En el Proyecto Pagos, si se quiere agregar soporte para Visa, ¿qué se debe hacer?',
+    opts:['Modificar CheckoutService para que conozca Visa','Modificar IPaymentGateway para agregar un método de Visa','Crear VisaGateway que implemente IPaymentGateway, sin tocar CheckoutService','Crear una nueva versión de CheckoutService específica para Visa'],
+    correct:2
+  },
+  {
+    q:'¿Cuál de los siguientes problemas NO resuelve DIP?',
+    opts:['Rigidez (cambios que se propagan)','Fragilidad (partes inesperadas que dejan de funcionar)','Inmovilidad (dificultad de reutilizar clases)','Lentitud en la ejecución del programa'],
+    correct:3
+  },
+];
+
+let qIndex=0, score=0, answered=false;
+
+function renderQuestion() {
+  const q = questions[qIndex];
+  document.getElementById('q-num').textContent = qIndex+1;
+  document.getElementById('quiz-question').textContent = q.q;
+  answered = false;
+  document.getElementById('next-q-btn').style.display = 'none';
+  const opts = document.getElementById('quiz-options');
+  opts.innerHTML = '';
+  ['A','B','C','D'].forEach((l,i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-opt';
+    btn.innerHTML = `<div class="opt-icon">${l}</div><span>${q.opts[i]}</span>`;
+    btn.onclick = () => checkAnswer(i, btn);
+    opts.appendChild(btn);
+  });
+  document.getElementById('q-dots').innerHTML = questions.map((_,i) =>
+    `<div style="width:10px;height:10px;border-radius:50%;background:${i<qIndex?'var(--blue-light)':i===qIndex?'var(--blue-deep)':'var(--border-light)'};"></div>`
+  ).join('');
+}
+
+function checkAnswer(idx, btn) {
+  if(answered) return;
+  answered = true;
+  const q = questions[qIndex];
+  document.querySelectorAll('.quiz-opt').forEach(o => o.classList.add('answered'));
+  if(idx===q.correct) {
+    btn.classList.add('correct');
+    btn.querySelector('.opt-icon').innerHTML = '<i class="fa fa-check"></i>';
+    score++;
+    document.getElementById('score-val').textContent = score;
+    Swal.fire({ toast:true, position:'top-end', icon:'success', title:'¡Correcto!', showConfirmButton:false, timer:1200, timerProgressBar:true });
+  } else {
+    btn.classList.add('wrong');
+    btn.querySelector('.opt-icon').innerHTML = '<i class="fa fa-times"></i>';
+    document.querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');
+    document.querySelectorAll('.quiz-opt')[q.correct].querySelector('.opt-icon').innerHTML = '<i class="fa fa-check"></i>';
+    Swal.fire({ toast:true, position:'top-end', icon:'error', title:'Incorrecto', showConfirmButton:false, timer:1400, timerProgressBar:true });
+  }
+  document.getElementById('next-q-btn').style.display = qIndex<questions.length-1 ? 'block' : 'none';
+  if(qIndex===questions.length-1) setTimeout(showResult, 1600);
+}
+
+function nextQuestion() { qIndex++; renderQuestion(); }
+
+function showResult() {
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('quiz-result').style.display='block';
+  const pct = Math.round((score/questions.length)*100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  const msgs = [[0,49,'Repasá el enunciado y los ejemplos de DIP 💪'],[50,74,'¡Casi! Revisá la diferencia entre rigidez, fragilidad e inmovilidad 🔍'],[75,89,'¡Muy bien! Dominás los conceptos de DIP 👏'],[90,100,'¡Perfecto! DIP completamente dominado 🏆']];
+  document.getElementById('result-msg').textContent = (msgs.find(([lo,hi]) => pct>=lo&&pct<=hi)||[])[2] || '';
+  if(pct===100) Swal.fire({ title:'🏆 ¡Excelente!', text:'Respondiste todo correctamente. Dominás DIP.', icon:'success', confirmButtonColor:'#1a5cbf' });
+}
+
+function resetQuiz() {
+  qIndex=0; score=0; answered=false;
+  document.getElementById('score-val').textContent='0';
+  document.getElementById('quiz-panel').style.display='block';
+  document.getElementById('quiz-result').style.display='none';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

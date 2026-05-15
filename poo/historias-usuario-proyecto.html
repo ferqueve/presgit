@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programación II - Historias de Usuario del Proyecto</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    :root {
+      --bg-main: #101828;
+      --bg-card: #182230;
+      --accent: #7c3aed;
+      --accent-2: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --code-bg: #0b1220;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #27364f, var(--bg-main) 45%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .slide {
+      min-height: calc(100vh - 76px);
+      display: none;
+      align-items: center;
+      padding: 3rem 0;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    .slide-card {
+      background: rgba(24, 34, 48, 0.9);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+      padding: 2.4rem;
+    }
+
+    .badge-topic {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-size: 0.9rem;
+      padding: 0.55rem 0.8rem;
+      border-radius: 999px;
+    }
+
+    .big-icon {
+      font-size: 4rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .muted {
+      color: var(--text-muted);
+    }
+
+    .step-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      padding: 1rem;
+      height: 100%;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 1rem;
+      font-size: 0.92rem;
+      overflow-x: auto;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .code-block code {
+      white-space: pre;
+    }
+
+    .nav-buttons {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .nav-buttons .container {
+      pointer-events: auto;
+    }
+
+    .btn-glow {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none;
+      color: white;
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.35);
+    }
+
+    .btn-glow:hover {
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .progress {
+      height: 8px;
+      background-color: rgba(255,255,255,0.08);
+    }
+
+    .progress-bar {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .mini-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 1.2rem;
+    }
+
+    .table-dark-custom {
+      --bs-table-bg: rgba(255,255,255,0.04);
+      --bs-table-color: #f8fafc;
+      --bs-table-border-color: rgba(255,255,255,0.12);
+    }
+
+    .footer-space {
+      height: 100px;
+    }
+
+    .hu-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      font-weight: 800;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .hu-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      height: 100%;
+      transition: border-color 0.2s;
+    }
+
+    .hu-card:hover {
+      border-color: rgba(124, 58, 237, 0.45);
+    }
+
+    .hu-card .hu-content h6 {
+      margin: 0 0 0.2rem 0;
+      font-weight: 700;
+    }
+
+    .hu-card .hu-content p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .criterio-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .criterio-item i {
+      margin-top: 2px;
+      flex-shrink: 0;
+      color: #06b6d4;
+    }
+
+    .group-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 0.8rem;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border-left: 3px solid var(--accent);
+    }
+
+    .timeline-date {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #06b6d4;
+      white-space: nowrap;
+      min-width: 90px;
+    }
+
+    .strategy-pill {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin: 0.2rem;
+    }
+
+    .pill-purple { background: rgba(124,58,237,0.3); border: 1px solid rgba(124,58,237,0.5); }
+    .pill-cyan   { background: rgba(6,182,212,0.3);  border: 1px solid rgba(6,182,212,0.5); }
+    .pill-green  { background: rgba(34,197,94,0.3);  border: 1px solid rgba(34,197,94,0.5); }
+    .pill-amber  { background: rgba(245,158,11,0.3); border: 1px solid rgba(245,158,11,0.5); }
+
+    @media (max-width: 768px) {
+      .slide-card { padding: 1.4rem; }
+      .slide { padding: 1.5rem 0; }
+      h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+  <div class="container">
+    <span class="navbar-brand fw-bold">
+      <i class="fa-solid fa-list-check me-2"></i>Programación II · Historias de Usuario
+    </span>
+    <div class="d-flex align-items-center gap-3">
+      <span id="slideCounter" class="small muted">1 / 15</span>
+      <button class="btn btn-sm btn-outline-light" onclick="showHelp()">
+        <i class="fa-solid fa-circle-question me-1"></i>Ayuda
+      </button>
+    </div>
+  </div>
+  <div class="progress position-absolute bottom-0 start-0 w-100 rounded-0">
+    <div id="progressBar" class="progress-bar" style="width: 6.6%"></div>
+  </div>
+</nav>
+
+<main class="container">
+
+  <!-- ===================== SLIDE 1: PORTADA ===================== -->
+  <section class="slide active">
+    <div class="slide-card w-100 animate__animated animate__fadeIn">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span class="badge-topic mb-3 d-inline-block">
+            <i class="fa-solid fa-robot me-1"></i> Proyecto 2026 · Primer semestre
+          </span>
+          <h1 class="display-4 fw-bold">Las Historias de Usuario del proyecto</h1>
+          <p class="lead muted mt-3">
+            16 historias de usuario que definen <em>qué</em> debe hacer el sistema de recomendaciones para un chatbot.
+          </p>
+          <p>
+            Hoy vamos a recorrerlas juntos: qué significan, qué pide cada una y cómo se relacionan entre sí.
+          </p>
+          <button class="btn btn-glow btn-lg mt-3" onclick="startClass()">
+            <i class="fa-solid fa-play me-2"></i>Comenzar
+          </button>
+        </div>
+        <div class="col-lg-5 text-center">
+          <i class="fa-solid fa-comments big-icon animate__animated animate__pulse animate__infinite"></i>
+          <h3 class="mt-4">¿Qué necesita el usuario?</h3>
+          <p class="muted">Antes de escribir código, hay que entender para quién y para qué.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 2: ¿QUÉ ES UNA HU? ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-book-open me-1"></i> Conceptos
+      </span>
+      <h2 class="fw-bold mb-4">¿Qué es una Historia de Usuario?</h2>
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-6">
+          <div class="mini-card">
+            <h5 class="mb-3"><i class="fa-solid fa-quote-left me-2 text-warning"></i>Formato estándar</h5>
+            <p class="fs-5 mb-0">
+              <strong>Como</strong> [tipo de usuario]<br>
+              <strong>quiero</strong> [hacer algo]<br>
+              <strong>para</strong> [obtener un beneficio].
+            </p>
+          </div>
+          <div class="mini-card mt-3">
+            <h5 class="mb-3"><i class="fa-solid fa-magnifying-glass me-2 text-info"></i>Ejemplo concreto</h5>
+            <p class="mb-0">
+              <strong>Como</strong> usuario<br>
+              <strong>quiero</strong> registrarme<br>
+              <strong>para</strong> poder utilizar el sistema.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <p class="group-label mb-2">¿Para qué sirven?</p>
+          <div class="criterio-item"><i class="fa-solid fa-check-circle"></i> Describen funcionalidad desde el punto de vista del usuario.</div>
+          <div class="criterio-item"><i class="fa-solid fa-check-circle"></i> No dicen <em>cómo</em> implementar, sino <em>qué</em> se necesita.</div>
+          <div class="criterio-item"><i class="fa-solid fa-check-circle"></i> Cada historia tiene <strong>criterios de aceptación</strong>: condiciones que deben cumplirse para considerarla terminada.</div>
+          <div class="criterio-item"><i class="fa-solid fa-check-circle"></i> Son la base para los <strong>casos de prueba</strong>.</div>
+          <div class="alert alert-info mt-3 mb-0">
+            <i class="fa-solid fa-lightbulb me-2"></i>
+            En la segunda entrega, cada historia deberá estar implementada y validada con casos de prueba usando la fachada.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 3: MAPA GENERAL ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-map me-1"></i> Panorama general
+      </span>
+      <h2 class="fw-bold mb-3">Las 16 historias de un vistazo</h2>
+      <div class="row g-2">
+        <div class="col-12 mb-1"><p class="group-label">Gestión de usuarios y datos</p></div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU1</div><div class="hu-content"><h6>Registrarme</h6><p>Crear una cuenta en el sistema.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU2</div><div class="hu-content"><h6>Mis preferencias</h6><p>Indicar qué me gusta.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU10</div><div class="hu-content"><h6>Registrar interacciones</h6><p>Guardar lo que consumí.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU11</div><div class="hu-content"><h6>Likes / Dislikes</h6><p>Marcar si algo me gustó.</p></div></div>
+        </div>
+        <div class="col-12 mt-2 mb-1"><p class="group-label">Recomendaciones</p></div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU3</div><div class="hu-content"><h6>Ver recomendaciones</h6><p>Lista de sugerencias ordenadas.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU4</div><div class="hu-content"><h6>Por historial</h6><p>Basadas en lo que ya consumí.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU5</div><div class="hu-content"><h6>Por preferencias</h6><p>Según mis géneros favoritos.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU6</div><div class="hu-content"><h6>Usuarios similares</h6><p>Lo que consumen otros como yo.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU7</div><div class="hu-content"><h6>Popularidad</h6><p>Para usuarios sin historial.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU15</div><div class="hu-content"><h6>Contenido relacionado</h6><p>Parecido a algo que consumí.</p></div></div>
+        </div>
+        <div class="col-12 mt-2 mb-1"><p class="group-label">Filtros, historial y administración</p></div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU8</div><div class="hu-content"><h6>Filtrar resultados</h6><p>Excluir por atributos.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU9</div><div class="hu-content"><h6>Ordenar</h6><p>Por score o relevancia.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU12</div><div class="hu-content"><h6>Ver historial</h6><p>Lo que ya consumí.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU13</div><div class="hu-content"><h6>No repetir</h6><p>No sugerir lo ya consumido.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU14</div><div class="hu-content"><h6>Guardar para después</h6><p>Lista personal de guardados.</p></div></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="hu-card"><div class="hu-badge">HU16</div><div class="hu-content"><h6>Admin: eliminar ítems</h6><p>Mantener el catálogo.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 4: HU1 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-user-plus me-1"></i> HU1
+      </span>
+      <h2 class="fw-bold mb-1">Registrarme en el sistema</h2>
+      <p class="lead muted mb-4">Como usuario quiero registrarme para poder utilizar el sistema.</p>
+
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="mini-card">
+            <h5 class="mb-3"><i class="fa-solid fa-list-ul me-2"></i>Criterios de aceptación</h5>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Ingresando mis datos se crea una cuenta válida.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El sistema valida que el usuario no exista previamente.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El usuario queda habilitado para usar el sistema.</div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="mini-card">
+            <h5 class="mb-3"><i class="fa-solid fa-chalkboard me-2"></i>¿Qué implica en el código?</h5>
+            <p class="muted">El sistema necesita una lista (o repositorio) de usuarios y un método para agregar uno nuevo.</p>
+            <div class="code-block mt-2"><code>// En la fachada o repositorio:
+bool RegistrarUsuario(string nombre, string email);
+
+// Antes de registrar, verificar:
+bool yaExiste = BuscarPorEmail(email) != null;
+if (yaExiste) return false;</code></div>
+          </div>
+          <div class="alert alert-warning mt-3 mb-0">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            No se puede registrar dos veces el mismo usuario. Definir por cuál campo se identifica (email, nombre, etc.).
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 5: HU2 y HU10 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-sliders me-1"></i> HU2 · HU10
+      </span>
+      <h2 class="fw-bold mb-1">Preferencias e Interacciones</h2>
+      <p class="lead muted mb-4">Dos formas de enriquecer el perfil de un usuario.</p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU2</div>
+              <h5 class="mb-0">Definir preferencias</h5>
+            </div>
+            <p class="muted">El usuario selecciona atributos que le interesan: género musical, categoría, temática, etc.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Puede elegir uno o más atributos.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Las preferencias quedan almacenadas.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Las recomendaciones las tienen en cuenta.</div>
+            <div class="code-block mt-3"><code>// Ejemplo:
+usuario.Preferencias = new List&lt;string&gt;
+    { "rock", "pop" };</code></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU10</div>
+              <h5 class="mb-0">Registrar interacciones</h5>
+            </div>
+            <p class="muted">Cada vez que el usuario consume un ítem (reproduce, visualiza, compra), eso se guarda en su historial.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Cada consumo genera una interacción.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Las interacciones se almacenan en el historial.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El sistema usa ese historial para recomendar.</div>
+            <div class="code-block mt-3"><code>// Ejemplo:
+usuario.HistorialIds.Add(cancionId);</code></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info mt-4 mb-0">
+        <i class="fa-solid fa-circle-info me-2"></i>
+        <strong>Diferencia clave:</strong> las <em>preferencias</em> las declara el usuario; las <em>interacciones</em> se generan automáticamente con el uso.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 6: HU3 y HU9 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-list-ol me-1"></i> HU3 · HU9
+      </span>
+      <h2 class="fw-bold mb-1">Ver y ordenar recomendaciones</h2>
+      <p class="lead muted mb-4">La lista final que el usuario recibe siempre debe estar ordenada.</p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU3</div>
+              <h5 class="mb-0">Ver recomendaciones</h5>
+            </div>
+            <p class="muted">El sistema presenta una lista de ítems sugeridos con información básica de cada uno.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Muestra una lista de ítems recomendados.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Tiene al menos un criterio de orden.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Cada ítem muestra su nombre y atributos relevantes.</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU9</div>
+              <h5 class="mb-0">Ordenar por criterio</h5>
+            </div>
+            <p class="muted">Las recomendaciones no se muestran en cualquier orden: el sistema define cómo rankearlas.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Existe un criterio de orden definido (score, popularidad…).</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Los resultados se presentan ordenados.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Cambiar el criterio modifica el orden.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-card mt-4">
+        <h6 class="mb-2"><i class="fa-solid fa-sort-amount-down me-2 text-info"></i>Posibles criterios de ordenamiento</h6>
+        <span class="strategy-pill pill-purple">Score de coincidencia</span>
+        <span class="strategy-pill pill-cyan">Popularidad (más consumido)</span>
+        <span class="strategy-pill pill-green">Más reciente</span>
+        <span class="strategy-pill pill-amber">Orden alfabético</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 7: HU4 y HU5 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> HU4 · HU5
+      </span>
+      <h2 class="fw-bold mb-1">Estrategias de recomendación (1/3)</h2>
+      <p class="lead muted mb-4">Dos de las formas en que el sistema decide qué recomendar.</p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU4</div>
+              <h5 class="mb-0">Por historial</h5>
+            </div>
+            <p class="muted">El sistema analiza lo que el usuario consumió y sugiere contenido parecido a eso.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Usa las interacciones previas del usuario.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Genera sugerencias distintas a lo ya consumido.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Cambiar el historial afecta las recomendaciones.</div>
+            <div class="alert alert-secondary mt-3 mb-0" style="font-size:0.85rem">
+              Ej.: si escuché muchas canciones de rock, el sistema infiere que me gusta el rock.
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU5</div>
+              <h5 class="mb-0">Por preferencias declaradas</h5>
+            </div>
+            <p class="muted">El sistema compara los atributos de los ítems contra lo que el usuario dijo que le gusta.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Usa los atributos definidos en preferencias.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Las recomendaciones coinciden con al menos una preferencia.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Cambiar preferencias modifica los resultados.</div>
+            <div class="alert alert-secondary mt-3 mb-0" style="font-size:0.85rem">
+              Es la estrategia más sencilla de implementar: comparar listas de strings.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 8: HU6 y HU7 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-users me-1"></i> HU6 · HU7
+      </span>
+      <h2 class="fw-bold mb-1">Estrategias de recomendación (2/3)</h2>
+      <p class="lead muted mb-4">Para usuarios con historial vs. usuarios nuevos.</p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU6</div>
+              <h5 class="mb-0">Usuarios similares</h5>
+            </div>
+            <p class="muted">Filtrado colaborativo: "si a personas parecidas a mí les gustó X, probablemente a mí también."</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Identifica usuarios con comportamiento similar.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Recomienda ítems consumidos por esos usuarios.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Excluye lo que el usuario ya consumió.</div>
+            <div class="mini-card mt-3" style="font-size:0.85rem">
+              <i class="fa-solid fa-lightbulb me-2 text-warning"></i>
+              ¿Cómo definir "similar"? Por ejemplo: usuarios que compartieron al menos N ítems en su historial.
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU7</div>
+              <h5 class="mb-0">Popularidad / Tendencias</h5>
+            </div>
+            <p class="muted">Para un usuario nuevo que no tiene historial ni preferencias, el sistema no puede "fallar": usa lo más popular.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Si el usuario no tiene historial, usa una estrategia alternativa.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Muestra ítems populares o recientes.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El sistema no falla ante ausencia de datos.</div>
+            <div class="alert alert-warning mt-3 mb-0" style="font-size:0.85rem">
+              <i class="fa-solid fa-triangle-exclamation me-2"></i>
+              Este caso se llama <em>cold start</em>. Hay que contemplarlo siempre.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 9: HU15 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-link me-1"></i> HU15
+      </span>
+      <h2 class="fw-bold mb-1">Estrategias de recomendación (3/3)</h2>
+      <p class="lead muted mb-4">Contenido relacionado a algo que ya consumí.</p>
+
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-6">
+          <div class="mini-card">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU15</div>
+              <h5 class="mb-0">Recomendaciones relacionadas</h5>
+            </div>
+            <p class="muted">"Escuché esta canción y quiero más canciones parecidas a esta."</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El sistema identifica los atributos del ítem base.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Recomienda ítems con atributos similares.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El resultado cambia según el ítem seleccionado.</div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="mini-card">
+            <h6 class="mb-3"><i class="fa-solid fa-diagram-project me-2 text-info"></i>Resumen de las 5 estrategias</h6>
+            <div class="criterio-item"><i class="fa-solid fa-tag text-purple"></i><strong style="min-width:180px;display:inline-block">Por preferencias (HU5)</strong> Atributos vs. gustos declarados.</div>
+            <div class="criterio-item"><i class="fa-solid fa-clock text-cyan"></i><strong style="min-width:180px;display:inline-block">Por historial (HU4)</strong> Basada en lo ya consumido.</div>
+            <div class="criterio-item"><i class="fa-solid fa-users text-green"></i><strong style="min-width:180px;display:inline-block">Colaborativa (HU6)</strong> Usuarios similares.</div>
+            <div class="criterio-item"><i class="fa-solid fa-fire text-amber"></i><strong style="min-width:180px;display:inline-block">Popularidad (HU7)</strong> Para cold start.</div>
+            <div class="criterio-item"><i class="fa-solid fa-link text-info"></i><strong style="min-width:180px;display:inline-block">Relacionadas (HU15)</strong> Parecidas a un ítem puntual.</div>
+          </div>
+          <div class="alert alert-primary mt-3 mb-0" style="font-size:0.85rem">
+            <i class="fa-solid fa-puzzle-piece me-2"></i>
+            El motor debe poder cambiar de estrategia sin modificar su estructura interna. ¡Piensen en el patrón Strategy!
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 10: HU8 y HU13 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-filter me-1"></i> HU8 · HU13
+      </span>
+      <h2 class="fw-bold mb-1">Filtros sobre las recomendaciones</h2>
+      <p class="lead muted mb-4">No todo lo que genera el motor llega al usuario: hay filtros que depuran la lista.</p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU8</div>
+              <h5 class="mb-0">Filtrar por atributo</h5>
+            </div>
+            <p class="muted">El usuario puede decir "no me muestres contenido de X género" o "excluí este tipo de ítem".</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El usuario define filtros por atributo.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Los ítems que cumplen el filtro son excluidos.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El sistema aplica los filtros antes de mostrar.</div>
+            <div class="code-block mt-3"><code>// Ejemplo: excluir género "reggaeton"
+if (item.Atributos.Contains("reggaeton"))
+    continue;</code></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU13</div>
+              <h5 class="mb-0">No repetir consumidos</h5>
+            </div>
+            <p class="muted">Nunca se debe recomendar algo que el usuario ya consumió. Este filtro es automático y siempre activo.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Excluye ítems del historial del usuario.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> No aparecen duplicados en recomendaciones.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El filtro se aplica automáticamente.</div>
+            <div class="code-block mt-3"><code>// Ya implementado en el motor base:
+if (usuario.HistorialIds.Contains(item.Id))
+    continue;</code></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info mt-4 mb-0">
+        <i class="fa-solid fa-layer-group me-2"></i>
+        Los filtros se aplican <strong>después</strong> de generar las recomendaciones y <strong>antes</strong> de ordenarlas.
+        El orden lógico es: <strong>Generar → Filtrar → Ordenar → Mostrar</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 11: HU11 y HU12 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-heart me-1"></i> HU11 · HU12
+      </span>
+      <h2 class="fw-bold mb-1">Valoraciones e historial visible</h2>
+      <p class="lead muted mb-4">El usuario tiene control sobre lo que le gustó y puede ver lo que ya consumió.</p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU11</div>
+              <h5 class="mb-0">Me gusta / No me gusta</h5>
+            </div>
+            <p class="muted">El usuario puede indicar su valoración de un ítem. Esto es distinto a simplemente haberlo consumido.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Puede marcar un ítem como "me gusta" o "no me gusta".</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Esta información afecta futuras recomendaciones.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El sistema diferencia consumo de valoración.</div>
+            <div class="mini-card mt-3" style="font-size:0.85rem">
+              <i class="fa-solid fa-lightbulb me-2 text-warning"></i>
+              Una <strong>Interaccion</strong> podría tener un campo <em>tipo</em> con valores como: <code>REPRODUCCION</code>, <code>LIKE</code>, <code>DISLIKE</code>.
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU12</div>
+              <h5 class="mb-0">Ver mi historial</h5>
+            </div>
+            <p class="muted">El usuario puede consultar en cualquier momento los ítems que ya consumió.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El usuario puede consultar su historial.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El historial muestra los ítems consumidos.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Se actualiza automáticamente con cada consumo.</div>
+            <div class="code-block mt-3"><code>// Obtener historial del usuario:
+List&lt;IRecomendable&gt; ObtenerHistorial(Usuario u,
+    List&lt;IRecomendable&gt; catalogo);</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 12: HU14 y HU16 ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-bookmark me-1"></i> HU14 · HU16
+      </span>
+      <h2 class="fw-bold mb-1">Guardados y administración</h2>
+      <p class="lead muted mb-4">Funciones adicionales para el usuario y para el administrador del sistema.</p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU14</div>
+              <h5 class="mb-0">Guardar para después</h5>
+            </div>
+            <p class="muted">El usuario puede marcar ítems para verlos más tarde, sin consumirlos todavía.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> El usuario puede guardar ítems.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Existe una lista de "guardados".</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Los ítems guardados pueden recuperarse.</div>
+            <div class="mini-card mt-3" style="font-size:0.85rem">
+              <i class="fa-solid fa-circle-info me-2 text-info"></i>
+              Guardar un ítem <strong>no</strong> equivale a consumirlo: no debe afectar el historial ni las recomendaciones de la misma forma que una reproducción.
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="hu-badge" style="width:36px;height:36px;font-size:0.7rem">HU16</div>
+              <h5 class="mb-0">Admin: eliminar ítems</h5>
+            </div>
+            <p class="muted">Un administrador puede dar de baja ítems del catálogo sin romper el sistema.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Se pueden eliminar ítems existentes.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Los ítems eliminados no aparecen en recomendaciones.</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> No se rompe el sistema si el ítem fue consumido antes.</div>
+            <div class="alert alert-warning mt-3 mb-0" style="font-size:0.85rem">
+              <i class="fa-solid fa-triangle-exclamation me-2"></i>
+              Si un ítem eliminado está en el historial de alguien, el sistema debe manejarlo sin errores (ej: ignorarlo o marcarlo como no disponible).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 13: DISEÑO DESACOPLADO ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-diagram-project me-1"></i> Requisito clave de diseño
+      </span>
+      <h2 class="fw-bold mb-2">El motor debe estar desacoplado del dominio</h2>
+      <p class="lead muted mb-4">
+        Este es el requisito de diseño más importante del proyecto: el recomendador no puede depender de clases concretas.
+      </p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <p class="group-label">¿Qué significa?</p>
+          <div class="criterio-item"><i class="fa-solid fa-times-circle text-danger"></i> <strong>No</strong> debe depender de <code>Cancion</code>, <code>Pelicula</code> o <code>Producto</code>.</div>
+          <div class="criterio-item"><i class="fa-solid fa-check-circle text-success"></i> Debe trabajar con una <strong>abstracción</strong>: una interfaz como <code>IRecomendable</code>.</div>
+          <div class="criterio-item"><i class="fa-solid fa-check-circle text-success"></i> El mismo motor puede usarse para <strong>cualquier dominio</strong> sin modificarlo.</div>
+          <div class="criterio-item"><i class="fa-solid fa-check-circle text-success"></i> Agregar un nuevo tipo de ítem no requiere tocar el motor.</div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <h6 class="mb-3 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Acoplado (mal diseño)</h6>
+            <div class="code-block" style="font-size:0.8rem"><code>public class Recomendador
+{
+    // Solo sirve para canciones ❌
+    public List&lt;Cancion&gt; Recomendar(
+        List&lt;Cancion&gt; canciones) { }
+}</code></div>
+            <h6 class="mb-3 mt-3 text-success"><i class="fa-solid fa-check me-2"></i>Desacoplado (buen diseño)</h6>
+            <div class="code-block" style="font-size:0.8rem"><code>public class Recomendador
+{
+    // Sirve para cualquier dominio ✅
+    public List&lt;IRecomendable&gt; Recomendar(
+        List&lt;IRecomendable&gt; items) { }
+}</code></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-primary mt-4 mb-0">
+        <i class="fa-solid fa-graduation-cap me-2"></i>
+        Principio de diseño detrás: <strong>Dependency Inversion</strong> — depender de abstracciones, no de implementaciones concretas.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 14: ROADMAP ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-road me-1"></i> Roadmap del semestre
+      </span>
+      <h2 class="fw-bold mb-4">Entregas y fechas</h2>
+
+      <div class="d-flex flex-column gap-3">
+        <div class="timeline-item" style="border-left-color:#6b7280">
+          <div class="timeline-date"><i class="fa-solid fa-flag me-1"></i>15 abr</div>
+          <div><strong>Kick-off</strong><p class="muted mb-0 small">Presentación del proyecto.</p></div>
+        </div>
+        <div class="timeline-item" style="border-left-color:#6b7280">
+          <div class="timeline-date"><i class="fa-solid fa-file-alt me-1"></i>22 abr</div>
+          <div><strong>Recepción de HU</strong><p class="muted mb-0 small">Entrega de historias de usuario propias del grupo.</p></div>
+        </div>
+        <div class="timeline-item" style="border-left-color:#6b7280">
+          <div class="timeline-date"><i class="fa-solid fa-presentation-screen me-1"></i>29 abr</div>
+          <div><strong>Presentación de propuestas</strong><p class="muted mb-0 small">El grupo presenta su propuesta de diseño.</p></div>
+        </div>
+        <div class="timeline-item" style="border-left-color:var(--accent)">
+          <div class="timeline-date"><i class="fa-solid fa-code-branch me-1"></i>25 may</div>
+          <div>
+            <strong>Primera entrega</strong>
+            <p class="muted mb-0 small">Trello + diagramas de clases + código de clases de dominio + fachada.</p>
+          </div>
+        </div>
+        <div class="timeline-item" style="border-left-color:var(--accent-2)">
+          <div class="timeline-date"><i class="fa-solid fa-vial me-1"></i>22 jun</div>
+          <div>
+            <strong>Segunda entrega</strong>
+            <p class="muted mb-0 small">Trello actualizado + historias de usuario implementadas con casos de prueba usando la fachada.</p>
+          </div>
+        </div>
+        <div class="timeline-item" style="border-left-color:#22c55e">
+          <div class="timeline-date"><i class="fa-solid fa-robot me-1"></i>6 jul</div>
+          <div>
+            <strong>Entrega final</strong>
+            <p class="muted mb-0 small">Trello actualizado + bot funcionando + todos los entregables.</p>
+          </div>
+        </div>
+        <div class="timeline-item" style="border-left-color:#f59e0b">
+          <div class="timeline-date"><i class="fa-solid fa-shield-halved me-1"></i>8 jul</div>
+          <div>
+            <strong>Defensa</strong>
+            <p class="muted mb-0 small">Presentación y defensa del proyecto ante el tribunal.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 15: PRIMERA ENTREGA ===================== -->
+  <section class="slide">
+    <div class="slide-card w-100">
+      <span class="badge-topic mb-3 d-inline-block">
+        <i class="fa-solid fa-calendar-check me-1"></i> Primera entrega · 25 de mayo
+      </span>
+      <h2 class="fw-bold mb-4">¿Qué se espera en la primera entrega?</h2>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <h5 class="mb-3"><i class="fa-brands fa-trello me-2 text-info"></i>Trello del equipo</h5>
+            <p class="muted">Tablero actualizado con las historias, su estado y la distribución del trabajo en el equipo.</p>
+          </div>
+          <div class="mini-card mt-3 h-100">
+            <h5 class="mb-3"><i class="fa-solid fa-sitemap me-2 text-warning"></i>Diagramas de clases</h5>
+            <p class="muted">Diagrama UML que muestre las clases, interfaces, atributos, métodos y relaciones del sistema.</p>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Interfaz <code>IRecomendable</code></div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Clases de dominio (ej: <code>Cancion</code>, <code>Usuario</code>)</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Motor de recomendación</div>
+            <div class="criterio-item"><i class="fa-solid fa-circle-check"></i> Fachada del sistema</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mini-card h-100">
+            <h5 class="mb-3"><i class="fa-solid fa-code me-2 text-success"></i>Código entregable</h5>
+            <p class="muted">Implementación en C# con estructura de carpetas organizada:</p>
+            <div class="code-block"><code>ProyectoRecomendador/
+│
+├── Interfaces/
+│   └── IRecomendable.cs
+│
+├── Models/
+│   ├── [Dominio].cs   (ej: Cancion)
+│   └── Usuario.cs
+│
+├── Services/
+│   └── Recomendador.cs
+│
+├── Facade/
+│   └── SistemaFacade.cs
+│
+└── Program.cs</code></div>
+            <div class="alert alert-success mt-3 mb-0" style="font-size:0.85rem">
+              <i class="fa-solid fa-check-circle me-2"></i>
+              La fachada centraliza todas las operaciones: registrar usuarios, agregar ítems, obtener recomendaciones.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mt-4 flex-wrap">
+        <button class="btn btn-glow btn-lg" onclick="finishClass()">
+          <i class="fa-solid fa-flag-checkered me-2"></i>Finalizar
+        </button>
+        <button class="btn btn-outline-light btn-lg" onclick="showHuSummary()">
+          <i class="fa-solid fa-table-list me-2"></i>Resumen de HUs
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-space"></div>
+</main>
+
+<div class="nav-buttons">
+  <div class="container d-flex justify-content-between">
+    <button class="btn btn-outline-light" onclick="prevSlide()">
+      <i class="fa-solid fa-arrow-left me-2"></i>Anterior
+    </button>
+    <button class="btn btn-glow" onclick="nextSlide()">
+      Siguiente<i class="fa-solid fa-arrow-right ms-2"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll(".slide");
+  const counter = document.getElementById("slideCounter");
+  const progressBar = document.getElementById("progressBar");
+  let currentSlide = 0;
+
+  function updateSlide() {
+    slides.forEach((slide, index) => {
+      slide.classList.remove("active", "animate__animated", "animate__fadeIn");
+      if (index === currentSlide) {
+        slide.classList.add("active", "animate__animated", "animate__fadeIn");
+      }
+    });
+    counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+    const progress = ((currentSlide + 1) / slides.length) * 100;
+    progressBar.style.width = `${progress}%`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function nextSlide() {
+    if (currentSlide < slides.length - 1) {
+      currentSlide++;
+      updateSlide();
+    } else {
+      finishClass();
+    }
+  }
+
+  function prevSlide() {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateSlide();
+    }
+  }
+
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "ArrowRight") nextSlide();
+    if (event.key === "ArrowLeft") prevSlide();
+  });
+
+  function startClass() {
+    Swal.fire({
+      title: "¡Arranquemos!",
+      text: "Vamos a recorrer las 16 historias de usuario del proyecto y entender qué pide cada una.",
+      icon: "success",
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#7c3aed",
+      confirmButtonText: "Vamos"
+    }).then(() => { currentSlide = 1; updateSlide(); });
+  }
+
+  function showHelp() {
+    Swal.fire({
+      title: "Controles",
+      html: `
+        <div class="text-start">
+          <p><i class="fa-solid fa-arrow-right"></i> Flecha derecha: siguiente diapositiva.</p>
+          <p><i class="fa-solid fa-arrow-left"></i> Flecha izquierda: diapositiva anterior.</p>
+          <p><i class="fa-solid fa-computer-mouse"></i> También podés usar los botones de abajo.</p>
+        </div>
+      `,
+      icon: "question",
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#7c3aed",
+      confirmButtonText: "Perfecto"
+    });
+  }
+
+  function showHuSummary() {
+    Swal.fire({
+      title: "Resumen de Historias de Usuario",
+      html: `
+        <div class="text-start" style="font-size:0.88rem">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr style="border-bottom:1px solid rgba(255,255,255,0.2)">
+              <th style="padding:4px 8px">HU</th><th style="padding:4px 8px">Descripción</th>
+            </tr></thead>
+            <tbody>
+              ${[
+                ["HU1","Registrarme"],["HU2","Definir preferencias"],["HU3","Ver recomendaciones"],
+                ["HU4","Recomendar por historial"],["HU5","Recomendar por preferencias"],
+                ["HU6","Recomendar por usuarios similares"],["HU7","Popularidad / Cold start"],
+                ["HU8","Filtrar por atributo"],["HU9","Ordenar resultados"],["HU10","Registrar interacciones"],
+                ["HU11","Me gusta / No me gusta"],["HU12","Ver historial"],["HU13","No repetir consumidos"],
+                ["HU14","Guardar para después"],["HU15","Contenido relacionado"],["HU16","Admin: eliminar ítems"]
+              ].map(([hu,desc]) => `<tr style="border-bottom:1px solid rgba(255,255,255,0.08)">
+                <td style="padding:4px 8px;font-weight:700;color:#06b6d4">${hu}</td>
+                <td style="padding:4px 8px">${desc}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      `,
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#7c3aed",
+      confirmButtonText: "Cerrar",
+      width: "600px"
+    });
+  }
+
+  function finishClass() {
+    Swal.fire({
+      title: "¡Listo!",
+      html: `
+        <p>Ya conocen las 16 historias de usuario del proyecto.</p>
+        <p><strong>Próxima entrega:</strong> 25 de mayo — Trello, diagramas de clases, dominio + fachada.</p>
+        <p class="mt-2" style="font-size:0.9rem;color:#94a3b8">Primero se entiende qué se necesita; después se codifica cómo.</p>
+      `,
+      icon: "success",
+      background: "#182230",
+      color: "#f8fafc",
+      confirmButtonColor: "#7c3aed",
+      confirmButtonText: "¡A trabajar!"
+    });
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

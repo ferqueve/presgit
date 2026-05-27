@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISP – Interface Segregation Principle | FIT UCU</title>
+
+<!-- Dependencies -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep:   #080c14;
+    --bg-card:   #0d1421;
+    --bg-panel:  #111827;
+    --accent:    #00e5ff;
+    --accent2:   #7c3aed;
+    --accent3:   #f59e0b;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --border:    rgba(0,229,255,.15);
+    --success:   #10b981;
+    --danger:    #ef4444;
+    --radius:    12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ─── GRID BG ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ─── LAYOUT ─── */
+  #app { position: relative; z-index: 1; height: 100vh; display: flex; flex-direction: column; }
+
+  /* ─── HEADER ─── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 28px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,12,20,.9);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
+  }
+  .brand { font-size: .78rem; font-weight: 700; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; }
+  .slide-counter { font-family: 'Space Mono', monospace; font-size: .8rem; color: var(--accent); }
+
+  /* ─── PROGRESS ─── */
+  #progress-bar-wrap { height: 3px; background: #1e293b; flex-shrink: 0; }
+  #progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .4s ease; }
+
+  /* ─── SLIDE AREA ─── */
+  #slide-area { flex: 1; overflow-y: auto; padding: 32px 40px; }
+
+  /* ─── SLIDE ─── */
+  .slide { display: none; }
+  .slide.active { display: block; }
+
+  /* ─── TYPOGRAPHY ─── */
+  .slide-tag {
+    display: inline-block; font-family: 'Space Mono', monospace;
+    font-size: .7rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid var(--accent); border-radius: 4px;
+    padding: 3px 10px; margin-bottom: 14px;
+  }
+  h1.slide-title { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 8px; }
+  h2.slide-title { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+  .accent-word { color: var(--accent); }
+  .accent2-word { color: var(--accent2); }
+  .accent3-word { color: var(--accent3); }
+  .lead-text { font-size: 1.05rem; color: #94a3b8; line-height: 1.7; }
+  .body-text { font-size: .95rem; color: #94a3b8; line-height: 1.75; }
+
+  /* ─── CARDS ─── */
+  .glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+  }
+
+  .highlight-box {
+    border-left: 3px solid var(--accent);
+    background: rgba(0,229,255,.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 20px;
+    margin: 16px 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ─── CODE ─── */
+  .code-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(255,255,255,.08); }
+  .code-header {
+    background: #1a2235; padding: 8px 16px; display: flex; align-items: center; gap: 8px;
+    font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--muted);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+  pre { margin: 0 !important; border-radius: 0 !important; }
+  code.hljs { font-family: 'Space Mono', monospace !important; font-size: .8rem !important; padding: 20px !important; }
+
+  /* ─── DIAGRAM ─── */
+  .diagram-wrap { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; }
+  .diagram-wrap svg { max-width: 100%; height: auto; }
+
+  /* ─── PILL BADGE ─── */
+  .badge-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,229,255,.1); border: 1px solid rgba(0,229,255,.25); border-radius: 99px; padding: 5px 14px; font-size: .82rem; color: var(--accent); font-weight: 600; }
+
+  /* ─── STEP LIST ─── */
+  .step-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .step-list li { display: flex; align-items: flex-start; gap: 14px; }
+  .step-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--accent2); display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; color: #fff; margin-top: 2px; }
+
+  /* ─── FOOTER NAV ─── */
+  footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 28px;
+    border-top: 1px solid var(--border);
+    background: rgba(8,12,20,.9);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    padding: 8px 22px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: .88rem;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: all .2s;
+  }
+  .nav-btn:hover { background: rgba(0,229,255,.08); border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: .3; cursor: default; pointer-events: none; }
+  .nav-btn.primary { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #00b8cc; }
+
+  /* ─── QUIZ ─── */
+  .quiz-option {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 18px; cursor: pointer;
+    transition: all .2s; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+    font-size: .95rem;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: rgba(0,229,255,.05); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,.1); }
+  .quiz-option.wrong   { border-color: var(--danger);  background: rgba(239,68,68,.1); }
+  .quiz-option.disabled { pointer-events: none; }
+  .option-letter { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.07); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .8rem; flex-shrink: 0; }
+  .quiz-feedback { border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: .9rem; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok  { background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.35); color: #34d399; }
+  .quiz-feedback.ko  { background: rgba(239,68,68,.12);  border: 1px solid rgba(239,68,68,.35);  color: #f87171; }
+  .quiz-q-counter { font-family: 'Space Mono', monospace; font-size: .78rem; color: var(--muted); margin-bottom: 8px; }
+  .quiz-question { font-size: 1.05rem; font-weight: 600; margin-bottom: 18px; line-height: 1.5; }
+
+  /* ─── RESULT ─── */
+  #result-section { display: none; }
+  .score-ring { position: relative; width: 140px; height: 140px; margin: 0 auto 24px; }
+  .score-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-num { font-size: 2.2rem; font-weight: 800; color: var(--accent); font-family: 'Space Mono', monospace; }
+  .score-label { font-size: .75rem; color: var(--muted); }
+
+  /* ─── TITLE SLIDE DECO ─── */
+  .title-deco { position: absolute; right: -60px; top: -60px; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,.25) 0%, transparent 70%); pointer-events: none; }
+  .solid-pill { font-weight: 800; font-size: 1.1rem; letter-spacing: .04em; }
+
+  /* scroll */
+  #slide-area::-webkit-scrollbar { width: 5px; }
+  #slide-area::-webkit-scrollbar-track { background: transparent; }
+  #slide-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  @media (max-width: 700px) {
+    #slide-area { padding: 20px 16px; }
+    header, footer { padding: 10px 16px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand"><i class="fa-solid fa-graduation-cap me-2"></i>FIT · UCU &nbsp;·&nbsp; Principios SOLID</div>
+    <div class="slide-counter"><span id="cur-slide">1</span> / <span id="tot-slides">13</span></div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:7.7%"></div></div>
+
+  <!-- SLIDES -->
+  <div id="slide-area">
+
+    <!-- ══════════════════ SLIDE 1 – TÍTULO ══════════════════ -->
+    <div class="slide active" id="slide-1">
+      <div class="animate__animated animate__fadeIn" style="position:relative;overflow:hidden;min-height:60vh;display:flex;flex-direction:column;justify-content:center;">
+        <div class="title-deco"></div>
+        <div class="slide-tag"><i class="fa-solid fa-s me-1"></i>SOLID · Principio 4</div>
+        <h1 class="slide-title">
+          Interface<br>
+          <span class="accent-word">Segregation</span><br>
+          Principle
+        </h1>
+        <p class="lead-text mt-3" style="max-width:560px;">
+          Diseño orientado a objetos robusto y desacoplado: que cada cliente dependa solo de lo que realmente usa.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <span class="badge-pill"><i class="fa-brands fa-microsoft"></i>C# / .NET</span>
+          <span class="badge-pill"><i class="fa-solid fa-book"></i>Robert C. Martin</span>
+          <span class="badge-pill"><i class="fa-solid fa-university"></i>FIT – UCU</span>
+        </div>
+        <div class="mt-5 glass-card" style="max-width:500px;">
+          <p class="body-text" style="margin:0;">
+            <span class="accent3-word fw-bold">ISP</span> forma parte del acrónimo <strong>SOLID</strong>, cinco principios de diseño OO para hacer el software más <em>comprensible, flexible y mantenible</em>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 2 – CONTEXTO ══════════════════ -->
+    <div class="slide" id="slide-2">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-circle-question me-1"></i>Motivación</div>
+        <h2 class="slide-title">¿Por qué surge <span class="accent-word">ISP</span>?</h2>
+        <p class="body-text mb-4">A veces una clase expone más responsabilidades de las que sus colaboradores necesitan. Esto genera una dependencia <strong>"todo o nada"</strong> problemática.</p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 class="accent3-word mb-3"><i class="fa-solid fa-triangle-exclamation me-2"></i>El problema</h6>
+              <ul class="step-list">
+                <li><div class="step-num" style="background:#ef4444">!</div><div class="body-text">Una clase tiene <em>más operaciones</em> de las que un cliente usa.</div></li>
+                <li><div class="step-num" style="background:#ef4444">!</div><div class="body-text">El cliente depende del <em>tipo completo</em>, aunque solo use 1 método.</div></li>
+                <li><div class="step-num" style="background:#ef4444">!</div><div class="body-text">Un cambio en algo que <em>no le incumbe</em> lo puede afectar.</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 class="text-success mb-3"><i class="fa-solid fa-circle-check me-2"></i>La solución</h6>
+              <ul class="step-list">
+                <li><div class="step-num">1</div><div class="body-text">Identificar grupos de operaciones que distintos clientes usan.</div></li>
+                <li><div class="step-num">2</div><div class="body-text">Separar esas operaciones en <em>interfaces específicas</em>.</div></li>
+                <li><div class="step-num">3</div><div class="body-text">Cada cliente depende <em>solo</em> del tipo que necesita.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="highlight-box mt-4">
+          <i class="fa-solid fa-lightbulb me-2" style="color:var(--accent3)"></i>
+          Recuerda: una clase tiene <strong>múltiples tipos</strong> → su propio tipo + ancestros + interfaces que implementa.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 3 – ENUNCIADO ══════════════════ -->
+    <div class="slide" id="slide-3">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-scroll me-1"></i>Definición</div>
+        <h2 class="slide-title">El <span class="accent-word">Enunciado</span></h2>
+
+        <div style="margin:32px 0;padding:32px;background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(0,229,255,.1));border:1px solid rgba(0,229,255,.3);border-radius:16px;text-align:center;">
+          <i class="fa-solid fa-quote-left fa-2x mb-3" style="color:var(--accent);opacity:.5"></i>
+          <p style="font-size:1.4rem;font-weight:700;line-height:1.5;color:#fff;max-width:600px;margin:0 auto 12px;">
+            Los clientes no deben ser forzados a <span class="accent-word">depender de tipos</span> que no usan.
+          </p>
+          <small class="text-muted">— Robert C. Martin</small>
+        </div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-4">
+            <div class="glass-card text-center">
+              <i class="fa-solid fa-user fa-2x mb-2" style="color:var(--accent2)"></i>
+              <h6 class="mb-2">Cliente</h6>
+              <p class="body-text" style="font-size:.85rem;">Objeto que <em>pide colaboración</em> y usa responsabilidades de otra clase.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="glass-card text-center">
+              <i class="fa-solid fa-puzzle-piece fa-2x mb-2" style="color:var(--accent)"></i>
+              <h6 class="mb-2">Tipo</h6>
+              <p class="body-text" style="font-size:.85rem;">En C#: la clase propia + sus ancestros + las interfaces que implementa.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="glass-card text-center">
+              <i class="fa-solid fa-scissors fa-2x mb-2" style="color:var(--accent3)"></i>
+              <h6 class="mb-2">Segregar</h6>
+              <p class="body-text" style="font-size:.85rem;">Separar interfaces grandes en partes <em>cohesivas y enfocadas</em>.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="body-text mt-4">
+          <strong>Nota terminológica:</strong> Martin habla de "interfaces" pero en C# esa palabra tiene un significado específico de construcción del lenguaje. Por eso usamos el término más general <strong>tipo</strong>.
+        </p>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 4 – DIAGRAMA PROBLEMA ══════════════════ -->
+    <div class="slide" id="slide-4">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-diagram-project me-1"></i>Diagrama</div>
+        <h2 class="slide-title">El <span class="accent3-word">problema</span> en un diagrama</h2>
+        <p class="body-text mb-4">Las clases A y B dependen de <strong>Interfaz C</strong>, que define O1 y O2. A solo usa O1 y B solo O2. Un cambio en O1 afecta también a B.</p>
+
+        <div class="diagram-wrap mb-4">
+          <!-- ISP Problema -->
+          <svg viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg" style="max-width:620px">
+            <defs>
+              <marker id="arr1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+              </marker>
+              <marker id="arrt" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto">
+                <path d="M5,0 L0,8 L10,8 z" fill="none" stroke="#7c3aed" stroke-width="1.5"/>
+              </marker>
+            </defs>
+            <!-- Interfaz C -->
+            <rect x="220" y="20" width="180" height="90" rx="8" fill="#1a2235" stroke="#00e5ff" stroke-width="1.5"/>
+            <text x="310" y="42" text-anchor="middle" fill="#00e5ff" font-family="Space Mono" font-size="11" font-weight="bold">«interface»</text>
+            <text x="310" y="58" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Interfaz C</text>
+            <line x1="228" y1="66" x2="392" y2="66" stroke="#1e3a5f" stroke-width="1"/>
+            <text x="310" y="82" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="10">+ O1()</text>
+            <text x="310" y="98" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="10">+ O2()</text>
+
+            <!-- Clase A -->
+            <rect x="30" y="160" width="130" height="55" rx="8" fill="#1a2235" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="95" y="183" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Clase A</text>
+            <text x="95" y="202" text-anchor="middle" fill="#f59e0b" font-family="Space Mono" font-size="9">usa → O1()</text>
+
+            <!-- Clase B -->
+            <rect x="460" y="160" width="130" height="55" rx="8" fill="#1a2235" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="525" y="183" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Clase B</text>
+            <text x="525" y="202" text-anchor="middle" fill="#f59e0b" font-family="Space Mono" font-size="9">usa → O2()</text>
+
+            <!-- A → InterfazC (depende) -->
+            <line x1="160" y1="185" x2="222" y2="110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr1)"/>
+            <!-- B → InterfazC (depende) -->
+            <line x1="460" y1="185" x2="400" y2="110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr1)"/>
+
+            <!-- Etiqueta problema -->
+            <rect x="185" y="140" width="250" height="28" rx="5" fill="rgba(239,68,68,.15)" stroke="rgba(239,68,68,.5)" stroke-width="1"/>
+            <text x="310" y="159" text-anchor="middle" fill="#f87171" font-family="Syne" font-size="11">⚠ Cambio en O1 también afecta a B</text>
+          </svg>
+        </div>
+
+        <div class="glass-card" style="border-left:3px solid #ef4444;">
+          <p class="body-text mb-0"><i class="fa-solid fa-arrow-right me-2" style="color:#ef4444"></i>Aunque B no usa O1, <strong>sí depende</strong> del tipo que la declara. Si O1 cambia, B podría recompilarse o verse afectada innecesariamente.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 5 – DIAGRAMA SOLUCIÓN ══════════════════ -->
+    <div class="slide" id="slide-5">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>Solución</div>
+        <h2 class="slide-title">La <span class="text-success">solución</span> ISP</h2>
+        <p class="body-text mb-4">Separamos las operaciones O1 y O2 en <strong>dos interfaces distintas</strong>. Ahora cada cliente depende solo del tipo que usa.</p>
+
+        <div class="diagram-wrap mb-4">
+          <svg viewBox="0 0 660 280" xmlns="http://www.w3.org/2000/svg" style="max-width:660px">
+            <defs>
+              <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+              </marker>
+            </defs>
+            <!-- Interfaz C1 -->
+            <rect x="50" y="20" width="175" height="85" rx="8" fill="#1a2235" stroke="#10b981" stroke-width="1.5"/>
+            <text x="137" y="42" text-anchor="middle" fill="#10b981" font-family="Space Mono" font-size="11" font-weight="bold">«interface»</text>
+            <text x="137" y="58" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Interfaz C1</text>
+            <line x1="58" y1="66" x2="217" y2="66" stroke="#1e3a5f"/>
+            <text x="137" y="90" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="10">+ O1()</text>
+
+            <!-- Interfaz C2 -->
+            <rect x="435" y="20" width="175" height="85" rx="8" fill="#1a2235" stroke="#10b981" stroke-width="1.5"/>
+            <text x="522" y="42" text-anchor="middle" fill="#10b981" font-family="Space Mono" font-size="11" font-weight="bold">«interface»</text>
+            <text x="522" y="58" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Interfaz C2</text>
+            <line x1="443" y1="66" x2="602" y2="66" stroke="#1e3a5f"/>
+            <text x="522" y="90" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="10">+ O2()</text>
+
+            <!-- Clase A -->
+            <rect x="50" y="185" width="175" height="60" rx="8" fill="#1a2235" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="137" y="208" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Clase A</text>
+            <text x="137" y="228" text-anchor="middle" fill="#f59e0b" font-family="Space Mono" font-size="9">depende de C1</text>
+
+            <!-- Clase B -->
+            <rect x="435" y="185" width="175" height="60" rx="8" fill="#1a2235" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="522" y="208" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Clase B</text>
+            <text x="522" y="228" text-anchor="middle" fill="#f59e0b" font-family="Space Mono" font-size="9">depende de C2</text>
+
+            <!-- A → C1 -->
+            <line x1="137" y1="185" x2="137" y2="107" stroke="#10b981" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr2)"/>
+            <!-- B → C2 -->
+            <line x1="522" y1="185" x2="522" y2="107" stroke="#10b981" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr2)"/>
+
+            <!-- Check labels -->
+            <text x="330" y="75" text-anchor="middle" fill="#10b981" font-family="Syne" font-size="13" font-weight="bold">✓ Aislados</text>
+            <text x="330" y="200" text-anchor="middle" fill="#64748b" font-family="Syne" font-size="11">Sin dependencia cruzada</text>
+          </svg>
+        </div>
+
+        <div class="highlight-box" style="border-color: var(--success);">
+          <i class="fa-solid fa-shield-check me-2" style="color:var(--success)"></i>
+          Un cambio en <strong>O1</strong> (Interfaz C1) <strong>solo afecta a Clase A</strong>. Clase B queda completamente aislada.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 6 – EJEMPLO: SALE ══════════════════ -->
+    <div class="slide" id="slide-6">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-cash-register me-1"></i>Ejemplo</div>
+        <h2 class="slide-title">Caso de estudio: <span class="accent-word">Punto de Venta</span></h2>
+        <p class="body-text mb-4">La clase <code>Sale</code> representa un ticket de venta. Cuando la venta se cierra, no se pueden agregar ni quitar ítems (<code>IsClosed</code>).</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">Sale.cs</span></div>
+          <pre><code class="language-csharp">public class Sale
+{
+    public bool IsClosed { get; private set; }
+
+    public SalesLineItem AddLineItem(double quantity, ProductSpecification product)
+    {
+        if (this.IsClosed)
+            throw new InvalidOperationException("La venta está cerrada.");
+
+        SalesLineItem item = new SalesLineItem(quantity, product);
+        this.lineItems.Add(item);
+        return item;
+    }
+
+    public void RemoveLineItem(SalesLineItem item)
+    {
+        if (this.IsClosed)
+            throw new InvalidOperationException("La venta está cerrada.");
+        this.lineItems.Remove(item);
+    }
+
+    public void Close()
+    {
+        if (this.IsClosed) throw new Exception("La venta ya está cerrada.");
+        this.IsClosed = true;
+    }
+
+    public void Open()
+    {
+        if (!this.IsClosed) throw new Exception("La venta no está cerrada.");
+        this.IsClosed = false;
+    }
+}</code></pre>
+        </div>
+        <div class="glass-card">
+          <p class="body-text mb-0"><i class="fa-solid fa-info-circle me-2" style="color:var(--accent)"></i>El siguiente desafío: cerrar la venta <strong>automáticamente</strong> si queda abierta más tiempo del necesario → necesitamos un temporizador.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 7 – COUNTDOWN TIMER ══════════════════ -->
+    <div class="slide" id="slide-7">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-clock me-1"></i>Mecanismo</div>
+        <h2 class="slide-title"><span class="accent-word">CountdownTimer</span> e <span class="accent2-word">ITimerClient</span></h2>
+        <p class="body-text mb-4">Para el cierre automático usamos <code>CountdownTimer</code>: un objeto registrado como <code>ITimerClient</code> recibe un aviso <code>TimeOut()</code> cuando el tiempo expira.</p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="code-wrap">
+              <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">ITimerClient.cs</span></div>
+              <pre><code class="language-csharp">public interface ITimerClient
+{
+    void TimeOut();
+}</code></pre>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="code-wrap">
+              <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">CountdownTimer.cs</span></div>
+              <pre><code class="language-csharp">public class CountdownTimer
+{
+    private ITimerClient client;
+    private Timer timer;
+
+    public void Register(int timeOut, ITimerClient client)
+    {
+        this.client = client;
+        this.timer = new Timer(
+            this.OnTimedEvent, null,
+            timeOut, Timeout.Infinite);
+    }
+
+    private void OnTimedEvent(object state)
+    {
+        this.client.TimeOut();
+        this.timer.Change(
+            Timeout.Infinite, Timeout.Infinite);
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="highlight-box mt-3">
+          <i class="fa-solid fa-plug me-2" style="color:var(--accent3)"></i>
+          Para que <code>Sale</code> reciba el aviso, debe implementar <code>ITimerClient</code>… pero esto trae un problema de ISP.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 8 – PROBLEMA ISP ══════════════════ -->
+    <div class="slide" id="slide-8">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-bug me-1"></i>Violación</div>
+        <h2 class="slide-title">Sale implementa <span class="accent3-word">ITimerClient</span> → <span style="color:#ef4444">problema</span></h2>
+        <p class="body-text mb-3">Al hacer que <code>Sale</code> implemente <code>ITimerClient</code>, todas las clases que usan <code>Sale</code> (como <code>Program</code>) pasan a depender <em>indirectamente</em> de <code>ITimerClient</code>.</p>
+
+        <div class="diagram-wrap mb-3">
+          <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" style="max-width:680px">
+            <defs>
+              <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+              </marker>
+              <marker id="impl" markerWidth="12" markerHeight="12" refX="6" refY="10" orient="auto">
+                <path d="M6,0 L0,10 L12,10 z" fill="none" stroke="#7c3aed" stroke-width="1.5"/>
+              </marker>
+            </defs>
+            <!-- ITimerClient -->
+            <rect x="460" y="15" width="185" height="75" rx="8" fill="#1a2235" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="552" y="37" text-anchor="middle" fill="#ef4444" font-family="Space Mono" font-size="10" font-weight="bold">«interface»</text>
+            <text x="552" y="52" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="11" font-weight="bold">ITimerClient</text>
+            <line x1="468" y1="60" x2="637" y2="60" stroke="#1e3a5f"/>
+            <text x="552" y="78" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="9">+ TimeOut()</text>
+
+            <!-- CountdownTimer -->
+            <rect x="460" y="165" width="185" height="55" rx="8" fill="#1a2235" stroke="#64748b" stroke-width="1"/>
+            <text x="552" y="190" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="11" font-weight="bold">CountdownTimer</text>
+            <text x="552" y="208" text-anchor="middle" fill="#64748b" font-family="Space Mono" font-size="9">Register(t, client)</text>
+
+            <!-- Sale -->
+            <rect x="230" y="90" width="165" height="80" rx="8" fill="#1a2235" stroke="#7c3aed" stroke-width="2"/>
+            <text x="312" y="114" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Sale</text>
+            <line x1="238" y1="122" x2="387" y2="122" stroke="#1e3a5f"/>
+            <text x="312" y="138" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="9">+ TimeOut() ← nuevo</text>
+            <text x="312" y="154" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="9">+ AddLineItem()</text>
+
+            <!-- Program -->
+            <rect x="30" y="90" width="155" height="55" rx="8" fill="#1a2235" stroke="#64748b" stroke-width="1"/>
+            <text x="107" y="120" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="11" font-weight="bold">Program</text>
+
+            <!-- Program → Sale -->
+            <line x1="185" y1="117" x2="230" y2="130" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr3)"/>
+            <!-- Sale implements ITimerClient -->
+            <line x1="395" y1="105" x2="460" y2="57" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="2,4" marker-end="url(#impl)"/>
+            <!-- CountdownTimer → ITimerClient -->
+            <line x1="552" y1="165" x2="552" y2="92" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr3)"/>
+
+            <!-- Alerta -->
+            <rect x="30" y="170" width="390" height="30" rx="6" fill="rgba(239,68,68,.12)" stroke="rgba(239,68,68,.4)"/>
+            <text x="225" y="190" text-anchor="middle" fill="#f87171" font-family="Syne" font-size="11">⚠ Program depende indirectamente de ITimerClient</text>
+          </svg>
+        </div>
+
+        <div class="glass-card" style="border-left:3px solid #ef4444;">
+          <p class="body-text mb-0"><strong>Consecuencia:</strong> Si cambia la firma de <code>TimeOut()</code> en <code>ITimerClient</code> (ej.: agregar <code>timeOutId</code>), clases como <code>Program</code> o <code>ConsolePrinter</code> quedan afectadas <em>sin razón</em>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 9 – CAMBIO PROBLEMA ══════════════════ -->
+    <div class="slide" id="slide-9">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-code-branch me-1"></i>Evolución</div>
+        <h2 class="slide-title">El cambio que <span style="color:#ef4444">evidencia</span> el problema</h2>
+        <p class="body-text mb-3">Se agrega un <code>timeOutId</code> para evitar cierres múltiples accidentales. Esto modifica la firma de <code>TimeOut()</code> → <strong>todas las implementaciones deben cambiar</strong>.</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">ITimerClient.cs – modificado</span></div>
+          <pre><code class="language-csharp">// ANTES:
+public interface ITimerClient
+{
+    void TimeOut();           // ← versión original
+}
+
+// DESPUÉS (con identificador único):
+public interface ITimerClient
+{
+    void TimeOut(object timeOutId);   // ← Sale TAMBIÉN debe cambiar
+}
+
+// CountdownTimer también cambia:
+public void Register(object timeOutId, int timeOut, ITimerClient client)
+{
+    this.client = client;
+    // timeOutId se pasa al Timer y se reenvía en TimeOut()
+    this.timer = new Timer(this.OnTimedEvent, timeOutId, timeOut, Timeout.Infinite);
+}</code></pre>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="glass-card" style="border-left:3px solid #ef4444">
+              <h6 class="mb-2" style="color:#f87171"><i class="fa-solid fa-chain-broken me-2"></i>Impacto negativo</h6>
+              <p class="body-text" style="font-size:.87rem;">Clases que <em>ni usan</em> el timer (Program, ConsolePrinter) se ven obligadas a recompilarse por culpa de la dependencia en <code>ITimerClient</code> a través de <code>Sale</code>.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card" style="border-left:3px solid var(--success)">
+              <h6 class="mb-2 text-success"><i class="fa-solid fa-wand-sparkles me-2"></i>Lo que necesitamos</h6>
+              <p class="body-text" style="font-size:.87rem;">Eliminar la implementación directa de <code>ITimerClient</code> en <code>Sale</code>. Patrón a usar: <strong>Adapter</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 10 – PATRÓN ADAPTER ══════════════════ -->
+    <div class="slide" id="slide-10">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-plug-circle-check me-1"></i>Solución</div>
+        <h2 class="slide-title">Patrón <span class="accent-word">Adapter</span> al rescate</h2>
+        <p class="body-text mb-4">Creamos <code>TimerAdapter</code>: una clase que implementa <code>ITimerClient</code> y delega a <code>Sale</code>. Sale ya no implementa <code>ITimerClient</code> directamente.</p>
+
+        <div class="diagram-wrap mb-4">
+          <svg viewBox="0 0 700 270" xmlns="http://www.w3.org/2000/svg" style="max-width:700px">
+            <defs>
+              <marker id="arr4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+              </marker>
+              <marker id="impl2" markerWidth="12" markerHeight="12" refX="6" refY="10" orient="auto">
+                <path d="M6,0 L0,10 L12,10 z" fill="none" stroke="#10b981" stroke-width="1.5"/>
+              </marker>
+              <marker id="comp" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">
+                <path d="M6,0 L12,6 L6,12 L0,6 z" fill="#f59e0b"/>
+              </marker>
+            </defs>
+            <!-- ITimerClient -->
+            <rect x="460" y="10" width="185" height="75" rx="8" fill="#1a2235" stroke="#10b981" stroke-width="1.5"/>
+            <text x="552" y="32" text-anchor="middle" fill="#10b981" font-family="Space Mono" font-size="10">«interface»</text>
+            <text x="552" y="48" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="11" font-weight="bold">ITimerClient</text>
+            <line x1="468" y1="56" x2="637" y2="56" stroke="#1e3a5f"/>
+            <text x="552" y="74" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="9">+ TimeOut()</text>
+
+            <!-- TimerAdapter -->
+            <rect x="440" y="160" width="220" height="80" rx="8" fill="#1a2235" stroke="#00e5ff" stroke-width="2"/>
+            <text x="550" y="182" text-anchor="middle" fill="#00e5ff" font-family="Space Mono" font-size="11" font-weight="bold">TimerAdapter</text>
+            <line x1="448" y1="190" x2="652" y2="190" stroke="#1e3a5f"/>
+            <text x="550" y="207" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="9">+ TimeOut() → sale.Close()</text>
+            <text x="550" y="225" text-anchor="middle" fill="#f59e0b" font-family="Space Mono" font-size="9">⟨nested private en Sale⟩</text>
+
+            <!-- Sale -->
+            <rect x="180" y="90" width="200" height="90" rx="8" fill="#1a2235" stroke="#7c3aed" stroke-width="2"/>
+            <text x="280" y="114" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="12" font-weight="bold">Sale</text>
+            <line x1="188" y1="122" x2="372" y2="122" stroke="#1e3a5f"/>
+            <text x="280" y="140" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="9">+ AddLineItem()</text>
+            <text x="280" y="155" text-anchor="middle" fill="#94a3b8" font-family="Space Mono" font-size="9">+ Close() / Open()</text>
+            <text x="280" y="170" text-anchor="middle" fill="#f59e0b" font-family="Space Mono" font-size="9">- timerClient: TimerAdapter</text>
+
+            <!-- CountdownTimer -->
+            <rect x="10" y="90" width="145" height="55" rx="8" fill="#1a2235" stroke="#64748b"/>
+            <text x="82" y="118" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="10" font-weight="bold">CountdownTimer</text>
+
+            <!-- Program -->
+            <rect x="10" y="185" width="145" height="45" rx="8" fill="#1a2235" stroke="#64748b"/>
+            <text x="82" y="212" text-anchor="middle" fill="#e2e8f0" font-family="Space Mono" font-size="10" font-weight="bold">Program</text>
+
+            <!-- Sale ◆→ TimerAdapter (composición) -->
+            <line x1="380" y1="160" x2="450" y2="185" stroke="#f59e0b" stroke-width="2" marker-start="url(#comp)"/>
+
+            <!-- TimerAdapter implements ITimerClient -->
+            <line x1="550" y1="160" x2="552" y2="87" stroke="#10b981" stroke-width="1.5" stroke-dasharray="2,4" marker-end="url(#impl2)"/>
+
+            <!-- CountdownTimer → ITimerClient -->
+            <line x1="155" y1="110" x2="460" y2="48" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr4)"/>
+            <!-- Program → Sale -->
+            <line x1="155" y1="210" x2="180" y2="160" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr4)"/>
+
+            <text x="280" y="262" text-anchor="middle" fill="#10b981" font-family="Syne" font-size="12" font-weight="bold">✓ Sale ya no implementa ITimerClient</text>
+          </svg>
+        </div>
+
+        <div class="highlight-box" style="border-color:var(--success)">
+          <i class="fa-solid fa-diamond me-2" style="color:var(--accent3)"></i>
+          El <strong>◆ diamante</strong> indica composición: <code>Sale</code> contiene una instancia de <code>TimerAdapter</code>. El adaptador es una clase anidada privada → invisible desde fuera.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 11 – CÓDIGO ADAPTER ══════════════════ -->
+    <div class="slide" id="slide-11">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-code me-1"></i>Implementación</div>
+        <h2 class="slide-title">Código del <span class="accent-word">TimerAdapter</span></h2>
+        <p class="body-text mb-3"><code>TimerAdapter</code> se declara como clase <strong>anidada privada</strong> dentro de <code>Sale</code>, lo que la hace invisible desde el exterior.</p>
+
+        <div class="code-wrap">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">Sale.cs – versión final con Adapter</span></div>
+          <pre><code class="language-csharp">public class Sale  // Ya NO implementa ITimerClient
+{
+    private CountdownTimer timer = new CountdownTimer();
+    private TimerAdapter timerClient;
+
+    public Sale()
+    {
+        this.StartCountdown();
+    }
+
+    public void Open()
+    {
+        if (!this.IsClosed) throw new Exception("La venta no está cerrada.");
+        this.IsClosed = false;
+        this.StartCountdown();   // reinicia la cuenta regresiva
+    }
+
+    private void StartCountdown()
+    {
+        this.timerClient = new TimerAdapter(this);
+        this.timer.Register(1000, this.timerClient);
+    }
+
+    // ── Clase anidada privada ──────────────────────────────────────
+    private class TimerAdapter : ITimerClient
+    {
+        private Sale sale;
+
+        public TimerAdapter(Sale sale)
+        {
+            this.sale = sale;
+        }
+
+        public void TimeOut()
+        {
+            this.sale.Close();   // delega el cierre a Sale
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 12 – VENTAJAS ══════════════════ -->
+    <div class="slide" id="slide-12">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-star me-1"></i>Resultado</div>
+        <h2 class="slide-title">Ventajas del diseño <span class="text-success">final</span></h2>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 style="color:var(--success)" class="mb-3"><i class="fa-solid fa-circle-check me-2"></i>Sale limpia</h6>
+              <p class="body-text">Sale <strong>no implementa</strong> <code>ITimerClient</code>. Sus clientes (Program, ConsolePrinter) no tienen dependencia en ese tipo. Cambios en <code>ITimerClient</code> no los afectan.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 style="color:var(--accent)" class="mb-3"><i class="fa-solid fa-shield-halved me-2"></i>Encapsulamiento total</h6>
+              <p class="body-text"><code>TimerAdapter</code> es una clase anidada privada. Solo existe dentro de <code>Sale</code>. Nadie más conoce su existencia.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 style="color:var(--accent3)" class="mb-3"><i class="fa-solid fa-arrows-rotate me-2"></i>Evolución independiente</h6>
+              <p class="body-text">Si <code>ITimerClient</code> cambia nuevamente, solo se modifica <code>TimerAdapter</code>. El tipo público de <code>Sale</code> no cambia.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 style="color:var(--accent2)" class="mb-3"><i class="fa-solid fa-layer-group me-2"></i>ISP + Adapter</h6>
+              <p class="body-text">ISP identifica el problema; el patrón Adapter provee la solución estructural. Ambos se complementan perfectamente.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(0,229,255,.08));border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:20px;text-align:center">
+          <p style="font-size:1.1rem;font-weight:700;color:#fff;margin:0">
+            <i class="fa-solid fa-graduation-cap me-2" style="color:var(--accent)"></i>
+            ISP promueve interfaces <span class="accent-word">pequeñas, cohesivas y orientadas al cliente</span>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 13 – QUIZ ══════════════════ -->
+    <div class="slide" id="slide-13">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-clipboard-question me-1"></i>Evaluación</div>
+        <h2 class="slide-title">Cuestionario <span class="accent-word">ISP</span></h2>
+        <p class="body-text mb-4">Responde las siguientes preguntas para verificar tu comprensión del principio.</p>
+
+        <!-- QUIZ CONTENT -->
+        <div id="quiz-section">
+          <div class="glass-card mb-3">
+            <div class="quiz-q-counter">Pregunta <span id="q-num">1</span> de 8</div>
+            <div class="quiz-question" id="q-text"></div>
+            <div id="q-options"></div>
+            <div class="quiz-feedback" id="q-feedback"></div>
+            <div class="text-end mt-3">
+              <button class="nav-btn primary" id="btn-next-q" onclick="nextQuestion()" style="display:none">
+                Siguiente <i class="fa-solid fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULT -->
+        <div id="result-section">
+          <div class="glass-card text-center mb-3">
+            <h4 class="mb-3">Resultado final</h4>
+            <div class="score-ring mb-3">
+              <canvas id="donut-chart" width="140" height="140"></canvas>
+              <div class="score-inner">
+                <div class="score-num" id="score-display">0/8</div>
+                <div class="score-label">correctas</div>
+              </div>
+            </div>
+            <div id="result-msg" class="mb-3"></div>
+            <div class="mb-3">
+              <canvas id="bar-chart" height="80"></canvas>
+            </div>
+            <button class="nav-btn primary mt-2" onclick="restartQuiz()">
+              <i class="fa-solid fa-rotate-left me-2"></i>Reiniciar cuestionario
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /slide-area -->
+
+  <!-- FOOTER NAV -->
+  <footer>
+    <button class="nav-btn" id="btn-prev" onclick="changeSlide(-1)" disabled>
+      <i class="fa-solid fa-arrow-left"></i> Anterior
+    </button>
+    <div class="d-flex gap-2" id="dot-nav"></div>
+    <button class="nav-btn primary" id="btn-next" onclick="changeSlide(1)">
+      Siguiente <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </footer>
+</div>
+
+<script>
+// ─── QUIZ DATA ───────────────────────────────────────────────
+const quizData = [
+  {
+    q: "¿Cuál es el enunciado del principio ISP?",
+    opts: [
+      "Las clases deben tener una sola razón para cambiar.",
+      "Los clientes no deben ser forzados a depender de tipos que no usan.",
+      "Las clases deben depender de abstracciones, no de implementaciones.",
+      "Las subclases deben ser substituibles por sus clases base."
+    ],
+    correct: 1,
+    feedback: "Correcto. ISP establece que los clientes solo deben depender de los tipos que realmente usan, evitando dependencias innecesarias.",
+    feedbackWrong: "Incorrecto. El enunciado de ISP es: 'Los clientes no deben ser forzados a depender de tipos que no usan.'"
+  },
+  {
+    q: "En el ejemplo del Punto de Venta, ¿qué problema concreto genera que Sale implemente ITimerClient?",
+    opts: [
+      "El timer no funciona correctamente si Sale implementa la interfaz.",
+      "Clases como Program dependen indirectamente de ITimerClient aunque no lo usen.",
+      "Sale pierde la capacidad de cerrar la venta manualmente.",
+      "CountdownTimer no puede registrar a Sale como cliente."
+    ],
+    correct: 1,
+    feedback: "Correcto. Program y otras clases que usan Sale quedan con una dependencia transitiva en ITimerClient, aunque nunca la usen directamente.",
+    feedbackWrong: "Incorrecto. El problema es que clases como Program dependen indirectamente de ITimerClient a través de Sale, aunque no lo necesiten."
+  },
+  {
+    q: "¿Cuántos tipos tiene una clase en C# según el material?",
+    opts: [
+      "Siempre uno: el tipo definido por la clase.",
+      "Dos: el propio y el de Object.",
+      "El tipo propio + sus ancestros + las interfaces que implementa ella y sus ancestros.",
+      "Depende de cuántos métodos públicos tenga."
+    ],
+    correct: 2,
+    feedback: "Correcto. Una clase tiene el tipo definido por ella misma, más los tipos de todas sus clases ancestras, más los tipos de las interfaces que implementa.",
+    feedbackWrong: "Incorrecto. El material explica que una clase tiene múltiples tipos: el suyo propio, el de sus ancestros y el de las interfaces que implementa."
+  },
+  {
+    q: "¿Cuál es el patrón de diseño utilizado para resolver la violación de ISP en el ejemplo de Sale?",
+    opts: [
+      "Observer",
+      "Strategy",
+      "Adapter",
+      "Decorator"
+    ],
+    correct: 2,
+    feedback: "Correcto. El patrón Adapter permite crear un objeto intermediario (TimerAdapter) que implementa ITimerClient y delega la operación a Sale.",
+    feedbackWrong: "Incorrecto. Se utiliza el patrón Adapter: TimerAdapter implementa ITimerClient y delega el comportamiento a Sale."
+  },
+  {
+    q: "¿Por qué TimerAdapter se declara como clase anidada privada dentro de Sale?",
+    opts: [
+      "Para que pueda acceder a los métodos privados de CountdownTimer.",
+      "Para que solo sea visible dentro de Sale, evitando que el exterior dependa de ella.",
+      "Para mejorar la performance de la aplicación.",
+      "Porque C# no permite clases que implementen interfaces fuera de otra clase."
+    ],
+    correct: 1,
+    feedback: "Correcto. Al ser privada y anidada, TimerAdapter es invisible desde fuera de Sale. El exterior no puede depender de ella.",
+    feedbackWrong: "Incorrecto. La razón es que al ser privada, TimerAdapter queda encapsulada dentro de Sale y ninguna clase externa puede depender de ella."
+  },
+  {
+    q: "En el diagrama de problema (ISP sin aplicar), si la clase A solo usa O1 y la clase B solo usa O2, ¿qué ocurre si se modifica O1?",
+    opts: [
+      "Solo A se ve afectada.",
+      "Solo B se ve afectada.",
+      "A y B podrían verse afectadas, aunque B no use O1.",
+      "Ninguna clase se ve afectada si los tests pasan."
+    ],
+    correct: 2,
+    feedback: "Correcto. Como B depende del tipo que contiene tanto O1 como O2, un cambio en O1 puede obligar a recompilar o modificar B aunque no la use.",
+    feedbackWrong: "Incorrecto. Dado que B depende del tipo completo (que incluye O1 y O2), un cambio en O1 puede afectar a B aunque no la use."
+  },
+  {
+    q: "¿Por qué se agregó el parámetro timeOutId al método TimeOut()?",
+    opts: [
+      "Para poder cancelar el timer externamente.",
+      "Para distinguir si el aviso corresponde a la cuenta regresiva actual y no a una anterior.",
+      "Para mejorar la performance del temporizador.",
+      "Para cumplir con el Principio de Sustitución de Liskov."
+    ],
+    correct: 1,
+    feedback: "Correcto. Sale puede abrir y cerrar la venta varias veces, generando múltiples cuentas regresivas. El id permite identificar cuál es la vigente.",
+    feedbackWrong: "Incorrecto. El id sirve para que Sale sepa si el aviso TimeOut corresponde a la cuenta regresiva activa, descartando avisos de cuentas anteriores."
+  },
+  {
+    q: "ISP pertenece al conjunto de principios SOLID. ¿Cuál de estas opciones describe SOLID?",
+    opts: [
+      "Un framework de pruebas unitarias para C#.",
+      "Un acrónimo mnemónico de cinco principios para diseños OO más comprensibles, flexibles y fáciles de mantener.",
+      "Un patrón arquitectónico para microservicios.",
+      "Una guía de estilo de código publicada por Microsoft."
+    ],
+    correct: 1,
+    feedback: "Correcto. SOLID es un acrónimo mnemónico que resume cinco principios de diseño orientado a objetos, promovidos por Robert C. Martin.",
+    feedbackWrong: "Incorrecto. SOLID es un acrónimo de cinco principios de diseño OO (Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion)."
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────────
+let currentSlide = 1;
+const totalSlides = 13;
+let currentQ = 0;
+let score = 0;
+let answered = [];
+let donutChart = null;
+let barChart = null;
+
+// ─── SLIDES ──────────────────────────────────────────────────
+function changeSlide(dir) {
+  const slides = document.querySelectorAll('.slide');
+  slides[currentSlide - 1].classList.remove('active');
+  currentSlide = Math.max(1, Math.min(totalSlides, currentSlide + dir));
+  slides[currentSlide - 1].classList.add('active');
+  slides[currentSlide - 1].querySelector('.animate__animated')?.classList.remove('animate__fadeInRight','animate__fadeIn');
+  void slides[currentSlide - 1].querySelector('.animate__animated')?.offsetWidth;
+  slides[currentSlide - 1].querySelector('.animate__animated')?.classList.add(currentSlide === 1 ? 'animate__fadeIn' : 'animate__fadeInRight');
+
+  document.getElementById('cur-slide').textContent = currentSlide;
+  document.getElementById('progress-bar').style.width = ((currentSlide / totalSlides) * 100) + '%';
+  document.getElementById('btn-prev').disabled = currentSlide === 1;
+  document.getElementById('btn-next').disabled = currentSlide === totalSlides;
+
+  updateDots();
+
+  if (currentSlide === totalSlides) {
+    document.getElementById('slide-area').scrollTop = 0;
+    hljs.highlightAll();
+  }
+  hljs.highlightAll();
+}
+
+function updateDots() {
+  const nav = document.getElementById('dot-nav');
+  nav.innerHTML = '';
+  for (let i = 1; i <= totalSlides; i++) {
+    const d = document.createElement('div');
+    d.style.cssText = `width:${i===currentSlide?'20px':'8px'};height:8px;border-radius:99px;background:${i===currentSlide?'var(--accent)':'#1e293b'};border:1px solid ${i<=currentSlide?'var(--accent)':'#334155'};transition:all .3s;cursor:pointer`;
+    d.onclick = () => { const dir = i - currentSlide; if (dir !== 0) changeSlide(dir); };
+    nav.appendChild(d);
+  }
+}
+
+// ─── QUIZ ────────────────────────────────────────────────────
+function loadQuestion() {
+  if (currentQ >= quizData.length) { showResults(); return; }
+  const q = quizData[currentQ];
+  document.getElementById('q-num').textContent = currentQ + 1;
+  document.getElementById('q-text').textContent = q.q;
+  const letters = ['A', 'B', 'C', 'D'];
+  document.getElementById('q-options').innerHTML = q.opts.map((opt, i) =>
+    `<div class="quiz-option" onclick="selectAnswer(${i})" id="opt-${i}">
+      <span class="option-letter">${letters[i]}</span>
+      <span>${opt}</span>
+    </div>`
+  ).join('');
+  const fb = document.getElementById('q-feedback');
+  fb.textContent = '';
+  fb.className = 'quiz-feedback';
+  document.getElementById('btn-next-q').style.display = 'none';
+}
+
+function selectAnswer(idx) {
+  const q = quizData[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const fb = document.getElementById('q-feedback');
+
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    fb.textContent = '✓ ' + q.feedback;
+    fb.className = 'quiz-feedback show ok';
+    score++;
+    answered.push(true);
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[q.correct].classList.add('correct');
+    fb.textContent = '✗ ' + q.feedbackWrong;
+    fb.className = 'quiz-feedback show ko';
+    answered.push(false);
+  }
+  document.getElementById('btn-next-q').style.display = 'inline-flex';
+}
+
+function nextQuestion() {
+  currentQ++;
+  loadQuestion();
+}
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('result-section').style.display = 'block';
+  document.getElementById('score-display').textContent = score + '/' + quizData.length;
+
+  const pct = Math.round((score / quizData.length) * 100);
+  let msg = '', color = '';
+  if (pct >= 87) { msg = '🏆 ¡Excelente! Dominas el principio ISP.'; color = '#10b981'; }
+  else if (pct >= 62) { msg = '👍 Bien. Repasa los puntos donde fallaste.'; color = '#f59e0b'; }
+  else { msg = '📖 Necesitas repasar el material con más detalle.'; color = '#ef4444'; }
+  document.getElementById('result-msg').innerHTML = `<p style="font-size:1.1rem;font-weight:600;color:${color}">${msg}</p><p class="body-text">Obtuviste <strong>${score} de ${quizData.length}</strong> correctas (${pct}%).</p>`;
+
+  // Donut
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(document.getElementById('donut-chart'), {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [score, quizData.length - score],
+        backgroundColor: ['#00e5ff', '#1e293b'],
+        borderColor: ['#00b8cc', '#334155'],
+        borderWidth: 2
+      }]
+    },
+    options: { cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { animateRotate: true } }
+  });
+
+  // Bar chart
+  if (barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById('bar-chart'), {
+    type: 'bar',
+    data: {
+      labels: answered.map((_, i) => `P${i+1}`),
+      datasets: [{
+        label: 'Resultado',
+        data: answered.map(a => a ? 1 : 0),
+        backgroundColor: answered.map(a => a ? 'rgba(16,185,129,.7)' : 'rgba(239,68,68,.7)'),
+        borderColor: answered.map(a => a ? '#10b981' : '#ef4444'),
+        borderWidth: 1, borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ctx.raw === 1 ? '✓ Correcta' : '✗ Incorrecta' }
+      }},
+      scales: {
+        y: { display: false, max: 1.2, min: 0 },
+        x: { ticks: { color: '#64748b', font: { family: 'Space Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,.05)' } }
+      }
+    }
+  });
+
+  // SweetAlert
+  Swal.fire({
+    title: score >= 6 ? '¡Bien hecho!' : 'Sigue practicando',
+    html: `<strong>${score}/${quizData.length}</strong> correctas · ${pct}%`,
+    icon: score >= 6 ? 'success' : score >= 4 ? 'warning' : 'error',
+    background: '#0d1421',
+    color: '#e2e8f0',
+    confirmButtonColor: '#00e5ff',
+    confirmButtonText: 'Ver resultados',
+    customClass: { popup: 'border border-secondary' }
+  });
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; answered = [];
+  document.getElementById('quiz-section').style.display = 'block';
+  document.getElementById('result-section').style.display = 'none';
+  loadQuestion();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  hljs.highlightAll();
+  updateDots();
+  loadQuestion();
+});
+</script>
+</body>
+</html>

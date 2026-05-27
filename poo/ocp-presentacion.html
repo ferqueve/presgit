@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCP – Open-Closed Principle | FIT UCU</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep:   #0a0f0a;
+    --bg-card:   #0e1510;
+    --bg-panel:  #131a14;
+    --accent:    #4ade80;
+    --accent2:   #f97316;
+    --accent3:   #38bdf8;
+    --text:      #e7efe9;
+    --muted:     #5a7060;
+    --border:    rgba(74,222,128,.13);
+    --success:   #4ade80;
+    --danger:    #f87171;
+    --warning:   #f97316;
+    --radius:    12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Hexagon pattern BG ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(74,222,128,.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -120px; right: -120px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(249,115,22,.12) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  #app { position: relative; z-index: 1; height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 28px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,15,10,.92);
+    backdrop-filter: blur(14px);
+    flex-shrink: 0;
+  }
+  .brand { font-size: .76rem; font-weight: 700; color: var(--muted); letter-spacing: .18em; text-transform: uppercase; }
+  .slide-counter { font-family: 'DM Mono', monospace; font-size: .8rem; color: var(--accent); }
+
+  /* ── PROGRESS ── */
+  #progress-bar-wrap { height: 3px; background: #1a2a1a; flex-shrink: 0; }
+  #progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .45s cubic-bezier(.4,0,.2,1); }
+
+  /* ── SLIDE AREA ── */
+  #slide-area { flex: 1; overflow-y: auto; padding: 30px 42px; }
+  #slide-area::-webkit-scrollbar { width: 4px; }
+  #slide-area::-webkit-scrollbar-track { background: transparent; }
+  #slide-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ── SLIDE ── */
+  .slide { display: none; }
+  .slide.active { display: block; }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace; font-size: .69rem;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent2); border: 1px solid rgba(249,115,22,.4);
+    border-radius: 4px; padding: 3px 12px; margin-bottom: 14px;
+  }
+  h1.slide-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px; }
+  h2.slide-title { font-size: clamp(1.45rem, 3vw, 2.1rem); font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+  .accent-word  { color: var(--accent); }
+  .accent2-word { color: var(--accent2); }
+  .accent3-word { color: var(--accent3); }
+  .lead-text { font-size: 1.05rem; color: #7a9e80; line-height: 1.75; }
+  .body-text { font-size: .94rem; color: #7a9e80; line-height: 1.78; }
+
+  /* ── CARDS ── */
+  .glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    position: relative; overflow: hidden;
+  }
+  .glass-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+  }
+
+  .highlight-box {
+    border-left: 3px solid var(--accent);
+    background: rgba(74,222,128,.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 20px; margin: 16px 0;
+    font-size: 1rem; font-weight: 600; color: var(--text);
+  }
+  .warn-box {
+    border-left: 3px solid var(--accent2);
+    background: rgba(249,115,22,.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 20px; margin: 16px 0;
+    font-size: .94rem; color: var(--text);
+  }
+
+  /* ── CODE ── */
+  .code-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(255,255,255,.07); }
+  .code-header {
+    background: #141e15; padding: 8px 16px;
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'DM Mono', monospace; font-size: .7rem; color: var(--muted);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+  pre { margin: 0 !important; border-radius: 0 !important; }
+  code.hljs { font-family: 'DM Mono', monospace !important; font-size: .79rem !important; padding: 20px !important; line-height: 1.6 !important; }
+
+  /* ── DIAGRAM ── */
+  .diagram-wrap {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 26px; text-align: center;
+  }
+  .diagram-wrap svg { max-width: 100%; height: auto; }
+
+  /* ── BADGE ── */
+  .badge-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(74,222,128,.08); border: 1px solid rgba(74,222,128,.22);
+    border-radius: 99px; padding: 5px 14px;
+    font-size: .82rem; color: var(--accent); font-weight: 600;
+  }
+  .badge-orange {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(249,115,22,.1); border: 1px solid rgba(249,115,22,.3);
+    border-radius: 99px; padding: 5px 14px;
+    font-size: .82rem; color: var(--accent2); font-weight: 600;
+  }
+
+  /* ── STEP LIST ── */
+  .step-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .step-list li { display: flex; align-items: flex-start; gap: 14px; }
+  .step-num {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent2); display: flex; align-items: center;
+    justify-content: center; font-size: .75rem; font-weight: 700; color: #fff; margin-top: 2px;
+  }
+  .step-num.green { background: var(--accent); color: #0a0f0a; }
+
+  /* ── QUOTE BLOCK ── */
+  .quote-block {
+    margin: 28px 0;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, rgba(249,115,22,.14), rgba(74,222,128,.08));
+    border: 1px solid rgba(74,222,128,.25);
+    border-radius: 14px; text-align: center;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; }
+  .compare-table th { background: #141e15; padding: 12px 18px; font-size: .85rem; font-weight: 700; letter-spacing: .05em; }
+  .compare-table td { padding: 12px 18px; border-top: 1px solid var(--border); font-size: .88rem; color: #7a9e80; }
+  .compare-table tr:hover td { background: rgba(74,222,128,.03); }
+
+  /* ── FOOTER NAV ── */
+  footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 28px;
+    border-top: 1px solid var(--border);
+    background: rgba(10,15,10,.92);
+    backdrop-filter: blur(14px);
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    padding: 8px 22px; font-family: 'Outfit', sans-serif;
+    font-weight: 600; font-size: .88rem;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: all .2s;
+  }
+  .nav-btn:hover { background: rgba(74,222,128,.07); border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: .28; cursor: default; pointer-events: none; }
+  .nav-btn.primary { background: var(--accent); color: #0a0f0a; border-color: var(--accent); font-weight: 700; }
+  .nav-btn.primary:hover { background: #22c55e; border-color: #22c55e; color: #0a0f0a; }
+
+  /* ── QUIZ ── */
+  .quiz-option {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 9px; padding: 14px 18px; cursor: pointer;
+    transition: all .2s; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px; font-size: .94rem;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: rgba(74,222,128,.05); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(74,222,128,.1); }
+  .quiz-option.wrong   { border-color: var(--danger);  background: rgba(248,113,113,.08); }
+  .quiz-option.disabled { pointer-events: none; }
+  .option-letter {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,.06); display: flex; align-items: center;
+    justify-content: center; font-weight: 700; font-size: .78rem;
+  }
+  .quiz-feedback { border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: .9rem; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok  { background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.35); color: #86efac; }
+  .quiz-feedback.ko  { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.35); color: #fca5a5; }
+  .quiz-q-counter { font-family: 'DM Mono', monospace; font-size: .76rem; color: var(--muted); margin-bottom: 8px; }
+  .quiz-question { font-size: 1.04rem; font-weight: 600; margin-bottom: 18px; line-height: 1.5; }
+
+  /* ── RESULT ── */
+  #result-section { display: none; }
+  .score-ring { position: relative; width: 140px; height: 140px; margin: 0 auto 20px; }
+  .score-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-num { font-size: 2.1rem; font-weight: 900; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .score-lbl { font-size: .72rem; color: var(--muted); }
+
+  @media (max-width: 700px) {
+    #slide-area { padding: 18px 14px; }
+    header, footer { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand"><i class="fa-solid fa-graduation-cap me-2"></i>FIT · UCU &nbsp;·&nbsp; Principios SOLID</div>
+    <div class="slide-counter"><span id="cur-slide">1</span> / <span id="tot-slides">14</span></div>
+  </header>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:7.14%"></div></div>
+
+  <!-- SLIDE AREA -->
+  <div id="slide-area">
+
+    <!-- ══ SLIDE 1 – PORTADA ══ -->
+    <div class="slide active" id="slide-1">
+      <div class="animate__animated animate__fadeIn" style="min-height:62vh;display:flex;flex-direction:column;justify-content:center;position:relative;">
+        <div style="position:absolute;left:-60px;top:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(74,222,128,.18) 0%,transparent 70%);pointer-events:none"></div>
+        <div class="slide-tag"><i class="fa-solid fa-o me-1"></i>SOLID · Principio 2</div>
+        <h1 class="slide-title">
+          Open /<br>
+          <span class="accent-word">Closed</span><br>
+          Principle
+        </h1>
+        <p class="lead-text mt-3" style="max-width:520px;">
+          Escribe clases que puedas extender sin tocar su código. El secreto de los sistemas que envejecen bien.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <span class="badge-pill"><i class="fa-brands fa-microsoft"></i>C# / .NET</span>
+          <span class="badge-orange"><i class="fa-solid fa-book"></i>Bertrand Meyer · 1988</span>
+          <span class="badge-pill"><i class="fa-solid fa-university"></i>FIT – UCU</span>
+        </div>
+        <div class="mt-5 glass-card" style="max-width:520px;">
+          <p class="body-text mb-0">
+            <span class="accent2-word fw-bold">OCP</span> es uno de los cinco principios
+            <strong>SOLID</strong> de Robert C. Martin. Su origen está en el libro
+            <em>"Object Oriented Software Construction"</em> de Bertrand Meyer (1988).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 2 – MOTIVACIÓN ══ -->
+    <div class="slide" id="slide-2">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-circle-question"></i>Motivación</div>
+        <h2 class="slide-title">¿Por qué necesitamos <span class="accent-word">OCP</span>?</h2>
+        <p class="body-text mb-4">Un programa se escribe <strong>una vez</strong>, pero se modifica <em>muchas veces más</em>. Cada modificación puede introducir errores donde antes todo funcionaba.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 class="mb-3" style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation me-2"></i>El riesgo habitual</h6>
+              <ul class="step-list">
+                <li><div class="step-num" style="background:#ef4444">!</div><div class="body-text">Para agregar una funcionalidad, modificamos clases que ya funcionan.</div></li>
+                <li><div class="step-num" style="background:#ef4444">!</div><div class="body-text">Esas modificaciones pueden romper lo que antes estaba bien.</div></li>
+                <li><div class="step-num" style="background:#ef4444">!</div><div class="body-text">Hay que re-testear todo el código afectado.</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100">
+              <h6 class="mb-3" style="color:var(--accent)"><i class="fa-solid fa-shield-check me-2"></i>Lo que OCP propone</h6>
+              <ul class="step-list">
+                <li><div class="step-num green">1</div><div class="body-text">Diseñar abstracciones en las partes que se espera que cambien.</div></li>
+                <li><div class="step-num green">2</div><div class="body-text">Extender el comportamiento via <strong>herencia o composición</strong>.</div></li>
+                <li><div class="step-num green">3</div><div class="body-text">Nunca modificar el código existente que ya funciona.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <i class="fa-solid fa-lightbulb me-2" style="color:var(--accent2)"></i>
+          La adhesión a OCP produce los mayores beneficios en POO: <strong>reusabilidad y mantenibilidad</strong>. Pero requiere <em>pensar abstracciones</em>, no solo usar un lenguaje OO.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 3 – ENUNCIADO ══ -->
+    <div class="slide" id="slide-3">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-scroll"></i>Definición</div>
+        <h2 class="slide-title">El <span class="accent-word">Enunciado</span></h2>
+
+        <div class="quote-block">
+          <i class="fa-solid fa-quote-left fa-2x mb-3" style="color:var(--accent);opacity:.45"></i>
+          <p style="font-size:1.5rem;font-weight:800;line-height:1.45;color:#fff;max-width:580px;margin:0 auto 12px;">
+            Las clases deben ser <span class="accent-word">abiertas</span> a la extensión,<br>
+            pero <span class="accent2-word">cerradas</span> a la modificación.
+          </p>
+          <small style="color:var(--muted)">— Bertrand Meyer, 1988 · retomado por Robert C. Martin</small>
+        </div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <div class="glass-card h-100" style="border-left:3px solid var(--accent)">
+              <h6 class="mb-2" style="color:var(--accent)"><i class="fa-solid fa-lock-open me-2"></i>Abierta a la extensión</h6>
+              <p class="body-text">Las responsabilidades de la clase <strong>pueden aumentarse</strong> mediante herencia, o mediante una combinación de herencia y composición/agregación.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100" style="border-left:3px solid var(--accent2)">
+              <h6 class="mb-2" style="color:var(--accent2)"><i class="fa-solid fa-lock me-2"></i>Cerrada a la modificación</h6>
+              <p class="body-text">No es <em>posible</em> (ni necesario si se cumple el principio) realizar <strong>cambios en el código</strong> de esa clase. Lo que ya funciona, no se toca.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 4 – PROBLEMA CONCRETO ══ -->
+    <div class="slide" id="slide-4">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-cash-register"></i>Contexto</div>
+        <h2 class="slide-title">El <span class="accent2-word">problema</span>: agregar descuentos</h2>
+        <p class="body-text mb-4">El sistema de punto de venta tiene tickets con líneas de producto. Pero <strong>no soporta descuentos</strong>. Para agregarlos, habría que modificar clases existentes → viola OCP.</p>
+
+        <div class="diagram-wrap mb-4">
+          <svg viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" style="max-width:620px">
+            <defs>
+              <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#5a7060"/>
+              </marker>
+            </defs>
+            <!-- Sale -->
+            <rect x="20" y="60" width="165" height="80" rx="8" fill="#141e15" stroke="#4ade80" stroke-width="1.5"/>
+            <text x="102" y="84" text-anchor="middle" fill="#e7efe9" font-family="DM Mono" font-size="12" font-weight="500">Sale</text>
+            <line x1="28" y1="92" x2="177" y2="92" stroke="#1e3a1e"/>
+            <text x="102" y="109" text-anchor="middle" fill="#5a7060" font-family="DM Mono" font-size="9">- lineItems: List&lt;?&gt;</text>
+            <text x="102" y="126" text-anchor="middle" fill="#5a7060" font-family="DM Mono" font-size="9">+ AddLineItem()</text>
+
+            <!-- SalesLineItem -->
+            <rect x="240" y="35" width="165" height="65" rx="8" fill="#141e15" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="322" y="58" text-anchor="middle" fill="#e7efe9" font-family="DM Mono" font-size="11" font-weight="500">SalesLineItem</text>
+            <line x1="248" y1="66" x2="397" y2="66" stroke="#1e3a1e"/>
+            <text x="322" y="83" text-anchor="middle" fill="#5a7060" font-family="DM Mono" font-size="9">Quantity, Product, SubTotal</text>
+
+            <!-- SaleDiscount (needed, missing) -->
+            <rect x="240" y="130" width="165" height="55" rx="8" fill="#1e1208" stroke="#f97316" stroke-width="1.5" stroke-dasharray="6,3"/>
+            <text x="322" y="153" text-anchor="middle" fill="#f97316" font-family="DM Mono" font-size="11" font-weight="500">SaleDiscount</text>
+            <text x="322" y="172" text-anchor="middle" fill="#5a7060" font-family="DM Mono" font-size="9">¿Dónde va?</text>
+
+            <!-- arrows -->
+            <line x1="185" y1="90" x2="240" y2="68" stroke="#5a7060" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+            <line x1="185" y1="110" x2="240" y2="155" stroke="#f97316" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+
+            <!-- label -->
+            <rect x="430" y="120" width="175" height="35" rx="6" fill="rgba(249,115,22,.1)" stroke="rgba(249,115,22,.4)"/>
+            <text x="517" y="140" text-anchor="middle" fill="#fb923c" font-family="Outfit" font-size="11">⚠ Requiere modificar Sale</text>
+          </svg>
+        </div>
+
+        <div class="warn-box">
+          <i class="fa-solid fa-arrow-right me-2" style="color:var(--accent2)"></i>
+          Una solución naïve sería usar un producto llamado "Descuento" con precio negativo, pero <strong>usar clases para propósitos no previstos es incorrecto</strong> y fragiliza el diseño.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 5 – CLASE ABSTRACTA ══ -->
+    <div class="slide" id="slide-5">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-layer-group"></i>Abstracción</div>
+        <h2 class="slide-title">La clave: clase <span class="accent-word">abstracta</span> SalesBaseItem</h2>
+        <p class="body-text mb-4">Introducimos <code>SalesBaseItem</code>, clase abstracta que define el <strong>contrato</strong> para cualquier línea de ticket. Cada subclase decide cómo calcular su subtotal y cómo imprimirse.</p>
+
+        <div class="row g-3">
+          <div class="col-md-5">
+            <div class="code-wrap">
+              <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">SalesBaseItem.cs</span></div>
+              <pre><code class="language-csharp">public abstract class SalesBaseItem
+{
+    // Subclase define cómo
+    // calcular el subtotal
+    public abstract double SubTotal { get; }
+
+    // Subclase define qué
+    // texto imprimir
+    public abstract string GetTextToPrint();
+}</code></pre>
+            </div>
+          </div>
+          <div class="col-md-7">
+            <div class="diagram-wrap h-100" style="display:flex;flex-direction:column;justify-content:center">
+              <svg viewBox="0 0 380 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <marker id="inh" markerWidth="12" markerHeight="12" refX="6" refY="10" orient="auto">
+                    <path d="M6,0 L0,10 L12,10 z" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+                  </marker>
+                </defs>
+                <!-- SalesBaseItem -->
+                <rect x="105" y="10" width="175" height="70" rx="8" fill="#141e15" stroke="#4ade80" stroke-width="2"/>
+                <text x="192" y="30" text-anchor="middle" fill="#4ade80" font-family="DM Mono" font-size="9">«abstract»</text>
+                <text x="192" y="46" text-anchor="middle" fill="#e7efe9" font-family="DM Mono" font-size="11" font-weight="500">SalesBaseItem</text>
+                <line x1="113" y1="54" x2="272" y2="54" stroke="#1e3a1e"/>
+                <text x="192" y="68" text-anchor="middle" fill="#5a7060" font-family="DM Mono" font-size="8.5">SubTotal / GetTextToPrint()</text>
+
+                <!-- SalesLineItem -->
+                <rect x="20" y="140" width="150" height="45" rx="8" fill="#141e15" stroke="#38bdf8" stroke-width="1.5"/>
+                <text x="95" y="166" text-anchor="middle" fill="#e7efe9" font-family="DM Mono" font-size="10" font-weight="500">SalesLineItem</text>
+                <text x="95" y="179" text-anchor="middle" fill="#38bdf8" font-family="DM Mono" font-size="8">override SubTotal</text>
+
+                <!-- SaleDiscount -->
+                <rect x="215" y="140" width="150" height="45" rx="8" fill="#141e15" stroke="#f97316" stroke-width="1.5"/>
+                <text x="290" y="166" text-anchor="middle" fill="#e7efe9" font-family="DM Mono" font-size="10" font-weight="500">SaleDiscount</text>
+                <text x="290" y="179" text-anchor="middle" fill="#f97316" font-family="DM Mono" font-size="8">override SubTotal (–)</text>
+
+                <!-- herencia -->
+                <line x1="95" y1="140" x2="160" y2="82" stroke="#4ade80" stroke-width="1.5" marker-end="url(#inh)"/>
+                <line x1="290" y1="140" x2="230" y2="82" stroke="#4ade80" stroke-width="1.5" marker-end="url(#inh)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight-box mt-3">
+          <i class="fa-solid fa-sitemap me-2"></i>
+          Cualquier nueva "línea de ticket" (descuento, impuesto, recargo…) solo necesita <strong>heredar de SalesBaseItem</strong> e implementar sus métodos abstractos. El resto del sistema no cambia.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 6 – SalesLineItem ══ -->
+    <div class="slide" id="slide-6">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-tag"></i>Implementación</div>
+        <h2 class="slide-title"><span class="accent3-word">SalesLineItem</span> hereda de SalesBaseItem</h2>
+        <p class="body-text mb-3">La clase existente se adapta para extender <code>SalesBaseItem</code>, sobrescribiendo <code>SubTotal</code> y <code>GetTextToPrint()</code>.</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">SalesLineItem.cs</span></div>
+          <pre><code class="language-csharp">public class SalesLineItem : SalesBaseItem   // hereda de la clase abstracta
+{
+    public SalesLineItem(double quantity, ProductSpecification product)
+    {
+        this.Quantity = quantity;
+        this.Product = product;
+    }
+
+    public double Quantity { get; set; }
+    public ProductSpecification Product { get; set; }
+
+    public override double SubTotal     // implementa el contrato
+    {
+        get { return this.Quantity * this.Product.Price; }
+    }
+
+    public override string GetTextToPrint()
+    {
+        return $"{this.Quantity} de '{this.Product.Description}' a ${this.Product.Price}\n";
+    }
+}</code></pre>
+        </div>
+        <div class="glass-card">
+          <p class="body-text mb-0"><i class="fa-solid fa-circle-info me-2" style="color:var(--accent3)"></i>La lógica de negocio de <code>SalesLineItem</code> permanece exactamente igual. Solo se agrega el <code>: SalesBaseItem</code> y los <code>override</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 7 – SaleDiscount ══ -->
+    <div class="slide" id="slide-7">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-percent"></i>Nueva clase</div>
+        <h2 class="slide-title"><span class="accent2-word">SaleDiscount</span>: extensión sin modificar</h2>
+        <p class="body-text mb-3">Se agrega soporte a descuentos creando una <strong>nueva subclase</strong>. Ninguna clase existente se modifica.</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">SaleDiscount.cs</span></div>
+          <pre><code class="language-csharp">public class SaleDiscount : SalesBaseItem
+{
+    public SaleDiscount(double amount)
+    {
+        this.Amount = amount;
+    }
+
+    public double Amount { get; }
+
+    public override double SubTotal
+    {
+        get
+        {
+            return -this.Amount;   // valor negativo → se resta del total
+        }
+    }
+
+    public override string GetTextToPrint()
+    {
+        return $"Descuento: -${this.Amount}\n";
+    }
+}</code></pre>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="glass-card" style="border-left:3px solid var(--accent)">
+              <p class="body-text mb-0"><i class="fa-solid fa-circle-check me-2 text-success"></i><code>SalesBaseItem</code> <strong>no se modificó</strong>. Solo se extendió con una nueva subclase.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card" style="border-left:3px solid var(--accent2)">
+              <p class="body-text mb-0"><i class="fa-solid fa-minus-circle me-2" style="color:var(--accent2)"></i><code>SubTotal</code> retorna el monto en <strong>negativo</strong> para que se reste automáticamente del total.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 8 – Sale modificada ══ -->
+    <div class="slide" id="slide-8">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-code"></i>Ajuste mínimo</div>
+        <h2 class="slide-title">Ajuste en <span class="accent-word">Sale</span>: List&lt;SalesBaseItem&gt;</h2>
+        <p class="body-text mb-3">El único cambio necesario en <code>Sale</code> es que la lista ahora almacena <code>SalesBaseItem</code> en lugar de <code>SalesLineItem</code>, y se agrega el método <code>AddDiscount</code>.</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">Sale.cs – cambios mínimos</span></div>
+          <pre><code class="language-csharp">public class Sale
+{
+    // Ahora almacena cualquier SalesBaseItem (línea, descuento, impuesto…)
+    private List&lt;SalesBaseItem&gt; lineItems = new List&lt;SalesBaseItem&gt;();
+
+    public SalesLineItem AddLineItem(double quantity, ProductSpecification product)
+    {
+        SalesLineItem item = new SalesLineItem(quantity, product);
+        this.lineItems.Add(item);   // funciona igual que antes
+        return item;
+    }
+
+    // Nuevo método — no modifica los anteriores
+    public SaleDiscount AddDiscount(double amount)
+    {
+        SaleDiscount item = new SaleDiscount(amount);
+        this.lineItems.Add(item);
+        return item;
+    }
+
+    public double Total
+    {
+        get { return this.lineItems.Sum(i => i.SubTotal); }
+    }
+}</code></pre>
+        </div>
+        <div class="warn-box">
+          <i class="fa-solid fa-circle-info me-2" style="color:var(--accent3)"></i>
+          Agregar <code>AddDiscount</code> es un cambio aditivo: no modifica métodos existentes. Riesgo de introducir errores: mínimo. (El apéndice muestra cómo evitar incluso este cambio con inyección de dependencias.)
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 9 – OUTPUT ══ -->
+    <div class="slide" id="slide-9">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-terminal"></i>Resultado</div>
+        <h2 class="slide-title">El programa en <span class="accent-word">acción</span></h2>
+        <p class="body-text mb-3">Con el nuevo diseño, agregar un descuento al ticket es trivial desde <code>Program</code>:</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">Program.cs</span></div>
+          <pre><code class="language-csharp">sale.AddLineItem(1, ProductAt(0));   // 1 × $100
+sale.AddLineItem(2, ProductAt(1));   // 2 × $200
+sale.AddLineItem(3, ProductAt(2));   // 3 × $300
+sale.AddDiscount(50);                // descuento de $50</code></pre>
+        </div>
+
+        <div class="diagram-wrap mb-3">
+          <svg viewBox="0 0 500 170" xmlns="http://www.w3.org/2000/svg" style="max-width:500px">
+            <rect x="10" y="10" width="480" height="150" rx="10" fill="#0d1510" stroke="#4ade80" stroke-width="1"/>
+            <text x="30" y="38" fill="#5a7060" font-family="DM Mono" font-size="11">$</text>
+            <text x="50" y="38" fill="#4ade80" font-family="DM Mono" font-size="11">dotnet run</text>
+            <text x="30" y="62" fill="#86efac" font-family="DM Mono" font-size="11">1 de 'Product 1' a $100</text>
+            <text x="30" y="82" fill="#86efac" font-family="DM Mono" font-size="11">2 de 'Product 2' a $200</text>
+            <text x="30" y="102" fill="#86efac" font-family="DM Mono" font-size="11">3 de 'Product 3' a $300</text>
+            <text x="30" y="122" fill="#fb923c" font-family="DM Mono" font-size="11">Descuento: -$50</text>
+            <line x1="22" y1="132" x2="478" y2="132" stroke="#1e3a1e" stroke-width="1"/>
+            <text x="30" y="152" fill="#fff" font-family="DM Mono" font-size="12" font-weight="bold">Total: $1350</text>
+          </svg>
+        </div>
+
+        <div class="highlight-box">
+          <i class="fa-solid fa-check-double me-2"></i>
+          El total se calcula sumando los <code>SubTotal</code> de cada <code>SalesBaseItem</code>. El descuento resta automáticamente al devolver valor negativo. <strong>Sin modificar la lógica de cálculo de Sale</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 10 – EXTENSIBILIDAD ══ -->
+    <div class="slide" id="slide-10">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-arrows-up-down-left-right"></i>Extensibilidad</div>
+        <h2 class="slide-title">Agregar <span class="accent2-word">SaleTax</span> sin tocar nada</h2>
+        <p class="body-text mb-3">El diseño permite agregar un impuesto porcentual creando <strong>solo una nueva clase</strong>. El resto del sistema no se modifica.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-7">
+            <div class="code-wrap">
+              <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">SaleTax.cs – nueva extensión</span></div>
+              <pre><code class="language-csharp">public class SaleTax : SalesBaseItem
+{
+    private Sale sale;
+    private double percentage;
+
+    public SaleTax(double percentage, Sale sale)
+    {
+        this.percentage = percentage;
+        this.sale = sale;
+    }
+
+    public override double SubTotal
+    {
+        get
+        {
+            // Calcula % sobre el subtotal
+            // de las líneas sin impuesto
+            return this.sale.SubtotalBeforeTax
+                   * this.percentage / 100;
+        }
+    }
+
+    public override string GetTextToPrint()
+    {
+        return $"IVA ({this.percentage}%): " +
+               $"${this.SubTotal:F2}\n";
+    }
+}</code></pre>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="glass-card h-100">
+              <h6 class="mb-3" style="color:var(--accent)"><i class="fa-solid fa-list-check me-2"></i>¿Qué se modificó?</h6>
+              <table class="compare-table">
+                <thead>
+                  <tr>
+                    <th style="color:var(--muted)">Clase</th>
+                    <th style="color:var(--muted)">¿Cambió?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>SalesBaseItem</code></td><td style="color:var(--success)">✓ No</td></tr>
+                  <tr><td><code>SalesLineItem</code></td><td style="color:var(--success)">✓ No</td></tr>
+                  <tr><td><code>SaleDiscount</code></td><td style="color:var(--success)">✓ No</td></tr>
+                  <tr><td><code>Sale</code></td><td style="color:var(--accent2)">± AddTax() (aditivo)</td></tr>
+                  <tr><td><code>SaleTax</code></td><td style="color:var(--accent3)">★ Nueva</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 11 – APÉNDICE: DELEGADOS ══ -->
+    <div class="slide" id="slide-11">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-flask me-1"></i>Avanzado · Apéndice</div>
+        <h2 class="slide-title">Inyección de dependencias y <span class="accent-word">delegados</span></h2>
+        <p class="body-text mb-3">Para evitar agregar un nuevo método <code>Add*</code> en <code>Sale</code> por cada nueva subclase, usamos <strong>inyección de dependencias</strong> con un delegado <code>Func&lt;SalesBaseItem&gt;</code>.</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">Sale.cs – un solo método Add universal</span></div>
+          <pre><code class="language-csharp">public class Sale
+{
+    // Un único método Add acepta cualquier creador de SalesBaseItem
+    public SalesBaseItem Add(Func&lt;SalesBaseItem&gt; createItem)
+    {
+        SalesBaseItem item = createItem.Invoke();  // ejecuta el delegado
+        this.lineItems.Add(item);
+        return item;
+    }
+}</code></pre>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="glass-card">
+              <h6 class="mb-2" style="color:var(--accent3)"><i class="fa-solid fa-lambda me-2"></i>¿Qué es un delegado?</h6>
+              <p class="body-text" style="font-size:.87rem;">En C#, los métodos son objetos llamados <strong>delegados</strong>. <code>Func&lt;SalesBaseItem&gt;</code> representa una función sin parámetros que retorna un <code>SalesBaseItem</code>.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card">
+              <h6 class="mb-2" style="color:var(--accent2)"><i class="fa-solid fa-arrow-right-arrow-left me-2"></i>Lambda <code>=&gt;</code></h6>
+              <p class="body-text" style="font-size:.87rem;">Una <strong>función lambda</strong> se escribe con <code>=&gt;</code> (se lee "da como resultado"). Ej: <code>x =&gt; x * x</code> eleva al cuadrado. <code>() =&gt; new SaleDiscount(50)</code> crea un descuento.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 12 – APÉNDICE: LAMBDA EN USO ══ -->
+    <div class="slide" id="slide-12">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-lambda me-1"></i>Avanzado · Lambda</div>
+        <h2 class="slide-title">Funciones <span class="accent-word">lambda</span> en Program</h2>
+        <p class="body-text mb-3">Usando lambdas como argumento del método <code>Add</code>, la clase <code>Sale</code> ya no necesita un método específico por cada tipo de ítem:</p>
+
+        <div class="code-wrap mb-3">
+          <div class="code-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="ms-2">Program.cs – con lambdas</span></div>
+          <pre><code class="language-csharp">// Cada lambda crea la instancia adecuada al momento de invocarla
+sale.Add(() => new SalesLineItem(1, ProductAt(0)));   // línea 1
+sale.Add(() => new SalesLineItem(2, ProductAt(1)));   // línea 2
+sale.Add(() => new SalesLineItem(3, ProductAt(2)));   // línea 3
+sale.Add(() => new SaleDiscount(50));                 // descuento
+sale.Add(() => new SaleTax(10, sale));                // impuesto 10%
+
+// () => ...  significa: "una función sin parámetros que da como resultado..."</code></pre>
+        </div>
+
+        <div class="highlight-box">
+          <i class="fa-solid fa-infinity me-2"></i>
+          Ahora podemos agregar <strong>cualquier nueva subclase de SalesBaseItem</strong> sin tocar <em>ni una sola línea</em> de <code>Sale</code>. OCP cumplido al 100%.
+        </div>
+        <div class="warn-box mt-2">
+          <i class="fa-solid fa-graduation-cap me-2" style="color:var(--accent)"></i>
+          <strong>Nota para el curso:</strong> este apéndice cubre conceptos avanzados (delegados, lambdas, inyección de dependencias). No se espera que los apliques, pero es útil conocerlos como posibilidad del lenguaje.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 13 – RESUMEN ══ -->
+    <div class="slide" id="slide-13">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-star"></i>Cierre</div>
+        <h2 class="slide-title">Resumen <span class="accent-word">OCP</span></h2>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="glass-card h-100" style="border-left:3px solid var(--accent)">
+              <h6 class="mb-2 text-success"><i class="fa-solid fa-lock-open me-2"></i>Abierto a extensión</h6>
+              <p class="body-text">Nuevas responsabilidades se agregan creando <strong>nuevas subclases</strong> de la clase abstracta.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100" style="border-left:3px solid var(--accent2)">
+              <h6 class="mb-2" style="color:var(--accent2)"><i class="fa-solid fa-lock me-2"></i>Cerrado a modificación</h6>
+              <p class="body-text">El código que ya funciona <strong>no se toca</strong>, eliminando el riesgo de romper lo existente.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100" style="border-left:3px solid var(--accent3)">
+              <h6 class="mb-2" style="color:var(--accent3)"><i class="fa-solid fa-sitemap me-2"></i>Clave: abstracciones</h6>
+              <p class="body-text">OCP no se consigue solo con un lenguaje OO. Requiere <strong>pensar qué puede cambiar</strong> y diseñar abstracciones ahí.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="glass-card h-100" style="border-left:3px solid #a78bfa">
+              <h6 class="mb-2" style="color:#a78bfa"><i class="fa-solid fa-trophy me-2"></i>Beneficios</h6>
+              <p class="body-text"><strong>Reusabilidad y mantenibilidad</strong>: lo nuevo se agrega, lo viejo no se rompe. Sistemas que envejecen bien.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(74,222,128,.14),rgba(249,115,22,.08));border:1px solid rgba(74,222,128,.28);border-radius:14px;padding:22px;text-align:center">
+          <p style="font-size:1.1rem;font-weight:700;color:#fff;margin:0">
+            <i class="fa-solid fa-graduation-cap me-2" style="color:var(--accent)"></i>
+            <span class="accent-word">Extiende</span> el comportamiento con nuevas clases.
+            <span class="accent2-word">Nunca modifiques</span> lo que ya funciona.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 14 – QUIZ ══ -->
+    <div class="slide" id="slide-14">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="slide-tag"><i class="fa-solid fa-clipboard-question"></i>Evaluación</div>
+        <h2 class="slide-title">Cuestionario <span class="accent-word">OCP</span></h2>
+        <p class="body-text mb-4">Responde para verificar tu comprensión del principio abierto/cerrado.</p>
+
+        <div id="quiz-section">
+          <div class="glass-card mb-3">
+            <div class="quiz-q-counter">Pregunta <span id="q-num">1</span> de 8</div>
+            <div class="quiz-question" id="q-text"></div>
+            <div id="q-options"></div>
+            <div class="quiz-feedback" id="q-feedback"></div>
+            <div class="text-end mt-3">
+              <button class="nav-btn primary" id="btn-next-q" onclick="nextQuestion()" style="display:none">
+                Siguiente <i class="fa-solid fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="result-section">
+          <div class="glass-card text-center mb-3">
+            <h4 class="mb-3">Resultado final</h4>
+            <div class="score-ring mb-3">
+              <canvas id="donut-chart" width="140" height="140"></canvas>
+              <div class="score-inner">
+                <div class="score-num" id="score-display">0/8</div>
+                <div class="score-lbl">correctas</div>
+              </div>
+            </div>
+            <div id="result-msg" class="mb-3"></div>
+            <div class="mb-3">
+              <canvas id="bar-chart" height="80"></canvas>
+            </div>
+            <button class="nav-btn primary mt-2" onclick="restartQuiz()">
+              <i class="fa-solid fa-rotate-left me-2"></i>Reiniciar cuestionario
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /slide-area -->
+
+  <!-- FOOTER NAV -->
+  <footer>
+    <button class="nav-btn" id="btn-prev" onclick="changeSlide(-1)" disabled>
+      <i class="fa-solid fa-arrow-left"></i> Anterior
+    </button>
+    <div class="d-flex gap-2 flex-wrap justify-content-center" id="dot-nav"></div>
+    <button class="nav-btn primary" id="btn-next" onclick="changeSlide(1)">
+      Siguiente <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </footer>
+</div>
+
+<script>
+// ── QUIZ DATA ────────────────────────────────────────────────
+const quizData = [
+  {
+    q: "¿Cuál es el enunciado del principio OCP?",
+    opts: [
+      "Las clases deben depender de abstracciones, no de implementaciones.",
+      "Las clases deben ser abiertas a la extensión, pero cerradas a la modificación.",
+      "Los clientes no deben ser forzados a depender de tipos que no usan.",
+      "Las subclases deben ser substituibles por sus clases base."
+    ],
+    correct: 1,
+    feedback: "Correcto. OCP establece que las clases deben poder extenderse sin modificar su código existente.",
+    feedbackWrong: "Incorrecto. El enunciado de OCP es: 'Las clases deben ser abiertas a la extensión, pero cerradas a la modificación.' (Bertrand Meyer, 1988)"
+  },
+  {
+    q: "¿Qué significa que una clase sea 'abierta a la extensión'?",
+    opts: [
+      "Que cualquier desarrollador puede editar su código fuente.",
+      "Que sus responsabilidades pueden extenderse mediante herencia o composición sin modificar su código.",
+      "Que la clase expone todos sus atributos como públicos.",
+      "Que acepta parámetros de cualquier tipo en sus métodos."
+    ],
+    correct: 1,
+    feedback: "Correcto. 'Abierta a la extensión' significa que se pueden agregar nuevas responsabilidades via herencia o composición, sin cambiar el código existente.",
+    feedbackWrong: "Incorrecto. Abierta a la extensión significa que sus responsabilidades pueden aumentarse mediante herencia o composición, sin necesidad de modificar el código de la clase."
+  },
+  {
+    q: "En el ejemplo del punto de venta, ¿cuál es el rol de la clase abstracta SalesBaseItem?",
+    opts: [
+      "Calcular el total final de la venta.",
+      "Guardar en base de datos cada línea del ticket.",
+      "Definir el contrato que deben cumplir todas las líneas del ticket (SubTotal y GetTextToPrint).",
+      "Reemplazar a la clase Sale para simplificar el diseño."
+    ],
+    correct: 2,
+    feedback: "Correcto. SalesBaseItem actúa como abstracción que define el contrato: SubTotal y GetTextToPrint, que cada subclase implementa a su manera.",
+    feedbackWrong: "Incorrecto. SalesBaseItem define el contrato (SubTotal y GetTextToPrint) que todas las líneas de ticket deben implementar."
+  },
+  {
+    q: "¿Cómo hace SaleDiscount para que el descuento se reste del total de la venta?",
+    opts: [
+      "Modifica el método Total de la clase Sale para restar descuentos.",
+      "Usa un flag especial que Sale detecta al calcular el total.",
+      "Retorna un valor negativo en su propiedad SubTotal.",
+      "Sobrescribe el método AddDiscount de SalesBaseItem."
+    ],
+    correct: 2,
+    feedback: "Correcto. SaleDiscount.SubTotal retorna -this.Amount. Al sumar todos los SubTotal, el descuento se resta automáticamente.",
+    feedbackWrong: "Incorrecto. SaleDiscount retorna el monto en negativo desde SubTotal. Al sumar todos los SubTotal en Sale, el descuento se descuenta automáticamente."
+  },
+  {
+    q: "Si se quisiera agregar una clase SaleTax sin aplicar el apéndice avanzado, ¿qué habría que hacer en Sale?",
+    opts: [
+      "Modificar el método AddLineItem para aceptar impuestos.",
+      "Reescribir la lógica de cálculo del total.",
+      "Agregar un método AddTax, sin modificar los métodos existentes.",
+      "Cambiar el tipo de retorno de GetTextToPrint en SalesBaseItem."
+    ],
+    correct: 2,
+    feedback: "Correcto. Solo se agrega el método AddTax. Los métodos y atributos existentes no se modifican, lo que minimiza el riesgo de errores.",
+    feedbackWrong: "Incorrecto. Bastaría con agregar un método AddTax en Sale. Esto es una adición, no una modificación de lo existente."
+  },
+  {
+    q: "¿Cuál es el propósito del delegado Func<SalesBaseItem> en la versión avanzada de Sale?",
+    opts: [
+      "Permitir que Sale use reflection para crear instancias automáticamente.",
+      "Inyectar el código de creación de instancias en Sale, evitando tener un método Add por cada subclase.",
+      "Reemplazar la clase abstracta SalesBaseItem por una interfaz.",
+      "Permitir que SaleDiscount acceda a los atributos privados de Sale."
+    ],
+    correct: 1,
+    feedback: "Correcto. Con Func<SalesBaseItem>, Sale recibe como argumento la función que crea la instancia (inyección de dependencias), necesitando un solo método Add para todos los tipos.",
+    feedbackWrong: "Incorrecto. El delegado Func<SalesBaseItem> permite inyectar el código de creación, evitando agregar un método Add por cada nueva subclase de SalesBaseItem."
+  },
+  {
+    q: "¿Cuál de estas opciones describe mejor una función lambda en C#?",
+    opts: [
+      "Un método estático de una clase abstracta.",
+      "Un tipo de bucle especial para colecciones.",
+      "Una forma de escribir métodos locales que pueden pasarse como argumento cuando se espera un delegado.",
+      "Una interfaz que define un contrato de comportamiento."
+    ],
+    correct: 2,
+    feedback: "Correcto. Una función lambda es una forma compacta de definir métodos locales usando el operador =>, que pueden pasarse como argumentos delegados.",
+    feedbackWrong: "Incorrecto. Una función lambda es una forma de escribir métodos locales con el operador => que pueden pasarse como argumentos cuando se espera un delegado."
+  },
+  {
+    q: "¿Por qué la adhesión al principio OCP produce reusabilidad y mantenibilidad?",
+    opts: [
+      "Porque elimina la necesidad de escribir pruebas unitarias.",
+      "Porque el código nuevo se agrega extendiendo clases existentes en vez de modificarlas, reduciendo el riesgo de romper lo que ya funciona.",
+      "Porque permite que múltiples desarrolladores editen la misma clase simultáneamente.",
+      "Porque reemplaza la herencia por composición en todos los casos."
+    ],
+    correct: 1,
+    feedback: "Correcto. Al extender en lugar de modificar, el código existente y probado no se toca. Cada extensión es independiente y el sistema crece sin fragilizarse.",
+    feedbackWrong: "Incorrecto. OCP produce esos beneficios porque las nuevas funcionalidades se agregan extendiendo (nuevas clases) sin modificar lo que ya existe y funciona."
+  }
+];
+
+// ── STATE ────────────────────────────────────────────────────
+const TOTAL_SLIDES = 14;
+let currentSlide = 1;
+let currentQ = 0, score = 0, answered = [];
+let donutChart = null, barChart = null;
+
+// ── SLIDES ───────────────────────────────────────────────────
+function changeSlide(dir) {
+  const slides = document.querySelectorAll('.slide');
+  slides[currentSlide - 1].classList.remove('active');
+  currentSlide = Math.max(1, Math.min(TOTAL_SLIDES, currentSlide + dir));
+  const s = slides[currentSlide - 1];
+  s.classList.add('active');
+  const anim = s.querySelector('.animate__animated');
+  if (anim) {
+    anim.classList.remove('animate__fadeInRight','animate__fadeIn');
+    void anim.offsetWidth;
+    anim.classList.add(currentSlide === 1 ? 'animate__fadeIn' : 'animate__fadeInRight');
+  }
+  document.getElementById('cur-slide').textContent = currentSlide;
+  document.getElementById('progress-bar').style.width = ((currentSlide / TOTAL_SLIDES) * 100) + '%';
+  document.getElementById('btn-prev').disabled = currentSlide === 1;
+  document.getElementById('btn-next').disabled = currentSlide === TOTAL_SLIDES;
+  updateDots();
+  document.getElementById('slide-area').scrollTop = 0;
+  hljs.highlightAll();
+}
+
+function updateDots() {
+  const nav = document.getElementById('dot-nav');
+  nav.innerHTML = '';
+  for (let i = 1; i <= TOTAL_SLIDES; i++) {
+    const d = document.createElement('div');
+    const active = i === currentSlide;
+    const visited = i < currentSlide;
+    d.style.cssText = `width:${active?'20px':'7px'};height:7px;border-radius:99px;` +
+      `background:${active?'var(--accent)':visited?'rgba(74,222,128,.3)':'#1e3a1e'};` +
+      `border:1px solid ${active||visited?'var(--accent)':'#2a4a2a'};transition:all .3s;cursor:pointer;flex-shrink:0`;
+    d.onclick = () => { const diff = i - currentSlide; if (diff) changeSlide(diff); };
+    nav.appendChild(d);
+  }
+}
+
+// ── QUIZ ─────────────────────────────────────────────────────
+function loadQuestion() {
+  if (currentQ >= quizData.length) { showResults(); return; }
+  const q = quizData[currentQ];
+  document.getElementById('q-num').textContent = currentQ + 1;
+  document.getElementById('q-text').textContent = q.q;
+  const letters = ['A','B','C','D'];
+  document.getElementById('q-options').innerHTML = q.opts.map((opt, i) =>
+    `<div class="quiz-option" onclick="selectAnswer(${i})" id="opt-${i}">
+      <span class="option-letter">${letters[i]}</span><span>${opt}</span>
+    </div>`).join('');
+  const fb = document.getElementById('q-feedback');
+  fb.textContent = ''; fb.className = 'quiz-feedback';
+  document.getElementById('btn-next-q').style.display = 'none';
+}
+
+function selectAnswer(idx) {
+  const q = quizData[currentQ];
+  document.querySelectorAll('.quiz-option').forEach(o => o.classList.add('disabled'));
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    document.getElementById(`opt-${idx}`).classList.add('correct');
+    fb.textContent = '✓ ' + q.feedback;
+    fb.className = 'quiz-feedback show ok';
+    score++; answered.push(true);
+  } else {
+    document.getElementById(`opt-${idx}`).classList.add('wrong');
+    document.getElementById(`opt-${q.correct}`).classList.add('correct');
+    fb.textContent = '✗ ' + q.feedbackWrong;
+    fb.className = 'quiz-feedback show ko';
+    answered.push(false);
+  }
+  document.getElementById('btn-next-q').style.display = 'inline-flex';
+}
+
+function nextQuestion() { currentQ++; loadQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('result-section').style.display = 'block';
+  const pct = Math.round((score / quizData.length) * 100);
+  document.getElementById('score-display').textContent = `${score}/${quizData.length}`;
+
+  let msg = '', color = '';
+  if (pct >= 87) { msg = '🏆 ¡Excelente! Dominas el principio OCP.'; color = '#4ade80'; }
+  else if (pct >= 62) { msg = '👍 Bien. Repasa los puntos donde fallaste.'; color = '#f97316'; }
+  else { msg = '📖 Repasa el material con más detalle.'; color = '#f87171'; }
+  document.getElementById('result-msg').innerHTML =
+    `<p style="font-size:1.1rem;font-weight:700;color:${color}">${msg}</p>` +
+    `<p class="body-text">Obtuviste <strong>${score} de ${quizData.length}</strong> correctas (${pct}%).</p>`;
+
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(document.getElementById('donut-chart'), {
+    type: 'doughnut',
+    data: { datasets: [{ data: [score, quizData.length - score],
+      backgroundColor: ['#4ade80','#1a2a1a'],
+      borderColor: ['#22c55e','#2a4a2a'], borderWidth: 2 }] },
+    options: { cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+  });
+
+  if (barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById('bar-chart'), {
+    type: 'bar',
+    data: {
+      labels: answered.map((_, i) => `P${i+1}`),
+      datasets: [{ data: answered.map(a => a ? 1 : 0),
+        backgroundColor: answered.map(a => a ? 'rgba(74,222,128,.7)' : 'rgba(248,113,113,.7)'),
+        borderColor: answered.map(a => a ? '#4ade80' : '#f87171'),
+        borderWidth: 1, borderRadius: 4 }]
+    },
+    options: { responsive: true,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.raw === 1 ? '✓ Correcta' : '✗ Incorrecta' } } },
+      scales: {
+        y: { display: false, max: 1.3 },
+        x: { ticks: { color: '#5a7060', font: { family: 'DM Mono', size: 10 } },
+          grid: { color: 'rgba(255,255,255,.04)' } }
+      }
+    }
+  });
+
+  Swal.fire({
+    title: score >= 6 ? '¡Buen trabajo!' : 'Sigue practicando',
+    html: `<strong>${score}/${quizData.length}</strong> correctas · ${pct}%`,
+    icon: score >= 6 ? 'success' : score >= 4 ? 'warning' : 'error',
+    background: '#0e1510', color: '#e7efe9',
+    confirmButtonColor: '#4ade80', confirmButtonText: 'Ver resultados',
+    customClass: { popup: 'border border-secondary' }
+  });
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; answered = [];
+  document.getElementById('quiz-section').style.display = 'block';
+  document.getElementById('result-section').style.display = 'none';
+  loadQuestion();
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  hljs.highlightAll();
+  updateDots();
+  loadQuestion();
+});
+</script>
+</body>
+</html>

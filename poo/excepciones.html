@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excepciones en C# | Programación 2 · FIT UCU</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/night-owl.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:      #0c0e1a;
+    --bg-card: #111526;
+    --bg-p:    #161929;
+    --a1:      #fb923c;   /* orange */
+    --a2:      #38bdf8;   /* sky */
+    --a3:      #a78bfa;   /* violet */
+    --ok:      #4ade80;
+    --err:     #f87171;
+    --text:    #e8eaf6;
+    --muted:   #4c5080;
+    --border:  rgba(251,146,60,.13);
+    --r:       12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Plus Jakarta Sans',sans-serif;
+    min-height:100vh; overflow:hidden;
+  }
+  body::before{
+    content:''; position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 55% 45% at 85% 15%, rgba(251,146,60,.08) 0%,transparent 60%),
+      radial-gradient(ellipse 45% 55% at 10% 85%, rgba(56,189,248,.06) 0%,transparent 60%);
+    pointer-events:none; z-index:0;
+  }
+  /* diagonal stripe texture */
+  body::after{
+    content:''; position:fixed; inset:0;
+    background-image:repeating-linear-gradient(
+      -45deg, transparent, transparent 18px,
+      rgba(251,146,60,.025) 18px, rgba(251,146,60,.025) 19px);
+    pointer-events:none; z-index:0;
+  }
+
+  #app{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 28px; border-bottom:1px solid var(--border);
+    background:rgba(12,14,26,.94); backdrop-filter:blur(16px); flex-shrink:0;
+  }
+  .brand{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;}
+  .sc{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--a1);}
+
+  #pbw{height:3px;background:#1a1c2e;flex-shrink:0;}
+  #pb{height:100%;background:linear-gradient(90deg,var(--a3),var(--a1));transition:width .4s ease;}
+
+  #sa{flex:1;overflow-y:auto;padding:28px 44px;}
+  #sa::-webkit-scrollbar{width:4px;}
+  #sa::-webkit-scrollbar-track{background:transparent;}
+  #sa::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+  .slide{display:none;} .slide.active{display:block;}
+
+  .stag{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'JetBrains Mono',monospace;font-size:.67rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--a1);border:1px solid rgba(251,146,60,.38);border-radius:4px;padding:3px 12px;margin-bottom:14px;
+  }
+  h1.t{font-size:clamp(1.9rem,4vw,3rem);font-weight:800;line-height:1.1;margin-bottom:10px;}
+  h2.t{font-size:clamp(1.4rem,2.8vw,2.1rem);font-weight:800;line-height:1.2;margin-bottom:16px;}
+  .c1{color:var(--a1);} .c2{color:var(--a2);} .c3{color:var(--a3);}
+  .bt{font-family:'JetBrains Mono',monospace;font-size:.83rem;color:#6b7db3;line-height:1.78;}
+  .lt{font-size:1rem;color:#8899cc;line-height:1.75;}
+
+  .card{
+    background:var(--bg-card);border:1px solid var(--border);
+    border-radius:var(--r);padding:20px 24px;position:relative;overflow:hidden;
+  }
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a3),var(--a1));}
+  .hl{border-left:3px solid var(--a1);background:rgba(251,146,60,.06);border-radius:0 8px 8px 0;padding:13px 18px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);}
+  .hl.sky{border-left-color:var(--a2);background:rgba(56,189,248,.06);}
+  .hl.violet{border-left-color:var(--a3);background:rgba(167,139,250,.06);}
+  .hl.ok{border-left-color:var(--ok);background:rgba(74,222,128,.06);}
+  .hl.err{border-left-color:var(--err);background:rgba(248,113,113,.06);}
+
+  /* CODE */
+  .cw{border-radius:var(--r);overflow:hidden;border:1px solid rgba(255,255,255,.07);}
+  .ch{background:#0d1117;padding:8px 16px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);}
+  .dot{width:10px;height:10px;border-radius:50%;}
+  .r{background:#ff5f57;}.y{background:#febc2e;}.g{background:#28c840;}
+  pre{margin:0!important;border-radius:0!important;}
+  code.hljs{font-family:'JetBrains Mono',monospace!important;font-size:.8rem!important;padding:20px!important;line-height:1.65!important;}
+
+  /* DIAGRAM */
+  .dw{background:var(--bg-p);border:1px solid var(--border);border-radius:var(--r);padding:22px;overflow-x:auto;}
+  .dw svg{display:block;margin:0 auto;}
+  .dlbl{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--muted);text-align:center;margin-top:8px;}
+
+  /* STEP LIST */
+  .sl{list-style:none;padding:0;display:flex;flex-direction:column;gap:11px;}
+  .sl li{display:flex;align-items:flex-start;gap:13px;}
+  .sn{flex-shrink:0;width:27px;height:27px;border-radius:50%;background:var(--a1);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#0c0e1a;margin-top:2px;}
+  .sn.sky{background:var(--a2);} .sn.vio{background:var(--a3);} .sn.ok{background:var(--ok);}
+
+  /* TERM TABLE */
+  .tt{width:100%;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden;}
+  .tt th{background:#161929;padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;letter-spacing:.05em;}
+  .tt td{padding:10px 16px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#6b7db3;}
+  .tt tr:hover td{background:rgba(251,146,60,.03);}
+
+  /* NAV */
+  footer{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;border-top:1px solid var(--border);background:rgba(12,14,26,.94);backdrop-filter:blur(16px);flex-shrink:0;}
+  .nb{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 22px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;}
+  .nb:hover{background:rgba(251,146,60,.08);border-color:var(--a1);color:var(--a1);}
+  .nb:disabled{opacity:.25;cursor:default;pointer-events:none;}
+  .nb.p{background:var(--a1);color:#0c0e1a;border-color:var(--a1);}
+  .nb.p:hover{background:#ea7c2a;border-color:#ea7c2a;}
+
+  /* QUIZ */
+  .qo{background:var(--bg-p);border:1px solid var(--border);border-radius:8px;padding:13px 17px;cursor:pointer;transition:all .2s;margin-bottom:9px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.82rem;}
+  .qo:hover{border-color:var(--a1);background:rgba(251,146,60,.05);}
+  .qo.correct{border-color:var(--ok);background:rgba(74,222,128,.08);}
+  .qo.wrong{border-color:var(--err);background:rgba(248,113,113,.08);}
+  .qo.disabled{pointer-events:none;}
+  .ol{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;}
+  .qf{border-radius:8px;padding:11px 15px;margin-top:11px;font-family:'JetBrains Mono',monospace;font-size:.8rem;display:none;}
+  .qf.show{display:block;}
+  .qf.ok{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.35);color:#86efac;}
+  .qf.ko{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:#fca5a5;}
+  .qc{font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--muted);margin-bottom:8px;}
+  .qq{font-size:.97rem;font-weight:700;margin-bottom:16px;line-height:1.5;}
+
+  #rs{display:none;}
+  .sr{position:relative;width:140px;height:140px;margin:0 auto 18px;}
+  .si{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .snum{font-size:2.1rem;font-weight:800;color:var(--a1);font-family:'JetBrains Mono',monospace;}
+  .slb{font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+  @media(max-width:700px){#sa{padding:16px 12px;}header,footer{padding:10px 12px;}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand"><i class="fa-solid fa-code me-2"></i>FIT · UCU &nbsp;·&nbsp; Programación 2 · C#</div>
+    <div class="sc"><span id="cs">1</span> / <span id="ts">13</span></div>
+  </header>
+  <div id="pbw"><div id="pb" style="width:7.69%"></div></div>
+
+  <div id="sa">
+
+    <!-- ══ 1 PORTADA ══ -->
+    <div class="slide active" id="slide-1">
+      <div class="animate__animated animate__fadeIn" style="min-height:63vh;display:flex;flex-direction:column;justify-content:center;position:relative;">
+        <div style="position:absolute;right:-80px;top:-70px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(251,146,60,.2) 0%,transparent 70%);pointer-events:none"></div>
+        <div class="stag"><i class="fa-solid fa-triangle-exclamation me-1"></i>Programación 2 · C#</div>
+        <h1 class="t">
+          Manejo de<br>
+          <span class="c1">Excepciones</span><br>
+          <span style="font-size:.55em;font-weight:600;color:#8899cc;">en C#</span>
+        </h1>
+        <p class="lt mt-3" style="max-width:560px;">
+          Qué son las excepciones, cuándo usarlas, cómo capturarlas y cómo crear las propias. Del error al <code style="color:var(--a2)">try…catch…finally</code>.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25);border-radius:99px;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--a1)"><i class="fa-brands fa-microsoft"></i>C# / .NET</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);border-radius:99px;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--a2)"><i class="fa-solid fa-book"></i>IEEE 610.12-1990</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:99px;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--a3)"><i class="fa-solid fa-university"></i>FIT – UCU</span>
+        </div>
+        <div class="mt-4 card" style="max-width:560px;">
+          <p class="bt mb-0"><span class="c1 fw-bold">Temas:</span> terminología (fault/failure/error) · <code>try…catch…finally</code> · crear excepciones propias · jerarquía <code>Exception</code> en C# · caso de estudio Library.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2 TERMINOLOGÍA ══ -->
+    <div class="slide" id="slide-2">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-book me-1"></i>Terminología · IEEE 610.12</div>
+        <h2 class="t">¿Por qué tanta <span class="c1">terminología</span>?</h2>
+        <p class="bt mb-4">Hablar con precisión sobre errores nos ayuda a decidir qué se puede manejar y qué es una falla irrecuperable.</p>
+        <div class="table-responsive mb-3">
+          <table class="tt">
+            <thead>
+              <tr>
+                <th style="color:var(--a1)">Término popular</th>
+                <th style="color:var(--a2)">Término preciso</th>
+                <th style="color:var(--a3)">Definición</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Error humano</td>
+                <td style="color:var(--a1)">Equivocación <em>(mistake)</em></td>
+                <td>Acción humana que produce un resultado incorrecto.</td>
+              </tr>
+              <tr>
+                <td>Bug / defecto</td>
+                <td style="color:var(--a2)">Falta <em>(fault)</em></td>
+                <td>Definición incorrecta en un paso, proceso o dato. Manifestación de una equivocación.</td>
+              </tr>
+              <tr>
+                <td>Crash / fallo</td>
+                <td style="color:var(--a3)">Falla <em>(failure)</em></td>
+                <td>Comportamiento o resultado incorrecto. Resultado de una falta.</td>
+              </tr>
+              <tr>
+                <td>Diferencia calculada</td>
+                <td style="color:var(--ok)">Error</td>
+                <td>Cantidad por la que el resultado es incorrecto respecto del valor teórico.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hl">
+          <i class="fa-solid fa-arrows-turn-right me-2"></i>
+          Cadena causal: <strong>equivocación</strong> → <strong>falta</strong> en el código → <strong>error</strong> en los datos → <strong>falla</strong> del sistema.
+        </div>
+        <div class="hl sky mt-2">
+          <i class="fa-solid fa-lightbulb me-2"></i>
+          Si la equivocación es del <strong>usuario</strong>, podemos manejarla (no hay falla). Si es del <strong>programador</strong>, hay falla y el programa no puede continuar.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 3 DOS TIPOS DE EXCEPCIÓN ══ -->
+    <div class="slide" id="slide-3">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-code-fork me-1"></i>Decisión de diseño</div>
+        <h2 class="t">¿Es <span class="c1">manejable</span> o es una <span style="color:var(--err)">falla</span>?</h2>
+        <p class="bt mb-4">La decisión la toma el objeto que recibe el resultado de enviar un mensaje, no la clase que lanza la excepción.</p>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card h-100" style="border-left:3px solid var(--ok)">
+              <h6 class="mb-3" style="color:var(--ok)"><i class="fa-solid fa-circle-check me-2"></i>Excepción manejable</h6>
+              <p class="bt">La equivocación es del <strong>usuario o de otro sistema externo</strong>. Se puede subsanar sin generar una nueva versión del programa.</p>
+              <div class="mt-3 p-2" style="background:#0d1117;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--ok)">
+                FileNotFoundException<br>
+                <span style="color:var(--muted)">→ pedir nuevamente la ruta al usuario</span>
+              </div>
+              <p class="bt mt-2">Ocurre una <strong>falta</strong>, pero <em>no</em> una falla.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card h-100" style="border-left:3px solid var(--err)">
+              <h6 class="mb-3" style="color:var(--err)"><i class="fa-solid fa-circle-xmark me-2"></i>Excepción no manejable (falla)</h6>
+              <p class="bt">La equivocación es del <strong>programador</strong>. El programa hace algo que no está de acuerdo con su especificación. No se puede resolver sin una nueva versión.</p>
+              <div class="mt-3 p-2" style="background:#0d1117;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--err)">
+                NullReferenceException<br>
+                <span style="color:var(--muted)">→ la variable debería tener un objeto (especificación)</span>
+              </div>
+              <p class="bt mt-2">Ocurre una <strong>falla</strong>: el programa no puede continuar.</p>
+            </div>
+          </div>
+        </div>
+        <div class="hl violet mt-3">
+          <i class="fa-solid fa-scale-balanced me-2"></i>
+          Ejemplo: <code>FileNotFoundException</code> puede ser manejable si la ruta la ingresó el usuario, pero podría ser una falla si el archivo es un recurso interno del sistema que debería existir siempre.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4 TRY CATCH FINALLY ══ -->
+    <div class="slide" id="slide-4">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-grip-lines me-1"></i>Estructura de control</div>
+        <h2 class="t">La estructura <span class="c2">try … catch … finally</span></h2>
+        <p class="bt mb-3">Controla el flujo de ejecución cuando puede ocurrir una excepción.</p>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <div class="card h-100 text-center">
+              <i class="fa-solid fa-shield-halved fa-2x mb-2" style="color:var(--a2)"></i>
+              <h6 class="mb-2 c2">try { }</h6>
+              <p class="bt" style="font-size:.8rem;">Sentencias en las que <strong>puede ocurrir</strong> la excepción que me interesa manejar.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 text-center">
+              <i class="fa-solid fa-net-wired fa-2x mb-2" style="color:var(--a1)"></i>
+              <h6 class="mb-2 c1">catch (Ex e) { }</h6>
+              <p class="bt" style="font-size:.8rem;">Se ejecuta <strong>solo si ocurre</strong> una excepción en el bloque <code>try</code>. Se puede concatenar varios <code>catch</code>.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 text-center">
+              <i class="fa-solid fa-lock fa-2x mb-2" style="color:var(--a3)"></i>
+              <h6 class="mb-2 c3">finally { }</h6>
+              <p class="bt" style="font-size:.8rem;">Se ejecuta <strong>siempre</strong>, haya o no excepción. Típicamente para liberar recursos.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dw mb-2">
+          <svg viewBox="0 0 760 120" xmlns="http://www.w3.org/2000/svg" style="max-width:760px;width:100%">
+            <defs>
+              <marker id="fa" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4c5080"/></marker>
+              <marker id="fa2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#fb923c"/></marker>
+            </defs>
+            <!-- try block -->
+            <rect x="10" y="20" width="140" height="80" rx="8" fill="#0d1117" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="80" y="42" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-size="12" font-weight="700">try { }</text>
+            <text x="80" y="62" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="9">Código que puede</text>
+            <text x="80" y="75" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="9">lanzar excepción</text>
+            <text x="80" y="90" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-size="8">→ ejecución normal</text>
+
+            <!-- arrow: no exception -->
+            <line x1="150" y1="50" x2="200" y2="50" stroke="#4ade80" stroke-width="1.5" marker-end="url(#fa)"/>
+            <text x="174" y="43" text-anchor="middle" fill="#4ade80" font-family="JetBrains Mono" font-size="8">sin excepción</text>
+
+            <!-- arrow: exception -->
+            <line x1="150" y1="80" x2="250" y2="80" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#fa2)"/>
+            <text x="200" y="98" text-anchor="middle" fill="#fb923c" font-family="JetBrains Mono" font-size="8">excepción →</text>
+
+            <!-- catch block -->
+            <rect x="250" y="55" width="145" height="55" rx="8" fill="#0d1117" stroke="#fb923c" stroke-width="1.5"/>
+            <text x="322" y="75" text-anchor="middle" fill="#fb923c" font-family="JetBrains Mono" font-size="11" font-weight="700">catch (Ex e)</text>
+            <text x="322" y="91" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="9">manejo del error</text>
+
+            <!-- merge arrow to finally -->
+            <line x1="395" y1="83" x2="490" y2="83" stroke="#4c5080" stroke-width="1.3" marker-end="url(#fa)"/>
+            <line x1="200" y1="50" x2="490" y2="50" stroke="#4c5080" stroke-width="1.3" marker-end="url(#fa)"/>
+            <line x1="490" y1="50" x2="490" y2="83" stroke="#4c5080" stroke-width="1.3"/>
+
+            <!-- finally block -->
+            <rect x="490" y="20" width="140" height="80" rx="8" fill="#0d1117" stroke="#a78bfa" stroke-width="1.5"/>
+            <text x="560" y="42" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="12" font-weight="700">finally { }</text>
+            <text x="560" y="62" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="9">SIEMPRE se ejecuta</text>
+            <text x="560" y="76" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="9">Liberar recursos</text>
+
+            <!-- continue -->
+            <line x1="630" y1="60" x2="690" y2="60" stroke="#4c5080" stroke-width="1.3" marker-end="url(#fa)"/>
+            <text x="710" y="64" fill="#4c5080" font-family="JetBrains Mono" font-size="9">continúa</text>
+          </svg>
+        </div>
+        <div class="hl sky">
+          <i class="fa-solid fa-info-circle me-2"></i>
+          Si no hay ningún <code>try…catch</code> que capture la excepción, se busca en el método que invocó al actual, y así hasta el <strong>programa principal</strong>. Si nadie la captura, el programa termina.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 5 CÓDIGO TRY CATCH ══ -->
+    <div class="slide" id="slide-5">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-code me-1"></i>Código de ejemplo</div>
+        <h2 class="t">Ejemplo: abrir un <span class="c1">archivo</span></h2>
+        <p class="bt mb-3">Escritura en un archivo: la apertura puede lanzar <code>UnauthorizedAccessException</code>. El <code>finally</code> garantiza que el archivo se cierre siempre.</p>
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="ms-2">FileExample.cs</span></div>
+          <pre><code class="language-csharp">FileStream file = null;
+FileInfo fileinfo = new FileInfo(@"c:\file.txt");
+
+try
+{
+    // Puede lanzar: UnauthorizedAccessException, IOException, etc.
+    file = fileinfo.OpenWrite();
+    file.WriteByte(0xF);
+}
+catch (UnauthorizedAccessException e)
+{
+    // Solo captura esta excepción específica
+    Debug.WriteLine("Acceso no autorizado");
+    throw e;     // ← re-lanza la excepción para el llamador
+}
+finally
+{
+    // Se ejecuta SIEMPRE: libera el recurso
+    if (file != null)
+    {
+        file.Close();
+    }
+}</code></pre>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card text-center" style="border-left:3px solid var(--a2)">
+              <code style="color:var(--a2);font-size:.82rem;">throw e</code>
+              <p class="bt mt-1" style="font-size:.78rem;">Relanza la excepción al llamador.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-center" style="border-left:3px solid var(--a1)">
+              <code style="color:var(--a1);font-size:.82rem;">throw</code>
+              <p class="bt mt-1" style="font-size:.78rem;">Sin argumento: relanza la excepción actual sin perder el stack trace.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-center" style="border-left:3px solid var(--a3)">
+              <code style="color:var(--a3);font-size:.82rem;">catch { }</code>
+              <p class="bt mt-1" style="font-size:.78rem;">Sin tipo: captura <em>cualquier</em> excepción.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 6 JERARQUÍA EXCEPTION ══ -->
+    <div class="slide" id="slide-6">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-sitemap me-1"></i>Jerarquía</div>
+        <h2 class="t">La clase <span class="c2">System.Exception</span></h2>
+        <p class="bt mb-3">En C# <strong>todas las excepciones</strong> heredan de <code>System.Exception</code>. Las clases propias también deben hacerlo.</p>
+        <div class="dw mb-3">
+          <svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" style="max-width:780px;width:100%">
+            <defs>
+              <marker id="inh" markerWidth="12" markerHeight="12" refX="6" refY="10" orient="auto"><path d="M6,0 L0,10 L12,10 z" fill="none" stroke="#38bdf8" stroke-width="1.5"/></marker>
+            </defs>
+            <!-- System.Exception -->
+            <rect x="280" y="10" width="210" height="55" rx="7" fill="#0d1117" stroke="#38bdf8" stroke-width="2"/>
+            <text x="385" y="32" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-size="9">System</text>
+            <text x="385" y="48" text-anchor="middle" fill="#e8eaf6" font-family="JetBrains Mono" font-size="11" font-weight="700">Exception</text>
+
+            <!-- SystemException -->
+            <rect x="100" y="120" width="175" height="50" rx="7" fill="#0d1117" stroke="#38bdf8" stroke-width="1.3"/>
+            <text x="187" y="141" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="8">System</text>
+            <text x="187" y="156" text-anchor="middle" fill="#e8eaf6" font-family="JetBrains Mono" font-size="10" font-weight="700">SystemException</text>
+
+            <!-- ApplicationException -->
+            <rect x="490" y="120" width="195" height="50" rx="7" fill="#0d1117" stroke="#a78bfa" stroke-width="1.3"/>
+            <text x="587" y="141" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="8">System</text>
+            <text x="587" y="156" text-anchor="middle" fill="#e8eaf6" font-family="JetBrains Mono" font-size="10" font-weight="700">ApplicationException</text>
+
+            <!-- inh lines -->
+            <line x1="187" y1="120" x2="340" y2="67" stroke="#38bdf8" stroke-width="1.3" marker-end="url(#inh)"/>
+            <line x1="587" y1="120" x2="430" y2="67" stroke="#38bdf8" stroke-width="1.3" marker-end="url(#inh)"/>
+
+            <!-- NullReferenceException -->
+            <rect x="10" y="220" width="175" height="50" rx="6" fill="#0d1117" stroke="#f87171" stroke-width="1.2"/>
+            <text x="97" y="241" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="8.5" font-weight="700">NullReference</text>
+            <text x="97" y="255" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="8.5" font-weight="700">Exception</text>
+            <line x1="97" y1="220" x2="150" y2="172" stroke="#f87171" stroke-width="1.2" marker-end="url(#inh)"/>
+
+            <!-- FileNotFoundException -->
+            <rect x="195" y="220" width="175" height="50" rx="6" fill="#0d1117" stroke="#4ade80" stroke-width="1.2"/>
+            <text x="282" y="241" text-anchor="middle" fill="#4ade80" font-family="JetBrains Mono" font-size="8.5" font-weight="700">FileNotFound</text>
+            <text x="282" y="255" text-anchor="middle" fill="#4ade80" font-family="JetBrains Mono" font-size="8.5" font-weight="700">Exception</text>
+            <line x1="282" y1="220" x2="200" y2="172" stroke="#4ade80" stroke-width="1.2" marker-end="url(#inh)"/>
+
+            <!-- LibraryException (custom) -->
+            <rect x="490" y="220" width="195" height="55" rx="6" fill="#0d1117" stroke="#fb923c" stroke-width="2"/>
+            <text x="587" y="241" text-anchor="middle" fill="#fb923c" font-family="JetBrains Mono" font-size="8">«custom»</text>
+            <text x="587" y="257" text-anchor="middle" fill="#e8eaf6" font-family="JetBrains Mono" font-size="10" font-weight="700">LibraryException</text>
+            <line x1="587" y1="220" x2="587" y2="172" stroke="#fb923c" stroke-width="1.8" marker-end="url(#inh)"/>
+
+            <text x="385" y="295" text-anchor="middle" fill="#4c5080" font-family="JetBrains Mono" font-size="8">▲ triángulo vacío = herencia</text>
+          </svg>
+        </div>
+        <div class="row g-2">
+          <div class="col-md-6">
+            <div class="hl err"><i class="fa-solid fa-bolt me-2"></i><code>NullReferenceException</code> → típicamente falla (bug del programador).</div>
+          </div>
+          <div class="col-md-6">
+            <div class="hl ok"><i class="fa-solid fa-file me-2"></i><code>FileNotFoundException</code> → puede ser manejable (error del usuario).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 7 CREAR EXCEPCIÓN PROPIA ══ -->
+    <div class="slide" id="slide-7">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-hammer me-1"></i>Excepción propia</div>
+        <h2 class="t">Crear <span class="c1">LibraryException</span></h2>
+        <p class="bt mb-3">No siempre es necesario crear una clase de excepción nueva, pero cuando las existentes no expresan bien el dominio del problema, es buena práctica hacerlo.</p>
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="ms-2">LibraryException.cs</span></div>
+          <pre><code class="language-csharp">[Serializable]              // atributo obligatorio
+internal class LibraryException : Exception
+{
+    // Constructor sin parámetros (obligatorio)
+    public LibraryException() { }
+
+    // Constructor con mensaje (el más usado)
+    public LibraryException(string message)
+        : base(message) { }
+
+    // Constructor con mensaje + excepción encadenada
+    public LibraryException(string message, Exception innerException)
+        : base(message, innerException) { }
+
+    // Constructor para serialización (obligatorio)
+    protected LibraryException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+}</code></pre>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="hl"><i class="fa-solid fa-list-check me-2"></i>Cuatro constructores obligatorios: sin parámetros · con mensaje · con mensaje + inner · serialización.</div>
+          </div>
+          <div class="col-md-6">
+            <div class="hl violet"><i class="fa-solid fa-tag me-2"></i><code>[Serializable]</code> es un atributo que permite que la excepción se serialice (ej.: en llamadas remotas o logs binarios).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 8 CASO LIBRARY – SONG ══ -->
+    <div class="slide" id="slide-8">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-music me-1"></i>Caso de estudio · Library</div>
+        <h2 class="t">Lanzar la excepción en el <span class="c1">constructor</span></h2>
+        <p class="bt mb-3">La especificación dice que no pueden existir canciones del género "marcha". Si alguien intenta crearla, es una violación de la especificación → se lanza <code>LibraryException</code>.</p>
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="ms-2">Song.cs</span></div>
+          <pre><code class="language-csharp">public class Song : Media
+{
+    private string artist;
+
+    public Song(string name, string genre, string artist)
+        : base(name, genre)
+    {
+        // Validación de la regla de negocio en el constructor
+        if (string.Equals(genre, "marcha", StringComparison.OrdinalIgnoreCase))
+        {
+            // La excepción es un objeto: se usa new
+            throw new LibraryException(
+                $"No me gusta {name} porque no me gusta la marcha");
+        }
+        this.artist = artist;
+    }
+}</code></pre>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="hl ok"><i class="fa-solid fa-circle-check me-2"></i><code>throw new LibraryException(...)</code> crea el objeto excepción y lo lanza en un solo paso.</div>
+          </div>
+          <div class="col-md-6">
+            <div class="hl sky"><i class="fa-solid fa-info-circle me-2"></i><code>StringComparison.OrdinalIgnoreCase</code> hace la comparación insensible a mayúsculas: "Marcha", "MARCHA", "marcha" → todas bloqueadas.</div>
+          </div>
+        </div>
+        <div class="hl violet mt-1">
+          <i class="fa-solid fa-shield-halved me-2"></i>
+          El constructor es el lugar ideal para validar invariantes: si la construcción del objeto falla, el objeto nunca existe en un estado inválido.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 9 PROGRAMA PRINCIPAL ══ -->
+    <div class="slide" id="slide-9">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-terminal me-1"></i>Capturar la excepción</div>
+        <h2 class="t">El <span class="c2">programa principal</span> captura LibraryException</h2>
+        <p class="bt mb-3">El programa intenta agregar canciones, incluyendo una de marcha. El <code>catch</code> captura la excepción y el <code>finally</code> imprime la biblioteca en cualquier caso.</p>
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="ms-2">Program.cs</span></div>
+          <pre><code class="language-csharp">public class Program
+{
+    private static Library library = new Library();
+
+    public static void Main(string[] args)
+    {
+        try
+        {
+            AddMovies();         // agrega películas
+            AddSongs();          // agrega canciones (no-marcha)
+            AddMarchaSongs();    // ← lanza LibraryException
+        }
+        catch (LibraryException e)
+        {
+            // Solo captura LibraryException (y subclases)
+            Console.WriteLine(e.Message);
+            // Las canciones agregadas ANTES de la excepción permanecen
+        }
+        finally
+        {
+            // Se ejecuta siempre: imprime el estado final de la biblioteca
+            PrintMediaItems("La biblioteca contiene:", library);
+        }
+    }
+}</code></pre>
+        </div>
+        <div class="hl err">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <strong>Efecto importante:</strong> cuando <code>AddMarchaSongs()</code> lanza la excepción, las sentencias siguientes dentro de <code>try</code> <strong>no se ejecutan</strong>. El control pasa directamente al <code>catch</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 10 FLUJO DE EJECUCIÓN ══ -->
+    <div class="slide" id="slide-10">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-diagram-project me-1"></i>Flujo de ejecución</div>
+        <h2 class="t">¿Qué pasa <span class="c1">exactamente</span> al lanzar?</h2>
+        <p class="bt mb-4">Trazamos el flujo de ejecución desde que <code>Song</code> lanza la excepción hasta que <code>Program</code> la captura.</p>
+        <div class="dw">
+          <svg viewBox="0 0 780 330" xmlns="http://www.w3.org/2000/svg" style="max-width:780px;width:100%">
+            <defs>
+              <marker id="fa3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4c5080"/></marker>
+              <marker id="fa4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#fb923c"/></marker>
+              <marker id="fa5" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4ade80"/></marker>
+            </defs>
+            <!-- Stack frames -->
+            <rect x="10" y="10" width="160" height="300" rx="8" fill="#0d1117" stroke="#4c5080" stroke-width="1"/>
+            <text x="90" y="30" text-anchor="middle" fill="#4c5080" font-family="JetBrains Mono" font-size="9">Call Stack</text>
+
+            <rect x="20" y="40" width="140" height="40" rx="5" fill="#111526" stroke="#38bdf8" stroke-width="1.2"/>
+            <text x="90" y="64" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-size="9" font-weight="700">Program.Main()</text>
+
+            <rect x="20" y="88" width="140" height="40" rx="5" fill="#111526" stroke="#a78bfa" stroke-width="1.2"/>
+            <text x="90" y="112" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="9" font-weight="700">AddMarchaSongs()</text>
+
+            <rect x="20" y="136" width="140" height="40" rx="5" fill="#111526" stroke="#a78bfa" stroke-width="1.2"/>
+            <text x="90" y="160" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="9" font-weight="700">Library.AddSong()</text>
+
+            <rect x="20" y="184" width="140" height="40" rx="5" fill="#111526" stroke="#fb923c" stroke-width="1.8"/>
+            <text x="90" y="204" text-anchor="middle" fill="#fb923c" font-family="JetBrains Mono" font-size="9" font-weight="700">new Song(...)</text>
+            <text x="90" y="218" text-anchor="middle" fill="#fb923c" font-family="JetBrains Mono" font-size="8">← throw aquí</text>
+
+            <!-- Exception object -->
+            <rect x="230" y="175" width="165" height="55" rx="7" fill="#1a0e0a" stroke="#fb923c" stroke-width="1.8"/>
+            <text x="312" y="196" text-anchor="middle" fill="#fb923c" font-family="JetBrains Mono" font-size="9">«object»</text>
+            <text x="312" y="211" text-anchor="middle" fill="#e8eaf6" font-family="JetBrains Mono" font-size="10" font-weight="700">LibraryException</text>
+            <text x="312" y="225" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="8">message: "No me gusta..."</text>
+            <line x1="160" y1="200" x2="230" y2="200" stroke="#fb923c" stroke-width="1.5" marker-end="url(#fa4)"/>
+
+            <!-- Stack unwinding arrows -->
+            <text x="230" y="140" fill="#fb923c" font-family="JetBrains Mono" font-size="9" font-weight="700">Stack unwinding ↑</text>
+            <line x1="170" y1="205" x2="170" y2="155" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#fa4)"/>
+            <text x="178" y="175" fill="#fb923c" font-family="JetBrains Mono" font-size="8">no catch</text>
+            <line x1="170" y1="150" x2="170" y2="100" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#fa4)"/>
+            <text x="178" y="128" fill="#fb923c" font-family="JetBrains Mono" font-size="8">no catch</text>
+            <line x1="170" y1="95" x2="170" y2="65" stroke="#4ade80" stroke-width="1.5" marker-end="url(#fa5)"/>
+            <text x="178" y="82" fill="#4ade80" font-family="JetBrains Mono" font-size="8">¡catch!</text>
+
+            <!-- catch box -->
+            <rect x="250" y="30" width="280" height="105" rx="8" fill="#0a150a" stroke="#4ade80" stroke-width="1.5"/>
+            <text x="390" y="52" text-anchor="middle" fill="#4ade80" font-family="JetBrains Mono" font-size="10" font-weight="700">catch (LibraryException e)</text>
+            <text x="390" y="70" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="9">en Program.Main()</text>
+            <text x="270" y="90" fill="#4ade80" font-family="JetBrains Mono" font-size="8.5">Console.WriteLine(e.Message);</text>
+            <text x="270" y="108" fill="#6b7db3" font-family="JetBrains Mono" font-size="8">→ "No me gusta ... porque no me gusta la marcha"</text>
+            <text x="270" y="126" fill="#6b7db3" font-family="JetBrains Mono" font-size="8">→ luego se ejecuta finally { }</text>
+
+            <!-- Finally box -->
+            <rect x="560" y="30" width="200" height="80" rx="8" fill="#0d0a1a" stroke="#a78bfa" stroke-width="1.5"/>
+            <text x="660" y="52" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="10" font-weight="700">finally { }</text>
+            <text x="660" y="70" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="8">PrintMediaItems(...</text>
+            <text x="660" y="86" text-anchor="middle" fill="#6b7db3" font-family="JetBrains Mono" font-size="8">SIEMPRE se ejecuta</text>
+            <line x1="530" y1="68" x2="560" y2="68" stroke="#a78bfa" stroke-width="1.3" marker-end="url(#fa3)"/>
+          </svg>
+        </div>
+        <p class="dlbl">Flujo de stack unwinding: la excepción sube por el call stack hasta encontrar un catch adecuado</p>
+      </div>
+    </div>
+
+    <!-- ══ 11 MÚLTIPLES CATCH ══ -->
+    <div class="slide" id="slide-11">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-layer-group me-1"></i>Múltiples catch</div>
+        <h2 class="t">Concatenar bloques <span class="c1">catch</span></h2>
+        <p class="bt mb-3">Es posible manejar excepciones de distintas clases en el mismo bloque <code>try</code>, con un <code>catch</code> por cada tipo. Se evalúan en orden: <strong>de más específica a más general</strong>.</p>
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="ms-2">MultiCatch.cs</span></div>
+          <pre><code class="language-csharp">try
+{
+    string ruta = Console.ReadLine();         // el usuario ingresa una ruta
+    File.WriteAllText(ruta, "contenido");
+}
+catch (UnauthorizedAccessException e)
+{
+    // Sin permiso de escritura
+    Console.WriteLine($"Sin permiso: {e.Message}");
+}
+catch (DirectoryNotFoundException e)
+{
+    // El directorio no existe
+    Console.WriteLine($"Directorio no encontrado: {e.Message}");
+}
+catch (IOException e)
+{
+    // Cualquier otro error de I/O (más general)
+    Console.WriteLine($"Error de E/S: {e.Message}");
+}
+catch (Exception e)
+{
+    // Catch-all: captura cualquier excepción no capturada antes
+    Console.WriteLine($"Error inesperado: {e.Message}");
+    throw;    // re-lanzar sin modificar el stack trace
+}
+finally
+{
+    Console.WriteLine("Operación finalizada.");
+}</code></pre>
+        </div>
+        <div class="hl err">
+          <i class="fa-solid fa-sort me-2"></i>
+          <strong>Orden importa:</strong> siempre de más específica a más general. Si pusieras <code>catch (Exception)</code> primero, los <code>catch</code> siguientes nunca se ejecutarían (error de compilación en C#).
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 12 BUENAS PRÁCTICAS ══ -->
+    <div class="slide" id="slide-12">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-star me-1"></i>Buenas prácticas</div>
+        <h2 class="t">Resumen y <span class="c1">buenas prácticas</span></h2>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="card h-100" style="border-left:3px solid var(--ok)">
+              <h6 class="mb-3" style="color:var(--ok)"><i class="fa-solid fa-circle-check me-2"></i>Sí hacer</h6>
+              <ul class="sl">
+                <li><div class="sn ok">✓</div><div class="bt">Lanzar excepciones específicas del dominio con mensajes descriptivos.</div></li>
+                <li><div class="sn ok">✓</div><div class="bt">Usar <code>finally</code> para liberar recursos (archivos, conexiones, memoria).</div></li>
+                <li><div class="sn ok">✓</div><div class="bt">Validar invariantes en el constructor: objeto inválido = excepción.</div></li>
+                <li><div class="sn ok">✓</div><div class="bt">Capturar solo las excepciones que puedas manejar correctamente.</div></li>
+                <li><div class="sn ok">✓</div><div class="bt">Usar <code>throw;</code> (sin argumento) para no perder el stack trace original.</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card h-100" style="border-left:3px solid var(--err)">
+              <h6 class="mb-3" style="color:var(--err)"><i class="fa-solid fa-circle-xmark me-2"></i>No hacer</h6>
+              <ul class="sl">
+                <li><div class="sn" style="background:var(--err)">✗</div><div class="bt">No usar excepciones para flujo de control normal (reemplazar <code>if</code>).</div></li>
+                <li><div class="sn" style="background:var(--err)">✗</div><div class="bt">No silenciar excepciones con <code>catch { }</code> vacío.</div></li>
+                <li><div class="sn" style="background:var(--err)">✗</div><div class="bt">No capturar <code>Exception</code> base si no vas a relanzarla.</div></li>
+                <li><div class="sn" style="background:var(--err)">✗</div><div class="bt">No lanzar <code>NullReferenceException</code> manualmente: usar <code>ArgumentNullException</code>.</div></li>
+                <li><div class="sn" style="background:var(--err)">✗</div><div class="bt">No usar <code>throw e;</code> si quieres preservar el stack trace: usa <code>throw;</code>.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(251,146,60,.14),rgba(56,189,248,.08));border:1px solid rgba(251,146,60,.28);border-radius:14px;padding:20px;text-align:center">
+          <p style="font-size:1.05rem;font-weight:700;color:#fff;margin:0">
+            <i class="fa-solid fa-graduation-cap me-2" style="color:var(--a1)"></i>
+            Las excepciones expresan <span class="c1">violaciones de la especificación</span>. Úsalas para comunicar <span class="c2">situaciones excepcionales</span>, no para flujo normal.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 13 QUIZ ══ -->
+    <div class="slide" id="slide-13">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-clipboard-question me-1"></i>Evaluación</div>
+        <h2 class="t">Cuestionario <span class="c1">Excepciones C#</span></h2>
+        <p class="bt mb-4">Verificá tu comprensión de los conceptos de manejo de excepciones.</p>
+
+        <div id="quiz-section">
+          <div class="card mb-3">
+            <div class="qc">Pregunta <span id="q-num">1</span> de 10</div>
+            <div class="qq" id="q-text"></div>
+            <div id="q-options"></div>
+            <div class="qf" id="q-feedback"></div>
+            <div class="text-end mt-3">
+              <button class="nb p" id="btn-next-q" onclick="nextQ()" style="display:none">
+                Siguiente <i class="fa-solid fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="rs">
+          <div class="card text-center mb-3">
+            <h4 class="mb-3">Resultado final</h4>
+            <div class="sr mb-3">
+              <canvas id="dc" width="140" height="140"></canvas>
+              <div class="si"><div class="snum" id="sd">0/10</div><div class="slb">correctas</div></div>
+            </div>
+            <div id="rm" class="mb-3"></div>
+            <div class="mb-3"><canvas id="bc" height="80"></canvas></div>
+            <button class="nb p mt-2" onclick="restart()">
+              <i class="fa-solid fa-rotate-left me-2"></i>Reiniciar cuestionario
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /sa -->
+
+  <footer>
+    <button class="nb" id="bp" onclick="go(-1)" disabled><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+    <div class="d-flex gap-1 flex-wrap justify-content-center" id="dn"></div>
+    <button class="nb p" id="bn" onclick="go(1)">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+  </footer>
+</div>
+
+<script>
+const TOTAL = 13;
+let cur = 1;
+
+const quiz = [
+  {
+    q: "¿Cuál es el término IEEE preciso para una 'acción humana que produce un resultado incorrecto'?",
+    opts:["Falla (failure)","Error","Equivocación (mistake)","Falta (fault)"],
+    ok:1, // index
+    fb_ok:"Correcto. Equivocación (mistake) es la acción humana. La falta es su manifestación en el código, y la falla es el resultado observable.",
+    fb_ko:"Incorrecto. El término preciso es equivocación (mistake). La falta (fault) es la manifestación de la equivocación en el código."
+  },
+  {
+    q: "¿Qué bloque del try…catch…finally se ejecuta siempre, haya o no excepción?",
+    opts:["try","catch","finally","Todos por igual"],
+    ok:2,
+    fb_ok:"Correcto. El bloque finally se ejecuta siempre, lo que lo hace ideal para liberar recursos como archivos o conexiones.",
+    fb_ko:"Incorrecto. El bloque finally se ejecuta siempre, independientemente de si ocurrió o no una excepción."
+  },
+  {
+    q: "¿De qué clase deben heredar obligatoriamente todas las excepciones en C#?",
+    opts:["System.Error","System.Exception","System.Throwable","System.BaseException"],
+    ok:1,
+    fb_ok:"Correcto. En C# todas las excepciones heredan de System.Exception. No existe Throwable (eso es Java).",
+    fb_ko:"Incorrecto. En C# todas las excepciones deben heredar de System.Exception (no de Error ni de Throwable, que son de Java)."
+  },
+  {
+    q: "En el ejemplo de la clase Song, ¿cuándo se lanza LibraryException?",
+    opts:[
+      "Cuando se llama a Library.Add() con cualquier canción.",
+      "Cuando se intenta crear una canción con género 'marcha'.",
+      "Cuando la biblioteca supera cierta cantidad de canciones.",
+      "Cuando no se puede conectar a la base de datos."
+    ],
+    ok:1,
+    fb_ok:"Correcto. El constructor de Song verifica si el género es 'marcha' (insensible a mayúsculas) y lanza LibraryException si es así.",
+    fb_ko:"Incorrecto. LibraryException se lanza en el constructor de Song únicamente cuando el género es 'marcha' (sin importar mayúsculas/minúsculas)."
+  },
+  {
+    q: "¿Cuál es la diferencia entre 'throw e;' y 'throw;' dentro de un bloque catch?",
+    opts:[
+      "Son exactamente equivalentes, no hay diferencia.",
+      "'throw e;' preserva el stack trace original; 'throw;' lo resetea.",
+      "'throw;' preserva el stack trace original; 'throw e;' lo resetea creando uno nuevo.",
+      "'throw e;' solo funciona con excepciones propias."
+    ],
+    ok:2,
+    fb_ok:"Correcto. 'throw;' relanza la excepción sin modificar el stack trace, lo que permite ver dónde ocurrió originalmente. 'throw e;' crea un nuevo stack trace desde el catch.",
+    fb_ko:"Incorrecto. 'throw;' (sin argumento) preserva el stack trace original. 'throw e;' resetea el stack trace, haciendo más difícil depurar el origen del error."
+  },
+  {
+    q: "¿Qué atributo debe decorar a una clase de excepción personalizada en C#?",
+    opts:["[Exception]","[CustomException]","[Serializable]","[DataContract]"],
+    ok:2,
+    fb_ok:"Correcto. El atributo [Serializable] es necesario para que la excepción pueda serializarse, por ejemplo, en escenarios de llamadas remotas.",
+    fb_ko:"Incorrecto. Las excepciones personalizadas deben decorarse con [Serializable] para permitir su serialización."
+  },
+  {
+    q: "Si ocurre una excepción dentro de un método y no hay un try…catch que la capture ahí, ¿qué sucede?",
+    opts:[
+      "El programa continúa ignorando la excepción.",
+      "La excepción se captura automáticamente por el runtime.",
+      "Se busca un try…catch en el método que llamó al método actual, y así sucesivamente.",
+      "La excepción se convierte automáticamente en una advertencia."
+    ],
+    ok:2,
+    fb_ok:"Correcto. C# hace 'stack unwinding': sube por la pila de llamadas buscando un catch adecuado. Si no encuentra ninguno, el programa termina.",
+    fb_ko:"Incorrecto. La excepción sube por la pila de llamadas (stack unwinding) buscando un catch. Si no hay ninguno, el programa termina."
+  },
+  {
+    q: "En el bloque catch, ¿para qué sirve el objeto de excepción recibido como parámetro (e.g., 'e')?",
+    opts:[
+      "Para pausar la ejecución del programa.",
+      "Para acceder a información sobre la excepción, como su mensaje (e.Message).",
+      "Para crear una nueva excepción del mismo tipo.",
+      "No tiene utilidad; es solo una convención."
+    ],
+    ok:1,
+    fb_ok:"Correcto. El objeto excepción contiene información como e.Message (descripción), e.StackTrace (dónde ocurrió) e InnerException (excepción encadenada).",
+    fb_ko:"Incorrecto. El objeto excepción permite acceder a e.Message, e.StackTrace y otras propiedades útiles para el diagnóstico y manejo del error."
+  },
+  {
+    q: "¿Por qué en un bloque try con múltiples catch se deben ordenar de más específico a más general?",
+    opts:[
+      "Es solo una convención de estilo, no tiene impacto funcional.",
+      "Porque el compilador lo exige siempre por razones de performance.",
+      "Porque el primer catch compatible con la excepción es el que se ejecuta; un catch(Exception) al inicio capturaría todo y los demás nunca se ejecutarían.",
+      "Porque el finally solo funciona si los catch están ordenados correctamente."
+    ],
+    ok:2,
+    fb_ok:"Correcto. Los catch se evalúan en orden. Si Exception (la más general) está primero, capturará todas las excepciones antes de que lleguen a los catch más específicos.",
+    fb_ko:"Incorrecto. C# evalúa los catch en orden y ejecuta el primero que sea compatible. Si Exception va primero, captura todo y los demás catch nunca se alcanzan (de hecho, el compilador lo detecta como error)."
+  },
+  {
+    q: "Según el material, ¿quién decide si una excepción representa una falla irrecuperable o algo manejable?",
+    opts:[
+      "La clase que lanza la excepción (por ej., FileStream).",
+      "El runtime de .NET automáticamente.",
+      "El objeto que envía el mensaje y recibe el resultado (el contexto de uso).",
+      "El sistema operativo donde corre el programa."
+    ],
+    ok:2,
+    fb_ok:"Correcto. La decisión depende del contexto: FileNotFoundException puede ser manejable si la ruta la ingresó el usuario, o una falla si es un recurso interno del sistema.",
+    fb_ko:"Incorrecto. La decisión la toma el objeto que usa el resultado. La misma excepción puede ser manejable en un contexto (usuario ingresó ruta incorrecta) y una falla en otro (recurso interno que debe existir)."
+  }
+];
+
+let qcur=0, qsc=0, qans=[];
+let dc=null, bc=null;
+
+function go(d) {
+  document.querySelectorAll('.slide')[cur-1].classList.remove('active');
+  cur = Math.max(1, Math.min(TOTAL, cur+d));
+  const s = document.querySelectorAll('.slide')[cur-1];
+  s.classList.add('active');
+  const a = s.querySelector('.animate__animated');
+  if(a){a.classList.remove('animate__fadeInRight','animate__fadeIn');void a.offsetWidth;a.classList.add(cur===1?'animate__fadeIn':'animate__fadeInRight');}
+  document.getElementById('cs').textContent = cur;
+  document.getElementById('pb').style.width = ((cur/TOTAL)*100)+'%';
+  document.getElementById('bp').disabled = cur===1;
+  document.getElementById('bn').disabled = cur===TOTAL;
+  dots(); document.getElementById('sa').scrollTop=0;
+  hljs.highlightAll();
+}
+
+function dots(){
+  const n=document.getElementById('dn'); n.innerHTML='';
+  for(let i=1;i<=TOTAL;i++){
+    const d=document.createElement('div');
+    const ac=i===cur, vi=i<cur;
+    d.style.cssText=`width:${ac?'18px':'6px'};height:6px;border-radius:99px;background:${ac?'var(--a1)':vi?'rgba(251,146,60,.3)':'#1a1c2e'};border:1px solid ${ac||vi?'var(--a1)':'#2a2c40'};transition:all .3s;cursor:pointer;flex-shrink:0`;
+    d.onclick=()=>{const dif=i-cur;if(dif)go(dif);};
+    n.appendChild(d);
+  }
+}
+
+function loadQ(){
+  if(qcur>=quiz.length){showRes();return;}
+  const q=quiz[qcur];
+  document.getElementById('q-num').textContent=qcur+1;
+  document.getElementById('q-text').textContent=q.q;
+  const L=['A','B','C','D'];
+  document.getElementById('q-options').innerHTML=q.opts.map((o,i)=>
+    `<div class="qo" onclick="sel(${i})" id="op-${i}"><span class="ol">${L[i]}</span><span>${o}</span></div>`
+  ).join('');
+  const fb=document.getElementById('q-feedback');
+  fb.textContent=''; fb.className='qf';
+  document.getElementById('btn-next-q').style.display='none';
+}
+
+function sel(idx){
+  const q=quiz[qcur];
+  document.querySelectorAll('.qo').forEach(o=>o.classList.add('disabled'));
+  const fb=document.getElementById('q-feedback');
+  if(idx===q.ok){
+    document.getElementById(`op-${idx}`).classList.add('correct');
+    fb.textContent='✓ '+q.fb_ok; fb.className='qf show ok';
+    qsc++; qans.push(true);
+  } else {
+    document.getElementById(`op-${idx}`).classList.add('wrong');
+    document.getElementById(`op-${q.ok}`).classList.add('correct');
+    fb.textContent='✗ '+q.fb_ko; fb.className='qf show ko';
+    qans.push(false);
+  }
+  document.getElementById('btn-next-q').style.display='inline-flex';
+}
+
+function nextQ(){qcur++;loadQ();}
+
+function showRes(){
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('rs').style.display='block';
+  const tot=quiz.length, pct=Math.round((qsc/tot)*100);
+  document.getElementById('sd').textContent=`${qsc}/${tot}`;
+  let msg='',color='';
+  if(pct>=90){msg='🏆 ¡Excelente! Dominás el tema de excepciones.';color='var(--a1)';}
+  else if(pct>=70){msg='👍 Bien. Repasá los puntos donde fallaste.';color='var(--a2)';}
+  else if(pct>=50){msg='🔄 Bien encaminado, pero conviene releer el material.';color='var(--a3)';}
+  else{msg='📖 Revisá el material con más detalle antes de continuar.';color='var(--err)';}
+  document.getElementById('rm').innerHTML=`<p style="font-size:1rem;font-weight:700;color:${color}">${msg}</p><p class="bt">Obtuviste <strong>${qsc} de ${tot}</strong> correctas (${pct}%).</p>`;
+  if(dc)dc.destroy();
+  dc=new Chart(document.getElementById('dc'),{
+    type:'doughnut',
+    data:{datasets:[{data:[qsc,tot-qsc],backgroundColor:['#fb923c','#1a1c2e'],borderColor:['#ea7c2a','#2a2c40'],borderWidth:2}]},
+    options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+  if(bc)bc.destroy();
+  bc=new Chart(document.getElementById('bc'),{
+    type:'bar',
+    data:{
+      labels:qans.map((_,i)=>`P${i+1}`),
+      datasets:[{data:qans.map(a=>a?1:0),
+        backgroundColor:qans.map(a=>a?'rgba(251,146,60,.7)':'rgba(248,113,113,.7)'),
+        borderColor:qans.map(a=>a?'#fb923c':'#f87171'),
+        borderWidth:1,borderRadius:4}]
+    },
+    options:{responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw===1?'✓ Correcta':'✗ Incorrecta'}}},
+      scales:{y:{display:false,max:1.3},x:{ticks:{color:'#4c5080',font:{family:'JetBrains Mono',size:10}},grid:{color:'rgba(255,255,255,.03)'}}}}
+  });
+  Swal.fire({
+    title:qsc>=8?'¡Buen trabajo!':'Sigue practicando',
+    html:`<strong>${qsc}/${tot}</strong> correctas · ${pct}%`,
+    icon:qsc>=8?'success':qsc>=5?'warning':'error',
+    background:'#111526',color:'#e8eaf6',
+    confirmButtonColor:'#fb923c',confirmButtonText:'Ver resultados',
+    customClass:{popup:'border border-secondary'}
+  });
+}
+
+function restart(){
+  qcur=0;qsc=0;qans=[];
+  document.getElementById('quiz-section').style.display='block';
+  document.getElementById('rs').style.display='none';
+  loadQ();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{hljs.highlightAll();dots();loadQ();});
+</script>
+</body>
+</html>

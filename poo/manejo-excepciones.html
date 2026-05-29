@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excepciones en .NET | Programación 2 · FIT UCU</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,MONO@-15..0,300..800,0..1&family=Sora:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:     #0b0b17;
+    --bgc:    #10101f;
+    --bgp:    #14142a;
+    --a1:     #e879f9;   /* fuchsia */
+    --a2:     #67e8f9;   /* cyan */
+    --a3:     #fde68a;   /* amber */
+    --a4:     #86efac;   /* green */
+    --err:    #f87171;
+    --warn:   #fb923c;
+    --text:   #ede9fe;
+    --muted:  #4c4870;
+    --border: rgba(232,121,249,.12);
+    --r:      12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Sora',sans-serif;
+    min-height:100vh; overflow:hidden;
+  }
+  /* animated gradient orbs */
+  body::before{
+    content:''; position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 60% 50% at 95% 5%,  rgba(232,121,249,.1) 0%,transparent 55%),
+      radial-gradient(ellipse 50% 40% at 5%  95%,  rgba(103,232,249,.08) 0%,transparent 55%);
+    pointer-events:none; z-index:0;
+  }
+  /* subtle noise */
+  body::after{
+    content:''; position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0; opacity:.5;
+  }
+  #app{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;}
+
+  /* HEADER */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 28px; border-bottom:1px solid var(--border);
+    background:rgba(11,11,23,.96); backdrop-filter:blur(18px); flex-shrink:0;
+  }
+  .brand{font-family:'Recursive',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;}
+  .sc{font-family:'Recursive',monospace;font-size:.82rem;color:var(--a1);font-weight:600;}
+
+  #pbw{height:3px;background:#1a1a2e;flex-shrink:0;}
+  #pb{height:100%;background:linear-gradient(90deg,var(--a2),var(--a1));transition:width .4s ease;}
+
+  #sa{flex:1;overflow-y:auto;padding:28px 44px;}
+  #sa::-webkit-scrollbar{width:4px;}
+  #sa::-webkit-scrollbar-track{background:transparent;}
+  #sa::-webkit-scrollbar-thumb{background:rgba(232,121,249,.2);border-radius:99px;}
+
+  .slide{display:none;} .slide.active{display:block;}
+
+  /* TYPO */
+  .stag{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'Recursive',monospace;font-size:.67rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--a1);border:1px solid rgba(232,121,249,.35);border-radius:4px;
+    padding:3px 12px;margin-bottom:14px;
+  }
+  h1.t{font-size:clamp(1.9rem,4vw,3.1rem);font-weight:900;line-height:1.08;margin-bottom:10px;}
+  h2.t{font-size:clamp(1.4rem,2.8vw,2.1rem);font-weight:800;line-height:1.2;margin-bottom:16px;}
+  .c1{color:var(--a1);} .c2{color:var(--a2);} .c3{color:var(--a3);} .c4{color:var(--a4);}
+  .bt{font-family:'Recursive',monospace;font-size:.82rem;color:#6060a0;line-height:1.82;}
+  .lt{font-size:1rem;color:#9090c0;line-height:1.78;}
+
+  /* GLASS CARD */
+  .gc{
+    background:var(--bgc);border:1px solid var(--border);
+    border-radius:var(--r);padding:20px 24px;position:relative;overflow:hidden;
+  }
+  .gc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--a2),var(--a1));}
+
+  /* EXCEPTION BADGE */
+  .exc-badge{
+    display:inline-flex;align-items:center;gap:7px;
+    border-radius:8px;padding:8px 14px;
+    font-family:'Recursive',monospace;font-size:.82rem;font-weight:600;
+    border:1px solid; margin-bottom:4px; width:100%;
+  }
+  .exc-badge.base {color:var(--a1);border-color:rgba(232,121,249,.3);background:rgba(232,121,249,.07);}
+  .exc-badge.sys  {color:var(--a2);border-color:rgba(103,232,249,.3);background:rgba(103,232,249,.07);}
+  .exc-badge.arg  {color:var(--a3);border-color:rgba(253,230,138,.3);background:rgba(253,230,138,.07);}
+  .exc-badge.ok   {color:var(--a4);border-color:rgba(134,239,172,.3);background:rgba(134,239,172,.07);}
+  .exc-badge.err  {color:var(--err);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.07);}
+  .exc-badge.warn {color:var(--warn);border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.07);}
+
+  /* BOXES */
+  .hl{border-left:3px solid var(--a1);background:rgba(232,121,249,.06);border-radius:0 8px 8px 0;padding:12px 18px;margin:12px 0;font-family:'Recursive',monospace;font-size:.81rem;color:var(--text);}
+  .hl.cy{border-left-color:var(--a2);background:rgba(103,232,249,.06);}
+  .hl.am{border-left-color:var(--a3);background:rgba(253,230,138,.06);}
+  .hl.gr{border-left-color:var(--a4);background:rgba(134,239,172,.06);}
+  .hl.er{border-left-color:var(--err);background:rgba(248,113,113,.06);}
+  .hl.wa{border-left-color:var(--warn);background:rgba(251,146,60,.06);}
+
+  /* STEP */
+  .sl{list-style:none;padding:0;display:flex;flex-direction:column;gap:11px;}
+  .sl li{display:flex;align-items:flex-start;gap:13px;}
+  .sn{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--a1);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.72rem;font-weight:700;color:#0b0b17;margin-top:1px;}
+  .sn.cy{background:var(--a2);} .sn.am{background:var(--a3);}
+  .sn.gr{background:var(--a4);} .sn.er{background:var(--err);}
+
+  /* CODE */
+  .cw{border-radius:var(--r);overflow:hidden;border:1px solid rgba(255,255,255,.07);}
+  .ch{background:#0d0d1a;padding:8px 16px;display:flex;align-items:center;gap:8px;
+    font-family:'Recursive',monospace;font-size:.7rem;color:var(--muted);}
+  .dot{width:10px;height:10px;border-radius:50%;}
+  .dr{background:#ff5f57;}.dy{background:#febc2e;}.dg{background:#28c840;}
+  pre{margin:0!important;border-radius:0!important;}
+  code.hljs{font-family:'Recursive',monospace!important;font-size:.79rem!important;padding:18px!important;line-height:1.65!important;}
+
+  /* TABLE */
+  .et{width:100%;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden;}
+  .et th{background:#14142a;padding:10px 14px;font-family:'Recursive',monospace;font-size:.78rem;font-weight:700;text-align:left;}
+  .et td{padding:10px 14px;border-top:1px solid var(--border);font-family:'Recursive',monospace;font-size:.78rem;color:#6060a0;vertical-align:top;}
+  .et tr:hover td{background:rgba(232,121,249,.03);}
+  .et code{color:var(--a2);font-size:.75rem;}
+
+  /* DIAGRAM */
+  .dw{background:var(--bgp);border:1px solid var(--border);border-radius:var(--r);padding:20px;overflow-x:auto;}
+  .dw svg{display:block;margin:0 auto;}
+  .dlbl{font-family:'Recursive',monospace;font-size:.74rem;color:var(--muted);text-align:center;margin-top:8px;}
+
+  /* VS TABLE */
+  .vst{width:100%;border-collapse:separate;border-spacing:0 6px;}
+  .vst td{padding:10px 16px;font-family:'Recursive',monospace;font-size:.8rem;border-radius:6px;}
+  .vst td.L{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#f87171;width:50%}
+  .vst td.R{background:rgba(134,239,172,.08);border:1px solid rgba(134,239,172,.2);color:#86efac;width:50%}
+
+  /* NAV */
+  footer{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 28px;border-top:1px solid var(--border);
+    background:rgba(11,11,23,.96);backdrop-filter:blur(18px);flex-shrink:0;}
+  .nb{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);
+    padding:8px 22px;font-family:'Sora',sans-serif;font-weight:700;font-size:.88rem;
+    cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;}
+  .nb:hover{background:rgba(232,121,249,.08);border-color:var(--a1);color:var(--a1);}
+  .nb:disabled{opacity:.22;cursor:default;pointer-events:none;}
+  .nb.p{background:var(--a1);color:#0b0b17;border-color:var(--a1);font-weight:800;}
+  .nb.p:hover{background:#d946ef;border-color:#d946ef;}
+
+  /* QUIZ */
+  .qo{background:var(--bgp);border:1px solid var(--border);border-radius:8px;padding:13px 17px;
+    cursor:pointer;transition:all .2s;margin-bottom:9px;display:flex;align-items:center;gap:12px;
+    font-family:'Recursive',monospace;font-size:.82rem;}
+  .qo:hover{border-color:var(--a1);background:rgba(232,121,249,.05);}
+  .qo.correct{border-color:var(--a4);background:rgba(134,239,172,.08);}
+  .qo.wrong{border-color:var(--err);background:rgba(248,113,113,.08);}
+  .qo.disabled{pointer-events:none;}
+  .ol{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.07);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;}
+  .qf{border-radius:8px;padding:11px 15px;margin-top:11px;font-family:'Recursive',monospace;font-size:.8rem;display:none;}
+  .qf.show{display:block;}
+  .qf.ok{background:rgba(134,239,172,.1);border:1px solid rgba(134,239,172,.35);color:#bbf7d0;}
+  .qf.ko{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:#fecaca;}
+  .qcount{font-family:'Recursive',monospace;font-size:.72rem;color:var(--muted);margin-bottom:8px;}
+  .qq{font-size:.95rem;font-weight:700;margin-bottom:16px;line-height:1.5;}
+
+  #rs{display:none;}
+  .sr{position:relative;width:140px;height:140px;margin:0 auto 18px;}
+  .si{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .snum{font-size:2.2rem;font-weight:800;color:var(--a1);font-family:'Recursive',monospace;}
+  .slb{font-size:.7rem;color:var(--muted);font-family:'Recursive',monospace;}
+
+  @media(max-width:700px){#sa{padding:16px 12px;}header,footer{padding:10px 12px;}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand"><i class="fa-solid fa-triangle-exclamation me-2"></i>FIT · UCU &nbsp;·&nbsp; Programación 2 · .NET</div>
+    <div class="sc"><span id="cs">1</span> / <span id="ts">13</span></div>
+  </header>
+  <div id="pbw"><div id="pb" style="width:7.69%"></div></div>
+
+  <div id="sa">
+
+    <!-- ══ 1 PORTADA ══ -->
+    <div class="slide active" id="slide-1">
+      <div class="animate__animated animate__fadeIn" style="min-height:63vh;display:flex;flex-direction:column;justify-content:center;position:relative;">
+        <div style="position:absolute;right:-40px;top:-40px;width:380px;height:380px;border-radius:50%;
+          background:radial-gradient(circle,rgba(232,121,249,.18) 0%,transparent 68%);pointer-events:none"></div>
+        <div class="stag"><i class="fa-solid fa-bolt me-1"></i>Programación 2 · .NET / C#</div>
+        <h1 class="t">Manejo y<br>lanzamiento de<br><span class="c1">excepciones</span><br><span style="font-size:.5em;font-weight:500;color:#6060a0;">en .NET</span></h1>
+        <p class="lt mt-3" style="max-width:560px;">El modelo uniforme de notificación de errores de .NET: qué son las excepciones, por qué son mejores que los códigos de retorno y cuáles son las más comunes.</p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <span class="exc-badge base" style="width:auto"><i class="fa-brands fa-microsoft"></i>.NET / C#</span>
+          <span class="exc-badge sys" style="width:auto"><i class="fa-solid fa-layer-group"></i>System.Exception</span>
+          <span class="exc-badge ok" style="width:auto"><i class="fa-solid fa-university"></i>FIT – UCU</span>
+        </div>
+        <div class="mt-4 gc" style="max-width:560px;">
+          <p class="bt mb-0"><span class="c1 fw-bold">Temas:</span> ¿qué es una excepción? · ventajas frente a códigos de retorno · jerarquía en .NET · excepciones comunes · cuándo lanzar · mejores prácticas.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2 QUÉ ES UNA EXCEPCIÓN ══ -->
+    <div class="slide" id="slide-2">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-circle-question me-1"></i>Definición</div>
+        <h2 class="t">¿Qué es una <span class="c1">excepción</span>?</h2>
+        <p class="lt mb-4">Las aplicaciones necesitan controlar errores en tiempo de ejecución de forma coherente. .NET proporciona un modelo uniforme: las operaciones indican errores produciendo <strong>excepciones</strong>.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-7">
+            <div class="gc h-100">
+              <h6 class="c1 mb-3"><i class="fa-solid fa-book me-2"></i>Definición formal</h6>
+              <div class="hl" style="font-size:.9rem;font-weight:600;line-height:1.6;">
+                Una excepción es cualquier <strong>condición de error o comportamiento inesperado</strong> que encuentra un programa en ejecución.
+              </div>
+              <p class="bt mt-3">En .NET, una excepción es un <strong>objeto</strong> que hereda de <code>System.Exception</code>. Se <em>lanza</em> desde la sección de código donde ocurrió el problema y se <em>pasa hacia arriba en la pila</em> hasta que la aplicación la controla o el programa finaliza.</p>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="gc h-100">
+              <h6 class="c2 mb-3"><i class="fa-solid fa-list me-2"></i>Fuentes de excepciones</h6>
+              <ul class="sl">
+                <li><div class="sn">1</div><div class="bt">Error en el <strong>código propio</strong>.</div></li>
+                <li><div class="sn cy">2</div><div class="bt">Error en código de <strong>librería compartida</strong>.</div></li>
+                <li><div class="sn am">3</div><div class="bt"><strong>Recursos del S.O.</strong> no disponibles.</div></li>
+                <li><div class="sn gr">4</div><div class="bt">Condiciones inesperadas del <strong>runtime</strong>.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="hl gr">
+              <i class="fa-solid fa-circle-check me-2"></i>
+              Algunas excepciones son <strong>recuperables</strong> (aplicación puede continuar).
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="hl er">
+              <i class="fa-solid fa-circle-xmark me-2"></i>
+              Las excepciones de <strong>runtime</strong> generalmente no son recuperables.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 3 FLUJO DE LA EXCEPCIÓN ══ -->
+    <div class="slide" id="slide-3">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-diagram-project me-1"></i>Flujo</div>
+        <h2 class="t">Cómo <span class="c2">viaja</span> una excepción</h2>
+        <p class="lt mb-3">Una excepción lanzada sube por la pila de llamadas buscando un manejador. Si no lo encuentra, el programa termina.</p>
+
+        <div class="dw mb-3">
+          <svg viewBox="0 0 780 310" xmlns="http://www.w3.org/2000/svg" style="max-width:780px;width:100%">
+            <defs>
+              <marker id="up" markerWidth="7" markerHeight="7" refX="3.5" refY="0" orient="auto">
+                <path d="M0,7 L3.5,0 L7,7 z" fill="#e879f9"/>
+              </marker>
+              <marker id="dn" markerWidth="7" markerHeight="7" refX="3.5" refY="7" orient="auto">
+                <path d="M0,0 L3.5,7 L7,0 z" fill="#67e8f9"/>
+              </marker>
+            </defs>
+
+            <!-- Stack frame labels -->
+            <text x="30" y="22" fill="#4c4870" font-family="Recursive" font-size="9" letter-spacing="2">PILA DE LLAMADAS</text>
+
+            <!-- Frame: Main -->
+            <rect x="20" y="30" width="200" height="55" rx="7" fill="#10101f" stroke="#e879f9" stroke-width="2"/>
+            <rect x="20" y="30" width="200" height="20" rx="7" fill="#1e0a2e"/>
+            <text x="120" y="44" text-anchor="middle" fill="#e879f9" font-family="Recursive" font-size="9" font-weight="700">Program.Main()</text>
+            <text x="30" y="63" fill="#6060a0" font-family="Recursive" font-size="8">try { ... } catch (Exception) ←</text>
+            <text x="30" y="75" fill="#86efac" font-family="Recursive" font-size="8">¡CATCH ENCONTRADO!</text>
+
+            <!-- Frame: MethodA -->
+            <rect x="20" y="100" width="200" height="48" rx="7" fill="#10101f" stroke="#4c4870" stroke-width="1.2"/>
+            <rect x="20" y="100" width="200" height="20" rx="7" fill="#14142a"/>
+            <text x="120" y="114" text-anchor="middle" fill="#9090c0" font-family="Recursive" font-size="9" font-weight="700">MethodA()</text>
+            <text x="30" y="133" fill="#4c4870" font-family="Recursive" font-size="8">sin try/catch → sigue subiendo</text>
+
+            <!-- Frame: MethodB -->
+            <rect x="20" y="162" width="200" height="48" rx="7" fill="#10101f" stroke="#4c4870" stroke-width="1.2"/>
+            <rect x="20" y="162" width="200" height="20" rx="7" fill="#14142a"/>
+            <text x="120" y="176" text-anchor="middle" fill="#9090c0" font-family="Recursive" font-size="9" font-weight="700">MethodB()</text>
+            <text x="30" y="196" fill="#4c4870" font-family="Recursive" font-size="8">sin try/catch → sigue subiendo</text>
+
+            <!-- Frame: FaultySrc -->
+            <rect x="20" y="224" width="200" height="55" rx="7" fill="#1a0814" stroke="#f87171" stroke-width="2"/>
+            <rect x="20" y="224" width="200" height="20" rx="7" fill="#2a0a14"/>
+            <text x="120" y="238" text-anchor="middle" fill="#f87171" font-family="Recursive" font-size="9" font-weight="700">FaultyMethod()</text>
+            <text x="30" y="258" fill="#f87171" font-family="Recursive" font-size="8">throw new Exception(...)</text>
+            <text x="30" y="270" fill="#4c4870" font-family="Recursive" font-size="8">← AQUÍ NACE</text>
+
+            <!-- Exception object -->
+            <rect x="280" y="220" width="185" height="65" rx="8" fill="#1a0814" stroke="#f87171" stroke-width="1.8"/>
+            <text x="372" y="240" text-anchor="middle" fill="#f87171" font-family="Recursive" font-size="9">«object»</text>
+            <text x="372" y="254" text-anchor="middle" fill="#ede9fe" font-family="Recursive" font-size="10" font-weight="700">Exception</text>
+            <text x="372" y="268" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="8">Message, StackTrace,</text>
+            <text x="372" y="279" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="8">InnerException...</text>
+            <line x1="220" y1="252" x2="280" y2="252" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4,2"/>
+
+            <!-- Upward arrows (stack unwinding) -->
+            <line x1="108" y1="160" x2="108" y2="88" stroke="#e879f9" stroke-width="2" marker-end="url(#up)"/>
+            <text x="116" y="140" fill="#e879f9" font-family="Recursive" font-size="8">stack</text>
+            <text x="116" y="151" fill="#e879f9" font-family="Recursive" font-size="8">unwinding</text>
+
+            <line x1="108" y1="222" x2="108" y2="150" stroke="#e879f9" stroke-width="2" marker-end="url(#up)"/>
+
+            <!-- Execution flow right side -->
+            <rect x="510" y="30" width="240" height="250" rx="10" fill="rgba(232,121,249,.04)" stroke="rgba(232,121,249,.15)" stroke-width="1"/>
+            <text x="630" y="52" text-anchor="middle" fill="#e879f9" font-family="Recursive" font-size="9" font-weight="700">FLUJO DE EJECUCIÓN</text>
+
+            <rect x="525" y="65" width="210" height="38" rx="6" fill="#14142a" stroke="#67e8f9" stroke-width="1"/>
+            <text x="630" y="82" text-anchor="middle" fill="#67e8f9" font-family="Recursive" font-size="8.5" font-weight="700">1. FaultyMethod lanza excepción</text>
+            <text x="630" y="96" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="7.5">throw new InvalidOperationException("...")</text>
+
+            <line x1="630" y1="103" x2="630" y2="115" stroke="#4c4870" stroke-width="1.3" marker-end="url(#dn)"/>
+
+            <rect x="525" y="116" width="210" height="38" rx="6" fill="#14142a" stroke="#4c4870" stroke-width="1"/>
+            <text x="630" y="133" text-anchor="middle" fill="#9090c0" font-family="Recursive" font-size="8.5">2. Runtime busca catch en MethodB</text>
+            <text x="630" y="147" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="7.5">No encontrado → sube</text>
+
+            <line x1="630" y1="154" x2="630" y2="166" stroke="#4c4870" stroke-width="1.3" marker-end="url(#dn)"/>
+
+            <rect x="525" y="167" width="210" height="38" rx="6" fill="#14142a" stroke="#4c4870" stroke-width="1"/>
+            <text x="630" y="184" text-anchor="middle" fill="#9090c0" font-family="Recursive" font-size="8.5">3. Runtime busca catch en MethodA</text>
+            <text x="630" y="198" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="7.5">No encontrado → sube</text>
+
+            <line x1="630" y1="205" x2="630" y2="217" stroke="#4c4870" stroke-width="1.3" marker-end="url(#dn)"/>
+
+            <rect x="525" y="218" width="210" height="48" rx="6" fill="#0a1f0a" stroke="#86efac" stroke-width="1.5"/>
+            <text x="630" y="235" text-anchor="middle" fill="#86efac" font-family="Recursive" font-size="8.5" font-weight="700">4. ¡CATCH encontrado en Main!</text>
+            <text x="630" y="250" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="7.5">catch (Exception e) { ... }</text>
+            <text x="630" y="263" text-anchor="middle" fill="#86efac" font-family="Recursive" font-size="7.5">→ se ejecuta el bloque catch</text>
+          </svg>
+        </div>
+        <div class="hl er">
+          <i class="fa-solid fa-skull me-2"></i>
+          Si ningún frame de la pila tiene un <code>catch</code> adecuado, el <strong>runtime finaliza la aplicación</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4 VS CÓDIGOS DE RETORNO ══ -->
+    <div class="slide" id="slide-4">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-scale-balanced me-1"></i>Comparación</div>
+        <h2 class="t">Excepciones vs. <span class="c3">códigos de retorno</span></h2>
+        <p class="lt mb-3">El modelo tradicional usaba valores de retorno o variables globales para indicar errores. Las excepciones son superiores en varios aspectos.</p>
+
+        <div class="table-responsive mb-3">
+          <table class="vst">
+            <tr>
+              <td class="L"><i class="fa-solid fa-circle-xmark me-2"></i><strong>Códigos de retorno</strong></td>
+              <td class="R"><i class="fa-solid fa-circle-check me-2"></i><strong>Excepciones .NET</strong></td>
+            </tr>
+            <tr>
+              <td class="L">Los errores pueden pasar <em>desapercibidos</em>: nadie fuerza a verificar el código de retorno.</td>
+              <td class="R">Si no se captura la excepción, el <strong>runtime termina la app</strong>. El error no se ignora.</td>
+            </tr>
+            <tr>
+              <td class="L">Valores inválidos <em>continúan propagándose</em> si no se verifica el código de retorno.</td>
+              <td class="R">Los valores inválidos <strong>no se propagan</strong>: la excepción interrumpe el flujo inmediatamente.</td>
+            </tr>
+            <tr>
+              <td class="L">El manejo de errores <em>mezcla</em> lógica de negocio con lógica de error.</td>
+              <td class="R">El código de manejo de errores está <strong>separado</strong> en bloques <code>catch</code>.</td>
+            </tr>
+            <tr>
+              <td class="L">Cada lenguaje o librería usa <em>convenciones distintas</em> para los códigos.</td>
+              <td class="R">El modelo funciona <strong>igual en todos los lenguajes .NET</strong> (C#, VB, F#…).</td>
+            </tr>
+            <tr>
+              <td class="L"><em>No cruzan</em> límites de proceso o máquina automáticamente.</td>
+              <td class="R">Las excepciones pueden iniciarse en <strong>varios procesos e incluso entre máquinas</strong>.</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="hl am">
+          <i class="fa-solid fa-lightbulb me-2"></i>
+          El código de control de excepciones puede <strong>agregarse a una aplicación existente</strong> para aumentar su confiabilidad sin cambiar la lógica de negocio.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 5 JERARQUÍA ══ -->
+    <div class="slide" id="slide-5">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-sitemap me-1"></i>Jerarquía</div>
+        <h2 class="t">Jerarquía de <span class="c1">System.Exception</span></h2>
+        <p class="lt mb-3">Todas las excepciones en .NET heredan de <code>System.Exception</code>. Conocer la jerarquía permite capturar con precisión.</p>
+
+        <div class="dw mb-3">
+          <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg" style="max-width:800px;width:100%">
+            <defs>
+              <marker id="inh" markerWidth="12" markerHeight="12" refX="6" refY="10" orient="auto">
+                <path d="M6,0 L0,10 L12,10 z" fill="none" stroke="#e879f9" stroke-width="1.5"/>
+              </marker>
+            </defs>
+
+            <!-- System.Exception -->
+            <rect x="290" y="10" width="220" height="55" rx="8" fill="#10101f" stroke="#e879f9" stroke-width="2"/>
+            <rect x="290" y="10" width="220" height="20" rx="8" fill="#1e0820"/>
+            <text x="400" y="24" text-anchor="middle" fill="#e879f9" font-family="Recursive" font-size="9" font-weight="700">System</text>
+            <text x="400" y="38" text-anchor="middle" fill="#ede9fe" font-family="Recursive" font-size="11" font-weight="700">Exception</text>
+            <text x="400" y="57" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="8">Message · StackTrace · InnerException</text>
+
+            <!-- SystemException -->
+            <rect x="100" y="120" width="190" height="45" rx="7" fill="#10101f" stroke="#67e8f9" stroke-width="1.5"/>
+            <rect x="100" y="120" width="190" height="18" rx="7" fill="#0a1e28"/>
+            <text x="195" y="132" text-anchor="middle" fill="#67e8f9" font-family="Recursive" font-size="9" font-weight="700">SystemException</text>
+            <text x="195" y="154" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="8">Errores de runtime</text>
+
+            <!-- ApplicationException -->
+            <rect x="510" y="120" width="200" height="45" rx="7" fill="#10101f" stroke="#e879f9" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <rect x="510" y="120" width="200" height="18" rx="7" fill="#1a0820"/>
+            <text x="610" y="132" text-anchor="middle" fill="#e879f9" font-family="Recursive" font-size="9" font-weight="700">ApplicationException</text>
+            <text x="610" y="148" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="8">obsoleto · no usar</text>
+
+            <!-- herencia -->
+            <line x1="195" y1="120" x2="350" y2="67" stroke="#e879f9" stroke-width="1.3" marker-end="url(#inh)"/>
+            <line x1="610" y1="120" x2="450" y2="67" stroke="#e879f9" stroke-width="1.3" marker-end="url(#inh)"/>
+
+            <!-- NullRef -->
+            <rect x="10"  y="220" width="160" height="45" rx="6" fill="#10101f" stroke="#f87171" stroke-width="1.2"/>
+            <text x="90"  y="238" text-anchor="middle" fill="#f87171" font-family="Recursive" font-size="8.5" font-weight="700">NullReference</text>
+            <text x="90"  y="252" text-anchor="middle" fill="#f87171" font-family="Recursive" font-size="8.5" font-weight="700">Exception</text>
+            <line x1="90"  y1="220" x2="140" y2="167" stroke="#f87171" stroke-width="1.2" marker-end="url(#inh)"/>
+
+            <!-- IndexOutOfRange -->
+            <rect x="185" y="220" width="165" height="45" rx="6" fill="#10101f" stroke="#fb923c" stroke-width="1.2"/>
+            <text x="267" y="238" text-anchor="middle" fill="#fb923c" font-family="Recursive" font-size="8.5" font-weight="700">IndexOutOfRange</text>
+            <text x="267" y="252" text-anchor="middle" fill="#fb923c" font-family="Recursive" font-size="8.5" font-weight="700">Exception</text>
+            <line x1="267" y1="220" x2="220" y2="167" stroke="#fb923c" stroke-width="1.2" marker-end="url(#inh)"/>
+
+            <!-- ArgumentException -->
+            <rect x="360" y="120" width="140" height="45" rx="7" fill="#10101f" stroke="#fde68a" stroke-width="1.5"/>
+            <rect x="360" y="120" width="140" height="18" rx="7" fill="#1a1800"/>
+            <text x="430" y="132" text-anchor="middle" fill="#fde68a" font-family="Recursive" font-size="9" font-weight="700">ArgumentException</text>
+            <text x="430" y="150" text-anchor="middle" fill="#6060a0" font-family="Recursive" font-size="8">base args</text>
+            <line x1="430" y1="120" x2="420" y2="67" stroke="#e879f9" stroke-width="1.3" marker-end="url(#inh)"/>
+
+            <!-- InvalidOperation -->
+            <rect x="360" y="220" width="160" height="45" rx="6" fill="#10101f" stroke="#67e8f9" stroke-width="1.2"/>
+            <text x="440" y="238" text-anchor="middle" fill="#67e8f9" font-family="Recursive" font-size="8.5" font-weight="700">InvalidOperation</text>
+            <text x="440" y="252" text-anchor="middle" fill="#67e8f9" font-family="Recursive" font-size="8.5" font-weight="700">Exception</text>
+            <line x1="440" y1="220" x2="220" y2="167" stroke="#67e8f9" stroke-width="1.2" marker-end="url(#inh)"/>
+
+            <!-- ArgumentNullException -->
+            <rect x="350" y="300" width="160" height="45" rx="6" fill="#10101f" stroke="#fde68a" stroke-width="1.2"/>
+            <text x="430" y="318" text-anchor="middle" fill="#fde68a" font-family="Recursive" font-size="8.5" font-weight="700">ArgumentNull</text>
+            <text x="430" y="332" text-anchor="middle" fill="#fde68a" font-family="Recursive" font-size="8.5" font-weight="700">Exception</text>
+            <line x1="430" y1="300" x2="430" y2="167" stroke="#fde68a" stroke-width="1.2" marker-end="url(#inh)"/>
+
+            <!-- ArgumentOutOfRange -->
+            <rect x="525" y="300" width="175" height="45" rx="6" fill="#10101f" stroke="#fde68a" stroke-width="1.2"/>
+            <text x="612" y="318" text-anchor="middle" fill="#fde68a" font-family="Recursive" font-size="8.5" font-weight="700">ArgumentOutOfRange</text>
+            <text x="612" y="332" text-anchor="middle" fill="#fde68a" font-family="Recursive" font-size="8.5" font-weight="700">Exception</text>
+            <line x1="612" y1="300" x2="450" y2="167" stroke="#fde68a" stroke-width="1.2" marker-end="url(#inh)"/>
+
+            <text x="400" y="355" text-anchor="middle" fill="#4c4870" font-family="Recursive" font-size="8">▷ triángulo = herencia · líneas sólidas = herencia activa · punteado = patrón obsoleto</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 6 EXCEPCIONES COMUNES ══ -->
+    <div class="slide" id="slide-6">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-list me-1"></i>Catálogo</div>
+        <h2 class="t">Excepciones <span class="c2">comunes</span> en .NET</h2>
+        <p class="lt mb-3">Estas excepciones aparecen frecuentemente. Conocerlas evita confundirlas y permite capturarlas correctamente.</p>
+
+        <div class="table-responsive">
+          <table class="et">
+            <thead>
+              <tr>
+                <th style="color:var(--a1)">Tipo</th>
+                <th style="color:var(--a2)">Descripción</th>
+                <th style="color:var(--a3)">Ejemplo que la causa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code style="color:var(--a1)">Exception</code></td>
+                <td>Clase base de todas las excepciones.</td>
+                <td style="color:#4c4870">No instanciar directamente. Usar clase derivada.</td>
+              </tr>
+              <tr>
+                <td><code style="color:var(--err)">IndexOutOfRangeException</code></td>
+                <td>El runtime la genera cuando una matriz no está correctamente indexada.</td>
+                <td><code>arr[arr.Length + 1]</code></td>
+              </tr>
+              <tr>
+                <td><code style="color:var(--err)">NullReferenceException</code></td>
+                <td>Solo en runtime cuando se hace referencia a un objeto null.</td>
+                <td><code>object o = null; o.ToString();</code></td>
+              </tr>
+              <tr>
+                <td><code style="color:var(--a2)">InvalidOperationException</code></td>
+                <td>Los métodos la generan si se produce un estado no válido.</td>
+                <td>Llamar a <code>Enumerator.MoveNext()</code> tras eliminar elemento de la colección.</td>
+              </tr>
+              <tr>
+                <td><code style="color:var(--a3)">ArgumentException</code></td>
+                <td>Clase base para todas las excepciones de argumento.</td>
+                <td style="color:#4c4870">No instanciar directamente. Usar clase derivada.</td>
+              </tr>
+              <tr>
+                <td><code style="color:var(--a3)">ArgumentNullException</code></td>
+                <td>Lanzada por métodos que no permiten argumentos nulos.</td>
+                <td><code>string s = null; "texto".IndexOf(s);</code></td>
+              </tr>
+              <tr>
+                <td><code style="color:var(--a3)">ArgumentOutOfRangeException</code></td>
+                <td>Lanzada cuando los argumentos están fuera del rango válido.</td>
+                <td><code>string s = "hi"; s.Substring(s.Length + 1);</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hl wa mt-3">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <code>NullReferenceException</code> e <code>IndexOutOfRangeException</code> son casi siempre <strong>bugs del programador</strong>: indican un error en el código, no en los datos del usuario.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 7 CÓDIGO: CAPTURAR ══ -->
+    <div class="slide" id="slide-7">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-net-wired me-1"></i>Capturar</div>
+        <h2 class="t">Capturar excepciones: <span class="c2">try / catch / finally</span></h2>
+        <p class="lt mb-3">Estructura básica y variantes para capturar excepciones específicas, múltiples tipos, y garantizar la liberación de recursos.</p>
+
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ms-2">Ejemplos.cs</span></div>
+          <pre><code class="language-csharp">// ── 1. Captura básica ───────────────────────────────────────────
+try
+{
+    int[] arr = new int[5];
+    arr[10] = 1;                     // IndexOutOfRangeException
+}
+catch (IndexOutOfRangeException ex)
+{
+    Console.WriteLine($"Índice fuera de rango: {ex.Message}");
+}
+
+// ── 2. Múltiples catch (de más específico a más general) ────────
+try
+{
+    string s = null;
+    _ = s.Length;                    // NullReferenceException
+}
+catch (NullReferenceException ex)
+{
+    Console.WriteLine("Referencia nula.");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Otro error: {ex.Message}");   // catch-all
+}
+
+// ── 3. Finally garantiza limpieza ───────────────────────────────
+FileStream file = null;
+try
+{
+    file = File.OpenRead("datos.txt");
+    // … procesar …
+}
+catch (FileNotFoundException)
+{
+    Console.WriteLine("Archivo no encontrado.");
+}
+finally
+{
+    file?.Close();   // se ejecuta SIEMPRE
+}
+
+// ── 4. Captura sin variable (cuando no se usa ex) ───────────────
+try { /* ... */ }
+catch (ArgumentNullException) { /* no necesito ex */ }</code></pre>
+        </div>
+        <div class="hl cy">
+          <i class="fa-solid fa-sort me-2"></i>
+          <strong>Orden importa:</strong> siempre de la excepción más específica a la más general. <code>catch (Exception)</code> al final captura todo lo que no se capturó antes.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 8 CÓDIGO: LANZAR ══ -->
+    <div class="slide" id="slide-8">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-bolt me-1"></i>Lanzar</div>
+        <h2 class="t">Lanzar excepciones: <span class="c1">throw</span></h2>
+        <p class="lt mb-3">Cómo crear y lanzar excepciones, cuándo relanzar, y cómo encadenar excepciones para no perder el contexto original.</p>
+
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ms-2">LanzarEjemplos.cs</span></div>
+          <pre><code class="language-csharp">// ── 1. Lanzar una nueva excepción ───────────────────────────────
+public void SetAge(int age)
+{
+    if (age < 0 || age > 150)
+        throw new ArgumentOutOfRangeException(nameof(age),
+            $"La edad {age} está fuera del rango válido (0-150).");
+    this.age = age;
+}
+
+// ── 2. throw (sin argumento) — preserva el stack trace ──────────
+try
+{
+    RiskyOperation();
+}
+catch (IOException ex)
+{
+    Log(ex);         // registrar
+    throw;           // ← relanzar SIN resetear el stack trace
+}
+
+// ── 3. throw ex — PIERDE el stack trace (evitar) ────────────────
+catch (IOException ex)
+{
+    throw ex;        // ← el stack trace ahora empieza aquí ⚠
+}
+
+// ── 4. Excepción encadenada (InnerException) ────────────────────
+try
+{
+    File.ReadAllText("config.json");
+}
+catch (IOException ex)
+{
+    // Envuelve la excepción original para agregar contexto
+    throw new ApplicationException(
+        "No se pudo cargar la configuración.", ex);
+    //                                         ↑ InnerException
+}
+
+// ── 5. Validación de argumentos (patrón guard clause) ───────────
+public string Process(string input)
+{
+    ArgumentNullException.ThrowIfNull(input);          // .NET 6+
+    ArgumentException.ThrowIfNullOrEmpty(input);       // .NET 7+
+    // … lógica …
+    return input.ToUpper();
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 9 THROW VS THROW EX ══ -->
+    <div class="slide" id="slide-9">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-code-compare me-1"></i>Detalle crítico</div>
+        <h2 class="t"><code>throw</code> vs <code>throw ex</code>: <span class="c1">stack trace</span></h2>
+        <p class="lt mb-3">Esta distinción es frecuente en errores de producción: perder el stack trace hace muy difícil encontrar el origen del error.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="cw">
+              <div class="ch"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ms-2">❌ throw ex (malo)</span></div>
+              <pre><code class="language-csharp">try
+{
+    // La excepción ORIGINÓ en la línea 42
+    // de DatabaseHelper.ExecuteQuery()
+    db.ExecuteQuery(sql);
+}
+catch (SqlException ex)
+{
+    Log(ex.Message);
+    throw ex;   // ← Stack trace ahora dice:
+                //   "line 8 of CatchBlock"
+                //   El origen real se PERDIÓ
+}</code></pre>
+            </div>
+            <div class="hl er mt-2">
+              <i class="fa-solid fa-circle-xmark me-2"></i>
+              El stack trace queda apuntando al <code>catch</code>, no al lugar real del error.
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="cw">
+              <div class="ch"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ms-2">✓ throw (correcto)</span></div>
+              <pre><code class="language-csharp">try
+{
+    // La excepción ORIGINÓ en la línea 42
+    // de DatabaseHelper.ExecuteQuery()
+    db.ExecuteQuery(sql);
+}
+catch (SqlException ex)
+{
+    Log(ex.Message);
+    throw;      // ← Stack trace preservado:
+                //   "line 42 of
+                //    DatabaseHelper.ExecuteQuery"
+}</code></pre>
+            </div>
+            <div class="hl gr mt-2">
+              <i class="fa-solid fa-circle-check me-2"></i>
+              El stack trace conserva el origen real. Mucho más útil para depurar.
+            </div>
+          </div>
+        </div>
+        <div class="hl am">
+          <i class="fa-solid fa-lightbulb me-2"></i>
+          Si necesitás agregar contexto al relanzar, usá <code>throw new MiException("contexto", ex)</code> donde <code>ex</code> es la <strong>InnerException</strong>. Así no perdés el error original.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 10 CUANDO LANZAR ══ -->
+    <div class="slide" id="slide-10">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-question-circle me-1"></i>¿Cuándo lanzar?</div>
+        <h2 class="t">¿Cuándo <span class="c1">lanzar</span> vs. cuándo <span class="c3">no</span>?</h2>
+        <p class="lt mb-3">Las excepciones son para situaciones excepcionales. Usarlas para control de flujo normal degrada la performance y la legibilidad.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--a4)">
+              <h6 class="c4 mb-3"><i class="fa-solid fa-circle-check me-2"></i>SÍ lanzar cuando…</h6>
+              <ul class="sl">
+                <li><div class="sn gr">✓</div><div class="bt">Un método recibe un <strong>argumento inválido</strong> (null, fuera de rango).</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Una <strong>precondición no se cumple</strong> (el objeto está en estado incorrecto para esa operación).</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Una operación de I/O falla (<strong>archivo no encontrado</strong>, sin acceso, red caída).</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Se viola una <strong>invariante o postcondición</strong> de la especificación.</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--err)">
+              <h6 class="c1 mb-3" style="color:var(--err)"><i class="fa-solid fa-circle-xmark me-2"></i>NO lanzar cuando…</h6>
+              <ul class="sl">
+                <li><div class="sn er">✗</div><div class="bt">La condición es <strong>parte del flujo normal</strong> (ej: buscar algo que puede no existir → usar <code>TryGet</code>).</div></li>
+                <li><div class="sn er">✗</div><div class="bt">El error se produce con <strong>altísima frecuencia</strong> (las excepciones tienen costo).</div></li>
+                <li><div class="sn er">✗</div><div class="bt">Solo para <strong>saltar a otra parte del código</strong> (antipatrón de control de flujo).</div></li>
+                <li><div class="sn er">✗</div><div class="bt">Para <strong>retornar valores vacíos</strong>: usar <code>null</code>, <code>Option</code>, o <code>Result</code> types.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="cw">
+          <div class="ch"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ms-2">Patrón TryXxx — alternativa a excepción en flujo normal</span></div>
+          <pre><code class="language-csharp">// ❌ Usar excepción para flujo normal (costoso)
+try { int n = int.Parse(userInput); }
+catch (FormatException) { /* input no era número */ }
+
+// ✓ Patrón TryParse — pensado para el caso "puede fallar"
+if (int.TryParse(userInput, out int n))
+    Console.WriteLine($"Número: {n}");
+else
+    Console.WriteLine("Entrada inválida");</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 11 PROPIEDADES EXCEPTION ══ -->
+    <div class="slide" id="slide-11">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-info-circle me-1"></i>Propiedades</div>
+        <h2 class="t">Propiedades de <span class="c2">System.Exception</span></h2>
+        <p class="lt mb-3">El objeto excepción lleva información útil para el diagnóstico. Conocer estas propiedades permite escribir mejores mensajes de error y logs.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="gc h-100">
+              <h6 class="c2 mb-3"><i class="fa-solid fa-tags me-2"></i>Propiedades principales</h6>
+              <div class="exc-badge sys mb-2"><i class="fa-solid fa-comment"></i><div><strong>Message</strong><br><span style="font-weight:400;font-size:.75rem">Descripción legible del error.</span></div></div>
+              <div class="exc-badge sys mb-2"><i class="fa-solid fa-layer-group"></i><div><strong>StackTrace</strong><br><span style="font-weight:400;font-size:.75rem">Secuencia de métodos en el momento del error.</span></div></div>
+              <div class="exc-badge base mb-2"><i class="fa-solid fa-link"></i><div><strong>InnerException</strong><br><span style="font-weight:400;font-size:.75rem">Excepción que causó esta (encadenado).</span></div></div>
+              <div class="exc-badge arg mb-2"><i class="fa-solid fa-tag"></i><div><strong>Source</strong><br><span style="font-weight:400;font-size:.75rem">Nombre del objeto o aplicación que causó el error.</span></div></div>
+              <div class="exc-badge ok mb-2"><i class="fa-solid fa-link-slash"></i><div><strong>HelpLink</strong><br><span style="font-weight:400;font-size:.75rem">URL con información adicional sobre el error.</span></div></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="cw h-100">
+              <div class="ch"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ms-2">InspectarExcepcion.cs</span></div>
+              <pre><code class="language-csharp">try
+{
+    throw new InvalidOperationException(
+        "No se puede procesar.",
+        new NullReferenceException("id es null"));
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Tipo:    {ex.GetType().Name}");
+    Console.WriteLine($"Mensaje: {ex.Message}");
+    Console.WriteLine($"Inner:   {ex.InnerException?.Message}");
+    Console.WriteLine($"Stack:");
+    Console.WriteLine(ex.StackTrace);
+
+    // Recorrer la cadena de excepciones
+    Exception inner = ex.InnerException;
+    while (inner != null)
+    {
+        Console.WriteLine($" → {inner.Message}");
+        inner = inner.InnerException;
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 12 BUENAS PRÁCTICAS ══ -->
+    <div class="slide" id="slide-12">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-star me-1"></i>Resumen</div>
+        <h2 class="t">Buenas <span class="c1">prácticas</span> · resumen</h2>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--a4)">
+              <h6 class="c4 mb-3"><i class="fa-solid fa-circle-check me-2"></i>Hacer</h6>
+              <ul class="sl">
+                <li><div class="sn gr">✓</div><div class="bt">Usar <code>throw;</code> para relanzar y preservar el stack trace.</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Capturar excepciones específicas antes que la base <code>Exception</code>.</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Usar <code>finally</code> para liberar recursos siempre.</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Usar <code>using</code> / <code>await using</code> para <code>IDisposable</code> (es un <code>finally</code> automático).</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Incluir mensaje descriptivo y <code>InnerException</code> al crear excepciones.</div></li>
+                <li><div class="sn gr">✓</div><div class="bt">Usar <code>TryXxx</code> cuando el fallo es parte del flujo normal.</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--err)">
+              <h6 style="color:var(--err)" class="mb-3"><i class="fa-solid fa-circle-xmark me-2"></i>No hacer</h6>
+              <ul class="sl">
+                <li><div class="sn er">✗</div><div class="bt">No usar <code>throw ex;</code> (pierde el stack trace).</div></li>
+                <li><div class="sn er">✗</div><div class="bt">No silenciar con <code>catch { }</code> vacío.</div></li>
+                <li><div class="sn er">✗</div><div class="bt">No lanzar <code>Exception</code> directamente: usar clases derivadas específicas.</div></li>
+                <li><div class="sn er">✗</div><div class="bt">No usar excepciones para flujo de control normal.</div></li>
+                <li><div class="sn er">✗</div><div class="bt">No capturar <code>Exception</code> sin relanzar (a menos que sea el punto de entrada).</div></li>
+                <li><div class="sn er">✗</div><div class="bt">No crear excepciones propias sin los constructores estándar y <code>[Serializable]</code>.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(232,121,249,.12),rgba(103,232,249,.07));border:1px solid rgba(232,121,249,.25);border-radius:14px;padding:20px;text-align:center">
+          <p style="font-size:1.05rem;font-weight:700;color:#fff;margin:0">
+            <i class="fa-solid fa-graduation-cap me-2" style="color:var(--a1)"></i>
+            Las excepciones son para situaciones <span class="c1">excepcionales</span>. Úsalas para comunicar <span class="c2">errores reales</span>, no para controlar el flujo normal del programa.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 13 QUIZ ══ -->
+    <div class="slide" id="slide-13">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-clipboard-question me-1"></i>Evaluación</div>
+        <h2 class="t">Cuestionario <span class="c1">Excepciones .NET</span></h2>
+        <p class="bt mb-4">Verificá tu comprensión del modelo de excepciones de .NET.</p>
+
+        <div id="quiz-section">
+          <div class="gc mb-3">
+            <div class="qcount">Pregunta <span id="q-num">1</span> de 10</div>
+            <div class="qq" id="q-text"></div>
+            <div id="q-options"></div>
+            <div class="qf" id="q-feedback"></div>
+            <div class="text-end mt-3">
+              <button class="nb p" id="btn-nq" onclick="nextQ()" style="display:none">
+                Siguiente <i class="fa-solid fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="rs">
+          <div class="gc text-center mb-3">
+            <h4 class="mb-3">Resultado final</h4>
+            <div class="sr mb-3">
+              <canvas id="dc" width="140" height="140"></canvas>
+              <div class="si"><div class="snum" id="sd">0/10</div><div class="slb">correctas</div></div>
+            </div>
+            <div id="rm" class="mb-3"></div>
+            <div class="mb-3"><canvas id="bc" height="80"></canvas></div>
+            <button class="nb p mt-2" onclick="restart()">
+              <i class="fa-solid fa-rotate-left me-2"></i>Reiniciar cuestionario
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /sa -->
+
+  <footer>
+    <button class="nb" id="bp" onclick="go(-1)" disabled><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+    <div class="d-flex gap-1 flex-wrap justify-content-center" id="dn"></div>
+    <button class="nb p" id="bn" onclick="go(1)">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+  </footer>
+</div>
+
+<script>
+const TOTAL = 13;
+let cur = 1;
+
+const quiz = [
+  {
+    q: "¿Qué es una excepción en .NET según la definición del material?",
+    opts:[
+      "Un tipo de variable especial que almacena mensajes de error.",
+      "Cualquier condición de error o comportamiento inesperado que encuentra un programa en ejecución.",
+      "Un método estático que detiene la ejecución del programa.",
+      "Un tipo de retorno alternativo para métodos que pueden fallar."
+    ], ok:1,
+    ok_fb:"Correcto. Una excepción es cualquier condición de error o comportamiento inesperado. En .NET es un objeto que hereda de System.Exception.",
+    ko_fb:"Incorrecto. Una excepción es cualquier condición de error o comportamiento inesperado que encuentra un programa en ejecución. En .NET es un objeto que hereda de System.Exception."
+  },
+  {
+    q: "¿De qué clase base heredan todas las excepciones en .NET?",
+    opts:[
+      "System.Error",
+      "System.BaseException",
+      "System.Exception",
+      "System.Throwable"
+    ], ok:2,
+    ok_fb:"Correcto. En .NET todas las excepciones heredan de System.Exception. (System.Throwable es de Java, no de .NET.)",
+    ko_fb:"Incorrecto. En .NET todas las excepciones heredan de System.Exception. (Throwable es de Java.)"
+  },
+  {
+    q: "¿Cuál es una ventaja clave de las excepciones sobre los códigos de retorno?",
+    opts:[
+      "Las excepciones son más rápidas que los códigos de retorno en todos los casos.",
+      "Si se lanza una excepción y no se controla, el runtime finaliza la aplicación. Los errores no pasan desapercibidos.",
+      "Las excepciones solo funcionan en C# y no en otros lenguajes de .NET.",
+      "Las excepciones no requieren bloques try/catch para funcionar."
+    ], ok:1,
+    ok_fb:"Correcto. Si no se maneja una excepción, el runtime termina la app. Con códigos de retorno, nadie fuerza a verificarlos y el error puede ignorarse silenciosamente.",
+    ko_fb:"Incorrecto. La ventaja clave es que una excepción no capturada termina la app (el error no pasa desapercibido). Con códigos de retorno, si nadie verifica el valor, el error se ignora."
+  },
+  {
+    q: "¿Qué excepción lanza .NET cuando se indexa una matriz con un índice fuera de su rango válido?",
+    opts:[
+      "ArgumentOutOfRangeException",
+      "InvalidOperationException",
+      "IndexOutOfRangeException",
+      "ArrayException"
+    ], ok:2,
+    ok_fb:"Correcto. IndexOutOfRangeException es lanzada por el runtime cuando una matriz no está correctamente indexada (ej: arr[arr.Length+1]).",
+    ko_fb:"Incorrecto. Es IndexOutOfRangeException la que lanza el runtime para matrices mal indexadas. ArgumentOutOfRangeException la lanzan los métodos para verificar argumentos en rango."
+  },
+  {
+    q: "¿Cuándo se lanza NullReferenceException?",
+    opts:[
+      "Cuando se pasa null como argumento a un método.",
+      "Solo en tiempo de ejecución, cuando se hace referencia a un objeto que es null.",
+      "Cuando se asigna null a una variable de tipo valor.",
+      "Cuando un método retorna null en vez de un objeto."
+    ], ok:1,
+    ok_fb:"Correcto. NullReferenceException solo ocurre en runtime cuando se intenta usar (desreferenciar) un objeto que tiene valor null (ej: o.ToString() cuando o es null).",
+    ko_fb:"Incorrecto. NullReferenceException ocurre en RUNTIME cuando se intenta usar un objeto que tiene valor null. Si solo se pasa null como argumento, la excepción apropiada sería ArgumentNullException."
+  },
+  {
+    q: "¿Cuál es la diferencia entre 'throw;' y 'throw ex;' dentro de un bloque catch?",
+    opts:[
+      "Son exactamente equivalentes; ninguna diferencia práctica.",
+      "'throw ex;' preserva el stack trace; 'throw;' lo resetea.",
+      "'throw;' preserva el stack trace original; 'throw ex;' lo resetea creando uno nuevo desde el catch.",
+      "'throw;' solo funciona si no se capturó ninguna excepción."
+    ], ok:2,
+    ok_fb:"Correcto. 'throw;' (sin argumento) relanza la excepción preservando el stack trace original, lo que facilita encontrar el origen del error. 'throw ex;' crea un nuevo stack trace desde el catch.",
+    ko_fb:"Incorrecto. 'throw;' preserva el stack trace original. 'throw ex;' resetea el stack trace, haciendo que el error parezca originarse en el bloque catch en lugar del lugar real."
+  },
+  {
+    q: "¿Qué hace el bloque 'finally' en una estructura try/catch/finally?",
+    opts:[
+      "Se ejecuta solo cuando no ocurre ninguna excepción.",
+      "Se ejecuta solo cuando ocurre una excepción no capturada.",
+      "Se ejecuta siempre, haya o no excepción, y es ideal para liberar recursos.",
+      "Cancela la excepción y permite continuar la ejecución normal."
+    ], ok:2,
+    ok_fb:"Correcto. El bloque finally se ejecuta siempre: tanto si el try terminó normalmente, como si ocurrió una excepción (capturada o no). Es ideal para garantizar la liberación de recursos.",
+    ko_fb:"Incorrecto. El bloque finally se ejecuta SIEMPRE, independientemente de si ocurrió o no una excepción. Es el lugar ideal para liberar recursos como archivos o conexiones."
+  },
+  {
+    q: "¿Qué excepción se debe lanzar cuando un método recibe un argumento que es null y no lo acepta?",
+    opts:[
+      "NullReferenceException",
+      "InvalidOperationException",
+      "ArgumentNullException",
+      "ArgumentException (la clase base)"
+    ], ok:2,
+    ok_fb:"Correcto. ArgumentNullException es la excepción específica para cuando un argumento es null y el método no lo permite. ArgumentException es su clase base (no instanciar directamente).",
+    ko_fb:"Incorrecto. Se debe lanzar ArgumentNullException, que es específica para argumentos null no permitidos. NullReferenceException la genera el runtime cuando se desreferencia null, no cuando se valida un argumento."
+  },
+  {
+    q: "¿Por qué no se debe usar excepciones para control de flujo normal?",
+    opts:[
+      "Porque el compilador lo prohíbe explícitamente.",
+      "Porque las excepciones tienen un costo de performance y la intención del código se pierde; para casos esperados existen patrones como TryXxx.",
+      "Porque solo se pueden lanzar excepciones del tipo System.Exception base.",
+      "Porque los bloques catch no pueden capturar excepciones lanzadas intencionalmente."
+    ], ok:1,
+    ok_fb:"Correcto. Las excepciones tienen costo de performance (crear el objeto, capturar el stack trace) y su uso para flujo normal hace el código difícil de leer. Para situaciones esperadas existen patrones como int.TryParse().",
+    ko_fb:"Incorrecto. El problema es de performance y legibilidad: las excepciones tienen costo computacional y para casos que son parte del flujo normal existen alternativas como el patrón TryXxx."
+  },
+  {
+    q: "¿Qué propiedad de Exception contiene la excepción original que causó la excepción actual?",
+    opts:[
+      "SourceException",
+      "CauseException",
+      "InnerException",
+      "OriginalException"
+    ], ok:2,
+    ok_fb:"Correcto. InnerException permite encadenar excepciones: cuando se captura una excepción y se lanza una nueva con más contexto, la original se pasa como InnerException para no perder el error raíz.",
+    ko_fb:"Incorrecto. La propiedad se llama InnerException. Permite encadenar excepciones: la nueva excepción tiene contexto adicional y la InnerException conserva el error original."
+  }
+];
+
+let qcur=0,qsc=0,qans=[];
+let dc=null,bc=null;
+
+function go(d){
+  document.querySelectorAll('.slide')[cur-1].classList.remove('active');
+  cur=Math.max(1,Math.min(TOTAL,cur+d));
+  const s=document.querySelectorAll('.slide')[cur-1];
+  s.classList.add('active');
+  const a=s.querySelector('.animate__animated');
+  if(a){a.classList.remove('animate__fadeInRight','animate__fadeIn');void a.offsetWidth;
+    a.classList.add(cur===1?'animate__fadeIn':'animate__fadeInRight');}
+  document.getElementById('cs').textContent=cur;
+  document.getElementById('pb').style.width=((cur/TOTAL)*100)+'%';
+  document.getElementById('bp').disabled=cur===1;
+  document.getElementById('bn').disabled=cur===TOTAL;
+  dots(); document.getElementById('sa').scrollTop=0;
+  hljs.highlightAll();
+}
+
+function dots(){
+  const n=document.getElementById('dn'); n.innerHTML='';
+  for(let i=1;i<=TOTAL;i++){
+    const d=document.createElement('div');
+    const ac=i===cur,vi=i<cur;
+    d.style.cssText=`width:${ac?'18px':'6px'};height:6px;border-radius:99px;`+
+      `background:${ac?'var(--a1)':vi?'rgba(232,121,249,.3)':'#1a1a2e'};`+
+      `border:1px solid ${ac||vi?'var(--a1)':'#2a2a40'};transition:all .3s;cursor:pointer;flex-shrink:0`;
+    d.onclick=()=>{const dif=i-cur;if(dif)go(dif);};
+    n.appendChild(d);
+  }
+}
+
+function loadQ(){
+  if(qcur>=quiz.length){showRes();return;}
+  const q=quiz[qcur];
+  document.getElementById('q-num').textContent=qcur+1;
+  document.getElementById('q-text').textContent=q.q;
+  const L=['A','B','C','D'];
+  document.getElementById('q-options').innerHTML=q.opts.map((o,i)=>
+    `<div class="qo" onclick="sel(${i})" id="op-${i}"><span class="ol">${L[i]}</span><span>${o}</span></div>`
+  ).join('');
+  const fb=document.getElementById('q-feedback');
+  fb.textContent='';fb.className='qf';
+  document.getElementById('btn-nq').style.display='none';
+}
+
+function sel(idx){
+  const q=quiz[qcur];
+  document.querySelectorAll('.qo').forEach(o=>o.classList.add('disabled'));
+  const fb=document.getElementById('q-feedback');
+  if(idx===q.ok){
+    document.getElementById(`op-${idx}`).classList.add('correct');
+    fb.textContent='✓ '+q.ok_fb;fb.className='qf show ok';
+    qsc++;qans.push(true);
+  } else {
+    document.getElementById(`op-${idx}`).classList.add('wrong');
+    document.getElementById(`op-${q.ok}`).classList.add('correct');
+    fb.textContent='✗ '+q.ko_fb;fb.className='qf show ko';
+    qans.push(false);
+  }
+  document.getElementById('btn-nq').style.display='inline-flex';
+}
+
+function nextQ(){qcur++;loadQ();}
+
+function showRes(){
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('rs').style.display='block';
+  const tot=quiz.length,pct=Math.round((qsc/tot)*100);
+  document.getElementById('sd').textContent=`${qsc}/${tot}`;
+  let msg='',color='';
+  if(pct>=90){msg='🏆 ¡Excelente! Dominás las excepciones en .NET.';color='var(--a1)';}
+  else if(pct>=70){msg='👍 Muy bien. Repasá los puntos fallidos.';color='var(--a3)';}
+  else if(pct>=50){msg='🔄 Vas encaminado. Revisá los slides de throw y jerarquía.';color='var(--a2)';}
+  else{msg='📖 Te conviene releer el material antes de continuar.';color='var(--err)';}
+  document.getElementById('rm').innerHTML=
+    `<p style="font-size:1rem;font-weight:700;color:${color}">${msg}</p>`+
+    `<p class="bt">Obtuviste <strong>${qsc} de ${tot}</strong> correctas (${pct}%).</p>`;
+  if(dc)dc.destroy();
+  dc=new Chart(document.getElementById('dc'),{
+    type:'doughnut',
+    data:{datasets:[{data:[qsc,tot-qsc],backgroundColor:['#e879f9','#1a1a2e'],borderColor:['#d946ef','#2a2a40'],borderWidth:2}]},
+    options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+  if(bc)bc.destroy();
+  bc=new Chart(document.getElementById('bc'),{
+    type:'bar',
+    data:{
+      labels:qans.map((_,i)=>`P${i+1}`),
+      datasets:[{data:qans.map(a=>a?1:0),
+        backgroundColor:qans.map(a=>a?'rgba(134,239,172,.7)':'rgba(248,113,113,.7)'),
+        borderColor:qans.map(a=>a?'#86efac':'#f87171'),
+        borderWidth:1,borderRadius:4}]
+    },
+    options:{responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw===1?'✓ Correcta':'✗ Incorrecta'}}},
+      scales:{y:{display:false,max:1.3},x:{ticks:{color:'#4c4870',font:{family:'Recursive',size:10}},grid:{color:'rgba(255,255,255,.03)'}}}}
+  });
+  Swal.fire({
+    title:qsc>=8?'¡Buen trabajo!':'Sigue practicando',
+    html:`<strong>${qsc}/${tot}</strong> correctas · ${pct}%`,
+    icon:qsc>=8?'success':qsc>=5?'warning':'error',
+    background:'#10101f',color:'#ede9fe',
+    confirmButtonColor:'#e879f9',confirmButtonText:'Ver resultados',
+    customClass:{popup:'border border-secondary'}
+  });
+}
+
+function restart(){
+  qcur=0;qsc=0;qans=[];
+  document.getElementById('quiz-section').style.display='block';
+  document.getElementById('rs').style.display='none';
+  loadQ();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{hljs.highlightAll();dots();loadQ();});
+</script>
+</body>
+</html>

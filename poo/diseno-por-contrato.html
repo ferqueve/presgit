@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diseño por Contrato | Programación 2 · FIT UCU</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Lexend:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:      #050d12;
+    --bgc:     #091520;
+    --bgp:     #0c1c27;
+    --a1:      #2dd4bf;   /* teal */
+    --a2:      #f472b6;   /* pink */
+    --a3:      #facc15;   /* yellow */
+    --a4:      #818cf8;   /* indigo */
+    --ok:      #34d399;
+    --err:     #f87171;
+    --text:    #e2f0f0;
+    --muted:   #3a5a65;
+    --border:  rgba(45,212,191,.13);
+    --r:       12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Lexend',sans-serif;
+    min-height:100vh; overflow:hidden;
+  }
+  body::before{
+    content:''; position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(45,212,191,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45,212,191,.04) 1px, transparent 1px);
+    background-size:44px 44px;
+    pointer-events:none; z-index:0;
+  }
+  body::after{
+    content:''; position:fixed;
+    top:-100px; left:-100px;
+    width:500px; height:500px; border-radius:50%;
+    background:radial-gradient(circle,rgba(45,212,191,.1) 0%,transparent 65%);
+    pointer-events:none; z-index:0;
+  }
+  #app{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 28px; border-bottom:1px solid var(--border);
+    background:rgba(5,13,18,.95); backdrop-filter:blur(16px); flex-shrink:0;
+  }
+  .brand{font-family:'Fira Code',monospace;font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;}
+  .sc{font-family:'Fira Code',monospace;font-size:.8rem;color:var(--a1);}
+
+  #pbw{height:3px;background:#0c2030;flex-shrink:0;}
+  #pb{height:100%;background:linear-gradient(90deg,var(--a4),var(--a1));transition:width .4s ease;}
+
+  #sa{flex:1;overflow-y:auto;padding:28px 44px;}
+  #sa::-webkit-scrollbar{width:4px;}
+  #sa::-webkit-scrollbar-track{background:transparent;}
+  #sa::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+  .slide{display:none;} .slide.active{display:block;}
+
+  /* ── TYPO ── */
+  .stag{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'Fira Code',monospace;font-size:.67rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--a1);border:1px solid rgba(45,212,191,.35);border-radius:4px;padding:3px 12px;margin-bottom:14px;
+  }
+  h1.t{font-size:clamp(1.9rem,4vw,3rem);font-weight:900;line-height:1.1;margin-bottom:10px;}
+  h2.t{font-size:clamp(1.4rem,2.8vw,2rem);font-weight:800;line-height:1.2;margin-bottom:16px;}
+  .c1{color:var(--a1);} .c2{color:var(--a2);} .c3{color:var(--a3);} .c4{color:var(--a4);}
+  .bt{font-family:'Fira Code',monospace;font-size:.82rem;color:#4a8090;line-height:1.8;}
+  .lt{font-size:1rem;color:#7ab5c0;line-height:1.78;}
+
+  /* ── CARDS ── */
+  .gc{
+    background:var(--bgc);border:1px solid var(--border);
+    border-radius:var(--r);padding:20px 24px;position:relative;overflow:hidden;
+  }
+  .gc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a4),var(--a1));}
+
+  /* ── FLASHCARD ── */
+  .fc{
+    background:var(--bgp);border:1px solid rgba(45,212,191,.22);border-radius:var(--r);
+    padding:16px 20px;position:relative;
+  }
+  .fc::before{
+    content:attr(data-label);
+    position:absolute;top:-1px;left:16px;
+    font-family:'Fira Code',monospace;font-size:.65rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--bg);background:var(--a1);padding:2px 10px;border-radius:0 0 6px 6px;
+  }
+  .fc.pink::before{background:var(--a2);}
+  .fc.yellow::before{background:var(--a3);color:#050d12;}
+  .fc.indigo::before{background:var(--a4);}
+  .fc.ok::before{background:var(--ok);color:#050d12;}
+  .fc.err::before{background:var(--err);color:#050d12;}
+  .fc-title{font-weight:700;font-size:.95rem;margin:12px 0 6px;color:var(--text);}
+  .fc-body{font-family:'Fira Code',monospace;font-size:.8rem;color:#4a8090;line-height:1.75;}
+
+  /* ── FORMULA ── */
+  .formula{
+    text-align:center;padding:24px 32px;margin:16px 0;
+    background:linear-gradient(135deg,rgba(45,212,191,.1),rgba(129,140,248,.08));
+    border:1px solid rgba(45,212,191,.28);border-radius:14px;
+  }
+  .formula-main{font-family:'Fira Code',monospace;font-size:1.6rem;font-weight:600;color:#fff;letter-spacing:.05em;}
+  .formula-read{font-size:.85rem;color:#7ab5c0;margin-top:8px;}
+
+  /* ── TRUTH TABLE ── */
+  .truth{width:100%;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden;font-family:'Fira Code',monospace;}
+  .truth th{background:#0c1c27;padding:10px 18px;font-size:.82rem;text-align:center;}
+  .truth td{padding:9px 18px;border-top:1px solid var(--border);font-size:.82rem;text-align:center;color:#4a8090;}
+  .truth td.T{color:var(--ok);font-weight:700;}
+  .truth td.F{color:var(--err);font-weight:700;}
+  .truth tr.hl-row td{background:rgba(248,113,113,.08);}
+
+  /* ── BOXES ── */
+  .hl{border-left:3px solid var(--a1);background:rgba(45,212,191,.06);border-radius:0 8px 8px 0;padding:12px 18px;margin:12px 0;font-family:'Fira Code',monospace;font-size:.81rem;color:var(--text);}
+  .hl.pink{border-left-color:var(--a2);background:rgba(244,114,182,.06);}
+  .hl.yellow{border-left-color:var(--a3);background:rgba(250,204,21,.06);}
+  .hl.indigo{border-left-color:var(--a4);background:rgba(129,140,248,.06);}
+  .hl.ok{border-left-color:var(--ok);background:rgba(52,211,153,.06);}
+  .hl.err{border-left-color:var(--err);background:rgba(248,113,113,.06);}
+
+  /* ── STEP LIST ── */
+  .sl{list-style:none;padding:0;display:flex;flex-direction:column;gap:11px;}
+  .sl li{display:flex;align-items:flex-start;gap:13px;}
+  .sn{flex-shrink:0;width:27px;height:27px;border-radius:50%;background:var(--a1);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#050d12;margin-top:2px;}
+  .sn.p{background:var(--a2);color:#fff;}
+  .sn.y{background:var(--a3);color:#050d12;}
+  .sn.i{background:var(--a4);color:#fff;}
+
+  /* ── DIAGRAM ── */
+  .dw{background:var(--bgp);border:1px solid var(--border);border-radius:var(--r);padding:20px;overflow-x:auto;}
+  .dw svg{display:block;margin:0 auto;}
+  .dlbl{font-family:'Fira Code',monospace;font-size:.75rem;color:var(--muted);text-align:center;margin-top:8px;}
+
+  /* ── CODE ── */
+  .cw{border-radius:var(--r);overflow:hidden;border:1px solid rgba(255,255,255,.07);}
+  .ch{background:#0d1117;padding:8px 16px;display:flex;align-items:center;gap:8px;font-family:'Fira Code',monospace;font-size:.7rem;color:var(--muted);}
+  .dot{width:10px;height:10px;border-radius:50%;}
+  .r{background:#ff5f57;}.y2{background:#febc2e;}.g{background:#28c840;}
+  pre{margin:0!important;border-radius:0!important;}
+  code.hljs{font-family:'Fira Code',monospace!important;font-size:.79rem!important;padding:18px!important;line-height:1.65!important;}
+
+  /* ── NAV ── */
+  footer{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;border-top:1px solid var(--border);background:rgba(5,13,18,.95);backdrop-filter:blur(16px);flex-shrink:0;}
+  .nb{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 22px;font-family:'Lexend',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;}
+  .nb:hover{background:rgba(45,212,191,.08);border-color:var(--a1);color:var(--a1);}
+  .nb:disabled{opacity:.25;cursor:default;pointer-events:none;}
+  .nb.p{background:var(--a1);color:#050d12;border-color:var(--a1);font-weight:800;}
+  .nb.p:hover{background:#14b8a6;border-color:#14b8a6;}
+
+  /* ── QUIZ ── */
+  .qo{background:var(--bgp);border:1px solid var(--border);border-radius:8px;padding:13px 17px;cursor:pointer;transition:all .2s;margin-bottom:9px;display:flex;align-items:center;gap:12px;font-family:'Fira Code',monospace;font-size:.82rem;}
+  .qo:hover{border-color:var(--a1);background:rgba(45,212,191,.05);}
+  .qo.correct{border-color:var(--ok);background:rgba(52,211,153,.08);}
+  .qo.wrong{border-color:var(--err);background:rgba(248,113,113,.08);}
+  .qo.disabled{pointer-events:none;}
+  .ol{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;}
+  .qf{border-radius:8px;padding:11px 15px;margin-top:11px;font-family:'Fira Code',monospace;font-size:.8rem;display:none;}
+  .qf.show{display:block;}
+  .qf.ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35);color:#6ee7b7;}
+  .qf.ko{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:#fca5a5;}
+  .qcount{font-family:'Fira Code',monospace;font-size:.72rem;color:var(--muted);margin-bottom:8px;}
+  .qq{font-size:.95rem;font-weight:700;margin-bottom:16px;line-height:1.5;}
+
+  #rs{display:none;}
+  .sr{position:relative;width:140px;height:140px;margin:0 auto 18px;}
+  .si{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .snum{font-size:2.1rem;font-weight:800;color:var(--a1);font-family:'Fira Code',monospace;}
+  .slb{font-size:.7rem;color:var(--muted);font-family:'Fira Code',monospace;}
+
+  @media(max-width:700px){#sa{padding:16px 12px;}header,footer{padding:10px 12px;}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand"><i class="fa-solid fa-file-contract me-2"></i>FIT · UCU &nbsp;·&nbsp; Programación 2 · C#</div>
+    <div class="sc"><span id="cs">1</span> / <span id="ts">14</span></div>
+  </header>
+  <div id="pbw"><div id="pb" style="width:7.14%"></div></div>
+
+  <div id="sa">
+
+    <!-- ══ 1 PORTADA ══ -->
+    <div class="slide active" id="slide-1">
+      <div class="animate__animated animate__fadeIn" style="min-height:63vh;display:flex;flex-direction:column;justify-content:center;position:relative;">
+        <div style="position:absolute;right:-60px;bottom:-60px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(129,140,248,.15) 0%,transparent 70%);pointer-events:none"></div>
+        <div class="stag"><i class="fa-solid fa-file-contract me-1"></i>Programación 2 · Sección 4.1</div>
+        <h1 class="t">
+          Diseño<br>
+          por <span class="c1">Contrato</span>
+        </h1>
+        <p class="lt mt-3" style="max-width:560px;">
+          Precondiciones, postcondiciones, invariantes y fórmulas de corrección. Programar contra especificaciones formales.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.25);border-radius:99px;padding:5px 14px;font-family:'Fira Code',monospace;font-size:.77rem;color:var(--a1)"><i class="fa-brands fa-microsoft"></i>C# / .NET</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.25);border-radius:99px;padding:5px 14px;font-family:'Fira Code',monospace;font-size:.77rem;color:var(--a2)"><i class="fa-solid fa-handshake"></i>Design by Contract</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.25);border-radius:99px;padding:5px 14px;font-family:'Fira Code',monospace;font-size:.77rem;color:var(--a4)"><i class="fa-solid fa-university"></i>FIT – UCU</span>
+        </div>
+        <div class="mt-4 gc" style="max-width:560px;">
+          <p class="bt mb-0"><span class="c1 fw-bold">Temas:</span> corrección · fórmulas de corrección · precondiciones · postcondiciones · fortaleza de afirmaciones · invariantes · contrato y LSP · violación de afirmación.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2 CORRECCIÓN ══ -->
+    <div class="slide" id="slide-2">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-check-double me-1"></i>Punto de partida</div>
+        <h2 class="t">¿Qué significa que un programa sea <span class="c1">correcto</span>?</h2>
+        <p class="lt mb-4">La <strong>corrección</strong> es uno de los factores de calidad de un producto de software. Pero es un concepto relativo.</p>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="gc h-100">
+              <h6 class="c1 mb-3"><i class="fa-solid fa-file-lines me-2"></i>Especificación</h6>
+              <p class="bt">La especificación describe <strong>qué debe hacer</strong> el software, no cómo lo hace. Sin especificación, no hay forma de juzgar si algo es correcto o incorrecto.</p>
+              <div class="hl mt-3">
+                <i class="fa-solid fa-quote-left me-2 opacity-50"></i>
+                Una pieza de software es correcta cuando <strong>satisface su especificación</strong>.
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100">
+              <h6 class="c2 mb-3"><i class="fa-solid fa-puzzle-piece me-2"></i>Encapsulamiento y tipos</h6>
+              <p class="bt">Gracias a la encapsulación, <strong>enviamos mensajes</strong> a objetos para acceder o cambiar su estado. Los mensajes posibles están especificados en el <em>tipo</em> del objeto.</p>
+              <p class="bt mt-2">¿Alcanza con que la firma del método coincida con la operación del tipo para decir que es correcto?</p>
+            </div>
+          </div>
+        </div>
+        <div class="hl pink">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <strong>No alcanza.</strong> La firma no dice: qué hace la operación, cómo cambia el estado, ni en qué estado debe estar el objeto para poder enviar el mensaje. Necesitamos <strong>fórmulas de corrección</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 3 FÓRMULA DE CORRECCIÓN ══ -->
+    <div class="slide" id="slide-3">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-subscript me-1"></i>Fórmula central</div>
+        <h2 class="t">La Fórmula de <span class="c1">Corrección</span></h2>
+        <p class="lt mb-3">Mecanismo formal para especificar qué hace una operación.</p>
+
+        <div class="formula">
+          <div class="formula-main">&#123; P &#125; &nbsp; A &nbsp; &#123; Q &#125;</div>
+          <div class="formula-read mt-2">
+            "Cualquier ejecución de <strong>A</strong> que comience en un estado donde <strong>P</strong> se cumple,<br>
+            termina en un estado donde <strong>Q</strong> se cumple."
+          </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-4">
+            <div class="fc" data-label="P · Precondición">
+              <div class="fc-title">Precondición P</div>
+              <div class="fc-body">Afirmación que debe ser verdadera <strong>antes</strong> de ejecutar A.<br><br>Responsabilidad del <em>que llama</em>.</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="fc yellow" data-label="A · Operación">
+              <div class="fc-title">Operación A</div>
+              <div class="fc-body">El método o acción que se ejecuta. Si P se cumple al entrar, debe garantizar Q al salir.</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="fc pink" data-label="Q · Postcondición">
+              <div class="fc-title">Postcondición Q</div>
+              <div class="fc-body">Afirmación que debe ser verdadera <strong>después</strong> de ejecutar A.<br><br>Responsabilidad del <em>que implementa</em>.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hl mt-3 indigo">
+          <i class="fa-solid fa-circle-info me-2"></i>
+          Una <strong>afirmación</strong> es un predicado que puede ser verdadero o falso, y describe propiedades semánticas del tipo.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4 PRECONDICIÓN ══ -->
+    <div class="slide" id="slide-4">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-arrow-right-to-bracket me-1"></i>Precondición</div>
+        <h2 class="t">La <span class="c1">Precondición</span></h2>
+
+        <div class="fc mb-4" data-label="Tarjeta · Precondición">
+          <div class="fc-title">Precondición</div>
+          <div class="fc-body">Una precondición es una afirmación asociada a una operación que <strong>debe ser satisfecha por la clase de los objetos que usan esa operación</strong>.</div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--a1)">
+              <h6 class="c1 mb-2"><i class="fa-solid fa-user me-2"></i>Para el cliente (que llama)</h6>
+              <p class="bt">La precondición es una <strong>obligación</strong>: antes de invocar la operación, debe asegurarse de que la precondición sea verdadera.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--a2)">
+              <h6 class="c2 mb-2"><i class="fa-solid fa-cog me-2"></i>Para el servidor (que implementa)</h6>
+              <p class="bt">La precondición es un <strong>derecho</strong>: puede asumir que la precondición se cumple al inicio de su ejecución.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="cw">
+          <div class="ch"><div class="dot r"></div><div class="dot y2"></div><div class="dot g"></div><span class="ms-2">Ejemplo conceptual en C#</span></div>
+          <pre><code class="language-csharp">// Precondición: index >= 0 && index < Count
+// El CLIENTE debe garantizarlo antes de llamar
+public T Get(int index)
+{
+    // El método PUEDE ASUMIR que index es válido
+    return this.items[index];
+}
+
+// El cliente es responsable:
+if (i >= 0 && i < myList.Count)
+{
+    var item = myList.Get(i);   // cumple la precondición
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 5 POSTCONDICIÓN ══ -->
+    <div class="slide" id="slide-5">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Postcondición</div>
+        <h2 class="t">La <span class="c2">Postcondición</span></h2>
+
+        <div class="fc pink mb-4" data-label="Tarjeta · Postcondición">
+          <div class="fc-title">Postcondición</div>
+          <div class="fc-body">Una postcondición es una afirmación asociada a una operación que <strong>debe ser satisfecha por la clase de los objetos que implementan esa operación</strong>.</div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--a2)">
+              <h6 class="c2 mb-2"><i class="fa-solid fa-user me-2"></i>Para el cliente (que llama)</h6>
+              <p class="bt">La postcondición es un <strong>derecho</strong>: puede confiar en que, si cumplió la precondición, el resultado satisface la postcondición.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100" style="border-left:3px solid var(--a1)">
+              <h6 class="c1 mb-2"><i class="fa-solid fa-cog me-2"></i>Para el servidor (que implementa)</h6>
+              <p class="bt">La postcondición es una <strong>obligación</strong>: debe garantizar que el estado resultante satisfaga la postcondición.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="cw">
+          <div class="ch"><div class="dot r"></div><div class="dot y2"></div><div class="dot g"></div><span class="ms-2">Ejemplo conceptual en C#</span></div>
+          <pre><code class="language-csharp">// Pre:  amount > 0 && amount <= Balance
+// Post: Balance == Balance_anterior - amount
+//       && el retiro fue registrado
+public void Withdraw(decimal amount)
+{
+    // El implementador DEBE garantizar
+    // que Balance se reduce en amount
+    this.balance -= amount;
+    this.RegisterTransaction(-amount);
+    // Al terminar, Post debe ser verdadera
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 6 CONTRATO ══ -->
+    <div class="slide" id="slide-6">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-handshake me-1"></i>El contrato</div>
+        <h2 class="t">Pre + Post = <span class="c3">Contrato</span></h2>
+        <p class="lt mb-4">La precondición y la postcondición forman un contrato entre el objeto que llama y el que implementa. Como un contrato legal, define derechos y obligaciones de cada parte.</p>
+
+        <div class="dw mb-3">
+          <svg viewBox="0 0 740 260" xmlns="http://www.w3.org/2000/svg" style="max-width:740px;width:100%">
+            <defs>
+              <marker id="a1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#3a5a65"/></marker>
+              <marker id="a2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#2dd4bf"/></marker>
+              <marker id="a3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#f472b6"/></marker>
+            </defs>
+
+            <!-- Cliente -->
+            <rect x="20" y="80" width="160" height="100" rx="8" fill="#091520" stroke="#2dd4bf" stroke-width="1.5"/>
+            <rect x="20" y="80" width="160" height="24" rx="8" fill="#0c2030"/>
+            <text x="100" y="97" text-anchor="middle" fill="#2dd4bf" font-family="Fira Code" font-size="10" font-weight="600">Cliente</text>
+            <text x="100" y="118" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8.5">Obligación:</text>
+            <text x="100" y="132" text-anchor="middle" fill="#facc15" font-family="Fira Code" font-size="8.5">cumplir Precondición</text>
+            <text x="100" y="150" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8.5">Derecho:</text>
+            <text x="100" y="164" text-anchor="middle" fill="#f472b6" font-family="Fira Code" font-size="8.5">recibir Postcondición</text>
+
+            <!-- Flecha Pre: cliente → contrato -->
+            <line x1="180" y1="120" x2="270" y2="120" stroke="#facc15" stroke-width="1.5" marker-end="url(#a2)"/>
+            <text x="225" y="113" text-anchor="middle" fill="#facc15" font-family="Fira Code" font-size="8">Pre: {P}</text>
+
+            <!-- Flecha Post: contrato → cliente -->
+            <line x1="270" y1="150" x2="180" y2="150" stroke="#f472b6" stroke-width="1.5" marker-end="url(#a3)"/>
+            <text x="225" y="168" text-anchor="middle" fill="#f472b6" font-family="Fira Code" font-size="8">Post: {Q}</text>
+
+            <!-- Contrato box -->
+            <rect x="270" y="55" width="190" height="150" rx="10" fill="#0a1f2a" stroke="#facc15" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="365" y="78" text-anchor="middle" fill="#facc15" font-family="Fira Code" font-size="10" font-weight="700">CONTRATO</text>
+            <text x="365" y="98" text-anchor="middle" fill="#e2f0f0" font-family="Fira Code" font-size="13" font-weight="700">{P} A {Q}</text>
+            <line x1="280" y1="108" x2="450" y2="108" stroke="#3a5a65"/>
+            <text x="365" y="124" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8">Si P → garantiza Q</text>
+            <text x="365" y="140" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8">Si ¬P → sin garantía</text>
+            <text x="365" y="158" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8">Si P y ¬Q → bug en impl.</text>
+            <text x="365" y="180" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8">Si ¬P e invoca → bug cliente</text>
+
+            <!-- Flecha contrato → servidor -->
+            <line x1="460" y1="120" x2="540" y2="120" stroke="#facc15" stroke-width="1.5" marker-end="url(#a2)"/>
+            <text x="500" y="113" text-anchor="middle" fill="#facc15" font-family="Fira Code" font-size="8">Pre: {P}</text>
+
+            <line x1="540" y1="150" x2="460" y2="150" stroke="#f472b6" stroke-width="1.5" marker-end="url(#a3)"/>
+            <text x="500" y="168" text-anchor="middle" fill="#f472b6" font-family="Fira Code" font-size="8">Post: {Q}</text>
+
+            <!-- Servidor -->
+            <rect x="540" y="80" width="175" height="100" rx="8" fill="#091520" stroke="#818cf8" stroke-width="1.5"/>
+            <rect x="540" y="80" width="175" height="24" rx="8" fill="#0c2030"/>
+            <text x="627" y="97" text-anchor="middle" fill="#818cf8" font-family="Fira Code" font-size="10" font-weight="600">Servidor (implementa)</text>
+            <text x="627" y="118" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8.5">Derecho:</text>
+            <text x="627" y="132" text-anchor="middle" fill="#facc15" font-family="Fira Code" font-size="8.5">asumir Precondición</text>
+            <text x="627" y="150" text-anchor="middle" fill="#4a8090" font-family="Fira Code" font-size="8.5">Obligación:</text>
+            <text x="627" y="164" text-anchor="middle" fill="#f472b6" font-family="Fira Code" font-size="8.5">garantizar Postcondición</text>
+
+            <!-- leyenda -->
+            <text x="370" y="235" text-anchor="middle" fill="#3a5a65" font-family="Fira Code" font-size="8">Si ¬P el cliente no tiene derecho a reclamar. Si P y ¬Q, el servidor incumplió.</text>
+          </svg>
+        </div>
+
+        <div class="hl">
+          <i class="fa-solid fa-scale-balanced me-2"></i>
+          Si el cliente viola la precondición, el servidor no tiene ninguna obligación. Si el servidor viola la postcondición (cuando la pre se cumplía), el programa es <strong>incorrecto</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 7 FORTALEZA ══ -->
+    <div class="slide" id="slide-7">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-weight-hanging me-1"></i>Fortaleza</div>
+        <h2 class="t">Fortaleza y debilidad de <span class="c3">afirmaciones</span></h2>
+        <p class="lt mb-3">Una afirmación puede ser <strong>más fuerte</strong> (más restrictiva, más difícil de satisfacer) o <strong>más débil</strong> que otra.</p>
+
+        <div class="fc yellow mb-3" data-label="Tarjeta · Fortaleza / Debilidad">
+          <div class="fc-title">Fortaleza / Debilidad</div>
+          <div class="fc-body">
+            Se dice que <strong>P₁ es más fuerte que P₂</strong> (y P₂ más débil que P₁) si:<br><br>
+            &nbsp;&nbsp;&nbsp;<strong>P₁ ⟹ P₂</strong> &nbsp;y&nbsp; <strong>P₁ ≠ P₂</strong><br><br>
+            Es decir: P₁ ⟹ P₂ es equivalente a ¬P₁ ∨ P₂
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-7">
+            <div class="gc">
+              <h6 class="c3 mb-3"><i class="fa-solid fa-table me-2"></i>Tabla de verdad de P₁ ⟹ P₂</h6>
+              <table class="truth">
+                <thead>
+                  <tr>
+                    <th style="color:var(--a1)">P₁</th>
+                    <th style="color:var(--a2)">P₂</th>
+                    <th style="color:var(--muted)">¬P₁</th>
+                    <th style="color:var(--a3)">¬P₁ ∨ P₂ &nbsp;(P₁⟹P₂)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td class="T">V</td><td class="T">V</td><td class="F">F</td><td class="T">V</td></tr>
+                  <tr class="hl-row"><td class="T">V</td><td class="F">F</td><td class="F">F</td><td class="F">F ← única fila falsa</td></tr>
+                  <tr><td class="F">F</td><td class="T">V</td><td class="T">V</td><td class="T">V</td></tr>
+                  <tr><td class="F">F</td><td class="F">F</td><td class="T">V</td><td class="T">V</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="gc h-100">
+              <h6 class="c1 mb-3"><i class="fa-solid fa-arrows-up-down me-2"></i>Ejemplos intuitivos</h6>
+              <ul class="sl">
+                <li><div class="sn y">F</div><div class="bt"><code>x > 0</code> es más fuerte que <code>x >= 0</code><br><span style="color:#3a5a65">(x>0 implica x≥0, pero no al revés)</span></div></li>
+                <li><div class="sn p">D</div><div class="bt"><code>x >= 0</code> es más débil que <code>x > 0</code><br><span style="color:#3a5a65">(hay más estados que la satisfacen)</span></div></li>
+                <li><div class="sn">i</div><div class="bt"><code>true</code> es la afirmación <em>más débil</em> posible. Cualquier estado la satisface.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 8 INVARIANTE ══ -->
+    <div class="slide" id="slide-8">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-infinity me-1"></i>Invariante</div>
+        <h2 class="t">La <span class="c4">Invariante</span> de Tipo / Clase</h2>
+        <p class="lt mb-3">Además de pre y postcondiciones para operaciones, necesitamos expresar propiedades globales que valen para <strong>todo objeto del tipo, durante toda su existencia</strong>.</p>
+
+        <div class="fc indigo mb-3" data-label="Tarjeta · Invariante">
+          <div class="fc-title">Invariante de tipo / clase</div>
+          <div class="fc-body">Una invariante es una afirmación asociada a un tipo que debe ser satisfecha por los objetos de ese tipo <strong>durante toda su existencia</strong>.</div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="cw">
+              <div class="ch"><div class="dot r"></div><div class="dot y2"></div><div class="dot g"></div><span class="ms-2">Ejemplo: clase BankAccount</span></div>
+              <pre><code class="language-csharp">// Invariante: Balance >= 0
+// Vale antes y después de cada operación pública
+
+public class BankAccount
+{
+    private decimal balance;
+
+    // Inv: balance >= 0
+    public BankAccount(decimal initial)
+    {
+        // Precondición: initial >= 0
+        this.balance = initial;
+        // Post: balance == initial (inv se cumple)
+    }
+
+    // Pre: amount > 0 && amount <= Balance
+    // Post: Balance == old(Balance) - amount
+    //       && Balance >= 0  ← invariante se mantiene
+    public void Withdraw(decimal amount)
+    {
+        this.balance -= amount;
+    }
+}</code></pre>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="fc indigo mb-3" data-label="Tarjeta · Invariante / Subtipos">
+              <div class="fc-title">Invariante en Subtipos</div>
+              <div class="fc-body">La invariante de un subtipo es la <strong>conjunción</strong> (∧) de las invariantes de sus supertipos.<br><br>Es decir: el subtipo hereda todas las invariantes del supertipo y puede agregar las propias.</div>
+            </div>
+            <div class="hl indigo">
+              <i class="fa-solid fa-lightbulb me-2"></i>
+              Una invariante puede traducirse como <strong>precondición y postcondición en todas las operaciones</strong>: debe ser verdadera al entrar y al salir de cada método público.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 9 ESPECIFICACIÓN Y CORRECCIÓN ══ -->
+    <div class="slide" id="slide-9">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-scroll me-1"></i>Especificación completa</div>
+        <h2 class="t">Especificación = Pre + Post + <span class="c4">Invariante</span></h2>
+        <p class="lt mb-4">Con los tres elementos podemos definir formalmente la especificación de un tipo y la corrección de su implementación.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="fc mb-3" data-label="Tarjeta · Especificación">
+              <div class="fc-title">Especificación de un tipo</div>
+              <div class="fc-body">La especificación de un tipo es el <strong>conjunto de precondiciones, postcondiciones e invariantes</strong> asociadas a ese tipo.</div>
+            </div>
+            <div class="fc ok" data-label="Tarjeta · Corrección">
+              <div class="fc-title">Corrección</div>
+              <div class="fc-body">Una clase que implementa uno o más tipos es <strong>correcta</strong> cuando satisface la especificación de todos los tipos que implementa.<br><br>Un <strong>programa es correcto</strong> cuando todas sus clases son correctas.</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100">
+              <h6 class="c1 mb-3"><i class="fa-solid fa-diagram-project me-2"></i>La especificación de un programa OO</h6>
+              <p class="bt">Como en un programa OO solo hay <strong>objetos enviándose mensajes</strong>, y los mensajes posibles están definidos en sus tipos, la especificación del programa es la <strong>suma de las especificaciones de todos sus tipos</strong>.</p>
+              <div class="hl mt-3">
+                <code>Especificación Programa</code><br>
+                <code>&nbsp;= ∑ Especificaciones de tipos</code><br>
+                <code>&nbsp;= ∑ (Pre + Post + Inv) por tipo</code>
+              </div>
+              <div class="hl ok mt-2">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                Programa correcto ⟺ todas sus clases son correctas ⟺ todas satisfacen sus especificaciones.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 10 CONTRATO Y LSP ══ -->
+    <div class="slide" id="slide-10">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-layer-group me-1"></i>Design by Contract + LSP</div>
+        <h2 class="t">El contrato y el <span class="c2">Principio de Sustitución</span></h2>
+        <p class="lt mb-3">El Diseño por Contrato está directamente relacionado con el <strong>Principio de Sustitución de Liskov (LSP)</strong>: un subtipo S puede sustituir a su supertipo T sin romper el programa.</p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="fc mb-3" data-label="Tarjeta · Precondiciones / Subtipos">
+              <div class="fc-title">Precondiciones en Subtipos</div>
+              <div class="fc-body">Una operación de un subtipo debe tener precondiciones <strong>iguales o más débiles</strong> que las de su supertipo.<br><br>Pre_S ⟹ Pre_T &nbsp;(Pre_T es más fuerte o igual)</div>
+            </div>
+            <div class="fc pink" data-label="Tarjeta · Postcondiciones / Subtipos">
+              <div class="fc-title">Postcondiciones en Subtipos</div>
+              <div class="fc-body">Una operación de un subtipo debe tener postcondiciones <strong>iguales o más fuertes</strong> que las de su supertipo.<br><br>Post_T ⟹ Post_S &nbsp;(Post_S es más fuerte o igual)</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="dw h-100" style="display:flex;align-items:center;">
+              <svg viewBox="0 0 340 290" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+                <defs>
+                  <marker id="inh" markerWidth="12" markerHeight="12" refX="6" refY="10" orient="auto"><path d="M6,0 L0,10 L12,10 z" fill="none" stroke="#2dd4bf" stroke-width="1.5"/></marker>
+                </defs>
+                <!-- SuperType T -->
+                <rect x="80" y="10" width="180" height="85" rx="7" fill="#091520" stroke="#2dd4bf" stroke-width="1.5"/>
+                <rect x="80" y="10" width="180" height="22" rx="7" fill="#0c2030"/>
+                <text x="170" y="26" text-anchor="middle" fill="#2dd4bf" font-family="Fira Code" font-size="10" font-weight="700">Tipo T (supertipo)</text>
+                <text x="90" y="48" fill="#4a8090" font-family="Fira Code" font-size="8">Pre_T: condición original</text>
+                <text x="90" y="62" fill="#4a8090" font-family="Fira Code" font-size="8">Post_T: resultado original</text>
+                <text x="90" y="76" fill="#4a8090" font-family="Fira Code" font-size="8">Inv_T: propiedad global T</text>
+
+                <!-- Subtipo S -->
+                <rect x="60" y="190" width="220" height="90" rx="7" fill="#091520" stroke="#818cf8" stroke-width="1.5"/>
+                <rect x="60" y="190" width="220" height="22" rx="7" fill="#0c1525"/>
+                <text x="170" y="206" text-anchor="middle" fill="#818cf8" font-family="Fira Code" font-size="10" font-weight="700">Subtipo S</text>
+                <text x="70" y="226" fill="#4a8090" font-family="Fira Code" font-size="8">Pre_S: ≤ Pre_T (más débil o igual)</text>
+                <text x="70" y="240" fill="#f472b6" font-family="Fira Code" font-size="8">Post_S: ≥ Post_T (más fuerte o igual)</text>
+                <text x="70" y="254" fill="#4a8090" font-family="Fira Code" font-size="8">Inv_S: Inv_T ∧ propias de S</text>
+
+                <line x1="170" y1="190" x2="170" y2="97" stroke="#2dd4bf" stroke-width="1.3" marker-end="url(#inh)"/>
+
+                <!-- Regla labels -->
+                <rect x="10" y="130" width="150" height="28" rx="5" fill="rgba(45,212,191,.08)" stroke="rgba(45,212,191,.2)"/>
+                <text x="85" y="148" text-anchor="middle" fill="#2dd4bf" font-family="Fira Code" font-size="8">Pre_S más débil → cliente</text>
+                <text x="85" y="159" text-anchor="middle" fill="#2dd4bf" font-family="Fira Code" font-size="8">cumple igual Pre_S</text>
+
+                <rect x="185" y="130" width="150" height="28" rx="5" fill="rgba(244,114,182,.08)" stroke="rgba(244,114,182,.2)"/>
+                <text x="260" y="148" text-anchor="middle" fill="#f472b6" font-family="Fira Code" font-size="8">Post_S más fuerte → servidor</text>
+                <text x="260" y="159" text-anchor="middle" fill="#f472b6" font-family="Fira Code" font-size="8">da al menos lo de T</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="hl yellow">
+          <i class="fa-solid fa-handshake me-2"></i>
+          <strong>Idea central:</strong> un cliente que antes cumplía Pre_T también cumplirá Pre_S (es más fácil). Un servidor que cumple Post_S también cumple Post_T (da más de lo prometido).
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 11 EJEMPLO CUENTA BANCARIA ══ -->
+    <div class="slide" id="slide-11">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-code me-1"></i>Ejemplo integrador</div>
+        <h2 class="t">Pre, Post e Invariante en <span class="c1">código</span></h2>
+        <p class="bt mb-3">Ejemplo completo con comentarios de especificación: cuenta bancaria con tipo base y subtipo.</p>
+        <div class="cw mb-3">
+          <div class="ch"><div class="dot r"></div><div class="dot y2"></div><div class="dot g"></div><span class="ms-2">BankAccount.cs — especificación en comentarios</span></div>
+          <pre><code class="language-csharp">// INVARIANTE: Balance >= 0
+public class BankAccount
+{
+    public decimal Balance { get; private set; }
+
+    // Pre:  initialBalance >= 0
+    // Post: Balance == initialBalance
+    public BankAccount(decimal initialBalance)
+    {
+        if (initialBalance < 0)
+            throw new ArgumentException("Balance inicial negativo");
+        this.Balance = initialBalance;
+    }
+
+    // Pre:  amount > 0  &&  amount <= Balance
+    // Post: Balance == old(Balance) - amount  &&  Balance >= 0
+    public virtual void Withdraw(decimal amount)
+    {
+        if (amount <= 0 || amount > Balance)
+            throw new ArgumentException("Monto inválido");
+        this.Balance -= amount;
+    }
+}
+
+// Subtipo con precondición más débil (permite descubierto)
+// INVARIANTE: Balance >= -OverdraftLimit  (más débil, ∧ con heredada)
+public class OverdraftAccount : BankAccount
+{
+    private decimal overdraftLimit;
+
+    // Pre:  amount > 0  &&  amount <= Balance + OverdraftLimit
+    //       ← MÁS DÉBIL que la de BankAccount
+    // Post: Balance == old(Balance) - amount  &&  Balance >= -OverdraftLimit
+    //       ← MÁS FUERTE: garantiza también el límite de descubierto
+    public override void Withdraw(decimal amount)
+    {
+        if (amount <= 0 || amount > Balance + overdraftLimit)
+            throw new ArgumentException("Excede límite de descubierto");
+        this.Balance -= amount;
+    }
+}</code></pre>
+        </div>
+        <div class="hl ok">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          <code>OverdraftAccount</code> puede sustituir a <code>BankAccount</code> según LSP: su precondición es más débil (acepta más casos) y su postcondición es más fuerte (garantiza más).
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 12 VIOLACIÓN ══ -->
+    <div class="slide" id="slide-12">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-circle-exclamation me-1"></i>Violación</div>
+        <h2 class="t">Violación de <span style="color:var(--err)">afirmación</span></h2>
+
+        <div class="fc err mb-3" data-label="Tarjeta · Violación de afirmación">
+          <div class="fc-title">Violación de afirmación</div>
+          <div class="fc-body">La violación de una afirmación es la situación a la que se llega en un <strong>programa incorrecto</strong> cuando no se cumple una precondición, postcondición o invariante.<br><br>Es producto de un <strong>error permanente en el código</strong> del programa.</div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="cw">
+              <div class="ch"><div class="dot r"></div><div class="dot y2"></div><div class="dot g"></div><span class="ms-2">Violaciones en C#</span></div>
+              <pre><code class="language-csharp">var account = new BankAccount(100);
+
+// Violación de PRECONDICIÓN:
+// El cliente no cumplió Pre (amount > 0)
+account.Withdraw(-50);   // ArgumentException
+
+// Violación de INVARIANTE:
+// Aunque el cliente cumplió Pre,
+// si la implementación rompe la invariante
+// → bug en el servidor
+
+// Violación de POSTCONDICIÓN:
+// Si Withdraw no resta el monto correctamente
+// → Post no se cumple → bug del implementador</code></pre>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100">
+              <h6 class="mb-3" style="color:var(--err)"><i class="fa-solid fa-bug me-2"></i>¿Quién tiene el bug?</h6>
+              <ul class="sl">
+                <li><div class="sn y">P</div><div class="bt"><strong>Precondición violada:</strong> bug en el <em>cliente</em> (llamó sin cumplir su obligación).</div></li>
+                <li><div class="sn p">Q</div><div class="bt"><strong>Postcondición violada</strong> (cuando pre se cumplía): bug en el <em>servidor</em> (no garantizó su obligación).</div></li>
+                <li><div class="sn i">I</div><div class="bt"><strong>Invariante violada:</strong> bug en el <em>servidor</em> (alguna operación dejó el objeto en estado inválido).</div></li>
+              </ul>
+              <div class="hl err mt-3">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                Las violaciones son señal de un <strong>programa incorrecto</strong>. Son distintas de las excepciones de usuario: no se pueden resolver sin corregir el código.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 13 RESUMEN ══ -->
+    <div class="slide" id="slide-13">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-star me-1"></i>Cierre</div>
+        <h2 class="t">Resumen: <span class="c1">Diseño por Contrato</span></h2>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="gc h-100">
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <span style="background:rgba(45,212,191,.15);border:1px solid rgba(45,212,191,.3);border-radius:6px;padding:3px 10px;font-family:'Fira Code',monospace;font-size:.75rem;color:var(--a1)">Precondición</span>
+                <span style="background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.3);border-radius:6px;padding:3px 10px;font-family:'Fira Code',monospace;font-size:.75rem;color:var(--a2)">Postcondición</span>
+                <span style="background:rgba(129,140,248,.15);border:1px solid rgba(129,140,248,.3);border-radius:6px;padding:3px 10px;font-family:'Fira Code',monospace;font-size:.75rem;color:var(--a4)">Invariante</span>
+              </div>
+              <ul class="sl">
+                <li><div class="sn">P</div><div class="bt"><span class="c1">Pre</span>: obligación del cliente, derecho del servidor.</div></li>
+                <li><div class="sn p">Q</div><div class="bt"><span class="c2">Post</span>: derecho del cliente, obligación del servidor.</div></li>
+                <li><div class="sn i">I</div><div class="bt"><span class="c4">Inv</span>: verdadera para todo objeto del tipo durante toda su existencia.</div></li>
+                <li><div class="sn y">F</div><div class="bt"><span class="c3">{P} A {Q}</span>: si P al entrar → Q al salir.</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="gc h-100">
+              <h6 class="c2 mb-3"><i class="fa-solid fa-layer-group me-2"></i>Con subtipos (LSP)</h6>
+              <ul class="sl">
+                <li><div class="sn">↓</div><div class="bt">Pre del subtipo ≤ Pre del supertipo <span style="color:#3a5a65">(más débil o igual)</span></div></li>
+                <li><div class="sn p">↑</div><div class="bt">Post del subtipo ≥ Post del supertipo <span style="color:#3a5a65">(más fuerte o igual)</span></div></li>
+                <li><div class="sn i">∧</div><div class="bt">Inv subtipo = Inv supertipo ∧ nuevas invariantes</div></li>
+              </ul>
+              <div class="hl ok mt-3">
+                <i class="fa-solid fa-rotate me-2"></i>
+                Esto garantiza la sustituibilidad: donde hay un T, puede haber un S sin romper el programa.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(45,212,191,.14),rgba(129,140,248,.08));border:1px solid rgba(45,212,191,.28);border-radius:14px;padding:20px;text-align:center">
+          <p style="font-size:1.05rem;font-weight:700;color:#fff;margin:0">
+            <i class="fa-solid fa-graduation-cap me-2" style="color:var(--a1)"></i>
+            Sin especificación no hay corrección. El <span class="c1">contrato</span> es la especificación: Pre + Post + Invariante.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 14 QUIZ ══ -->
+    <div class="slide" id="slide-14">
+      <div class="animate__animated animate__fadeInRight">
+        <div class="stag"><i class="fa-solid fa-clipboard-question me-1"></i>Evaluación</div>
+        <h2 class="t">Cuestionario <span class="c1">Diseño por Contrato</span></h2>
+        <p class="bt mb-4">Verificá tu comprensión de la sección 4.1.</p>
+
+        <div id="quiz-section">
+          <div class="gc mb-3">
+            <div class="qcount">Pregunta <span id="q-num">1</span> de 10</div>
+            <div class="qq" id="q-text"></div>
+            <div id="q-options"></div>
+            <div class="qf" id="q-feedback"></div>
+            <div class="text-end mt-3">
+              <button class="nb p" id="btn-nq" onclick="nextQ()" style="display:none">
+                Siguiente <i class="fa-solid fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="rs">
+          <div class="gc text-center mb-3">
+            <h4 class="mb-3">Resultado final</h4>
+            <div class="sr mb-3">
+              <canvas id="dc" width="140" height="140"></canvas>
+              <div class="si"><div class="snum" id="sd">0/10</div><div class="slb">correctas</div></div>
+            </div>
+            <div id="rm" class="mb-3"></div>
+            <div class="mb-3"><canvas id="bc" height="80"></canvas></div>
+            <button class="nb p mt-2" onclick="restart()">
+              <i class="fa-solid fa-rotate-left me-2"></i>Reiniciar cuestionario
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /sa -->
+
+  <footer>
+    <button class="nb" id="bp" onclick="go(-1)" disabled><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+    <div class="d-flex gap-1 flex-wrap justify-content-center" id="dn"></div>
+    <button class="nb p" id="bn" onclick="go(1)">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+  </footer>
+</div>
+
+<script>
+const TOTAL = 14;
+let cur = 1;
+
+const quiz = [
+  {
+    q: "¿Qué expresa la fórmula de corrección {P} A {Q}?",
+    opts:[
+      "A ejecuta siempre que Q sea verdadera, y al terminar garantiza P.",
+      "Cualquier ejecución de A que comience con P verdadera, termina con Q verdadera.",
+      "A es correcta si y solo si P y Q son iguales.",
+      "P y Q son condiciones opcionales que A puede o no satisfacer."
+    ],
+    ok:1,
+    ok_fb:"Correcto. La fórmula se lee: si P es verdadera al inicio de A, entonces Q será verdadera al final. Si P no se cumple, A no tiene ninguna obligación.",
+    ko_fb:"Incorrecto. {P} A {Q} significa: si A comienza en un estado donde P se cumple, terminará en un estado donde Q se cumple."
+  },
+  {
+    q: "¿Qué es una precondición y quién es responsable de cumplirla?",
+    opts:[
+      "Es una afirmación que debe cumplir el implementador antes de escribir el método.",
+      "Es una afirmación que debe cumplir el objeto que llama (cliente) antes de invocar la operación.",
+      "Es una condición que el compilador verifica automáticamente.",
+      "Es equivalente a la postcondición pero aplicada al estado inicial."
+    ],
+    ok:1,
+    ok_fb:"Correcto. La precondición es obligación del cliente (quien llama). Si el cliente la viola, el servidor no tiene obligación de producir ningún resultado correcto.",
+    ko_fb:"Incorrecto. La precondición es una obligación para el objeto cliente que usa la operación, y un derecho para el objeto que la implementa."
+  },
+  {
+    q: "La postcondición de una operación es un derecho para el cliente y una obligación para el servidor. ¿Qué significa esto?",
+    opts:[
+      "El cliente puede modificar la postcondición si lo necesita.",
+      "El servidor puede ignorar la postcondición si la precondición no se cumplió.",
+      "El cliente puede confiar en que Q será verdadera al terminar; el servidor DEBE garantizarlo si P era verdadera.",
+      "Ambos tienen la misma responsabilidad sobre la postcondición."
+    ],
+    ok:2,
+    ok_fb:"Correcto. Si el cliente cumplió la precondición, puede confiar en que la postcondición se cumplirá. Es la obligación del servidor garantizarlo.",
+    ko_fb:"Incorrecto. El cliente tiene el derecho de recibir Q como resultado (puede confiar en ello). El servidor tiene la obligación de garantizarlo cuando P era verdadera al inicio."
+  },
+  {
+    q: "Dadas P₁ = 'x > 5' y P₂ = 'x > 0', ¿cuál es más fuerte?",
+    opts:[
+      "P₂ es más fuerte porque acepta más valores de x.",
+      "P₁ es más fuerte porque implica P₂ (todo x > 5 también es x > 0) y son diferentes.",
+      "Son igual de fuertes porque ambas son sobre x.",
+      "P₂ es más fuerte porque su valor límite es menor."
+    ],
+    ok:1,
+    ok_fb:"Correcto. P₁ ('x > 5') implica P₂ ('x > 0') porque cualquier x mayor que 5 también es mayor que 0. Como P₁ ⟹ P₂ y P₁ ≠ P₂, P₁ es más fuerte.",
+    ko_fb:"Incorrecto. P₁ ('x > 5') es más fuerte: implica P₂ ('x > 0') porque todo x > 5 es también x > 0. La afirmación más fuerte es más restrictiva (tiene menos estados que la satisfacen)."
+  },
+  {
+    q: "¿Cuándo es falsa la implicación P₁ ⟹ P₂?",
+    opts:[
+      "Cuando P₁ es falsa y P₂ es verdadera.",
+      "Cuando ambas son falsas.",
+      "Cuando P₁ es verdadera y P₂ es falsa.",
+      "Cuando P₁ y P₂ son iguales."
+    ],
+    ok:2,
+    ok_fb:"Correcto. P₁ ⟹ P₂ equivale a ¬P₁ ∨ P₂, que es falsa solo cuando P₁ es V y P₂ es F: el antecedente es verdadero pero el consecuente es falso.",
+    ko_fb:"Incorrecto. La única fila donde P₁ ⟹ P₂ es falsa es cuando P₁ = V y P₂ = F. En todos los demás casos es verdadera."
+  },
+  {
+    q: "¿Qué es una invariante de tipo?",
+    opts:[
+      "Una condición que solo se cumple durante el constructor de la clase.",
+      "Una afirmación que debe ser verdadera para todos los objetos del tipo durante toda su existencia.",
+      "Una precondición que es igual a la postcondición.",
+      "Un método que no puede ser redefinido en subtipos."
+    ],
+    ok:1,
+    ok_fb:"Correcto. La invariante expresa propiedades globales que se deben cumplir siempre: antes y después de cada operación pública. Por ejemplo: 'Balance >= 0' en una cuenta bancaria.",
+    ko_fb:"Incorrecto. Una invariante es una afirmación que debe ser satisfecha por los objetos del tipo durante TODA su existencia, no solo en el constructor."
+  },
+  {
+    q: "Un subtipo S redefine una operación del supertipo T. ¿Qué debe cumplirse con las precondiciones según el Diseño por Contrato?",
+    opts:[
+      "La precondición de S debe ser más fuerte que la de T.",
+      "La precondición de S debe ser exactamente igual a la de T.",
+      "La precondición de S debe ser igual o más débil que la de T.",
+      "Las precondiciones no importan en los subtipos, solo las postcondiciones."
+    ],
+    ok:2,
+    ok_fb:"Correcto. El subtipo debe tener precondiciones iguales o más débiles. Así, un cliente que antes podía cumplir Pre_T también podrá cumplir Pre_S, permitiendo la sustitución.",
+    ko_fb:"Incorrecto. El subtipo debe tener precondiciones iguales o MÁS DÉBILES. Si fueran más fuertes, un cliente que antes cumplía la pre del supertipo podría no cumplir la del subtipo, rompiendo LSP."
+  },
+  {
+    q: "¿Cómo es la invariante de un subtipo respecto a la de su supertipo?",
+    opts:[
+      "El subtipo puede reemplazar la invariante del supertipo con una nueva.",
+      "La invariante del subtipo es la conjunción (∧) de la del supertipo y sus propias invariantes.",
+      "El subtipo no tiene invariante propia; solo hereda la del supertipo.",
+      "La invariante del subtipo debe ser más débil que la del supertipo."
+    ],
+    ok:1,
+    ok_fb:"Correcto. La invariante del subtipo es Inv_T ∧ Inv_propias_de_S. El subtipo hereda todas las invariantes del supertipo y puede agregar nuevas restricciones.",
+    ko_fb:"Incorrecto. La invariante del subtipo es la CONJUNCIÓN de la del supertipo y las propias: el subtipo hereda todas y puede agregar más."
+  },
+  {
+    q: "¿Qué significa que un programa orientado a objetos sea correcto?",
+    opts:[
+      "Que compila sin errores y no tiene excepciones en tiempo de ejecución.",
+      "Que todas sus clases satisfacen la especificación de todos los tipos que implementan.",
+      "Que pasa todos los tests unitarios escritos por el programador.",
+      "Que fue revisado por al menos dos desarrolladores diferentes."
+    ],
+    ok:1,
+    ok_fb:"Correcto. Un programa es correcto cuando todas sus clases son correctas, es decir, satisfacen la especificación (Pre + Post + Inv) de todos los tipos que implementan.",
+    ko_fb:"Incorrecto. La corrección se define respecto a la especificación: un programa es correcto cuando todas sus clases satisfacen las especificaciones (Pre + Post + Inv) de todos los tipos que implementan."
+  },
+  {
+    q: "¿Qué indica una violación de afirmación (precondición, postcondición o invariante)?",
+    opts:[
+      "Que el usuario cometió un error de ingreso de datos que puede corregirse.",
+      "Que hay un error permanente en el código del programa (bug del programador).",
+      "Que la especificación está incompleta y debe ampliarse.",
+      "Que la clase necesita un método adicional para manejar el caso."
+    ],
+    ok:1,
+    ok_fb:"Correcto. Una violación de afirmación es producto de un error permanente en el código: a diferencia de una excepción de usuario, no puede resolverse sin corregir el programa.",
+    ko_fb:"Incorrecto. Una violación de afirmación es un error permanente en el código, no un error de usuario. No puede resolverse en tiempo de ejecución: requiere corregir el programa."
+  }
+];
+
+let qcur=0, qsc=0, qans=[];
+let dc=null, bc=null;
+
+function go(d){
+  document.querySelectorAll('.slide')[cur-1].classList.remove('active');
+  cur=Math.max(1,Math.min(TOTAL,cur+d));
+  const s=document.querySelectorAll('.slide')[cur-1];
+  s.classList.add('active');
+  const a=s.querySelector('.animate__animated');
+  if(a){a.classList.remove('animate__fadeInRight','animate__fadeIn');void a.offsetWidth;a.classList.add(cur===1?'animate__fadeIn':'animate__fadeInRight');}
+  document.getElementById('cs').textContent=cur;
+  document.getElementById('pb').style.width=((cur/TOTAL)*100)+'%';
+  document.getElementById('bp').disabled=cur===1;
+  document.getElementById('bn').disabled=cur===TOTAL;
+  dots(); document.getElementById('sa').scrollTop=0;
+  hljs.highlightAll();
+}
+
+function dots(){
+  const n=document.getElementById('dn'); n.innerHTML='';
+  for(let i=1;i<=TOTAL;i++){
+    const d=document.createElement('div');
+    const ac=i===cur,vi=i<cur;
+    d.style.cssText=`width:${ac?'18px':'6px'};height:6px;border-radius:99px;background:${ac?'var(--a1)':vi?'rgba(45,212,191,.3)':'#0c2030'};border:1px solid ${ac||vi?'var(--a1)':'#1a3040'};transition:all .3s;cursor:pointer;flex-shrink:0`;
+    d.onclick=()=>{const dif=i-cur;if(dif)go(dif);};
+    n.appendChild(d);
+  }
+}
+
+function loadQ(){
+  if(qcur>=quiz.length){showRes();return;}
+  const q=quiz[qcur];
+  document.getElementById('q-num').textContent=qcur+1;
+  document.getElementById('q-text').textContent=q.q;
+  const L=['A','B','C','D'];
+  document.getElementById('q-options').innerHTML=q.opts.map((o,i)=>
+    `<div class="qo" onclick="sel(${i})" id="op-${i}"><span class="ol">${L[i]}</span><span>${o}</span></div>`
+  ).join('');
+  const fb=document.getElementById('q-feedback');
+  fb.textContent=''; fb.className='qf';
+  document.getElementById('btn-nq').style.display='none';
+}
+
+function sel(idx){
+  const q=quiz[qcur];
+  document.querySelectorAll('.qo').forEach(o=>o.classList.add('disabled'));
+  const fb=document.getElementById('q-feedback');
+  if(idx===q.ok){
+    document.getElementById(`op-${idx}`).classList.add('correct');
+    fb.textContent='✓ '+q.ok_fb; fb.className='qf show ok';
+    qsc++; qans.push(true);
+  } else {
+    document.getElementById(`op-${idx}`).classList.add('wrong');
+    document.getElementById(`op-${q.ok}`).classList.add('correct');
+    fb.textContent='✗ '+q.ko_fb; fb.className='qf show ko';
+    qans.push(false);
+  }
+  document.getElementById('btn-nq').style.display='inline-flex';
+}
+
+function nextQ(){qcur++;loadQ();}
+
+function showRes(){
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('rs').style.display='block';
+  const tot=quiz.length, pct=Math.round((qsc/tot)*100);
+  document.getElementById('sd').textContent=`${qsc}/${tot}`;
+  let msg='',color='';
+  if(pct>=90){msg='🏆 ¡Excelente! Dominás el Diseño por Contrato.';color='var(--a1)';}
+  else if(pct>=70){msg='👍 Muy bien. Repasá los puntos fallidos.';color='var(--a3)';}
+  else if(pct>=50){msg='🔄 Vas por buen camino. Revisá las tarjetas.';color='var(--a4)';}
+  else{msg='📖 Te conviene releer el material con cuidado.';color='var(--err)';}
+  document.getElementById('rm').innerHTML=`<p style="font-size:1rem;font-weight:700;color:${color}">${msg}</p><p class="bt">Obtuviste <strong>${qsc} de ${tot}</strong> correctas (${pct}%).</p>`;
+  if(dc)dc.destroy();
+  dc=new Chart(document.getElementById('dc'),{
+    type:'doughnut',
+    data:{datasets:[{data:[qsc,tot-qsc],backgroundColor:['#2dd4bf','#0c2030'],borderColor:['#14b8a6','#1a3040'],borderWidth:2}]},
+    options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+  if(bc)bc.destroy();
+  bc=new Chart(document.getElementById('bc'),{
+    type:'bar',
+    data:{
+      labels:qans.map((_,i)=>`P${i+1}`),
+      datasets:[{data:qans.map(a=>a?1:0),
+        backgroundColor:qans.map(a=>a?'rgba(45,212,191,.7)':'rgba(248,113,113,.7)'),
+        borderColor:qans.map(a=>a?'#2dd4bf':'#f87171'),
+        borderWidth:1,borderRadius:4}]
+    },
+    options:{responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw===1?'✓ Correcta':'✗ Incorrecta'}}},
+      scales:{y:{display:false,max:1.3},x:{ticks:{color:'#3a5a65',font:{family:'Fira Code',size:10}},grid:{color:'rgba(255,255,255,.03)'}}}}
+  });
+  Swal.fire({
+    title:qsc>=8?'¡Buen trabajo!':'Sigue practicando',
+    html:`<strong>${qsc}/${tot}</strong> correctas · ${pct}%`,
+    icon:qsc>=8?'success':qsc>=5?'warning':'error',
+    background:'#091520',color:'#e2f0f0',
+    confirmButtonColor:'#2dd4bf',confirmButtonText:'Ver resultados',
+    customClass:{popup:'border border-secondary'}
+  });
+}
+
+function restart(){
+  qcur=0;qsc=0;qans=[];
+  document.getElementById('quiz-section').style.display='block';
+  document.getElementById('rs').style.display='none';
+  loadQ();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{hljs.highlightAll();dots();loadQ();});
+</script>
+</body>
+</html>

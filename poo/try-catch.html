@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>try/catch en C# — Manejo de Excepciones</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<!-- Animate.css -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<!-- SweetAlert2 -->
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #0a0e1a;
+    --surface:   #111827;
+    --panel:     #1a2236;
+    --border:    #1e3a5f;
+    --accent:    #00d4ff;
+    --accent2:   #7c3aed;
+    --accent3:   #10b981;
+    --warn:      #f59e0b;
+    --danger:    #ef4444;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --code-bg:   #0d1117;
+    --success:   #22c55e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease;
+    z-index: 9999;
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  /* ─── SLIDE CONTAINER ─── */
+  #slides-wrapper {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 60px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ─── GRID BACKGROUND ─── */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ─── SLIDE HEADER ─── */
+  .slide-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1.hero {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    line-height: 1.1;
+    color: #fff;
+    text-align: center;
+  }
+
+  h1.hero span { color: var(--accent); }
+
+  h2.slide-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  h2.slide-title .kw { color: var(--accent); }
+  h2.slide-title .kw2 { color: var(--accent2); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 28px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── CARDS ─── */
+  .card-glass {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-glass::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  /* ─── CODE BLOCK ─── */
+  pre.code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    line-height: 1.7;
+    color: #c9d1d9;
+    overflow-x: auto;
+    position: relative;
+    text-align: left;
+    width: 100%;
+  }
+
+  pre.code-block .kw   { color: #ff7b72; }
+  pre.code-block .type { color: #79c0ff; }
+  pre.code-block .str  { color: #a5d6ff; }
+  pre.code-block .cmt  { color: #8b949e; font-style: italic; }
+  pre.code-block .fn   { color: #d2a8ff; }
+  pre.code-block .var  { color: #ffa657; }
+  pre.code-block .num  { color: #79c0ff; }
+
+  /* ─── BADGE ─── */
+  .badge-accent {
+    background: rgba(0,212,255,.15);
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,.3);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    padding: 3px 10px;
+  }
+
+  .badge-warn {
+    background: rgba(245,158,11,.15);
+    color: var(--warn);
+    border: 1px solid rgba(245,158,11,.3);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    padding: 3px 10px;
+  }
+
+  .badge-danger {
+    background: rgba(239,68,68,.15);
+    color: var(--danger);
+    border: 1px solid rgba(239,68,68,.3);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    padding: 3px 10px;
+  }
+
+  /* ─── LIST ─── */
+  ul.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  ul.feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  ul.feature-list li .icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: .75rem;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .flow-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    text-align: center;
+    min-width: 110px;
+  }
+
+  .flow-box.try-box   { border-color: var(--accent);  color: var(--accent);  }
+  .flow-box.ok-box    { border-color: var(--accent3); color: var(--accent3); }
+  .flow-box.err-box   { border-color: var(--danger);  color: var(--danger);  }
+  .flow-box.catch-box { border-color: var(--warn);    color: var(--warn);    }
+  .flow-box.clr-box   { border-color: var(--accent2); color: var(--accent2); }
+  .flow-box.end-box   { border-color: var(--muted);   color: var(--text);    }
+
+  .flow-arrow { color: var(--muted); font-size: 1.2rem; }
+
+  /* ─── NAVIGATION ─── */
+  #nav-bar {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 10px 22px;
+    z-index: 999;
+    box-shadow: 0 4px 30px rgba(0,0,0,.4);
+  }
+
+  #nav-bar button {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all .2s;
+    font-size: .95rem;
+  }
+
+  #nav-bar button:hover { background: rgba(255,255,255,.06); color: #fff; }
+  #nav-bar button:disabled { opacity: .3; cursor: default; }
+
+  #slide-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--accent);
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* ─── SLIDE-SPECIFIC: HERO ─── */
+  .hero-glow {
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,255,.12) 0%, transparent 70%);
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity: .7; }
+    50%      { transform: translate(-50%,-50%) scale(1.15); opacity: 1; }
+  }
+
+  /* ─── TERMINAL ─── */
+  .terminal {
+    background: #050810;
+    border: 1px solid #1a2236;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    padding: 16px 20px;
+    width: 100%;
+    color: #c9d1d9;
+    line-height: 1.8;
+  }
+
+  .terminal .prompt { color: var(--accent3); }
+  .terminal .output { color: var(--muted); }
+  .terminal .error  { color: var(--danger); }
+  .terminal .ok     { color: var(--success); }
+
+  /* ─── CODE RUNNER (Slide 10+) ─── */
+  #runner-section {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  #exercise-tabs .nav-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    border: 1px solid transparent;
+    background: transparent;
+    transition: all .2s;
+  }
+
+  #exercise-tabs .nav-link.active {
+    background: rgba(0,212,255,.12);
+    color: var(--accent);
+    border-color: rgba(0,212,255,.3);
+  }
+
+  #exercise-tabs .nav-link.locked {
+    opacity: .35;
+    cursor: not-allowed;
+  }
+
+  #exercise-tabs .nav-link.solved {
+    color: var(--success);
+    border-color: rgba(34,197,94,.3);
+    background: rgba(34,197,94,.08);
+  }
+
+  .ex-editor {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    color: #c9d1d9;
+    padding: 14px;
+    min-height: 140px;
+    resize: vertical;
+    outline: none;
+    width: 100%;
+    line-height: 1.7;
+  }
+
+  .ex-editor:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,212,255,.15); }
+
+  .run-btn {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    border: none;
+    color: #000;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 9px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: 1px;
+  }
+
+  .run-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,212,255,.4); }
+
+  #feedback-box {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    padding: 12px 16px;
+    border-radius: 8px;
+    min-height: 50px;
+    border: 1px solid var(--border);
+    background: var(--code-bg);
+    color: var(--muted);
+    display: none;
+  }
+
+  /* ─── COLUMNS ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    width: 100%;
+  }
+
+  /* ─── NOTA ─── */
+  .note-box {
+    background: rgba(245,158,11,.07);
+    border: 1px solid rgba(245,158,11,.25);
+    border-left: 3px solid var(--warn);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: .9rem;
+    color: var(--text);
+  }
+
+  .note-box .note-title {
+    color: var(--warn);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  /* ─── SCROLLABLE CONTENT ─── */
+  .slide-content {
+    width: 100%;
+    max-width: 900px;
+    overflow-y: auto;
+    max-height: calc(100vh - 160px);
+    padding-right: 6px;
+  }
+
+  .slide-content::-webkit-scrollbar { width: 4px; }
+  .slide-content::-webkit-scrollbar-track { background: transparent; }
+  .slide-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ─── GLOW ACCENT LINE ─── */
+  .accent-line {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    margin: 10px auto 20px;
+  }
+
+  /* ─── STEP BADGE ─── */
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: .8rem;
+    flex-shrink: 0;
+  }
+
+  /* ─── ANIMATE HELPERS ─── */
+  .delay-1 { animation-delay: .15s; }
+  .delay-2 { animation-delay: .3s; }
+  .delay-3 { animation-delay: .45s; }
+  .delay-4 { animation-delay: .6s; }
+  .delay-5 { animation-delay: .75s; }
+
+  /* ─── EXCEPTION TYPE CARDS ─── */
+  .exc-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .exc-icon {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    .slide { padding: 24px 20px; }
+    .two-col { grid-template-columns: 1fr; }
+    h1.hero { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="slides-wrapper"></div>
+
+<!-- NAV -->
+<div id="nav-bar">
+  <button id="btn-prev" onclick="navigate(-1)" title="Anterior">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  <span id="slide-counter">1 / 1</span>
+  <button id="btn-next" onclick="navigate(1)" title="Siguiente">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+  <button onclick="showSlideMenu()" title="Diapositivas" style="margin-left:4px">
+    <i class="fas fa-th-large"></i>
+  </button>
+  <button onclick="toggleFullscreen()" title="Pantalla completa">
+    <i class="fas fa-expand"></i>
+  </button>
+</div>
+
+<!-- Bootstrap + SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+/* ══════════════════════════════════════
+   SLIDES DATA
+══════════════════════════════════════ */
+const slides = [
+
+/* ── 0: HERO ── */
+{
+  title: 'Hero',
+  render: () => `
+    <div class="hero-glow"></div>
+    <div class="text-center animate__animated animate__fadeInDown">
+      <div class="slide-label">C# · Manejo de Excepciones</div>
+      <h1 class="hero mt-2">Bloque <span>try</span> / <span style="color:var(--accent2)">catch</span></h1>
+      <div class="accent-line"></div>
+      <p class="subtitle">Detectar y controlar excepciones en tiempo de ejecución</p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
+        <span class="badge-accent"><i class="fas fa-shield-halved me-1"></i> Excepciones CLR</span>
+        <span class="badge-warn"><i class="fas fa-code me-1"></i> .NET 8</span>
+        <span class="badge-danger"><i class="fas fa-terminal me-1"></i> Ejercicios dotnet</span>
+      </div>
+    </div>
+    <div class="mt-5 animate__animated animate__fadeInUp delay-3">
+      <div class="flow-wrap">
+        <div class="flow-box try-box animate__animated animate__fadeInLeft delay-1">try { }</div>
+        <span class="flow-arrow"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box catch-box animate__animated animate__fadeIn delay-2">catch(E1)</div>
+        <span class="flow-arrow"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box catch-box animate__animated animate__fadeIn delay-3">catch(E2)</div>
+        <span class="flow-arrow"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box clr-box animate__animated animate__fadeIn delay-4">CLR</div>
+        <span class="flow-arrow"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box end-box animate__animated animate__fadeInRight delay-5">fin</div>
+      </div>
+    </div>
+    <p class="text-center mt-4 animate__animated animate__fadeIn delay-5" style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.75rem">
+      <i class="fas fa-keyboard me-2"></i>← → para navegar · F para pantalla completa
+    </p>
+  `
+},
+
+/* ── 1: ¿QUÉ ES UNA EXCEPCIÓN? ── */
+{
+  title: '¿Qué es una Excepción?',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Concepto base</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-bolt me-2" style="color:var(--warn)"></i>¿Qué es una <span class="kw">Excepción</span>?</h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <div class="two-col">
+        <div class="card-glass animate__animated animate__fadeInLeft">
+          <p class="mb-2" style="font-size:.9rem;color:var(--muted);font-family:'JetBrains Mono',monospace">DEFINICIÓN</p>
+          <p>Una <strong style="color:var(--accent)">excepción</strong> es un evento inesperado que interrumpe el flujo normal de ejecución de un programa.</p>
+          <p class="mt-2">En .NET, toda excepción es un objeto que hereda de <code style="color:var(--warn)">System.Exception</code>.</p>
+        </div>
+        <div class="card-glass animate__animated animate__fadeInRight">
+          <p class="mb-2" style="font-size:.9rem;color:var(--muted);font-family:'JetBrains Mono',monospace">SIN MANEJO</p>
+          <pre class="code-block" style="font-size:.72rem">
+<span class="cmt">// Esto detiene el programa:</span>
+<span class="type">string</span> <span class="var">s</span> = <span class="kw">null</span>;
+<span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">s</span>.Length);
+<span class="cmt">// ❌ NullReferenceException</span></pre>
+        </div>
+      </div>
+      <div class="mt-3 animate__animated animate__fadeInUp delay-2">
+        <ul class="feature-list">
+          <li>
+            <div class="icon" style="background:rgba(0,212,255,.15)"><i class="fas fa-circle-info" style="color:var(--accent)"></i></div>
+            <div>Las excepciones ocurren en <strong>tiempo de ejecución</strong> (runtime), no en compilación.</div>
+          </li>
+          <li>
+            <div class="icon" style="background:rgba(239,68,68,.15)"><i class="fas fa-triangle-exclamation" style="color:var(--danger)"></i></div>
+            <div>Una excepción no controlada <strong style="color:var(--danger)">detiene la aplicación</strong>.</div>
+          </li>
+          <li>
+            <div class="icon" style="background:rgba(34,197,94,.15)"><i class="fas fa-shield-halved" style="color:var(--success)"></i></div>
+            <div>El bloque <code style="color:var(--accent)">try/catch</code> nos permite <strong>controlarlas</strong> elegantemente.</div>
+          </li>
+        </ul>
+      </div>
+      <div class="note-box mt-3 animate__animated animate__fadeIn delay-4">
+        <div class="note-title"><i class="fas fa-lightbulb me-1"></i> NOTA CLR</div>
+        El Common Language Runtime (CLR) de .NET detecta las excepciones y busca el manejador (<code>catch</code>) apropiado en la pila de llamadas.
+      </div>
+    </div>
+  `
+},
+
+/* ── 2: SINTAXIS BÁSICA ── */
+{
+  title: 'Sintaxis try/catch',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Sintaxis</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown">Estructura <span class="kw">try</span> / <span class="kw2">catch</span></h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="kw">try</span>
+{
+    <span class="cmt">// Código que PUEDE lanzar</span>
+    <span class="cmt">// una excepción</span>
+    <span class="type">int</span> <span class="var">resultado</span> = <span class="num">10</span> / <span class="num">0</span>;
+}
+<span class="kw">catch</span> (<span class="type">DivideByZeroException</span> <span class="var">e</span>)
+{
+    <span class="cmt">// Controla ESTE tipo</span>
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">e</span>.Message);
+}
+<span class="kw">catch</span> (<span class="type">Exception</span> <span class="var">e</span>)
+{
+    <span class="cmt">// Captura cualquier excepción</span>
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"Error: "</span> + <span class="var">e</span>.Message);
+}</pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <div class="card-glass mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="step-num">1</span>
+              <strong style="color:var(--accent)">Bloque try</strong>
+            </div>
+            <p style="font-size:.9rem">Envuelve el código riesgoso. Si ocurre una excepción, <strong>la ejecución salta inmediatamente</strong> al primer <code>catch</code> compatible.</p>
+          </div>
+          <div class="card-glass mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="step-num" style="background:linear-gradient(135deg,var(--warn),#d97706)">2</span>
+              <strong style="color:var(--warn)">Bloques catch</strong>
+            </div>
+            <p style="font-size:.9rem">Cada bloque especifica el <strong>tipo de excepción</strong> que maneja. Se evalúan <strong>en orden</strong> de más específico a más general.</p>
+          </div>
+          <div class="card-glass">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="step-num" style="background:linear-gradient(135deg,var(--accent2),#6d28d9)">3</span>
+              <strong style="color:var(--accent2)">Variable de excepción</strong>
+            </div>
+            <p style="font-size:.9rem">La variable <code style="color:var(--warn)">e</code> contiene info: <code>.Message</code>, <code>.StackTrace</code>, <code>.InnerException</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 3: EJEMPLO STREAMREADER ── */
+{
+  title: 'Ejemplo StreamReader',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Ejemplo oficial Microsoft</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-file-code me-2" style="color:var(--accent)"></i>Leer archivo con <span class="kw">StreamReader</span></h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <pre class="code-block animate__animated animate__fadeIn delay-1">
+<span class="kw">using</span> <span class="type">System</span>;
+<span class="kw">using</span> <span class="type">System.IO</span>;
+
+<span class="kw">public class</span> <span class="type">ProcessFile</span>
+{
+    <span class="kw">public static void</span> <span class="fn">Main</span>()
+    {
+        <span class="kw">try</span>
+        {
+            <span class="kw">using</span> (<span class="type">StreamReader</span> <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="str">"data.txt"</span>))
+            {
+                <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Primera línea: {<span class="var">sr</span>.<span class="fn">ReadLine</span>()}"</span>);
+            }
+        }
+        <span class="kw">catch</span> (<span class="type">FileNotFoundException</span> <span class="var">e</span>)         <span class="cmt">// Archivo no existe</span>
+        {
+            <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Archivo no encontrado: '{<span class="var">e</span>}'"</span>);
+        }
+        <span class="kw">catch</span> (<span class="type">DirectoryNotFoundException</span> <span class="var">e</span>)    <span class="cmt">// Ruta inválida</span>
+        {
+            <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Directorio no encontrado: '{<span class="var">e</span>}'"</span>);
+        }
+        <span class="kw">catch</span> (<span class="type">IOException</span> <span class="var">e</span>)                   <span class="cmt">// Otro error de E/S</span>
+        {
+            <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"No se pudo abrir: '{<span class="var">e</span>}'"</span>);
+        }
+    }
+}</pre>
+      <div class="mt-2 animate__animated animate__fadeIn delay-3" style="font-size:.85rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center">
+        <i class="fas fa-info-circle me-1" style="color:var(--accent)"></i>
+        Los 3 catch van de <strong style="color:var(--accent)">más específico</strong> → <strong style="color:var(--warn)">más general</strong>
+      </div>
+    </div>
+  `
+},
+
+/* ── 4: JERARQUÍA DE EXCEPCIONES ── */
+{
+  title: 'Jerarquía de Excepciones',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Jerarquía .NET</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-sitemap me-2" style="color:var(--accent2)"></i>Tipos de <span class="kw2">Excepciones</span></h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <div class="d-flex flex-column gap-2 mb-3 animate__animated animate__fadeIn delay-1">
+        <div class="exc-card">
+          <div class="exc-icon" style="background:rgba(0,212,255,.12);color:var(--accent)"><i class="fas fa-layer-group"></i></div>
+          <div>
+            <code style="color:var(--accent)">System.Exception</code> — <span style="font-size:.9rem">Base de todas las excepciones. Contiene <code>.Message</code> y <code>.StackTrace</code>.</span>
+          </div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-icon" style="background:rgba(239,68,68,.12);color:var(--danger)"><i class="fas fa-file-slash"></i></div>
+          <div>
+            <code style="color:var(--danger)">FileNotFoundException</code> — <span style="font-size:.9rem">El archivo especificado no existe en el sistema.</span>
+          </div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-icon" style="background:rgba(245,158,11,.12);color:var(--warn)"><i class="fas fa-folder-open"></i></div>
+          <div>
+            <code style="color:var(--warn)">DirectoryNotFoundException</code> — <span style="font-size:.9rem">El directorio de la ruta no existe.</span>
+          </div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-icon" style="background:rgba(124,58,237,.12);color:var(--accent2)"><i class="fas fa-hard-drive"></i></div>
+          <div>
+            <code style="color:var(--accent2)">IOException</code> — <span style="font-size:.9rem">Cualquier error genérico de entrada/salida. Padre de las dos anteriores.</span>
+          </div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-icon" style="background:rgba(34,197,94,.12);color:var(--success)"><i class="fas fa-ban"></i></div>
+          <div>
+            <code style="color:var(--success)">NullReferenceException</code> — <span style="font-size:.9rem">Se intentó usar una referencia nula.</span>
+          </div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-icon" style="background:rgba(245,158,11,.12);color:var(--warn)"><i class="fas fa-divide"></i></div>
+          <div>
+            <code style="color:var(--warn)">DivideByZeroException</code> — <span style="font-size:.9rem">División entera por cero.</span>
+          </div>
+        </div>
+      </div>
+      <div class="note-box animate__animated animate__fadeIn delay-4">
+        <div class="note-title"><i class="fas fa-sort me-1"></i> ORDEN IMPORTANTE</div>
+        Los <code>catch</code> específicos deben ir <strong>antes</strong> que los generales. <code>IOException</code> antes de <code>Exception</code>; de lo contrario el compilador C# dará error.
+      </div>
+    </div>
+  `
+},
+
+/* ── 5: CLR Y EXCEPCIONES NO CONTROLADAS ── */
+{
+  title: 'CLR — No controladas',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Comportamiento del runtime</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-microchip me-2" style="color:var(--accent2)"></i><span class="kw2">CLR</span> y excepciones no controladas</h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <p class="mb-3 animate__animated animate__fadeIn delay-1">Cuando ningún bloque <code>catch</code> en la pila de llamadas maneja la excepción, el <strong style="color:var(--accent2)">CLR</strong> toma el control:</p>
+      <div class="d-flex flex-column gap-2 mb-3 animate__animated animate__fadeIn delay-2">
+        <div class="card-glass d-flex gap-3 align-items-start">
+          <i class="fas fa-window-maximize mt-1" style="color:var(--warn);width:22px"></i>
+          <div><strong style="color:var(--warn)">Cuadro de diálogo Depurar</strong> — en modo Debug aparece un popup con la excepción para depuración.</div>
+        </div>
+        <div class="card-glass d-flex gap-3 align-items-start">
+          <i class="fas fa-stop mt-1" style="color:var(--danger);width:22px"></i>
+          <div><strong style="color:var(--danger)">Detiene la ejecución</strong> — el programa termina con un cuadro de información de excepción.</div>
+        </div>
+        <div class="card-glass d-flex gap-3 align-items-start">
+          <i class="fas fa-terminal mt-1" style="color:var(--muted);width:22px"></i>
+          <div><strong>Error en stderr</strong> — en consola se imprime el error en el flujo de salida de error estándar (<code>Console.Error</code>).</div>
+        </div>
+      </div>
+      <div class="two-col animate__animated animate__fadeIn delay-3">
+        <div class="terminal">
+          <div class="prompt">$ dotnet run</div>
+          <div class="error mt-1">Unhandled exception. System.IO.FileNotFoundException:</div>
+          <div class="error">  Could not find file 'data.txt'.</div>
+          <div class="output">   at System.IO.FileStream..ctor</div>
+          <div class="output">   at ProcessFile.Main() in Program.cs:12</div>
+        </div>
+        <div class="note-box">
+          <div class="note-title"><i class="fas fa-memory me-1"></i> OUTOFMEMORYEXCEPTION</div>
+          Algunas excepciones como <code>OutOfMemoryException</code> o <code>StackOverflowException</code> pueden ser lanzadas por el <strong>CLR en cualquier momento</strong>. Las aplicaciones usualmente <strong>no pueden recuperarse</strong> de ellas.
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 6: BLOQUE FINALLY ── */
+{
+  title: 'Bloque finally',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Limpieza garantizada</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown">Bloque <span class="kw">finally</span></h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="type">StreamReader</span> <span class="var">sr</span> = <span class="kw">null</span>;
+<span class="kw">try</span>
+{
+    <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="str">"data.txt"</span>);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">sr</span>.<span class="fn">ReadLine</span>());
+}
+<span class="kw">catch</span> (<span class="type">IOException</span> <span class="var">e</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">e</span>.Message);
+}
+<span class="kw">finally</span>
+{
+    <span class="cmt">// SIEMPRE se ejecuta</span>
+    <span class="kw">if</span> (<span class="var">sr</span> != <span class="kw">null</span>)
+        <span class="var">sr</span>.<span class="fn">Close</span>();
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"Recursos liberados."</span>);
+}</pre>
+        </div>
+        <div class="d-flex flex-column gap-3 animate__animated animate__fadeInRight">
+          <div class="card-glass">
+            <div class="mb-1" style="color:var(--accent3);font-weight:700"><i class="fas fa-check-double me-1"></i>Siempre se ejecuta</div>
+            <p style="font-size:.9rem">El bloque <code>finally</code> corre tanto si hubo excepción como si no. Ideal para liberar recursos.</p>
+          </div>
+          <div class="card-glass">
+            <div class="mb-1" style="color:var(--warn);font-weight:700"><i class="fas fa-recycle me-1"></i>using es mejor práctica</div>
+            <pre class="code-block" style="font-size:.72rem">
+<span class="cmt">// Equivalente automático:</span>
+<span class="kw">using</span> <span class="kw">var</span> <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="str">"data.txt"</span>);
+<span class="cmt">// Dispose() garantizado al salir</span></pre>
+          </div>
+          <div class="card-glass">
+            <div class="mb-1" style="color:var(--accent2);font-weight:700"><i class="fas fa-diagram-project me-1"></i>Flujo de control</div>
+            <div class="flow-wrap" style="gap:6px;font-size:.72rem">
+              <div class="flow-box try-box" style="min-width:70px;padding:6px 10px">try</div>
+              <span class="flow-arrow" style="font-size:.9rem">→</span>
+              <div class="flow-box" style="min-width:80px;padding:6px;border-color:var(--danger);color:var(--danger)">excepción</div>
+              <span class="flow-arrow" style="font-size:.9rem">→</span>
+              <div class="flow-box catch-box" style="min-width:70px;padding:6px 10px">catch</div>
+              <span class="flow-arrow" style="font-size:.9rem">→</span>
+              <div class="flow-box" style="min-width:70px;padding:6px;border-color:var(--accent3);color:var(--accent3)">finally</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 7: BUENAS PRÁCTICAS ── */
+{
+  title: 'Buenas Prácticas',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Mejores prácticas</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-star me-2" style="color:var(--warn)"></i>Procedimientos <span class="kw">Recomendados</span></h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <div class="d-flex flex-column gap-2">
+        <div class="card-glass d-flex gap-3 animate__animated animate__fadeIn delay-1">
+          <i class="fas fa-bullseye mt-1" style="color:var(--accent);width:20px"></i>
+          <div><strong>Catch específico antes que general.</strong> Poner <code>Exception</code> al final como último recurso.</div>
+        </div>
+        <div class="card-glass d-flex gap-3 animate__animated animate__fadeIn delay-2">
+          <i class="fas fa-scissors mt-1" style="color:var(--accent3);width:20px"></i>
+          <div><strong>try pequeños.</strong> Solo el código que puede fallar, no bloques grandes innecesarios.</div>
+        </div>
+        <div class="card-glass d-flex gap-3 animate__animated animate__fadeIn delay-3">
+          <i class="fas fa-eye-slash mt-1" style="color:var(--danger);width:20px"></i>
+          <div><strong>Nunca catch vacío.</strong> Un <code>catch { }</code> silencioso oculta errores y dificulta el debugging.</div>
+        </div>
+        <div class="card-glass d-flex gap-3 animate__animated animate__fadeIn delay-4">
+          <i class="fas fa-recycle mt-1" style="color:var(--warn);width:20px"></i>
+          <div><strong>Usar using.</strong> Para <code>IDisposable</code> siempre preferir <code>using</code> en lugar de <code>finally</code> manual.</div>
+        </div>
+        <div class="card-glass d-flex gap-3 animate__animated animate__fadeIn delay-4">
+          <i class="fas fa-arrow-up-right-dots mt-1" style="color:var(--accent2);width:20px"></i>
+          <div><strong>Re-lanzar con throw.</strong> Si no podés manejar la excepción completamente, usa <code>throw;</code> (sin parámetro) para preservar el stack trace.</div>
+        </div>
+        <div class="card-glass d-flex gap-3 animate__animated animate__fadeIn delay-5">
+          <i class="fas fa-file-circle-plus mt-1" style="color:var(--accent);width:20px"></i>
+          <div><strong>Excepciones propias.</strong> Para tu librería, crea excepciones personalizadas: <code>class MiException : Exception { }</code></div>
+        </div>
+      </div>
+      <pre class="code-block mt-3 animate__animated animate__fadeIn delay-5" style="font-size:.72rem">
+<span class="cmt">// ❌ MAL</span>
+<span class="kw">try</span> { ... } <span class="kw">catch</span> (<span class="type">Exception</span>) { }   <span class="cmt">// catch vacío</span>
+
+<span class="cmt">// ✅ BIEN</span>
+<span class="kw">try</span> { ... }
+<span class="kw">catch</span> (<span class="type">FileNotFoundException</span> <span class="var">e</span>) { <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">e</span>.Message); <span class="kw">throw</span>; }</pre>
+    </div>
+  `
+},
+
+/* ── 8: EJEMPLOS PRÁCTICOS EN VSCODE ── */
+{
+  title: 'Proyectos dotnet CLI',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Práctica VSCode</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-terminal me-2" style="color:var(--accent3)"></i>Proyectos con <span class="kw">dotnet CLI</span></h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <p class="mb-3" style="font-size:.9rem;color:var(--muted)">Estructura de proyecto múltiples archivos con .NET 8:</p>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <p class="mb-1" style="font-size:.8rem;color:var(--accent);font-family:'JetBrains Mono',monospace">1. CREAR SOLUCIÓN</p>
+          <div class="terminal">
+            <div class="prompt">$ mkdir EjemplosExcepciones</div>
+            <div class="prompt">$ cd EjemplosExcepciones</div>
+            <div class="prompt">$ dotnet new solution</div>
+            <div class="prompt">$ dotnet new classlib -n Excepciones.Core</div>
+            <div class="prompt">$ dotnet new console -n Excepciones.App</div>
+            <div class="prompt">$ dotnet sln add Excepciones.Core</div>
+            <div class="prompt">$ dotnet sln add Excepciones.App</div>
+            <div class="prompt">$ dotnet add Excepciones.App reference Excepciones.Core</div>
+          </div>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.8rem;color:var(--accent2);font-family:'JetBrains Mono',monospace">2. ESTRUCTURA DE ARCHIVOS</p>
+          <pre class="code-block" style="font-size:.72rem">
+EjemplosExcepciones/
+├── EjemplosExcepciones.sln
+├── Excepciones.Core/
+│   ├── Excepciones.Core.csproj
+│   ├── FileProcessor.cs
+│   └── CustomExceptions.cs
+└── Excepciones.App/
+    ├── Excepciones.App.csproj
+    └── Program.cs</pre>
+          <div class="mt-2">
+            <p class="mb-1" style="font-size:.8rem;color:var(--accent3);font-family:'JetBrains Mono',monospace">3. EJECUTAR</p>
+            <div class="terminal">
+              <div class="prompt">$ dotnet run --project Excepciones.App</div>
+              <div class="ok">✓ Build succeeded</div>
+              <div class="output">Primera línea: Hola mundo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 animate__animated animate__fadeIn delay-3">
+        <p class="mb-1" style="font-size:.8rem;color:var(--warn);font-family:'JetBrains Mono',monospace">FileProcessor.cs (Excepciones.Core)</p>
+        <pre class="code-block" style="font-size:.72rem">
+<span class="kw">namespace</span> <span class="type">Excepciones.Core</span>;   <span class="cmt">// file-scoped namespace (.NET 6+)</span>
+
+<span class="kw">public class</span> <span class="type">FileProcessor</span>
+{
+    <span class="kw">public static</span> <span class="type">string</span> <span class="fn">ReadFirstLine</span>(<span class="type">string</span> <span class="var">path</span>)
+    {
+        <span class="kw">try</span>
+        {
+            <span class="kw">using var</span> <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="var">path</span>);
+            <span class="kw">return</span> <span class="var">sr</span>.<span class="fn">ReadLine</span>() ?? <span class="str">"(vacío)"</span>;
+        }
+        <span class="kw">catch</span> (<span class="type">FileNotFoundException</span>)
+        {
+            <span class="kw">throw new</span> <span class="type">ArchivoNoEncontradoException</span>(<span class="var">path</span>);
+        }
+    }
+}</pre>
+      </div>
+    </div>
+  `
+},
+
+/* ── 9: EXCEPCIÓN PERSONALIZADA ── */
+{
+  title: 'Excepción personalizada',
+  render: () => `
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Custom Exception</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-puzzle-piece me-2" style="color:var(--accent2)"></i>Excepción <span class="kw2">Personalizada</span></h2>
+      <div class="accent-line" style="margin-left:0"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <p class="mb-1" style="font-size:.8rem;color:var(--accent);font-family:'JetBrains Mono',monospace">CustomExceptions.cs</p>
+          <pre class="code-block">
+<span class="kw">namespace</span> <span class="type">Excepciones.Core</span>;
+
+<span class="kw">public class</span> <span class="type">ArchivoNoEncontradoException</span>
+    : <span class="type">Exception</span>
+{
+    <span class="kw">public</span> <span class="type">string</span> <span class="var">RutaArchivo</span> { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="fn">ArchivoNoEncontradoException</span>(
+        <span class="type">string</span> <span class="var">ruta</span>)
+        : <span class="kw">base</span>(<span class="str">$"No se encontró: {<span class="var">ruta</span>}"</span>)
+    {
+        <span class="var">RutaArchivo</span> = <span class="var">ruta</span>;
+    }
+}</pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.8rem;color:var(--accent3);font-family:'JetBrains Mono',monospace">Program.cs (App)</p>
+          <pre class="code-block">
+<span class="kw">using</span> <span class="type">Excepciones.Core</span>;
+
+<span class="kw">try</span>
+{
+    <span class="kw">var</span> <span class="var">linea</span> = <span class="type">FileProcessor</span>
+        .<span class="fn">ReadFirstLine</span>(<span class="str">"noexiste.txt"</span>);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">linea</span>);
+}
+<span class="kw">catch</span> (<span class="type">ArchivoNoEncontradoException</span> <span class="var">ex</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">ForegroundColor</span>
+        = <span class="type">ConsoleColor</span>.Red;
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">ex</span>.Message);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(
+        <span class="str">$"Ruta: {<span class="var">ex</span>.RutaArchivo}"</span>);
+    <span class="fn">Console</span>.<span class="fn">ResetColor</span>();
+}</pre>
+          <div class="terminal mt-2">
+            <div class="prompt">$ dotnet run --project Excepciones.App</div>
+            <div class="error">No se encontró: noexiste.txt</div>
+            <div class="error">Ruta: noexiste.txt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 10-19: CODE RUNNER (10 ejercicios) ── */
+{
+  title: 'Code Runner — 10 Ejercicios',
+  isRunner: true,
+  render: () => `
+    <div class="slide-label animate__animated animate__fadeIn" style="text-align:center">Práctica interactiva</div>
+    <h2 class="slide-title animate__animated animate__fadeInDown" style="text-align:center">
+      <i class="fas fa-code me-2" style="color:var(--accent)"></i>Code Runner — <span class="kw">try/catch</span>
+    </h2>
+    <div class="accent-line"></div>
+    <div id="runner-section" class="animate__animated animate__fadeIn delay-1">
+      <ul class="nav flex-wrap gap-1 mb-2" id="exercise-tabs"></ul>
+      <div id="ex-description" class="note-box mb-2" style="font-size:.88rem"></div>
+      <div id="ex-hint" style="font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px"></div>
+      <textarea class="ex-editor" id="ex-editor" spellcheck="false"></textarea>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <button class="run-btn" onclick="runExercise()"><i class="fas fa-play me-2"></i>Verificar</button>
+        <button onclick="resetEditor()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:.95rem">
+          <i class="fas fa-rotate-left me-1"></i>Reiniciar
+        </button>
+        <button onclick="showHintSwal()" style="background:transparent;border:1px solid rgba(245,158,11,.3);color:var(--warn);padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:.95rem">
+          <i class="fas fa-lightbulb me-1"></i>Pista
+        </button>
+        <span id="ex-progress" style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--accent);margin-left:auto"></span>
+      </div>
+      <div id="feedback-box"></div>
+    </div>
+  `
+}
+
+];
+
+/* ══════════════════════════════════════
+   EXERCISES
+══════════════════════════════════════ */
+const exercises = [
+  {
+    id: 1,
+    title: "EJ 01 — try/catch básico",
+    description: "Escribe un bloque <code>try/catch</code> que capture una <strong>DivideByZeroException</strong> al dividir 10 entre 0 e imprima <code>Division por cero</code>.",
+    hint: "Usa: try { int r = 10 / 0; } catch (DivideByZeroException) { Console.WriteLine(...); }",
+    template: `// Escribe tu código aquí
+try
+{
+
+}
+catch (           )
+{
+
+}`,
+    check: (code) => {
+      return /try\s*\{/.test(code)
+          && /catch\s*\(\s*DivideByZeroException/.test(code)
+          && /Division\s*por\s*cero/i.test(code);
+    }
+  },
+  {
+    id: 2,
+    title: "EJ 02 — Mensaje de excepción",
+    description: "Lanza una <strong>ArgumentException</strong> con el mensaje <code>Argumento inválido</code> y captúrala, imprimiendo <code>ex.Message</code>.",
+    hint: "throw new ArgumentException(\"Argumento inválido\"); luego catch(ArgumentException ex){ Console.WriteLine(ex.Message); }",
+    template: `try
+{
+    // lanza ArgumentException aquí
+
+}
+catch (ArgumentException ex)
+{
+    // imprime ex.Message
+
+}`,
+    check: (code) => {
+      return /throw\s+new\s+ArgumentException/.test(code)
+          && /Argumento\s+inv[aá]lido/i.test(code)
+          && /ex\.Message/i.test(code)
+          && /Console\.WriteLine/.test(code);
+    }
+  },
+  {
+    id: 3,
+    title: "EJ 03 — Múltiples catch",
+    description: "Escribe dos bloques <code>catch</code>: uno para <strong>FileNotFoundException</strong> y otro para <strong>IOException</strong>. (Solo declara la estructura, no necesitas abrir archivo real.)",
+    hint: "catch (FileNotFoundException e){ } catch (IOException e){ }",
+    template: `try
+{
+    // código de archivo
+}
+// catch FileNotFoundException
+
+// catch IOException
+`,
+    check: (code) => {
+      return /catch\s*\(\s*FileNotFoundException/.test(code)
+          && /catch\s*\(\s*IOException/.test(code);
+    }
+  },
+  {
+    id: 4,
+    title: "EJ 04 — Bloque finally",
+    description: "Agrega un bloque <code>finally</code> que imprima <code>Limpieza completada</code> sin importar si hubo excepción.",
+    hint: "Después del catch: finally { Console.WriteLine(\"Limpieza completada\"); }",
+    template: `try
+{
+    int[] arr = new int[3];
+    arr[10] = 5; // IndexOutOfRangeException
+}
+catch (IndexOutOfRangeException ex)
+{
+    Console.WriteLine(ex.Message);
+}
+// agrega finally aquí`,
+    check: (code) => {
+      return /finally\s*\{/.test(code)
+          && /Limpieza\s+completada/i.test(code);
+    }
+  },
+  {
+    id: 5,
+    title: "EJ 05 — NullReferenceException",
+    description: "Captura una <strong>NullReferenceException</strong> e imprime <code>Referencia nula detectada</code>.",
+    hint: "string s = null; Console.WriteLine(s.Length); — esto lanza NullReferenceException",
+    template: `try
+{
+    string s = null;
+    // provoca NullReferenceException
+
+}
+catch (           )
+{
+    // imprime "Referencia nula detectada"
+}`,
+    check: (code) => {
+      return /catch\s*\(\s*NullReferenceException/.test(code)
+          && /Referencia\s+nula\s+detectada/i.test(code);
+    }
+  },
+  {
+    id: 6,
+    title: "EJ 06 — Catch general",
+    description: "Escribe un catch que capture <strong>cualquier excepción</strong> (<code>Exception</code>) e imprima <code>Error: </code> seguido de <code>ex.Message</code>.",
+    hint: "catch (Exception ex) { Console.WriteLine(\"Error: \" + ex.Message); }",
+    template: `try
+{
+    throw new InvalidOperationException("operación inválida");
+}
+// catch general aquí`,
+    check: (code) => {
+      return /catch\s*\(\s*Exception\s+\w+\)/.test(code)
+          && /Error:\s*/i.test(code)
+          && /\.Message/.test(code);
+    }
+  },
+  {
+    id: 7,
+    title: "EJ 07 — Re-lanzar excepción",
+    description: "Captura una <strong>IOException</strong> pero vuelve a lanzarla con <code>throw;</code> (sin parámetro, para preservar stack trace).",
+    hint: "catch (IOException) { throw; }  — sin argumentos preserva el stack trace",
+    template: `try
+{
+    throw new IOException("error de disco");
+}
+catch (IOException)
+{
+    // re-lanza sin modificar
+
+}`,
+    check: (code) => {
+      return /catch\s*\(\s*IOException\s*\)/.test(code)
+          && /\bthrow\s*;/.test(code);
+    }
+  },
+  {
+    id: 8,
+    title: "EJ 08 — Excepción personalizada",
+    description: "Declara una clase <strong>EdadInvalidaException</strong> que herede de <code>Exception</code> con un constructor que reciba un <code>string</code>.",
+    hint: "public class EdadInvalidaException : Exception { public EdadInvalidaException(string msg) : base(msg) { } }",
+    template: `// Declara la excepción personalizada
+public class EdadInvalidaException :         
+{
+    public EdadInvalidaException(string msg)
+        :        (msg)
+    {
+    }
+}`,
+    check: (code) => {
+      return /class\s+EdadInvalidaException\s*:\s*Exception/.test(code)
+          && /:\s*base\s*\(msg\)/.test(code);
+    }
+  },
+  {
+    id: 9,
+    title: "EJ 09 — Lanzar y capturar propia",
+    description: "Lanza tu <strong>EdadInvalidaException</strong> con el mensaje <code>Edad negativa</code> y captúrala imprimiendo el mensaje.",
+    hint: "throw new EdadInvalidaException(\"Edad negativa\"); catch(EdadInvalidaException ex){ Console.WriteLine(ex.Message); }",
+    template: `// Usa la excepción del ejercicio anterior
+
+try
+{
+    int edad = -5;
+    if (edad < 0)
+        throw new EdadInvalidaException(        );
+}
+catch (EdadInvalidaException ex)
+{
+
+}`,
+    check: (code) => {
+      return /throw\s+new\s+EdadInvalidaException/.test(code)
+          && /Edad\s+negativa/i.test(code)
+          && /catch\s*\(\s*EdadInvalidaException/.test(code)
+          && /Console\.WriteLine/.test(code);
+    }
+  },
+  {
+    id: 10,
+    title: "EJ 10 — Cadena completa",
+    description: "Escribe la solución completa: <code>try</code> que lanza <strong>FormatException</strong>, dos <code>catch</code> (FormatException y Exception) y un <code>finally</code> que imprime <code>Fin del proceso</code>.",
+    hint: "try { throw new FormatException(); } catch(FormatException ex){} catch(Exception ex){} finally{ Console.WriteLine(\"Fin del proceso\"); }",
+    template: `// Solución completa
+try
+{
+
+}
+catch (FormatException ex)
+{
+
+}
+catch (Exception ex)
+{
+
+}
+finally
+{
+
+}`,
+    check: (code) => {
+      return /catch\s*\(\s*FormatException/.test(code)
+          && /catch\s*\(\s*Exception/.test(code)
+          && /finally\s*\{/.test(code)
+          && /Fin\s+del\s+proceso/i.test(code);
+    }
+  }
+];
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let currentSlide = 0;
+let currentEx = 0;
+let solvedExercises = new Set();
+let unlockedExercises = new Set([0]);
+
+/* ══════════════════════════════════════
+   SLIDE RENDER
+══════════════════════════════════════ */
+function buildSlides() {
+  const wrapper = document.getElementById('slides-wrapper');
+  slides.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'slide';
+    div.id = `slide-${i}`;
+    div.innerHTML = s.render();
+    wrapper.appendChild(div);
+  });
+}
+
+function showSlide(idx) {
+  const all = document.querySelectorAll('.slide');
+  all.forEach(s => s.classList.remove('active'));
+  document.getElementById(`slide-${idx}`).classList.add('active');
+
+  const total = slides.length;
+  document.getElementById('slide-counter').textContent = `${idx + 1} / ${total}`;
+  document.getElementById('btn-prev').disabled = (idx === 0);
+  document.getElementById('btn-next').disabled = (idx === total - 1);
+
+  const pct = ((idx) / (total - 1)) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  if (slides[idx].isRunner) {
+    buildRunnerUI();
+  }
+}
+
+function navigate(dir) {
+  const next = currentSlide + dir;
+  if (next < 0 || next >= slides.length) return;
+  currentSlide = next;
+  showSlide(currentSlide);
+}
+
+/* ══════════════════════════════════════
+   CODE RUNNER
+══════════════════════════════════════ */
+function buildRunnerUI() {
+  const tabs = document.getElementById('exercise-tabs');
+  if (!tabs) return;
+  tabs.innerHTML = '';
+  exercises.forEach((ex, i) => {
+    const li = document.createElement('li');
+    li.className = 'nav-item';
+    const a = document.createElement('a');
+    a.className = 'nav-link' +
+      (solvedExercises.has(i) ? ' solved' : '') +
+      (!unlockedExercises.has(i) ? ' locked' : '') +
+      (i === currentEx ? ' active' : '');
+    a.textContent = solvedExercises.has(i) ? '✓ ' + ex.id : ex.id.toString().padStart(2,'0');
+    a.title = ex.title;
+    if (unlockedExercises.has(i)) {
+      a.onclick = () => selectExercise(i);
+    } else {
+      a.onclick = () => Swal.fire({
+        icon: 'info',
+        title: '🔒 Bloqueado',
+        text: `Completa el ejercicio ${i} primero.`,
+        background: '#111827',
+        color: '#e2e8f0',
+        confirmButtonColor: '#00d4ff'
+      });
+    }
+    li.appendChild(a);
+    tabs.appendChild(li);
+  });
+  loadExercise(currentEx);
+  updateProgress();
+}
+
+function selectExercise(i) {
+  currentEx = i;
+  buildRunnerUI();
+}
+
+function loadExercise(i) {
+  const ex = exercises[i];
+  const desc = document.getElementById('ex-description');
+  const hint = document.getElementById('ex-hint');
+  const editor = document.getElementById('ex-editor');
+  const fb = document.getElementById('feedback-box');
+  if (!desc || !editor) return;
+  desc.innerHTML = `<strong style="color:var(--accent)">${ex.title}</strong><br>${ex.description}`;
+  hint.innerHTML = '';
+  editor.value = ex.template;
+  fb.style.display = 'none';
+}
+
+function resetEditor() {
+  document.getElementById('ex-editor').value = exercises[currentEx].template;
+  document.getElementById('feedback-box').style.display = 'none';
+}
+
+function showHintSwal() {
+  Swal.fire({
+    icon: 'info',
+    title: '<span style="color:#f59e0b">💡 Pista</span>',
+    html: `<span style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#c9d1d9">${exercises[currentEx].hint}</span>`,
+    background: '#111827',
+    color: '#e2e8f0',
+    confirmButtonColor: '#00d4ff'
+  });
+}
+
+function updateProgress() {
+  const el = document.getElementById('ex-progress');
+  if (el) el.textContent = `${solvedExercises.size} / ${exercises.length} resueltos`;
+}
+
+function runExercise() {
+  const code = document.getElementById('ex-editor').value;
+  const ex = exercises[currentEx];
+  const fb = document.getElementById('feedback-box');
+
+  const passed = ex.check(code);
+  fb.style.display = 'block';
+
+  if (passed) {
+    fb.style.background = 'rgba(34,197,94,.08)';
+    fb.style.borderColor = 'rgba(34,197,94,.3)';
+    fb.style.color = '#22c55e';
+    fb.innerHTML = `<i class="fas fa-circle-check me-2"></i><strong>¡Correcto!</strong> ${currentEx < exercises.length - 1 ? 'Siguiente ejercicio desbloqueado.' : '¡Completaste todos los ejercicios!'}`;
+
+    if (!solvedExercises.has(currentEx)) {
+      solvedExercises.add(currentEx);
+      if (currentEx + 1 < exercises.length) {
+        unlockedExercises.add(currentEx + 1);
+      }
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: '✅ ¡Ejercicio correcto!',
+      html: currentEx < exercises.length - 1
+        ? `<span style="font-size:1rem">Ejercicio <strong>${currentEx + 2}</strong> desbloqueado.</span>`
+        : `<span style="font-size:1rem">🎉 ¡Completaste los <strong>10 ejercicios</strong>!</span>`,
+      background: '#111827',
+      color: '#e2e8f0',
+      confirmButtonColor: '#22c55e',
+      timer: 2800,
+      timerProgressBar: true,
+      showConfirmButton: true,
+      confirmButtonText: currentEx < exercises.length - 1 ? 'Siguiente →' : '🎓 Finalizar'
+    }).then(() => {
+      if (currentEx + 1 < exercises.length) {
+        currentEx++;
+        buildRunnerUI();
+      }
+    });
+  } else {
+    fb.style.background = 'rgba(239,68,68,.08)';
+    fb.style.borderColor = 'rgba(239,68,68,.3)';
+    fb.style.color = '#ef4444';
+    fb.innerHTML = `<i class="fas fa-circle-xmark me-2"></i><strong>Incorrecto.</strong> Revisa tu código. Usa el botón <strong>Pista</strong> si necesitas ayuda.`;
+  }
+
+  buildRunnerUI();
+}
+
+/* ══════════════════════════════════════
+   SLIDE MENU
+══════════════════════════════════════ */
+function showSlideMenu() {
+  const items = slides.map((s, i) =>
+    `<li style="padding:8px 12px;cursor:pointer;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:${i===currentSlide?'var(--accent)':'#c9d1d9'};background:${i===currentSlide?'rgba(0,212,255,.1)':'transparent'}"
+     onclick="Swal.close(); currentSlide=${i}; showSlide(${i})">
+       <span style="color:var(--muted);margin-right:8px">${String(i+1).padStart(2,'0')}</span>${s.title}
+     </li>`
+  ).join('');
+
+  Swal.fire({
+    title: '<span style="color:#00d4ff;font-size:1rem;letter-spacing:2px">DIAPOSITIVAS</span>',
+    html: `<ul style="list-style:none;padding:0;margin:0;max-height:320px;overflow-y:auto">${items}</ul>`,
+    background: '#111827',
+    color: '#e2e8f0',
+    showConfirmButton: false,
+    showCloseButton: true,
+    width: 420
+  });
+}
+
+/* ══════════════════════════════════════
+   FULLSCREEN
+══════════════════════════════════════ */
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+/* ══════════════════════════════════════
+   KEYBOARD
+══════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+  // Don't navigate if runner editor focused
+  if (document.activeElement && document.activeElement.id === 'ex-editor') return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') navigate(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   navigate(-1);
+  if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  if (e.key === 'Enter' && slides[currentSlide]?.isRunner) runExercise();
+});
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+buildSlides();
+showSlide(0);
+</script>
+</body>
+</html>

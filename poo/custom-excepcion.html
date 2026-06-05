@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excepciones Definidas por el Usuario — C#</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:      #0c0a14;
+    --surface: #130f22;
+    --panel:   #1a1530;
+    --border:  #2d2060;
+    --accent:  #a78bfa;   /* violet */
+    --accent2: #f472b6;   /* pink */
+    --accent3: #34d399;   /* emerald */
+    --warn:    #fbbf24;
+    --danger:  #f87171;
+    --text:    #e4e0f5;
+    --muted:   #5b5280;
+    --code-bg: #080610;
+    --success: #34d399;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
+    overflow: hidden;
+    height: 100vh; width: 100vw;
+  }
+
+  /* ─── GRADIENT MESH ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 10%, rgba(167,139,250,.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 85%, rgba(244,114,182,.06) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ─── HEX PATTERN ─── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52'%3E%3Cpolygon points='30,2 58,17 58,47 30,62 2,47 2,17' fill='none' stroke='rgba(167,139,250,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ─── PROGRESS ─── */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease; z-index: 9999;
+    box-shadow: 0 0 14px var(--accent);
+  }
+
+  /* ─── SLIDES ─── */
+  #slides-wrapper { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 36px 64px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+    z-index: 1;
+  }
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  /* corner marks */
+  .slide::before,.slide::after { content:''; position:absolute; width:40px; height:40px; pointer-events:none; z-index:2; }
+  .slide::before { top:16px; left:16px; border-top:2px solid rgba(167,139,250,.3); border-left:2px solid rgba(167,139,250,.3); }
+  .slide::after   { bottom:16px; right:16px; border-bottom:2px solid rgba(244,114,182,.3); border-right:2px solid rgba(244,114,182,.3); }
+
+  /* ─── TYPOGRAPHY ─── */
+  .slide-label {
+    font-family: 'Fira Code', monospace; font-size: .68rem;
+    color: var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-bottom: 5px;
+  }
+
+  h1.hero {
+    font-family: 'Outfit', sans-serif; font-weight: 800;
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem); line-height: 1.06;
+    color: #fff; text-align: center;
+  }
+  h1.hero .kw  { color: var(--accent); }
+  h1.hero .kw2 { color: var(--accent2); }
+
+  h2.slide-title {
+    font-family: 'Outfit', sans-serif; font-weight: 800;
+    font-size: clamp(1.4rem, 2.6vw, 2.1rem); color: #fff; margin-bottom: 3px;
+  }
+  h2.slide-title .kw  { color: var(--accent); }
+  h2.slide-title .kw2 { color: var(--accent2); }
+  h2.slide-title .kw3 { color: var(--accent3); }
+
+  /* ─── ACCENT LINE ─── */
+  .accent-line {
+    width: 52px; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px; margin: 7px 0 18px;
+  }
+  .accent-line.center { margin: 7px auto 18px; }
+
+  /* ─── CARDS ─── */
+  .card-g {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 22px; position: relative; overflow: hidden;
+  }
+  .card-g::before {
+    content: ''; position: absolute; top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  /* ─── CODE ─── */
+  pre.code-block {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 15px 18px; font-family: 'Fira Code', monospace; font-size: .77rem;
+    line-height: 1.78; color: #c9d1d9; overflow-x: auto; width: 100%; text-align: left;
+  }
+  pre.code-block .kw   { color: #c084fc; }
+  pre.code-block .type { color: #a78bfa; }
+  pre.code-block .str  { color: #f9a8d4; }
+  pre.code-block .cmt  { color: #4d4370; font-style: italic; }
+  pre.code-block .fn   { color: #34d399; }
+  pre.code-block .var  { color: #fcd34d; }
+  pre.code-block .num  { color: #fb923c; }
+  pre.code-block .hl   { background: rgba(167,139,250,.12); border-left: 3px solid var(--accent); padding-left: 6px; display: block; }
+
+  /* ─── TWO / THREE COL ─── */
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; width: 100%; }
+
+  /* ─── FEATURE LIST ─── */
+  ul.feat { list-style: none; padding: 0; margin: 0; }
+  ul.feat li { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 11px; font-size: .93rem; line-height: 1.5; }
+  ul.feat li .ico { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: .73rem; flex-shrink: 0; margin-top: 2px; }
+
+  /* ─── BADGES ─── */
+  .badge-v { background:rgba(167,139,250,.12);color:var(--accent); border:1px solid rgba(167,139,250,.3); border-radius:6px;font-family:'Fira Code',monospace;font-size:.7rem;padding:3px 10px; }
+  .badge-p { background:rgba(244,114,182,.12);color:var(--accent2);border:1px solid rgba(244,114,182,.3);border-radius:6px;font-family:'Fira Code',monospace;font-size:.7rem;padding:3px 10px; }
+  .badge-e { background:rgba(52,211,153,.12); color:var(--accent3);border:1px solid rgba(52,211,153,.3); border-radius:6px;font-family:'Fira Code',monospace;font-size:.7rem;padding:3px 10px; }
+  .badge-w { background:rgba(251,191,36,.12); color:var(--warn);  border:1px solid rgba(251,191,36,.3); border-radius:6px;font-family:'Fira Code',monospace;font-size:.7rem;padding:3px 10px; }
+
+  /* ─── NOTE ─── */
+  .note-box {
+    background: rgba(167,139,250,.07); border: 1px solid rgba(167,139,250,.22);
+    border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 16px; font-size: .88rem;
+  }
+  .note-box .nt { color:var(--accent);font-family:'Fira Code',monospace;font-size:.67rem;letter-spacing:3px;font-weight:600;margin-bottom:5px; }
+
+  .warn-box {
+    background: rgba(251,191,36,.06); border: 1px solid rgba(251,191,36,.22);
+    border-left: 3px solid var(--warn); border-radius: 8px; padding: 12px 16px; font-size: .88rem;
+  }
+  .warn-box .nt { color:var(--warn);font-family:'Fira Code',monospace;font-size:.67rem;letter-spacing:3px;font-weight:600;margin-bottom:5px; }
+
+  /* ─── TERMINAL ─── */
+  .terminal {
+    background: #040208; border: 1px solid var(--border); border-radius: 10px;
+    font-family: 'Fira Code', monospace; font-size: .76rem;
+    padding: 14px 18px; width: 100%; color: #c9d1d9; line-height: 1.9;
+  }
+  .terminal .prompt { color: var(--accent3); }
+  .terminal .ok     { color: var(--success); }
+  .terminal .err    { color: var(--danger); }
+  .terminal .dim    { color: var(--muted); }
+  .terminal .hi     { color: var(--accent); }
+
+  /* ─── SCROLLABLE ─── */
+  .slide-content {
+    width: 100%; max-width: 940px;
+    overflow-y: auto; max-height: calc(100vh - 145px); padding-right: 5px;
+  }
+  .slide-content::-webkit-scrollbar { width: 3px; }
+  .slide-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── STEP NUM ─── */
+  .step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-family: 'Fira Code', monospace; font-weight: 600; font-size: .78rem;
+    flex-shrink: 0;
+  }
+
+  /* ─── FLOW ─── */
+  .flow-wrap { display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center; }
+  .flow-box { background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:'Fira Code',monospace;font-size:.72rem;text-align:center;min-width:88px; }
+  .fb-v   { border-color:var(--accent); color:var(--accent); }
+  .fb-p   { border-color:var(--accent2);color:var(--accent2);}
+  .fb-e   { border-color:var(--accent3);color:var(--accent3); box-shadow:0 0 8px rgba(52,211,153,.18);}
+  .fb-w   { border-color:var(--warn);   color:var(--warn);  }
+  .fb-end { border-color:var(--muted);  color:var(--text);  }
+  .flow-arr { color:var(--muted);font-size:1rem; }
+
+  /* ─── CONSTRUCTOR CARD ─── */
+  .ctor-card {
+    border-radius: 10px; padding: 13px 16px;
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .ctor-card::before { content:'';position:absolute;top:0;left:0;bottom:0;width:3px; }
+  .ctor-1::before { background: var(--accent); }
+  .ctor-2::before { background: var(--accent2); }
+  .ctor-3::before { background: var(--accent3); }
+  .ctor-card .ct-label { font-family:'Fira Code',monospace;font-size:.68rem;letter-spacing:3px;font-weight:600;margin-bottom:6px; }
+  .ctor-1 .ct-label { color:var(--accent); }
+  .ctor-2 .ct-label { color:var(--accent2);}
+  .ctor-3 .ct-label { color:var(--accent3);}
+
+  /* ─── HIERARCHY ─── */
+  .hier-line { display:flex;align-items:center;gap:8px;margin:5px 0; }
+  .hier-box { background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:6px 14px;font-family:'Fira Code',monospace;font-size:.75rem; }
+
+  /* ─── NAV ─── */
+  #nav-bar {
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:12px;
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:50px;padding:8px 20px;z-index:999;
+    box-shadow:0 4px 32px rgba(0,0,0,.55);
+  }
+  #nav-bar button { background:transparent;border:none;color:var(--muted);cursor:pointer;padding:5px 11px;border-radius:8px;transition:all .2s;font-size:.9rem; }
+  #nav-bar button:hover { background:rgba(255,255,255,.05);color:#fff; }
+  #nav-bar button:disabled { opacity:.3;cursor:default; }
+  #slide-counter { font-family:'Fira Code',monospace;font-size:.7rem;color:var(--accent);min-width:56px;text-align:center; }
+
+  /* ─── RUNNER ─── */
+  #runner-section { width:100%;max-width:940px;display:flex;flex-direction:column;gap:12px; }
+
+  #exercise-tabs .nav-link {
+    font-family:'Fira Code',monospace;font-size:.68rem;padding:5px 11px;
+    border-radius:6px;color:var(--muted);border:1px solid transparent;
+    background:transparent;transition:all .2s;cursor:pointer;
+  }
+  #exercise-tabs .nav-link.active { background:rgba(167,139,250,.12);color:var(--accent);border-color:rgba(167,139,250,.3); }
+  #exercise-tabs .nav-link.locked { opacity:.3;cursor:not-allowed; }
+  #exercise-tabs .nav-link.solved { color:var(--success);border-color:rgba(52,211,153,.28);background:rgba(52,211,153,.06); }
+
+  .ex-editor {
+    background:var(--code-bg);border:1px solid var(--border);border-radius:10px;
+    font-family:'Fira Code',monospace;font-size:.79rem;color:#c9d1d9;
+    padding:13px;min-height:148px;resize:vertical;outline:none;width:100%;line-height:1.78;
+  }
+  .ex-editor:focus { border-color:var(--accent);box-shadow:0 0 0 2px rgba(167,139,250,.14); }
+
+  .run-btn {
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none;color:#fff;font-family:'Outfit',sans-serif;font-weight:700;
+    font-size:1rem;padding:9px 24px;border-radius:8px;cursor:pointer;
+    transition:all .2s;letter-spacing:.4px;
+  }
+  .run-btn:hover { transform:translateY(-1px);box-shadow:0 4px 18px rgba(167,139,250,.4); }
+
+  .ghost-btn {
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:8px 16px;border-radius:8px;cursor:pointer;
+    font-family:'Outfit',sans-serif;font-size:.92rem;transition:all .2s;
+  }
+  .ghost-btn:hover { border-color:var(--accent);color:var(--accent); }
+  .ghost-btn.warn:hover { border-color:var(--warn);color:var(--warn); }
+
+  #feedback-box {
+    font-family:'Fira Code',monospace;font-size:.78rem;
+    padding:11px 15px;border-radius:8px;border:1px solid var(--border);
+    background:var(--code-bg);color:var(--muted);display:none;
+  }
+
+  /* ─── HERO GLOW ─── */
+  .hero-glow {
+    position:absolute;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle,rgba(167,139,250,.1) 0%,transparent 68%);
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    animation:hglow 5s ease-in-out infinite;pointer-events:none;
+  }
+  @keyframes hglow {
+    0%,100%{ opacity:.7;transform:translate(-50%,-50%) scale(1); }
+    50%    { opacity:1; transform:translate(-50%,-50%) scale(1.12); }
+  }
+
+  /* delays */
+  .d1{animation-delay:.1s}.d2{animation-delay:.22s}.d3{animation-delay:.35s}
+  .d4{animation-delay:.48s}.d5{animation-delay:.62s}
+
+  @media(max-width:768px){
+    .slide{padding:20px 16px;}
+    .two-col,.three-col{grid-template-columns:1fr;}
+    h1.hero{font-size:2rem;}
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="slides-wrapper"></div>
+
+<div id="nav-bar">
+  <button id="btn-prev" onclick="navigate(-1)"><i class="fas fa-chevron-left"></i></button>
+  <span id="slide-counter">1 / 1</span>
+  <button id="btn-next" onclick="navigate(1)"><i class="fas fa-chevron-right"></i></button>
+  <button onclick="showSlideMenu()" style="margin-left:4px"><i class="fas fa-th-large"></i></button>
+  <button onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const slides = [
+
+/* ── 0 HERO ── */
+{
+  title:'Hero',
+  render:()=>`
+    <div class="hero-glow"></div>
+    <div class="text-center animate__animated animate__fadeInDown">
+      <div class="slide-label">C# · .NET 8 · Excepciones</div>
+      <h1 class="hero mt-2">Excepciones <span class="kw">Definidas</span><br>por el <span class="kw2">Usuario</span></h1>
+      <p style="font-family:'Fira Code',monospace;font-size:.85rem;color:var(--muted);margin-top:8px">Crear clases de excepción propias derivando de <code style="color:var(--accent)">System.Exception</code></p>
+      <div class="accent-line center mt-3"></div>
+      <div class="d-flex justify-content-center gap-3 flex-wrap mt-1">
+        <span class="badge-v"><i class="fas fa-diagram-project me-1"></i> Jerarquía .NET</span>
+        <span class="badge-p"><i class="fas fa-cubes me-1"></i> 3 constructores</span>
+        <span class="badge-e"><i class="fas fa-terminal me-1"></i> Proyecto multi-archivo</span>
+      </div>
+    </div>
+    <div class="mt-5 animate__animated animate__fadeInUp d3">
+      <div class="flow-wrap">
+        <div class="flow-box fb-end animate__animated animate__fadeIn d1">System.Object</div>
+        <span class="flow-arr"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box fb-v   animate__animated animate__fadeIn d2">System.Exception</div>
+        <span class="flow-arr"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box fb-p   animate__animated animate__fadeIn d3">IOException</div>
+        <span class="flow-arr"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box fb-e   animate__animated animate__fadeIn d4" style="font-size:.68rem">MiExcepcion<br>Exception</div>
+      </div>
+    </div>
+    <p class="text-center mt-4 animate__animated animate__fadeIn d5" style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.7rem">
+      <i class="fas fa-keyboard me-2"></i>← → navegar · F pantalla completa
+    </p>
+  `
+},
+
+/* ── 1 JERARQUÍA ── */
+{
+  title:'Jerarquía de Excepciones',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Contexto .NET</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-sitemap me-2" style="color:var(--accent)"></i>Jerarquía de <span class="kw">Excepciones</span> en .NET</h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <div class="card-g">
+            <p class="mb-2" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--muted);letter-spacing:2px">ÁRBOL DE HERENCIA</p>
+            <div class="hier-line" style="margin-left:0"><div class="hier-box" style="border-color:var(--muted);color:var(--text)">System.Object</div></div>
+            <div class="hier-line" style="margin-left:20px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">└─</span>
+              <div class="hier-box" style="border-color:var(--accent);color:var(--accent)">System.Exception</div>
+            </div>
+            <div class="hier-line" style="margin-left:40px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">├─</span>
+              <div class="hier-box" style="border-color:var(--accent2);color:var(--accent2)">SystemException</div>
+            </div>
+            <div class="hier-line" style="margin-left:60px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">│ ├─</span>
+              <div class="hier-box" style="font-size:.7rem">NullReferenceException</div>
+            </div>
+            <div class="hier-line" style="margin-left:60px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">│ └─</span>
+              <div class="hier-box" style="font-size:.7rem">ArgumentException</div>
+            </div>
+            <div class="hier-line" style="margin-left:40px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">├─</span>
+              <div class="hier-box" style="border-color:var(--accent3);color:var(--accent3)">IOException</div>
+            </div>
+            <div class="hier-line" style="margin-left:60px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">│ └─</span>
+              <div class="hier-box" style="font-size:.7rem">FileNotFoundException</div>
+            </div>
+            <div class="hier-line" style="margin-left:40px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">└─</span>
+              <div class="hier-box" style="border-color:var(--warn);color:var(--warn);font-size:.7rem">⭐ TuPropiaException</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex flex-column gap-3 animate__animated animate__fadeInRight">
+          <div class="card-g">
+            <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--muted);letter-spacing:2px">¿CUÁNDO CREAR UNA PROPIA?</p>
+            <ul class="feat mt-2">
+              <li>
+                <div class="ico" style="background:rgba(167,139,250,.12)"><i class="fas fa-magnifying-glass" style="color:var(--accent)"></i></div>
+                <div style="font-size:.9rem">Cuando ninguna excepción predefinida describe el error con precisión.</div>
+              </li>
+              <li>
+                <div class="ico" style="background:rgba(244,114,182,.12)"><i class="fas fa-box" style="color:var(--accent2)"></i></div>
+                <div style="font-size:.9rem">Cuando tu librería/dominio necesita un tipo de error <strong>propio y reconocible</strong>.</div>
+              </li>
+              <li>
+                <div class="ico" style="background:rgba(52,211,153,.12)"><i class="fas fa-filter" style="color:var(--accent3)"></i></div>
+                <div style="font-size:.9rem">Cuando quien usa tu código necesita capturar <strong>ese tipo específico</strong> con catch.</div>
+              </li>
+            </ul>
+          </div>
+          <div class="note-box">
+            <div class="nt"><i class="fas fa-book me-1"></i> CONVENCIÓN OFICIAL</div>
+            El nombre de toda excepción personalizada debe terminar con la palabra <code>"Exception"</code>. Ej: <code>EmployeeListNotFoundException</code>, <code>EdadInvalidaException</code>.
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 2 EJEMPLO OFICIAL ── */
+{
+  title:'Ejemplo oficial',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Ejemplo Microsoft</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-code me-2" style="color:var(--accent2)"></i><span class="kw2">EmployeeListNotFoundException</span></h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="kw">using</span> <span class="type">System</span>;
+
+<span class="kw">public class</span> <span class="type">EmployeeListNotFoundException</span>
+    : <span class="type">Exception</span>
+{
+<span class="hl">    <span class="cmt">// Constructor 1: sin parámetros</span></span>
+<span class="hl">    <span class="kw">public</span> <span class="fn">EmployeeListNotFoundException</span>()</span>
+<span class="hl">    {</span>
+<span class="hl">    }</span>
+
+<span class="hl">    <span class="cmt">// Constructor 2: con mensaje</span></span>
+<span class="hl">    <span class="kw">public</span> <span class="fn">EmployeeListNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>)</span>
+<span class="hl">        : <span class="fn">base</span>(<span class="var">message</span>)</span>
+<span class="hl">    {</span>
+<span class="hl">    }</span>
+
+<span class="hl">    <span class="cmt">// Constructor 3: mensaje + excepción interna</span></span>
+<span class="hl">    <span class="kw">public</span> <span class="fn">EmployeeListNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>,</span>
+<span class="hl">        <span class="type">Exception</span> <span class="var">inner</span>)</span>
+<span class="hl">        : <span class="fn">base</span>(<span class="var">message</span>, <span class="var">inner</span>)</span>
+<span class="hl">    {</span>
+<span class="hl">    }</span>
+}</pre>
+        </div>
+        <div class="d-flex flex-column gap-3 animate__animated animate__fadeInRight">
+          <div class="ctor-card ctor-1">
+            <div class="ct-label"><i class="fas fa-circle me-1"></i> CONSTRUCTOR 1 — Sin parámetros</div>
+            <p style="font-size:.88rem">Permite instanciar la excepción sin datos adicionales.<br><code style="color:var(--accent)">throw new EmployeeListNotFoundException();</code></p>
+          </div>
+          <div class="ctor-card ctor-2">
+            <div class="ct-label"><i class="fas fa-circle me-1"></i> CONSTRUCTOR 2 — Con mensaje</div>
+            <p style="font-size:.88rem">El más usado. Pasa el mensaje a <code>base(message)</code> → disponible en <code>ex.Message</code>.<br><code style="color:var(--accent2)">throw new EmployeeListNotFoundException("No encontrado");</code></p>
+          </div>
+          <div class="ctor-card ctor-3">
+            <div class="ct-label"><i class="fas fa-circle me-1"></i> CONSTRUCTOR 3 — Mensaje + Inner</div>
+            <p style="font-size:.88rem">Encadena excepciones. La original queda en <code>ex.InnerException</code> para trazabilidad.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 3 LOS 3 CONSTRUCTORES DETALLE ── */
+{
+  title:'Los 3 constructores',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Detalle de constructores</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown">Los <span class="kw">3 constructores</span> estándar</h2>
+      <div class="accent-line"></div>
+      <div class="note-box mb-3 animate__animated animate__fadeIn d1">
+        <div class="nt"><i class="fas fa-info-circle me-1"></i> ¿POR QUÉ 3?</div>
+        Microsoft recomienda implementar los 3 constructores para que tu excepción sea <strong>consistente</strong> con el patrón estándar de .NET y sea fácil de usar por cualquier consumidor.
+      </div>
+      <div class="d-flex flex-column gap-3">
+        <div class="card-g animate__animated animate__fadeIn d1">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="step-num">1</span>
+            <div style="width:100%">
+              <p class="mb-1" style="color:var(--accent);font-weight:700">Sin parámetros — Default constructor</p>
+              <div class="two-col" style="gap:10px">
+                <pre class="code-block" style="font-size:.72rem">
+<span class="kw">public</span> <span class="fn">MiException</span>()
+    : <span class="fn">base</span>()   <span class="cmt">// opcional</span>
+{
+}</pre>
+                <div style="font-size:.88rem"><code>ex.Message</code> tendrá el mensaje genérico del CLR. Útil cuando el contexto ya es suficiente para entender el error.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-g animate__animated animate__fadeIn d2">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="step-num" style="background:linear-gradient(135deg,var(--accent2),#db2777)">2</span>
+            <div style="width:100%">
+              <p class="mb-1" style="color:var(--accent2);font-weight:700">Con string message</p>
+              <div class="two-col" style="gap:10px">
+                <pre class="code-block" style="font-size:.72rem">
+<span class="kw">public</span> <span class="fn">MiException</span>(<span class="kw">string</span> <span class="var">message</span>)
+    : <span class="fn">base</span>(<span class="var">message</span>)
+{
+}</pre>
+                <div style="font-size:.88rem">El <code>message</code> se almacena en <code>Exception.Message</code>. Es el constructor más frecuente y el que siempre deberías incluir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-g animate__animated animate__fadeIn d3">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="step-num" style="background:linear-gradient(135deg,var(--accent3),#059669)">3</span>
+            <div style="width:100%">
+              <p class="mb-1" style="color:var(--accent3);font-weight:700">Con message + Exception inner</p>
+              <div class="two-col" style="gap:10px">
+                <pre class="code-block" style="font-size:.72rem">
+<span class="kw">public</span> <span class="fn">MiException</span>(<span class="kw">string</span> <span class="var">message</span>,
+    <span class="type">Exception</span> <span class="var">inner</span>)
+    : <span class="fn">base</span>(<span class="var">message</span>, <span class="var">inner</span>)
+{
+}</pre>
+                <div style="font-size:.88rem"><code>inner</code> se guarda en <code>ex.InnerException</code>. Permite encadenar excepciones preservando la causa original del error.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 4 PROPIEDADES PROPIAS ── */
+{
+  title:'Propiedades personalizadas',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Extensión avanzada</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown">Agregar <span class="kw">Propiedades</span> Personalizadas</h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="kw">namespace</span> <span class="type">HR.Core</span>;
+
+<span class="kw">public class</span> <span class="type">EmployeeNotFoundException</span>
+    : <span class="type">Exception</span>
+{
+    <span class="cmt">// Propiedad propia: ID del empleado</span>
+    <span class="kw">public int</span> <span class="var">EmployeeId</span> { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>()
+    {
+    }
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>)
+        : <span class="fn">base</span>(<span class="var">message</span>)
+    {
+    }
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>,
+        <span class="kw">int</span> <span class="var">employeeId</span>)
+        : <span class="fn">base</span>(<span class="var">message</span>)
+    {
+        <span class="var">EmployeeId</span> = <span class="var">employeeId</span>;
+    }
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>,
+        <span class="type">Exception</span> <span class="var">inner</span>)
+        : <span class="fn">base</span>(<span class="var">message</span>, <span class="var">inner</span>)
+    {
+    }
+}</pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--muted);letter-spacing:2px">USO EN CÓDIGO</p>
+          <pre class="code-block mb-3">
+<span class="cmt">// Lanzar con ID del empleado</span>
+<span class="kw">throw new</span> <span class="type">EmployeeNotFoundException</span>(
+    <span class="str">$"Empleado {<span class="var">id</span>} no existe"</span>, <span class="var">id</span>);
+
+<span class="cmt">// Capturar y usar la propiedad</span>
+<span class="kw">catch</span> (<span class="type">EmployeeNotFoundException</span> <span class="var">ex</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">ex</span>.Message);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(
+        <span class="str">$"ID: {<span class="var">ex</span>.EmployeeId}"</span>);
+}</pre>
+          <div class="note-box">
+            <div class="nt"><i class="fas fa-star me-1"></i> BUENA PRÁCTICA</div>
+            Agrega propiedades específicas del dominio cuando el mensaje solo no es suficiente: IDs, rutas, rangos inválidos, etc.
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 5 INNER EXCEPTION ── */
+{
+  title:'InnerException — Encadenamiento',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Técnica avanzada</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-link me-2" style="color:var(--accent3)"></i>Encadenamiento con <span class="kw3">InnerException</span></h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="kw">public static</span> <span class="type">Employee</span> <span class="fn">GetEmployee</span>(<span class="kw">int</span> <span class="var">id</span>)
+{
+    <span class="kw">try</span>
+    {
+        <span class="cmt">// Simula falla de base de datos</span>
+        <span class="kw">throw new</span> <span class="type">SqlException</span>(<span class="str">"Timeout"</span>);
+    }
+    <span class="kw">catch</span> (<span class="type">SqlException</span> <span class="var">dbEx</span>)
+    {
+        <span class="cmt">// Envuelve la excepción original</span>
+        <span class="kw">throw new</span> <span class="type">EmployeeNotFoundException</span>(
+            <span class="str">$"No se pudo obtener empleado {<span class="var">id</span>}"</span>,
+            <span class="var">dbEx</span>   <span class="cmt">// ← inner exception</span>
+        );
+    }
+}
+
+<span class="cmt">// Quien consume:</span>
+<span class="kw">catch</span> (<span class="type">EmployeeNotFoundException</span> <span class="var">ex</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">ex</span>.Message);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">ex</span>.InnerException?.Message);
+}</pre>
+        </div>
+        <div class="d-flex flex-column gap-3 animate__animated animate__fadeInRight">
+          <div class="card-g">
+            <p class="mb-2" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--muted);letter-spacing:2px">CADENA DE EXCEPCIÓN</p>
+            <div class="flow-wrap flex-column" style="gap:6px;align-items:flex-start">
+              <div class="flow-box fb-e" style="width:100%;text-align:left">
+                <i class="fas fa-layer-group me-2" style="color:var(--accent3)"></i>
+                <code>EmployeeNotFoundException</code>
+                <div style="font-size:.68rem;color:var(--muted);margin-top:2px">"No se pudo obtener empleado 42"</div>
+              </div>
+              <span class="flow-arr" style="margin-left:20px"><i class="fas fa-arrow-down"></i> .InnerException</span>
+              <div class="flow-box fb-p" style="width:88%;margin-left:20px;text-align:left">
+                <i class="fas fa-database me-2" style="color:var(--accent2)"></i>
+                <code>SqlException</code>
+                <div style="font-size:.68rem;color:var(--muted);margin-top:2px">"Timeout"</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-g">
+            <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--muted);letter-spacing:2px">VENTAJAS</p>
+            <ul class="feat mt-2">
+              <li>
+                <div class="ico" style="background:rgba(52,211,153,.12)"><i class="fas fa-eye" style="color:var(--accent3)"></i></div>
+                <div style="font-size:.87rem">Preserva la causa raíz para debugging</div>
+              </li>
+              <li>
+                <div class="ico" style="background:rgba(167,139,250,.12)"><i class="fas fa-layer-group" style="color:var(--accent)"></i></div>
+                <div style="font-size:.87rem">Abstrae detalles de implementación al llamador</div>
+              </li>
+              <li>
+                <div class="ico" style="background:rgba(244,114,182,.12)"><i class="fas fa-magnifying-glass-chart" style="color:var(--accent2)"></i></div>
+                <div style="font-size:.87rem">Los loggers pueden recorrer toda la cadena</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 6 PROYECTO MULTI-ARCHIVO ── */
+{
+  title:'Proyecto multi-archivo',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">dotnet CLI — Proyecto real</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-folder-tree me-2" style="color:var(--accent)"></i>Estructura <span class="kw">multi-archivo</span> .NET 8</h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--accent3);letter-spacing:2px">COMANDOS DOTNET CLI</p>
+          <div class="terminal mb-2">
+            <div class="prompt">$ mkdir HR.System && cd HR.System</div>
+            <div class="prompt">$ dotnet new solution -n HR.System</div>
+            <div class="prompt">$ dotnet new classlib -n HR.Core</div>
+            <div class="prompt">$ dotnet new console -n HR.App</div>
+            <div class="prompt">$ dotnet sln add HR.Core</div>
+            <div class="prompt">$ dotnet sln add HR.App</div>
+            <div class="prompt">$ dotnet add HR.App reference HR.Core</div>
+            <div class="prompt">$ dotnet run --project HR.App</div>
+          </div>
+          <pre class="code-block" style="font-size:.7rem">
+HR.System/
+├── HR.System.sln
+├── HR.Core/
+│   ├── HR.Core.csproj
+│   ├── Exceptions/
+│   │   ├── EmployeeNotFoundException.cs
+│   │   └── InvalidSalaryException.cs
+│   └── Services/
+│       └── EmployeeService.cs
+└── HR.App/
+    ├── HR.App.csproj
+    └── Program.cs</pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--accent);letter-spacing:2px">EmployeeNotFoundException.cs</p>
+          <pre class="code-block mb-2" style="font-size:.7rem">
+<span class="kw">namespace</span> <span class="type">HR.Core.Exceptions</span>;
+
+<span class="kw">public class</span> <span class="type">EmployeeNotFoundException</span> : <span class="type">Exception</span>
+{
+    <span class="kw">public int</span> <span class="var">EmployeeId</span> { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>() { }
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>)
+        : <span class="fn">base</span>(<span class="var">message</span>) { }
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>,
+        <span class="kw">int</span> <span class="var">id</span>) : <span class="fn">base</span>(<span class="var">message</span>) => <span class="var">EmployeeId</span> = <span class="var">id</span>;
+
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>(<span class="kw">string</span> <span class="var">message</span>,
+        <span class="type">Exception</span> <span class="var">inner</span>) : <span class="fn">base</span>(<span class="var">message</span>, <span class="var">inner</span>) { }
+}</pre>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 7 SERVICE + PROGRAM ── */
+{
+  title:'EmployeeService + Program',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Código completo</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-gears me-2" style="color:var(--accent2)"></i>Service y Program — <span class="kw2">uso real</span></h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--accent2);letter-spacing:2px">EmployeeService.cs (HR.Core)</p>
+          <pre class="code-block" style="font-size:.7rem">
+<span class="kw">namespace</span> <span class="type">HR.Core.Services</span>;
+<span class="kw">using</span> <span class="type">HR.Core.Exceptions</span>;
+
+<span class="kw">public record</span> <span class="type">Employee</span>(<span class="kw">int</span> <span class="var">Id</span>, <span class="kw">string</span> <span class="var">Name</span>);
+
+<span class="kw">public class</span> <span class="type">EmployeeService</span>
+{
+    <span class="kw">private readonly</span> <span class="type">List</span>&lt;<span class="type">Employee</span>&gt; <span class="var">_employees</span> =
+    [
+        <span class="kw">new</span>(<span class="num">1</span>, <span class="str">"Ana García"</span>),
+        <span class="kw">new</span>(<span class="num">2</span>, <span class="str">"Luis Pérez"</span>),
+    ];
+
+    <span class="kw">public</span> <span class="type">Employee</span> <span class="fn">GetById</span>(<span class="kw">int</span> <span class="var">id</span>)
+    {
+        <span class="kw">var</span> <span class="var">emp</span> = <span class="var">_employees</span>
+            .<span class="fn">FirstOrDefault</span>(<span class="var">e</span> => <span class="var">e</span>.Id == <span class="var">id</span>);
+
+        <span class="kw">if</span> (<span class="var">emp</span> <span class="kw">is null</span>)
+            <span class="kw">throw new</span> <span class="type">EmployeeNotFoundException</span>(
+                <span class="str">$"Empleado ID {<span class="var">id</span>} no existe"</span>, <span class="var">id</span>);
+
+        <span class="kw">return</span> <span class="var">emp</span>;
+    }
+}</pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--accent3);letter-spacing:2px">Program.cs (HR.App)</p>
+          <pre class="code-block mb-2" style="font-size:.7rem">
+<span class="kw">using</span> <span class="type">HR.Core.Services</span>;
+<span class="kw">using</span> <span class="type">HR.Core.Exceptions</span>;
+
+<span class="kw">var</span> <span class="var">service</span> = <span class="kw">new</span> <span class="type">EmployeeService</span>();
+
+<span class="kw">try</span>
+{
+    <span class="kw">var</span> <span class="var">emp</span> = <span class="var">service</span>.<span class="fn">GetById</span>(<span class="num">99</span>); <span class="cmt">// no existe</span>
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">emp</span>.Name);
+}
+<span class="kw">catch</span> (<span class="type">EmployeeNotFoundException</span> <span class="var">ex</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"[!] {<span class="var">ex</span>.Message}"</span>);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"    ID: {<span class="var">ex</span>.EmployeeId}"</span>);
+}</pre>
+          <div class="terminal">
+            <div class="prompt">$ dotnet run --project HR.App</div>
+            <div class="err">[!] Empleado ID 99 no existe</div>
+            <div class="err">    ID: 99</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 8 JERARQUÍA PROPIA ── */
+{
+  title:'Jerarquía de excepciones propia',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Diseño avanzado</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-diagram-project me-2" style="color:var(--accent)"></i>Crear una <span class="kw">jerarquía</span> propia</h2>
+      <div class="accent-line"></div>
+      <p class="mb-3" style="font-size:.9rem;color:var(--muted)">Para dominios grandes, crea una excepción base del módulo y derivá las específicas:</p>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="kw">namespace</span> <span class="type">HR.Core.Exceptions</span>;
+
+<span class="cmt">// Excepción base del módulo HR</span>
+<span class="kw">public class</span> <span class="type">HRException</span> : <span class="type">Exception</span>
+{
+    <span class="kw">public</span> <span class="fn">HRException</span>() { }
+    <span class="kw">public</span> <span class="fn">HRException</span>(<span class="kw">string</span> <span class="var">msg</span>)
+        : <span class="fn">base</span>(<span class="var">msg</span>) { }
+    <span class="kw">public</span> <span class="fn">HRException</span>(<span class="kw">string</span> <span class="var">msg</span>, <span class="type">Exception</span> <span class="var">inner</span>)
+        : <span class="fn">base</span>(<span class="var">msg</span>, <span class="var">inner</span>) { }
+}
+
+<span class="cmt">// Específicas que heredan de HRException</span>
+<span class="kw">public class</span> <span class="type">EmployeeNotFoundException</span> : <span class="type">HRException</span>
+{
+    <span class="kw">public int</span> <span class="var">EmployeeId</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="fn">EmployeeNotFoundException</span>(<span class="kw">string</span> <span class="var">msg</span>, <span class="kw">int</span> <span class="var">id</span>)
+        : <span class="fn">base</span>(<span class="var">msg</span>) => <span class="var">EmployeeId</span> = <span class="var">id</span>;
+}
+
+<span class="kw">public class</span> <span class="type">InvalidSalaryException</span> : <span class="type">HRException</span>
+{
+    <span class="kw">public decimal</span> <span class="var">Salary</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="fn">InvalidSalaryException</span>(<span class="kw">string</span> <span class="var">msg</span>, <span class="kw">decimal</span> <span class="var">s</span>)
+        : <span class="fn">base</span>(<span class="var">msg</span>) => <span class="var">Salary</span> = <span class="var">s</span>;
+}</pre>
+        </div>
+        <div class="d-flex flex-column gap-3 animate__animated animate__fadeInRight">
+          <div class="card-g">
+            <p class="mb-2" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--muted);letter-spacing:2px">JERARQUÍA RESULTANTE</p>
+            <div class="hier-line"><div class="hier-box" style="border-color:var(--accent);color:var(--accent)">System.Exception</div></div>
+            <div class="hier-line" style="margin-left:20px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">└─</span>
+              <div class="hier-box" style="border-color:var(--accent2);color:var(--accent2)">HRException</div>
+            </div>
+            <div class="hier-line" style="margin-left:40px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">├─</span>
+              <div class="hier-box" style="border-color:var(--accent3);color:var(--accent3);font-size:.72rem">EmployeeNotFoundException</div>
+            </div>
+            <div class="hier-line" style="margin-left:40px">
+              <span style="color:var(--muted);font-family:'Fira Code',monospace;font-size:.75rem">└─</span>
+              <div class="hier-box" style="border-color:var(--warn);color:var(--warn);font-size:.72rem">InvalidSalaryException</div>
+            </div>
+          </div>
+          <div class="card-g">
+            <p class="mb-1" style="font-size:.7rem;font-family:'Fira Code',monospace;color:var(--muted);letter-spacing:2px">CATCH FLEXIBLE</p>
+            <pre class="code-block" style="font-size:.7rem">
+<span class="cmt">// Captura solo la específica:</span>
+<span class="kw">catch</span> (<span class="type">EmployeeNotFoundException</span> <span class="var">ex</span>) { }
+
+<span class="cmt">// Captura cualquier error HR:</span>
+<span class="kw">catch</span> (<span class="type">HRException</span> <span class="var">ex</span>) { }
+
+<span class="cmt">// Captura todo:</span>
+<span class="kw">catch</span> (<span class="type">Exception</span> <span class="var">ex</span>) { }</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 9 BUENAS PRÁCTICAS ── */
+{
+  title:'Buenas prácticas',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Mejores prácticas</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-star me-2" style="color:var(--warn)"></i>Procedimientos <span class="kw">Recomendados</span></h2>
+      <div class="accent-line"></div>
+      <div class="d-flex flex-column gap-2 mb-3">
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d1">
+          <i class="fas fa-spell-check mt-1" style="color:var(--accent);width:20px"></i>
+          <div><strong>Nombre termina en "Exception".</strong> Es una convención de .NET. Siempre: <code>ProductoException</code>, <code>StockAgotadoException</code>.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d2">
+          <i class="fas fa-3 mt-1" style="color:var(--accent2);width:20px"></i>
+          <div><strong>Implementa los 3 constructores.</strong> Compatibilidad garantizada con el ecosistema .NET y con serializadores de log.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d3">
+          <i class="fas fa-layer-group mt-1" style="color:var(--accent3);width:20px"></i>
+          <div><strong>Hereda de Exception o de una excepción específica.</strong> Si tu error es de E/S, hereda de <code>IOException</code>. Si es general del dominio, de <code>Exception</code>.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d4">
+          <i class="fas fa-tag mt-1" style="color:var(--warn);width:20px"></i>
+          <div><strong>Agrega propiedades de dominio.</strong> Incluye datos relevantes (<code>EmployeeId</code>, <code>Salary</code>, <code>FilePath</code>) para que quien atrapa tenga contexto real.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d5">
+          <i class="fas fa-folder-tree mt-1" style="color:var(--accent2);width:20px"></i>
+          <div><strong>Organiza en carpeta Exceptions/.</strong> Mantén las excepciones separadas en su propio directorio dentro del proyecto Core.</div>
+        </div>
+      </div>
+      <pre class="code-block animate__animated animate__fadeIn d5" style="font-size:.71rem">
+<span class="cmt">// ❌ MAL — nombre sin "Exception", sin constructores</span>
+<span class="kw">public class</span> <span class="type">ErrorEmpleado</span> : <span class="type">Exception</span> { }
+
+<span class="cmt">// ✅ BIEN — convención correcta, 3 constructores, propiedad propia</span>
+<span class="kw">public class</span> <span class="type">EmpleadoNoEncontradoException</span> : <span class="type">Exception</span>
+{
+    <span class="kw">public int</span> <span class="var">Id</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="fn">EmpleadoNoEncontradoException</span>() { }
+    <span class="kw">public</span> <span class="fn">EmpleadoNoEncontradoException</span>(<span class="kw">string</span> <span class="var">msg</span>) : <span class="fn">base</span>(<span class="var">msg</span>) { }
+    <span class="kw">public</span> <span class="fn">EmpleadoNoEncontradoException</span>(<span class="kw">string</span> <span class="var">msg</span>, <span class="kw">int</span> <span class="var">id</span>) : <span class="fn">base</span>(<span class="var">msg</span>) => <span class="var">Id</span> = <span class="var">id</span>;
+    <span class="kw">public</span> <span class="fn">EmpleadoNoEncontradoException</span>(<span class="kw">string</span> <span class="var">msg</span>, <span class="type">Exception</span> <span class="var">e</span>) : <span class="fn">base</span>(<span class="var">msg</span>, <span class="var">e</span>) { }
+}</pre>
+    </div>
+  `
+},
+
+/* ── 10 CODE RUNNER ── */
+{
+  title:'Code Runner — 10 Ejercicios',
+  isRunner:true,
+  render:()=>`
+    <div class="slide-label animate__animated animate__fadeIn" style="text-align:center">Práctica interactiva</div>
+    <h2 class="slide-title animate__animated animate__fadeInDown" style="text-align:center">
+      <i class="fas fa-code me-2" style="color:var(--accent)"></i>Code Runner — Excepciones <span class="kw">Personalizadas</span>
+    </h2>
+    <div class="accent-line center"></div>
+    <div id="runner-section" class="animate__animated animate__fadeIn d1">
+      <ul class="nav flex-wrap gap-1 mb-2" id="exercise-tabs"></ul>
+      <div id="ex-description" class="note-box mb-2" style="font-size:.86rem"></div>
+      <textarea class="ex-editor" id="ex-editor" spellcheck="false"></textarea>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <button class="run-btn" onclick="runExercise()"><i class="fas fa-play me-2"></i>Verificar</button>
+        <button class="ghost-btn" onclick="resetEditor()"><i class="fas fa-rotate-left me-1"></i>Reiniciar</button>
+        <button class="ghost-btn warn" onclick="showHintSwal()"><i class="fas fa-lightbulb me-1"></i>Pista</button>
+        <span id="ex-progress" style="font-family:'Fira Code',monospace;font-size:.73rem;color:var(--accent);margin-left:auto"></span>
+      </div>
+      <div id="feedback-box"></div>
+    </div>
+  `
+}
+
+];
+
+/* ═══════════════════════════════════════
+   EXERCISES
+═══════════════════════════════════════ */
+const exercises = [
+  {
+    id:1,
+    title:"EJ 01 — Clase básica",
+    description:"Crea una clase <code>ProductoException</code> que herede de <code>Exception</code>. Debe tener solo el constructor sin parámetros.",
+    hint:"public class ProductoException : Exception { public ProductoException() { } }",
+    template:`// Crea la clase aquí
+public class ProductoException :         
+{
+    public ProductoException()
+    {
+    }
+}`,
+    check: c => /class\s+ProductoException\s*:\s*Exception/.test(c)
+             && /ProductoException\s*\(\s*\)/.test(c)
+  },
+  {
+    id:2,
+    title:"EJ 02 — Constructor con mensaje",
+    description:"Agrega a <code>ProductoException</code> un constructor que reciba un <code>string message</code> y lo pase a <code>base(message)</code>.",
+    hint:"public ProductoException(string message) : base(message) { }",
+    template:`public class ProductoException : Exception
+{
+    public ProductoException() { }
+
+    // agrega constructor con string message
+
+}`,
+    check: c => /class\s+ProductoException/.test(c)
+             && /ProductoException\s*\(\s*string\s+\w+\s*\)/.test(c)
+             && /:\s*base\s*\(\s*\w+\s*\)/.test(c)
+  },
+  {
+    id:3,
+    title:"EJ 03 — Los 3 constructores",
+    description:"Implementa los <strong>3 constructores estándar</strong> en <code>StockException</code>: sin parámetros, con mensaje, y con mensaje + inner exception.",
+    hint:"public StockException() {} public StockException(string msg): base(msg){} public StockException(string msg, Exception inner): base(msg,inner){}",
+    template:`public class StockException : Exception
+{
+    // Constructor 1: sin parámetros
+
+    // Constructor 2: con mensaje
+
+    // Constructor 3: mensaje + inner exception
+
+}`,
+    check: c => /class\s+StockException\s*:\s*Exception/.test(c)
+             && /StockException\s*\(\s*\)/.test(c)
+             && /StockException\s*\(\s*string/.test(c)
+             && /Exception\s+\w+\s*\)/.test(c)
+             && (c.match(/StockException\s*\(/g)||[]).length >= 3
+  },
+  {
+    id:4,
+    title:"EJ 04 — Propiedad personalizada",
+    description:"Crea <code>PrecioInvalidoException</code> con los 3 constructores y una propiedad <code>public decimal Precio { get; }</code>.",
+    hint:"public decimal Precio { get; } — en el constructor específico: Precio = precio;",
+    template:`public class PrecioInvalidoException : Exception
+{
+    // propiedad Precio aquí
+
+    public PrecioInvalidoException() { }
+
+    public PrecioInvalidoException(string message)
+        : base(message) { }
+
+    public PrecioInvalidoException(string message, Exception inner)
+        : base(message, inner) { }
+}`,
+    check: c => /decimal\s+Precio\s*\{\s*get/.test(c)
+             && /class\s+PrecioInvalidoException/.test(c)
+  },
+  {
+    id:5,
+    title:"EJ 05 — Constructor con propiedad",
+    description:"Agrega a <code>PrecioInvalidoException</code> un constructor que reciba <code>string message</code> y <code>decimal precio</code> y asigne <code>Precio = precio</code>.",
+    hint:"public PrecioInvalidoException(string message, decimal precio) : base(message) { Precio = precio; }",
+    template:`public class PrecioInvalidoException : Exception
+{
+    public decimal Precio { get; }
+
+    public PrecioInvalidoException() { }
+    public PrecioInvalidoException(string message) : base(message) { }
+    public PrecioInvalidoException(string message, Exception inner) : base(message, inner) { }
+
+    // agrega constructor con string message y decimal precio
+
+}`,
+    check: c => /PrecioInvalidoException\s*\(\s*string\s+\w+\s*,\s*decimal\s+\w+\s*\)/.test(c)
+             && /Precio\s*=\s*\w+/.test(c)
+  },
+  {
+    id:6,
+    title:"EJ 06 — Lanzar la excepción propia",
+    description:"Lanza una <code>PrecioInvalidoException</code> con el mensaje <code>Precio negativo</code> y captúrala imprimiendo <code>ex.Message</code>.",
+    hint:"throw new PrecioInvalidoException(\"Precio negativo\"); catch(PrecioInvalidoException ex){ Console.WriteLine(ex.Message); }",
+    template:`// (asume que PrecioInvalidoException ya está definida)
+
+try
+{
+    decimal precio = -10m;
+    if (precio < 0)
+        throw new PrecioInvalidoException(        );
+}
+catch (PrecioInvalidoException ex)
+{
+    // imprime ex.Message
+}`,
+    check: c => /throw\s+new\s+PrecioInvalidoException/.test(c)
+             && /Precio\s+negativo/i.test(c)
+             && /catch\s*\(\s*PrecioInvalidoException/.test(c)
+             && /ex\.Message/.test(c)
+  },
+  {
+    id:7,
+    title:"EJ 07 — Namespace file-scoped",
+    description:"Declara la excepción <code>ClienteNoEncontradoException</code> usando <strong>namespace file-scoped</strong>: <code>namespace Ventas.Core.Exceptions;</code>",
+    hint:"namespace Ventas.Core.Exceptions; public class ClienteNoEncontradoException : Exception { ... }",
+    template:`// namespace file-scoped aquí
+
+
+
+public class ClienteNoEncontradoException :         
+{
+    public ClienteNoEncontradoException() { }
+    public ClienteNoEncontradoException(string message) : base(message) { }
+    public ClienteNoEncontradoException(string message, Exception inner) : base(message, inner) { }
+}`,
+    check: c => /namespace\s+[\w\.]+\s*;/.test(c)
+             && /class\s+ClienteNoEncontradoException\s*:\s*Exception/.test(c)
+  },
+  {
+    id:8,
+    title:"EJ 08 — InnerException (encadenamiento)",
+    description:"Captura una <code>ArgumentException</code> y re-lánzala envuelta en una <code>PrecioInvalidoException</code> usando el constructor con <code>inner</code>.",
+    hint:"catch(ArgumentException argEx){ throw new PrecioInvalidoException(\"Wrapper\", argEx); }",
+    template:`try
+{
+    try
+    {
+        throw new ArgumentException("arg inválido");
+    }
+    catch (ArgumentException argEx)
+    {
+        // lanza PrecioInvalidoException con argEx como inner
+
+    }
+}
+catch (PrecioInvalidoException ex)
+{
+    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex.InnerException?.Message);
+}`,
+    check: c => /throw\s+new\s+PrecioInvalidoException/.test(c)
+             && /argEx/.test(c)
+             && /InnerException/.test(c)
+  },
+  {
+    id:9,
+    title:"EJ 09 — Jerarquía: base del módulo",
+    description:"Crea <code>VentasException</code> (base) y <code>ProductoException</code> que herede de <code>VentasException</code> (no de Exception directamente).",
+    hint:"public class VentasException : Exception { ... } public class ProductoException : VentasException { ... }",
+    template:`// Excepción base del módulo
+
+
+// Excepción específica que hereda de VentasException
+
+`,
+    check: c => /class\s+VentasException\s*:\s*Exception/.test(c)
+             && /class\s+ProductoException\s*:\s*VentasException/.test(c)
+  },
+  {
+    id:10,
+    title:"EJ 10 — Solución completa",
+    description:"Define <code>EmpleadoNoEncontradoException</code> con los 3 constructores y propiedad <code>int EmpleadoId</code>. Lánzala y captúrala imprimiendo mensaje e ID.",
+    hint:"Combina todo: 3 constructores + propiedad EmpleadoId + throw + catch imprimiendo ex.Message y ex.EmpleadoId",
+    template:`// Define la excepción completa
+public class EmpleadoNoEncontradoException : Exception
+{
+    // propiedad EmpleadoId
+
+    // 3 constructores
+
+
+}
+
+// Lanza y captura
+try
+{
+    // lanza con mensaje "Empleado no existe" y id 42
+
+}
+catch (EmpleadoNoEncontradoException ex)
+{
+    // imprime ex.Message y ex.EmpleadoId
+}`,
+    check: c => /class\s+EmpleadoNoEncontradoException\s*:\s*Exception/.test(c)
+             && /int\s+EmpleadoId\s*\{\s*get/.test(c)
+             && (c.match(/EmpleadoNoEncontradoException\s*\(/g)||[]).length >= 3
+             && /throw\s+new\s+EmpleadoNoEncontradoException/.test(c)
+             && /Empleado\s+no\s+existe/i.test(c)
+             && /ex\.EmpleadoId/i.test(c)
+  }
+];
+
+/* ═══════════════════════════════════════
+   STATE & ENGINE
+═══════════════════════════════════════ */
+let currentSlide = 0, currentEx = 0;
+let solvedExercises = new Set(), unlockedExercises = new Set([0]);
+
+function buildSlides(){
+  const w = document.getElementById('slides-wrapper');
+  slides.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className='slide'; d.id=`slide-${i}`;
+    d.innerHTML = s.render(); w.appendChild(d);
+  });
+}
+
+function showSlide(idx){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`slide-${idx}`).classList.add('active');
+  const total=slides.length;
+  document.getElementById('slide-counter').textContent=`${idx+1} / ${total}`;
+  document.getElementById('btn-prev').disabled = idx===0;
+  document.getElementById('btn-next').disabled = idx===total-1;
+  document.getElementById('progress-bar').style.width=(idx/(total-1)*100)+'%';
+  if(slides[idx].isRunner) buildRunnerUI();
+}
+
+function navigate(dir){
+  const n=currentSlide+dir;
+  if(n<0||n>=slides.length) return;
+  currentSlide=n; showSlide(currentSlide);
+}
+
+/* ─── RUNNER ─── */
+function buildRunnerUI(){
+  const tabs=document.getElementById('exercise-tabs');
+  if(!tabs) return;
+  tabs.innerHTML='';
+  exercises.forEach((ex,i)=>{
+    const li=document.createElement('li'); li.className='nav-item';
+    const a=document.createElement('a');
+    a.className='nav-link'+(solvedExercises.has(i)?' solved':'')+((!unlockedExercises.has(i))?' locked':'')+(i===currentEx?' active':'');
+    a.textContent=solvedExercises.has(i)?`✓ ${ex.id}`:String(ex.id).padStart(2,'0');
+    a.title=ex.title;
+    if(unlockedExercises.has(i)){
+      a.onclick=()=>{ currentEx=i; buildRunnerUI(); };
+    } else {
+      a.onclick=()=>Swal.fire({icon:'info',title:'🔒 Bloqueado',text:`Completa el ejercicio ${i} primero.`,background:'#130f22',color:'#e4e0f5',confirmButtonColor:'#a78bfa'});
+    }
+    li.appendChild(a); tabs.appendChild(li);
+  });
+  loadExercise(currentEx); updateProgress();
+}
+
+function loadExercise(i){
+  const ex=exercises[i];
+  const desc=document.getElementById('ex-description');
+  const ed=document.getElementById('ex-editor');
+  const fb=document.getElementById('feedback-box');
+  if(!desc||!ed) return;
+  desc.innerHTML=`<strong style="color:var(--accent)">${ex.title}</strong><br>${ex.description}`;
+  ed.value=ex.template; fb.style.display='none';
+}
+
+function resetEditor(){ document.getElementById('ex-editor').value=exercises[currentEx].template; document.getElementById('feedback-box').style.display='none'; }
+
+function showHintSwal(){
+  Swal.fire({icon:'info',title:'<span style="color:var(--warn)">💡 Pista</span>',
+    html:`<span style="font-family:'Fira Code',monospace;font-size:.8rem;color:#c9d1d9">${exercises[currentEx].hint}</span>`,
+    background:'#130f22',color:'#e4e0f5',confirmButtonColor:'#a78bfa'});
+}
+
+function updateProgress(){
+  const el=document.getElementById('ex-progress');
+  if(el) el.textContent=`${solvedExercises.size} / ${exercises.length} resueltos`;
+}
+
+function runExercise(){
+  const code=document.getElementById('ex-editor').value;
+  const ex=exercises[currentEx];
+  const fb=document.getElementById('feedback-box');
+  const passed=ex.check(code);
+  fb.style.display='block';
+  if(passed){
+    fb.style.background='rgba(52,211,153,.07)';
+    fb.style.borderColor='rgba(52,211,153,.28)';
+    fb.style.color='var(--success)';
+    fb.innerHTML=`<i class="fas fa-circle-check me-2"></i><strong>¡Correcto!</strong> ${currentEx<exercises.length-1?'Siguiente ejercicio desbloqueado.':'¡Completaste todos los ejercicios!'}`;
+    if(!solvedExercises.has(currentEx)){ solvedExercises.add(currentEx); if(currentEx+1<exercises.length) unlockedExercises.add(currentEx+1); }
+    Swal.fire({icon:'success',title:'✅ ¡Correcto!',
+      html:currentEx<exercises.length-1?`Ejercicio <strong>${currentEx+2}</strong> desbloqueado.`:`🎉 ¡Completaste los <strong>10 ejercicios</strong>!`,
+      background:'#130f22',color:'#e4e0f5',confirmButtonColor:'#34d399',timer:2600,timerProgressBar:true,
+      showConfirmButton:true,confirmButtonText:currentEx<exercises.length-1?'Siguiente →':'🎓 Finalizar'
+    }).then(()=>{ if(currentEx+1<exercises.length){ currentEx++; buildRunnerUI(); } });
+  } else {
+    fb.style.background='rgba(248,113,113,.07)';
+    fb.style.borderColor='rgba(248,113,113,.28)';
+    fb.style.color='var(--danger)';
+    fb.innerHTML=`<i class="fas fa-circle-xmark me-2"></i><strong>Incorrecto.</strong> Revisa tu código o usa <strong>Pista</strong>.`;
+  }
+  buildRunnerUI();
+}
+
+function showSlideMenu(){
+  const items=slides.map((s,i)=>
+    `<li style="padding:8px 12px;cursor:pointer;border-radius:6px;font-family:'Fira Code',monospace;font-size:.76rem;color:${i===currentSlide?'var(--accent)':'#e4e0f5'};background:${i===currentSlide?'rgba(167,139,250,.1)':'transparent'}"
+     onclick="Swal.close();currentSlide=${i};showSlide(${i})">
+       <span style="color:var(--muted);margin-right:8px">${String(i+1).padStart(2,'0')}</span>${s.title}
+     </li>`
+  ).join('');
+  Swal.fire({title:'<span style="color:var(--accent);font-size:.9rem;letter-spacing:3px">DIAPOSITIVAS</span>',
+    html:`<ul style="list-style:none;padding:0;max-height:320px;overflow-y:auto">${items}</ul>`,
+    background:'#130f22',color:'#e4e0f5',showConfirmButton:false,showCloseButton:true,width:400});
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+document.addEventListener('keydown',e=>{
+  if(document.activeElement?.id==='ex-editor') return;
+  if(e.key==='ArrowRight'||e.key==='PageDown') navigate(1);
+  if(e.key==='ArrowLeft' ||e.key==='PageUp')   navigate(-1);
+  if(e.key==='f'||e.key==='F') toggleFullscreen();
+});
+
+buildSlides();
+showSlide(0);
+</script>
+</body>
+</html>

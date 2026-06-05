@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloque finally en C# — Limpieza Garantizada</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:      #080c10;
+    --surface: #0f1620;
+    --panel:   #14202e;
+    --border:  #1a3050;
+    --accent:  #00ffa3;
+    --accent2: #3b82f6;
+    --accent3: #f472b6;
+    --warn:    #fbbf24;
+    --danger:  #f87171;
+    --text:    #dde6f0;
+    --muted:   #4d6480;
+    --code-bg: #060a0f;
+    --success: #00ffa3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ─── SCANLINES OVERLAY ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,.07) 0px,
+      rgba(0,0,0,.07) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 10000;
+  }
+
+  /* ─── PROGRESS ─── */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease;
+    z-index: 9999;
+    box-shadow: 0 0 14px var(--accent);
+  }
+
+  /* ─── SLIDES ─── */
+  #slides-wrapper { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 64px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+  }
+
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  /* dot grid bg */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(0,255,163,.08) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+  }
+
+  /* corner decoration */
+  .slide::after {
+    content: '';
+    position: absolute;
+    top: 18px; left: 18px;
+    width: 48px; height: 48px;
+    border-top: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+    opacity: .35;
+    pointer-events: none;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .slide-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--accent);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h1.hero {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.6rem, 5.5vw, 4.4rem);
+    line-height: 1.05;
+    color: #fff;
+    text-align: center;
+  }
+  h1.hero .kw  { color: var(--accent);  }
+  h1.hero .kw2 { color: var(--accent2); }
+
+  h2.slide-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  h2.slide-title .kw  { color: var(--accent);  }
+  h2.slide-title .kw2 { color: var(--accent2); }
+  h2.slide-title .kw3 { color: var(--accent3); }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* ─── ACCENT LINE ─── */
+  .accent-line {
+    width: 56px; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    margin: 8px 0 20px;
+  }
+  .accent-line.center { margin: 8px auto 20px; }
+
+  /* ─── CARDS ─── */
+  .card-g {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-g::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  /* ─── CODE ─── */
+  pre.code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    line-height: 1.75;
+    color: #c9d1d9;
+    overflow-x: auto;
+    width: 100%;
+    text-align: left;
+  }
+  pre.code-block .kw   { color: #79c0ff; }
+  pre.code-block .type { color: #00ffa3; }
+  pre.code-block .str  { color: #ffa657; }
+  pre.code-block .cmt  { color: #4d6480; font-style: italic; }
+  pre.code-block .fn   { color: #d2a8ff; }
+  pre.code-block .var  { color: #e3b341; }
+  pre.code-block .num  { color: #f472b6; }
+  pre.code-block .fin  { color: #00ffa3; font-weight: 600; }   /* finally highlight */
+
+  /* ─── TWO COL ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; width: 100%; }
+
+  /* ─── LISTS ─── */
+  ul.feat { list-style: none; padding: 0; margin: 0; }
+  ul.feat li {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 11px; font-size: .95rem; line-height: 1.5;
+  }
+  ul.feat li .ico {
+    width: 26px; height: 26px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; flex-shrink: 0; margin-top: 2px;
+  }
+
+  /* ─── BADGES ─── */
+  .badge-g  { background:rgba(0,255,163,.12); color:var(--accent);  border:1px solid rgba(0,255,163,.3);  border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:.72rem; padding:3px 10px; }
+  .badge-b  { background:rgba(59,130,246,.12);color:var(--accent2); border:1px solid rgba(59,130,246,.3); border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:.72rem; padding:3px 10px; }
+  .badge-p  { background:rgba(244,114,182,.12);color:var(--accent3);border:1px solid rgba(244,114,182,.3);border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:.72rem; padding:3px 10px; }
+  .badge-w  { background:rgba(251,191,36,.12); color:var(--warn);   border:1px solid rgba(251,191,36,.3); border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:.72rem; padding:3px 10px; }
+
+  /* ─── TERMINAL ─── */
+  .terminal {
+    background: #030609;
+    border: 1px solid #1a3050;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    padding: 14px 18px;
+    width: 100%;
+    color: #c9d1d9;
+    line-height: 1.85;
+  }
+  .terminal .prompt { color: var(--accent); }
+  .terminal .ok     { color: var(--success); }
+  .terminal .err    { color: var(--danger); }
+  .terminal .dim    { color: var(--muted); }
+
+  /* ─── NOTE ─── */
+  .note-box {
+    background: rgba(251,191,36,.06);
+    border: 1px solid rgba(251,191,36,.22);
+    border-left: 3px solid var(--warn);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: .88rem;
+  }
+  .note-box .nt { color:var(--warn); font-family:'JetBrains Mono',monospace; font-size:.68rem; letter-spacing:3px; font-weight:700; margin-bottom:5px; }
+
+  /* ─── FLOW ─── */
+  .flow-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .flow-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    text-align: center;
+    min-width: 90px;
+  }
+  .fb-try   { border-color:var(--accent2); color:var(--accent2); }
+  .fb-catch { border-color:var(--danger);  color:var(--danger); }
+  .fb-fin   { border-color:var(--accent);  color:var(--accent);  box-shadow:0 0 8px rgba(0,255,163,.2); }
+  .fb-ok    { border-color:var(--success); color:var(--success); }
+  .fb-end   { border-color:var(--muted);   color:var(--text); }
+  .flow-arr { color:var(--muted); font-size:1.1rem; }
+
+  /* ─── STEP NUM ─── */
+  .step-num {
+    width:30px; height:30px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#000; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.8rem;
+    flex-shrink:0;
+  }
+
+  /* ─── SCROLLABLE ─── */
+  .slide-content {
+    width:100%; max-width:920px;
+    overflow-y:auto;
+    max-height:calc(100vh - 150px);
+    padding-right:6px;
+  }
+  .slide-content::-webkit-scrollbar { width:3px; }
+  .slide-content::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+  /* ─── NAV ─── */
+  #nav-bar {
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:12px;
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:50px; padding:9px 20px;
+    z-index:999; box-shadow:0 4px 32px rgba(0,0,0,.5);
+  }
+  #nav-bar button {
+    background:transparent; border:none; color:var(--muted);
+    cursor:pointer; padding:5px 11px; border-radius:8px;
+    transition:all .2s; font-size:.9rem;
+  }
+  #nav-bar button:hover { background:rgba(255,255,255,.05); color:#fff; }
+  #nav-bar button:disabled { opacity:.3; cursor:default; }
+  #slide-counter { font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--accent); min-width:58px; text-align:center; }
+
+  /* ─── RUNNER ─── */
+  #runner-section { width:100%; max-width:920px; display:flex; flex-direction:column; gap:12px; }
+
+  #exercise-tabs .nav-link {
+    font-family:'JetBrains Mono',monospace; font-size:.7rem;
+    padding:5px 11px; border-radius:6px;
+    color:var(--muted); border:1px solid transparent;
+    background:transparent; transition:all .2s; cursor:pointer;
+  }
+  #exercise-tabs .nav-link.active  { background:rgba(0,255,163,.1); color:var(--accent); border-color:rgba(0,255,163,.28); }
+  #exercise-tabs .nav-link.locked  { opacity:.3; cursor:not-allowed; }
+  #exercise-tabs .nav-link.solved  { color:var(--success); border-color:rgba(0,255,163,.25); background:rgba(0,255,163,.06); }
+
+  .ex-editor {
+    background:var(--code-bg); border:1px solid var(--border); border-radius:10px;
+    font-family:'JetBrains Mono',monospace; font-size:.8rem; color:#c9d1d9;
+    padding:14px; min-height:145px; resize:vertical; outline:none; width:100%; line-height:1.75;
+  }
+  .ex-editor:focus { border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,255,163,.12); }
+
+  .run-btn {
+    background:linear-gradient(135deg,var(--accent),#00cc80);
+    border:none; color:#000;
+    font-family:'Syne',sans-serif; font-weight:700; font-size:1rem;
+    padding:9px 24px; border-radius:8px; cursor:pointer;
+    transition:all .2s; letter-spacing:.5px;
+  }
+  .run-btn:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(0,255,163,.4); }
+
+  .ghost-btn {
+    background:transparent; border:1px solid var(--border); color:var(--muted);
+    padding:8px 16px; border-radius:8px; cursor:pointer;
+    font-family:'Syne',sans-serif; font-size:.93rem; transition:all .2s;
+  }
+  .ghost-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+  #feedback-box {
+    font-family:'JetBrains Mono',monospace; font-size:.8rem;
+    padding:12px 16px; border-radius:8px; min-height:48px;
+    border:1px solid var(--border); background:var(--code-bg);
+    color:var(--muted); display:none;
+  }
+
+  /* ─── HERO GLOW ─── */
+  .hero-glow {
+    width:380px; height:380px; border-radius:50%;
+    background:radial-gradient(circle,rgba(0,255,163,.1) 0%,transparent 68%);
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    animation:glow-pulse 5s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes glow-pulse {
+    0%,100%{ opacity:.7; transform:translate(-50%,-50%) scale(1); }
+    50%    { opacity:1;   transform:translate(-50%,-50%) scale(1.14); }
+  }
+
+  /* ─── DELAYS ─── */
+  .d1{ animation-delay:.12s } .d2{ animation-delay:.24s }
+  .d3{ animation-delay:.36s } .d4{ animation-delay:.5s  }
+  .d5{ animation-delay:.65s }
+
+  /* ─── SCENARIO BOXES ─── */
+  .scenario {
+    border-radius:10px; padding:14px 18px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .sc-ok  { background:rgba(0,255,163,.06); border:1px solid rgba(0,255,163,.2);  }
+  .sc-err { background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);}
+  .sc-fin { background:rgba(59,130,246,.06); border:1px solid rgba(59,130,246,.2); }
+  .sc-icon { font-size:1.2rem; width:28px; flex-shrink:0; margin-top:2px; }
+
+  @media(max-width:768px){
+    .slide{ padding:22px 18px; }
+    .two-col,.three-col{ grid-template-columns:1fr; }
+    h1.hero{ font-size:2.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="slides-wrapper"></div>
+
+<div id="nav-bar">
+  <button id="btn-prev" onclick="navigate(-1)"><i class="fas fa-chevron-left"></i></button>
+  <span id="slide-counter">1 / 1</span>
+  <button id="btn-next" onclick="navigate(1)"><i class="fas fa-chevron-right"></i></button>
+  <button onclick="showSlideMenu()" style="margin-left:4px"><i class="fas fa-th-large"></i></button>
+  <button onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+/* ═══════════════════════════════════════
+   SLIDES
+═══════════════════════════════════════ */
+const slides = [
+
+/* ── 0 HERO ── */
+{
+  title:'Hero',
+  render:()=>`
+    <div class="hero-glow"></div>
+    <div class="text-center animate__animated animate__fadeInDown">
+      <div class="slide-label">C# · .NET 8 · Manejo de Excepciones</div>
+      <h1 class="hero mt-2">Bloque <span class="kw">finally</span></h1>
+      <p style="font-size:1.05rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:6px">Limpieza garantizada · Siempre se ejecuta</p>
+      <div class="accent-line center mt-3"></div>
+      <div class="d-flex justify-content-center gap-3 flex-wrap mt-1">
+        <span class="badge-g"><i class="fas fa-shield-halved me-1"></i> Recursos seguros</span>
+        <span class="badge-b"><i class="fas fa-recycle me-1"></i> IDisposable / using</span>
+        <span class="badge-p"><i class="fas fa-terminal me-1"></i> dotnet CLI</span>
+      </div>
+    </div>
+    <div class="mt-5 animate__animated animate__fadeInUp d3">
+      <div class="flow-wrap">
+        <div class="flow-box fb-try  animate__animated animate__fadeIn d1">try { }</div>
+        <span class="flow-arr"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box fb-ok   animate__animated animate__fadeIn d2">sin error</div>
+        <span class="flow-arr"><i class="fas fa-arrow-right"></i></span>
+        <div class="flow-box fb-fin  animate__animated animate__fadeIn d3">finally</div>
+        <span class="flow-arr"><i class="fas fa-arrows-split-up-and-left" style="transform:rotate(90deg)"></i></span>
+        <div class="flow-box fb-catch animate__animated animate__fadeIn d2">catch(E)</div>
+        <span class="flow-arr"><i class="fas fa-arrow-left"></i></span>
+        <div class="flow-box fb-err  animate__animated animate__fadeIn d1" style="border-color:var(--danger);color:var(--danger)">excepción</div>
+      </div>
+    </div>
+    <p class="text-center mt-4 animate__animated animate__fadeIn d5" style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.72rem">
+      <i class="fas fa-keyboard me-2"></i>← → navegar · F pantalla completa
+    </p>
+  `
+},
+
+/* ── 1 ¿QUÉ ES FINALLY? ── */
+{
+  title:'¿Qué es finally?',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Concepto esencial</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-shield-halved me-2" style="color:var(--accent)"></i>¿Qué es el bloque <span class="kw">finally</span>?</h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="card-g animate__animated animate__fadeInLeft">
+          <p class="mb-2" style="font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:2px">DEFINICIÓN</p>
+          <p>El bloque <code style="color:var(--accent)">finally</code> contiene código que <strong>siempre se ejecuta</strong>, sin importar si el bloque <code>try</code> completó con éxito o lanzó una excepción.</p>
+          <p class="mt-2">Es la garantía de que cierto código de <strong style="color:var(--accent)">limpieza</strong> nunca será saltado.</p>
+        </div>
+        <div class="card-g animate__animated animate__fadeInRight">
+          <p class="mb-2" style="font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:2px">PROBLEMA SIN FINALLY</p>
+          <pre class="code-block" style="font-size:.72rem">
+<span class="type">StreamReader</span> <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="str">"x.txt"</span>);
+<span class="cmt">// Si esto lanza...</span>
+<span class="fn">Procesar</span>(<span class="var">sr</span>);
+<span class="cmt">// ...esto NUNCA se ejecuta ❌</span>
+<span class="var">sr</span>.<span class="fn">Close</span>();</pre>
+        </div>
+      </div>
+      <div class="mt-3 animate__animated animate__fadeIn d2">
+        <ul class="feat">
+          <li>
+            <div class="ico" style="background:rgba(0,255,163,.12)"><i class="fas fa-check" style="color:var(--accent)"></i></div>
+            <div>Se ejecuta cuando el <code>try</code> termina <strong>normalmente</strong> (sin excepción).</div>
+          </li>
+          <li>
+            <div class="ico" style="background:rgba(248,113,113,.12)"><i class="fas fa-bolt" style="color:var(--danger)"></i></div>
+            <div>Se ejecuta cuando ocurre una excepción <strong>captada por catch</strong>.</div>
+          </li>
+          <li>
+            <div class="ico" style="background:rgba(251,191,36,.12)"><i class="fas fa-triangle-exclamation" style="color:var(--warn)"></i></div>
+            <div>Se ejecuta incluso cuando la excepción <strong>no es captada</strong> (antes de que el CLR la maneje).</div>
+          </li>
+          <li>
+            <div class="ico" style="background:rgba(59,130,246,.12)"><i class="fas fa-arrow-right-from-bracket" style="color:var(--accent2)"></i></div>
+            <div>Se ejecuta si el <code>try</code> contiene un <code>return</code>, <code>break</code> o <code>continue</code>.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  `
+},
+
+/* ── 2 SINTAXIS ── */
+{
+  title:'Sintaxis',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Sintaxis</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown">Estructura <span class="kw">try</span> / <span class="kw2">catch</span> / <span class="kw">finally</span></h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="kw">try</span>
+{
+    <span class="cmt">// Código que puede fallar</span>
+    RiskyOperation();
+}
+<span class="kw">catch</span> (<span class="type">ArgumentOutOfRangeException</span> <span class="var">e</span>)
+{
+    <span class="cmt">// Maneja el error específico</span>
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Error: {<span class="var">e</span>.Message}"</span>);
+}
+<span class="kw">catch</span> (<span class="type">Exception</span> <span class="var">e</span>)
+{
+    <span class="cmt">// Fallback general</span>
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">e</span>);
+}
+<span class="fin">finally</span>
+{
+    <span class="cmt">// SIEMPRE se ejecuta</span>
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"Limpieza lista."</span>);
+}</pre>
+        </div>
+        <div class="d-flex flex-column gap-3 animate__animated animate__fadeInRight">
+          <div class="card-g">
+            <div class="d-flex gap-2 align-items-center mb-2">
+              <span class="step-num">1</span>
+              <strong style="color:var(--accent2)">try</strong>
+            </div>
+            <p style="font-size:.88rem">Envuelve el código riesgoso. La ejecución <strong>salta al catch</strong> al primer error.</p>
+          </div>
+          <div class="card-g">
+            <div class="d-flex gap-2 align-items-center mb-2">
+              <span class="step-num" style="background:linear-gradient(135deg,var(--danger),#b91c1c)">2</span>
+              <strong style="color:var(--danger)">catch</strong>
+            </div>
+            <p style="font-size:.88rem">Opcional pero frecuente junto a <code>finally</code>. Puede re-lanzar con <code>throw;</code>.</p>
+          </div>
+          <div class="card-g">
+            <div class="d-flex gap-2 align-items-center mb-2">
+              <span class="step-num" style="background:linear-gradient(135deg,var(--accent),#00cc80)">3</span>
+              <strong style="color:var(--accent)">finally</strong>
+            </div>
+            <p style="font-size:.88rem">Se ejecuta <strong>siempre</strong>. Libera recursos: conexiones, archivos, handles del SO.</p>
+          </div>
+        </div>
+      </div>
+      <div class="note-box mt-3 animate__animated animate__fadeIn d4">
+        <div class="nt"><i class="fas fa-info-circle me-1"></i> SOLO finally</div>
+        Se puede usar <code>try/finally</code> <strong>sin ningún catch</strong> si solo necesitas garantizar limpieza pero no manejar el error aquí.
+      </div>
+    </div>
+  `
+},
+
+/* ── 3 EJEMPLO OFICIAL ── */
+{
+  title:'Ejemplo oficial',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Ejemplo Microsoft</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-copy me-2" style="color:var(--accent2)"></i>Array.Copy — <span class="kw">ArgumentOutOfRangeException</span></h2>
+      <div class="accent-line"></div>
+      <pre class="code-block animate__animated animate__fadeIn d1">
+<span class="kw">class</span> <span class="type">ArgumentOutOfRangeExample</span>
+{
+    <span class="kw">public static void</span> <span class="fn">Main</span>()
+    {
+        <span class="kw">int</span>[] <span class="var">array1</span> = { <span class="num">0</span>, <span class="num">0</span> };
+        <span class="kw">int</span>[] <span class="var">array2</span> = { <span class="num">0</span>, <span class="num">0</span> };
+
+        <span class="kw">try</span>
+        {
+            <span class="cmt">// length = -1 → lanza ArgumentOutOfRangeException</span>
+            <span class="type">Array</span>.<span class="fn">Copy</span>(<span class="var">array1</span>, <span class="var">array2</span>, <span class="num">-1</span>);
+        }
+        <span class="kw">catch</span> (<span class="type">ArgumentOutOfRangeException</span> <span class="var">e</span>)
+        {
+            <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Error: {<span class="var">e</span>}"</span>);
+            <span class="kw">throw</span>;   <span class="cmt">// re-lanza preservando stack trace</span>
+        }
+        <span class="fin">finally</span>
+        {
+            <span class="cmt">// Se ejecuta INDEPENDIENTEMENTE del resultado</span>
+            <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"This statement is always executed."</span>);
+        }
+    }
+}</pre>
+      <div class="two-col mt-3 animate__animated animate__fadeIn d3">
+        <div class="terminal">
+          <div class="dim"># Salida cuando length = -1</div>
+          <div class="err">Error: System.ArgumentOutOfRangeException:</div>
+          <div class="err">  Non-negative number required.</div>
+          <div class="ok">This statement is always executed.</div>
+          <div class="err">Unhandled: ArgumentOutOfRangeException ↑ (throw;)</div>
+        </div>
+        <div class="terminal">
+          <div class="dim"># Salida con length = 2 (sin error)</div>
+          <div class="ok">This statement is always executed.</div>
+          <div class="dim"># catch no se ejecuta</div>
+          <div class="dim"># finally sí, siempre</div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 4 TRES ESCENARIOS ── */
+{
+  title:'Los 3 escenarios',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Comportamiento</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown">Los <span class="kw">3 escenarios</span> de ejecución</h2>
+      <div class="accent-line"></div>
+      <div class="d-flex flex-column gap-3 mb-3">
+
+        <div class="scenario sc-ok animate__animated animate__fadeInLeft d1">
+          <div class="sc-icon" style="color:var(--accent)"><i class="fas fa-circle-check"></i></div>
+          <div>
+            <strong style="color:var(--accent)">Escenario 1 — Sin excepción</strong>
+            <div class="flow-wrap mt-2" style="justify-content:flex-start;gap:6px">
+              <div class="flow-box fb-try" style="min-width:80px;padding:5px 10px;font-size:.72rem">try ✓</div>
+              <span class="flow-arr" style="font-size:.9rem">→</span>
+              <div class="flow-box fb-fin" style="min-width:80px;padding:5px 10px;font-size:.72rem">finally ✓</div>
+              <span class="flow-arr" style="font-size:.9rem">→</span>
+              <div class="flow-box fb-end" style="min-width:80px;padding:5px 10px;font-size:.72rem">continúa</div>
+            </div>
+            <p class="mt-1" style="font-size:.88rem">El <code>catch</code> se omite. <code>finally</code> corre igual.</p>
+          </div>
+        </div>
+
+        <div class="scenario sc-err animate__animated animate__fadeInLeft d2">
+          <div class="sc-icon" style="color:var(--danger)"><i class="fas fa-triangle-exclamation"></i></div>
+          <div>
+            <strong style="color:var(--danger)">Escenario 2 — Excepción captada</strong>
+            <div class="flow-wrap mt-2" style="justify-content:flex-start;gap:6px">
+              <div class="flow-box fb-try" style="min-width:80px;padding:5px 10px;font-size:.72rem">try ❌</div>
+              <span class="flow-arr" style="font-size:.9rem">→</span>
+              <div class="flow-box fb-catch" style="min-width:80px;padding:5px 10px;font-size:.72rem">catch ✓</div>
+              <span class="flow-arr" style="font-size:.9rem">→</span>
+              <div class="flow-box fb-fin" style="min-width:80px;padding:5px 10px;font-size:.72rem">finally ✓</div>
+            </div>
+            <p class="mt-1" style="font-size:.88rem"><code>catch</code> maneja el error. <code>finally</code> limpia recursos.</p>
+          </div>
+        </div>
+
+        <div class="scenario sc-fin animate__animated animate__fadeInLeft d3">
+          <div class="sc-icon" style="color:var(--accent2)"><i class="fas fa-arrow-up-right-from-square"></i></div>
+          <div>
+            <strong style="color:var(--accent2)">Escenario 3 — Excepción NO captada</strong>
+            <div class="flow-wrap mt-2" style="justify-content:flex-start;gap:6px">
+              <div class="flow-box fb-try"   style="min-width:80px;padding:5px 10px;font-size:.72rem">try ❌</div>
+              <span class="flow-arr" style="font-size:.9rem">→</span>
+              <div class="flow-box fb-fin"   style="min-width:80px;padding:5px 10px;font-size:.72rem">finally ✓</div>
+              <span class="flow-arr" style="font-size:.9rem">→</span>
+              <div class="flow-box" style="min-width:80px;padding:5px 10px;font-size:.72rem;border-color:var(--accent2);color:var(--accent2)">CLR</div>
+            </div>
+            <p class="mt-1" style="font-size:.88rem"><code>finally</code> corre antes de que el CLR maneje la excepción no controlada.</p>
+          </div>
+        </div>
+
+        <div class="scenario animate__animated animate__fadeInLeft d4" style="background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2)">
+          <div class="sc-icon" style="color:var(--warn)"><i class="fas fa-arrow-turn-up"></i></div>
+          <div>
+            <strong style="color:var(--warn)">Escenario 4 — return dentro de try</strong>
+            <pre class="code-block mt-2" style="font-size:.72rem">
+<span class="kw">try</span> { <span class="kw">return</span> <span class="num">42</span>; }    <span class="cmt">// ← return</span>
+<span class="fin">finally</span> { <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"aún corro"</span>); }  <span class="cmt">// ← se ejecuta igual</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 5 USING vs FINALLY ── */
+{
+  title:'using vs finally',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Comparativa</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><code style="color:var(--accent)">using</code> vs <span class="kw">finally</span> manual</h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <p class="mb-1" style="font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace">✦ CON finally MANUAL</p>
+          <pre class="code-block">
+<span class="type">StreamReader</span>? <span class="var">sr</span> = <span class="kw">null</span>;
+<span class="kw">try</span>
+{
+    <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="str">"data.txt"</span>);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">sr</span>.<span class="fn">ReadLine</span>());
+}
+<span class="kw">catch</span> (<span class="type">IOException</span> <span class="var">e</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">e</span>.Message);
+}
+<span class="fin">finally</span>
+{
+    <span class="var">sr</span>?.<span class="fn">Dispose</span>();
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"sr cerrado"</span>);
+}</pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.78rem;color:var(--accent);font-family:'JetBrains Mono',monospace">✦ CON using (equivalente)</p>
+          <pre class="code-block">
+<span class="kw">try</span>
+{
+    <span class="kw">using var</span> <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="str">"data.txt"</span>);
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">sr</span>.<span class="fn">ReadLine</span>());
+}
+<span class="kw">catch</span> (<span class="type">IOException</span> <span class="var">e</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="var">e</span>.Message);
+}
+<span class="cmt">// Dispose() se llama automáticamente
+// al salir del scope, como finally</span></pre>
+          <div class="note-box mt-3">
+            <div class="nt"><i class="fas fa-lightbulb me-1"></i> REGLA PRÁCTICA</div>
+            Para <strong>IDisposable</strong> (archivos, conexiones, streams): usa <code>using</code>.<br>
+            Para <strong>lógica de limpieza compleja</strong> (múltiples recursos, lógica condicional): usa <code>finally</code>.
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 animate__animated animate__fadeIn d3">
+        <p class="mb-1" style="font-size:.78rem;color:var(--accent2);font-family:'JetBrains Mono',monospace">CÓMO FUNCIONA using INTERNAMENTE (IL decompilado)</p>
+        <pre class="code-block" style="font-size:.72rem">
+<span class="cmt">// El compilador convierte using en try/finally automáticamente:</span>
+<span class="type">StreamReader</span> <span class="var">sr</span> = <span class="type">File</span>.<span class="fn">OpenText</span>(<span class="str">"data.txt"</span>);
+<span class="kw">try</span> { ... }
+<span class="fin">finally</span> { <span class="kw">if</span> (<span class="var">sr</span> != <span class="kw">null</span>) ((<span class="type">IDisposable</span>)<span class="var">sr</span>).<span class="fn">Dispose</span>(); }</pre>
+      </div>
+    </div>
+  `
+},
+
+/* ── 6 CONEXIÓN BASE DE DATOS ── */
+{
+  title:'Caso real — BD',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Caso de uso real</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-database me-2" style="color:var(--accent3)"></i>Conexión a base de datos con <span class="kw">finally</span></h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <pre class="code-block">
+<span class="kw">namespace</span> <span class="type">DataAccess.Core</span>;
+
+<span class="kw">public class</span> <span class="type">ProductRepository</span>
+{
+    <span class="kw">private readonly string</span> <span class="var">_conn</span>;
+
+    <span class="kw">public</span> <span class="fn">ProductRepository</span>(<span class="kw">string</span> <span class="var">conn</span>)
+        => <span class="var">_conn</span> = <span class="var">conn</span>;
+
+    <span class="kw">public</span> <span class="type">List</span>&lt;<span class="type">string</span>&gt; <span class="fn">GetAll</span>()
+    {
+        <span class="type">SqlConnection</span>? <span class="var">cn</span> = <span class="kw">null</span>;
+        <span class="kw">try</span>
+        {
+            <span class="var">cn</span> = <span class="kw">new</span> <span class="type">SqlConnection</span>(<span class="var">_conn</span>);
+            <span class="var">cn</span>.<span class="fn">Open</span>();
+            <span class="cmt">// ... ejecutar query ...</span>
+            <span class="kw">return</span> [<span class="str">"P1"</span>, <span class="str">"P2"</span>];
+        }
+        <span class="kw">catch</span> (<span class="type">SqlException</span> <span class="var">e</span>)
+        {
+            <span class="fn">Console</span>.<span class="fn">Error</span>.<span class="fn">WriteLine</span>(<span class="var">e</span>.Message);
+            <span class="kw">return</span> [];
+        }
+        <span class="fin">finally</span>
+        {
+            <span class="cmt">// conexión SIEMPRE cerrada</span>
+            <span class="var">cn</span>?.<span class="fn">Close</span>();
+        }
+    }
+}</pre>
+        </div>
+        <div class="d-flex flex-column gap-3 animate__animated animate__fadeInRight">
+          <div class="card-g">
+            <p style="font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px">ESTRUCTURA PROYECTO</p>
+            <pre class="code-block" style="font-size:.72rem">
+DataAccess/
+├── DataAccess.sln
+├── DataAccess.Core/
+│   ├── ProductRepository.cs
+│   └── DataAccess.Core.csproj
+└── DataAccess.App/
+    ├── Program.cs
+    └── DataAccess.App.csproj</pre>
+          </div>
+          <div class="terminal">
+            <div class="dim"># Crear solución</div>
+            <div class="prompt">$ dotnet new solution -n DataAccess</div>
+            <div class="prompt">$ dotnet new classlib -n DataAccess.Core</div>
+            <div class="prompt">$ dotnet new console -n DataAccess.App</div>
+            <div class="prompt">$ dotnet sln add DataAccess.Core</div>
+            <div class="prompt">$ dotnet sln add DataAccess.App</div>
+            <div class="prompt">$ dotnet add DataAccess.App reference DataAccess.Core</div>
+            <div class="prompt">$ dotnet run --project DataAccess.App</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 7 FINALLY + RETURN ── */
+{
+  title:'finally + return / throw',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Casos especiales</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><span class="kw">finally</span> + <span class="kw2">return</span> / <span class="kw3">throw</span></h2>
+      <div class="accent-line"></div>
+      <div class="two-col mb-3">
+        <div class="animate__animated animate__fadeInLeft">
+          <p class="mb-1" style="font-size:.78rem;color:var(--accent2);font-family:'JetBrains Mono',monospace">return dentro de try</p>
+          <pre class="code-block">
+<span class="kw">static int</span> <span class="fn">Calcular</span>()
+{
+    <span class="kw">try</span>
+    {
+        <span class="kw">return</span> <span class="num">42</span>;   <span class="cmt">// ← retorna</span>
+    }
+    <span class="fin">finally</span>
+    {
+        <span class="cmt">// Se ejecuta ANTES de retornar</span>
+        <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"finally corrió"</span>);
+    }
+}
+<span class="cmt">// Output:
+// finally corrió
+// (luego devuelve 42)</span></pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.78rem;color:var(--accent3);font-family:'JetBrains Mono',monospace">throw dentro de catch</p>
+          <pre class="code-block">
+<span class="kw">try</span>
+{
+    <span class="type">Array</span>.<span class="fn">Copy</span>(<span class="var">a</span>, <span class="var">b</span>, <span class="num">-1</span>);
+}
+<span class="kw">catch</span> (<span class="type">ArgumentOutOfRangeException</span> <span class="var">e</span>)
+{
+    <span class="fn">Log</span>.<span class="fn">Error</span>(<span class="var">e</span>);
+    <span class="kw">throw</span>;     <span class="cmt">// re-lanza</span>
+}
+<span class="fin">finally</span>
+{
+    <span class="cmt">// Corre aunque haya throw</span>
+    <span class="fn">LiberarRecursos</span>();
+}</pre>
+        </div>
+      </div>
+      <div class="note-box animate__animated animate__fadeIn d3">
+        <div class="nt"><i class="fas fa-triangle-exclamation me-1"></i> CUIDADO — return en finally</div>
+        Si colocas un <code>return</code> <strong>dentro</strong> del bloque <code>finally</code>, <strong>suprime</strong> cualquier excepción pendiente y cualquier valor de retorno del <code>try</code>. Evítalo salvo que sea intencional.
+      </div>
+      <div class="mt-3 animate__animated animate__fadeIn d4">
+        <pre class="code-block" style="font-size:.72rem">
+<span class="cmt">// ❌ Evitar — return en finally suprime la excepción</span>
+<span class="kw">try</span> { <span class="kw">throw new</span> <span class="type">Exception</span>(); }
+<span class="fin">finally</span> { <span class="kw">return</span>; }   <span class="cmt">// la excepción desaparece silenciosamente ⚠</span>
+
+<span class="cmt">// ✅ Correcto — finally solo libera recursos</span>
+<span class="kw">try</span> { <span class="kw">throw new</span> <span class="type">Exception</span>(); }
+<span class="fin">finally</span> { <span class="fn">Cleanup</span>(); }   <span class="cmt">// excepción sigue su camino</span></pre>
+      </div>
+    </div>
+  `
+},
+
+/* ── 8 PROYECTO MULTI-ARCHIVO ── */
+{
+  title:'Proyecto multi-archivo',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">dotnet CLI — Proyecto completo</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-folder-tree me-2" style="color:var(--accent)"></i>Ejemplo multi-archivo <span class="kw">VSCode</span></h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div class="animate__animated animate__fadeInLeft">
+          <p class="mb-1" style="font-size:.78rem;color:var(--accent);font-family:'JetBrains Mono',monospace">ResourceManager.cs (Core)</p>
+          <pre class="code-block" style="font-size:.72rem">
+<span class="kw">namespace</span> <span class="type">Finally.Core</span>;
+
+<span class="kw">public class</span> <span class="type">ResourceManager</span>
+{
+    <span class="kw">private bool</span> <span class="var">_open</span> = <span class="kw">false</span>;
+
+    <span class="kw">public void</span> <span class="fn">Open</span>()
+    {
+        <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"[+] Recurso abierto"</span>);
+        <span class="var">_open</span> = <span class="kw">true</span>;
+    }
+
+    <span class="kw">public void</span> <span class="fn">Process</span>(<span class="kw">bool</span> <span class="var">fail</span>)
+    {
+        <span class="kw">if</span> (<span class="var">fail</span>) <span class="kw">throw new</span>
+            <span class="type">InvalidOperationException</span>(<span class="str">"Fallo"</span>);
+        <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"[✓] Procesado OK"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="fn">Close</span>()
+    {
+        <span class="kw">if</span> (<span class="var">_open</span>)
+            <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"[-] Recurso cerrado"</span>);
+    }
+}</pre>
+        </div>
+        <div class="animate__animated animate__fadeInRight">
+          <p class="mb-1" style="font-size:.78rem;color:var(--accent3);font-family:'JetBrains Mono',monospace">Program.cs (App)</p>
+          <pre class="code-block" style="font-size:.72rem">
+<span class="kw">using</span> <span class="type">Finally.Core</span>;
+
+<span class="kw">var</span> <span class="var">rm</span> = <span class="kw">new</span> <span class="type">ResourceManager</span>();
+
+<span class="kw">try</span>
+{
+    <span class="var">rm</span>.<span class="fn">Open</span>();
+    <span class="var">rm</span>.<span class="fn">Process</span>(fail: <span class="kw">true</span>); <span class="cmt">// ← fuerza error</span>
+}
+<span class="kw">catch</span> (<span class="type">InvalidOperationException</span> <span class="var">e</span>)
+{
+    <span class="fn">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"[!] {<span class="var">e</span>.Message}"</span>);
+}
+<span class="fin">finally</span>
+{
+    <span class="var">rm</span>.<span class="fn">Close</span>(); <span class="cmt">// siempre libera</span>
+}</pre>
+          <div class="terminal mt-2">
+            <div class="prompt">$ dotnet run --project Finally.App</div>
+            <div class="ok">[+] Recurso abierto</div>
+            <div class="err">[!] Fallo</div>
+            <div class="ok">[-] Recurso cerrado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+},
+
+/* ── 9 BUENAS PRÁCTICAS ── */
+{
+  title:'Buenas prácticas',
+  render:()=>`
+    <div class="slide-content">
+      <div class="slide-label animate__animated animate__fadeIn">Mejores prácticas</div>
+      <h2 class="slide-title animate__animated animate__fadeInDown"><i class="fas fa-star me-2" style="color:var(--warn)"></i>Procedimientos <span class="kw">Recomendados</span></h2>
+      <div class="accent-line"></div>
+      <div class="d-flex flex-column gap-2 mb-3">
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d1">
+          <i class="fas fa-broom mt-1" style="color:var(--accent);width:20px"></i>
+          <div><strong>Solo limpieza en finally.</strong> No pongas lógica de negocio. Es un bloque de <em>infraestructura</em>, no de aplicación.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d2">
+          <i class="fas fa-shield-virus mt-1" style="color:var(--accent2);width:20px"></i>
+          <div><strong>Protege contra null.</strong> Usa <code>recurso?.Dispose()</code> en lugar de <code>recurso.Dispose()</code> para evitar otra excepción dentro de finally.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d3">
+          <i class="fas fa-ban mt-1" style="color:var(--danger);width:20px"></i>
+          <div><strong>Nunca return en finally.</strong> Suprime excepciones silenciosamente, un error muy difícil de depurar.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d4">
+          <i class="fas fa-recycle mt-1" style="color:var(--accent3);width:20px"></i>
+          <div><strong>Preferir using para IDisposable.</strong> El compilador lo convierte en try/finally automáticamente. Código más limpio y menos verboso.</div>
+        </div>
+        <div class="card-g d-flex gap-3 animate__animated animate__fadeIn d5">
+          <i class="fas fa-layer-group mt-1" style="color:var(--warn);width:20px"></i>
+          <div><strong>Múltiples recursos → múltiples using.</strong> Cada recurso en su propio <code>using</code> anidado garantiza el orden correcto de liberación.</div>
+        </div>
+      </div>
+      <pre class="code-block animate__animated animate__fadeIn d5" style="font-size:.72rem">
+<span class="cmt">// ✅ Múltiples recursos — orden de cierre garantizado (inverso al de apertura)</span>
+<span class="kw">using var</span> <span class="var">cn</span>  = <span class="kw">new</span> <span class="type">SqlConnection</span>(<span class="var">cs</span>);
+<span class="kw">using var</span> <span class="var">cmd</span> = <span class="kw">new</span> <span class="type">SqlCommand</span>(<span class="str">"SELECT..."</span>, <span class="var">cn</span>);
+<span class="cmt">// Dispose: cmd primero, luego cn → sin fugas de memoria</span></pre>
+    </div>
+  `
+},
+
+/* ── 10 CODE RUNNER ── */
+{
+  title:'Code Runner — 10 Ejercicios',
+  isRunner: true,
+  render:()=>`
+    <div class="slide-label animate__animated animate__fadeIn" style="text-align:center">Práctica interactiva</div>
+    <h2 class="slide-title animate__animated animate__fadeInDown" style="text-align:center">
+      <i class="fas fa-terminal me-2" style="color:var(--accent)"></i>Code Runner — <span class="kw">finally</span>
+    </h2>
+    <div class="accent-line center"></div>
+    <div id="runner-section" class="animate__animated animate__fadeIn d1">
+      <ul class="nav flex-wrap gap-1 mb-2" id="exercise-tabs"></ul>
+      <div id="ex-description" class="note-box mb-2" style="font-size:.87rem"></div>
+      <textarea class="ex-editor" id="ex-editor" spellcheck="false"></textarea>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <button class="run-btn" onclick="runExercise()"><i class="fas fa-play me-2"></i>Verificar</button>
+        <button class="ghost-btn" onclick="resetEditor()"><i class="fas fa-rotate-left me-1"></i>Reiniciar</button>
+        <button class="ghost-btn" onclick="showHintSwal()" style="border-color:rgba(251,191,36,.3);color:var(--warn)"><i class="fas fa-lightbulb me-1"></i>Pista</button>
+        <span id="ex-progress" style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);margin-left:auto"></span>
+      </div>
+      <div id="feedback-box"></div>
+    </div>
+  `
+}
+
+];
+
+/* ═══════════════════════════════════════
+   EXERCISES
+═══════════════════════════════════════ */
+const exercises = [
+  {
+    id:1,
+    title:"EJ 01 — finally básico",
+    description:"Agrega un bloque <code>finally</code> que imprima exactamente <code>Siempre ejecutado</code> después del try/catch.",
+    hint:"finally { Console.WriteLine(\"Siempre ejecutado\"); }",
+    template:`try
+{
+    int x = 10 / 2;
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+// agrega finally aquí`,
+    check: c => /finally\s*\{/.test(c) && /Siempre\s+ejecutado/i.test(c)
+  },
+  {
+    id:2,
+    title:"EJ 02 — try/finally sin catch",
+    description:"Escribe un bloque <code>try/finally</code> SIN catch que imprima <code>Recurso liberado</code> en el finally.",
+    hint:"try { } finally { Console.WriteLine(\"Recurso liberado\"); }",
+    template:`// try/finally sin catch
+try
+{
+    Console.WriteLine("Procesando...");
+}
+// no hay catch
+// agrega finally:`,
+    check: c => /try\s*\{/.test(c)
+            && !/catch/.test(c)
+            && /finally\s*\{/.test(c)
+            && /Recurso\s+liberado/i.test(c)
+  },
+  {
+    id:3,
+    title:"EJ 03 — Cierre de StreamReader",
+    description:"Declara <code>StreamReader? sr = null;</code> fuera del try. En el finally, ciérralo con <code>sr?.Dispose();</code>.",
+    hint:"StreamReader? sr = null; try { ... } finally { sr?.Dispose(); }",
+    template:`StreamReader? sr = null;
+try
+{
+    // simula apertura
+    Console.WriteLine("Archivo abierto");
+}
+catch (IOException ex)
+{
+    Console.WriteLine(ex.Message);
+}
+// finally aquí — cierra sr`,
+    check: c => /StreamReader\s*\?\s*\w+\s*=\s*null/.test(c)
+            && /finally\s*\{/.test(c)
+            && /\?\.\s*Dispose\s*\(\s*\)/.test(c)
+  },
+  {
+    id:4,
+    title:"EJ 04 — finally con return",
+    description:"Escribe un método que retorne <code>1</code> desde el <code>try</code>. Verifica que el finally imprima <code>Antes de retornar</code>.",
+    hint:"try { return 1; } finally { Console.WriteLine(\"Antes de retornar\"); }",
+    template:`static int Metodo()
+{
+    try
+    {
+        // retorna 1
+
+    }
+    finally
+    {
+        // imprime "Antes de retornar"
+
+    }
+}`,
+    check: c => /return\s+1/.test(c)
+            && /finally\s*\{/.test(c)
+            && /Antes\s+de\s+retornar/i.test(c)
+  },
+  {
+    id:5,
+    title:"EJ 05 — Re-lanzar en catch + finally",
+    description:"Captura una <code>ArgumentOutOfRangeException</code>, re-lánzala con <code>throw;</code> y limpia en <code>finally</code> imprimiendo <code>Limpieza tras throw</code>.",
+    hint:"catch(ArgumentOutOfRangeException){ throw; } finally { Console.WriteLine(\"Limpieza tras throw\"); }",
+    template:`try
+{
+    int[] arr = new int[2];
+    arr[5] = 1; // IndexOutOfRangeException
+}
+catch (IndexOutOfRangeException)
+{
+    // re-lanza
+
+}
+finally
+{
+    // imprime "Limpieza tras throw"
+
+}`,
+    check: c => /\bthrow\s*;/.test(c)
+            && /finally\s*\{/.test(c)
+            && /Limpieza\s+tras\s+throw/i.test(c)
+  },
+  {
+    id:6,
+    title:"EJ 06 — Clase con finally interno",
+    description:"Crea una clase <code>Recurso</code> con método <code>Usar(bool fallar)</code> que use try/catch/finally. El finally debe imprimir <code>Recurso.Dispose</code>.",
+    hint:"public class Recurso { public void Usar(bool fallar){ try{...}catch(Exception ex){...}finally{ Console.WriteLine(\"Recurso.Dispose\"); } } }",
+    template:`public class Recurso
+{
+    public void Usar(bool fallar)
+    {
+        try
+        {
+            if (fallar) throw new Exception("Error forzado");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        // finally que imprime "Recurso.Dispose"
+
+    }
+}`,
+    check: c => /class\s+Recurso/.test(c)
+            && /finally\s*\{/.test(c)
+            && /Recurso\.Dispose/i.test(c)
+  },
+  {
+    id:7,
+    title:"EJ 07 — Namespace file-scoped",
+    description:"Declara <code>namespace Finally.Core;</code> (file-scoped) y dentro una clase <code>Limpiador</code> con un método que use <code>finally</code>.",
+    hint:"namespace Finally.Core; public class Limpiador { public void Limpiar(){ try{}finally{ Console.WriteLine(\"ok\"); } } }",
+    template:`// namespace file-scoped aquí
+
+
+
+public class Limpiador
+{
+    public void Limpiar()
+    {
+        try { Console.WriteLine("Trabajando..."); }
+        // agrega finally
+
+    }
+}`,
+    check: c => /namespace\s+\w+[\.\w]*\s*;/.test(c)
+            && /class\s+Limpiador/.test(c)
+            && /finally\s*\{/.test(c)
+  },
+  {
+    id:8,
+    title:"EJ 08 — using como finally",
+    description:"Reescribe el patrón: en lugar de finally manual, usa <code>using var sr = File.OpenText(\"x.txt\");</code> dentro del try.",
+    hint:"try { using var sr = File.OpenText(\"x.txt\"); Console.WriteLine(sr.ReadLine()); } catch(IOException ex){ }",
+    template:`// Reescribe usando 'using' en lugar de finally manual
+// (no necesitas declarar sr fuera del try)
+
+try
+{
+    // using var sr = ...
+
+}
+catch (IOException ex)
+{
+    Console.WriteLine(ex.Message);
+}`,
+    check: c => /using\s+var\s+\w+\s*=\s*File\.OpenText/.test(c)
+            && !/finally/.test(c)
+  },
+  {
+    id:9,
+    title:"EJ 09 — Múltiples recursos",
+    description:"Usa DOS <code>using var</code> anidados: uno para <code>StreamReader</code> y otro para <code>StringReader</code> (simulados). Sin finally explícito.",
+    hint:"using var sr1 = new StringReader(\"a\"); using var sr2 = new StringReader(\"b\"); // ambos se liberan solos",
+    template:`try
+{
+    // primer using var (StringReader)
+
+    // segundo using var (StringReader)
+
+    Console.WriteLine("Ambos listos");
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}`,
+    check: c => {
+      const matches = c.match(/using\s+var/g);
+      return matches && matches.length >= 2 && /StringReader/.test(c);
+    }
+  },
+  {
+    id:10,
+    title:"EJ 10 — Solución completa",
+    description:"Escribe una solución completa con: <code>try</code> que lanza <code>ArgumentOutOfRangeException</code>, <code>catch</code> que la captura, <code>throw;</code> para re-lanzarla, y <code>finally</code> que imprime <code>Fin garantizado</code>.",
+    hint:"try{ throw new ArgumentOutOfRangeException(); } catch(ArgumentOutOfRangeException){ throw; } finally{ Console.WriteLine(\"Fin garantizado\"); }",
+    template:`// Solución completa
+try
+{
+
+}
+catch (ArgumentOutOfRangeException)
+{
+
+}
+finally
+{
+
+}`,
+    check: c => /catch\s*\(\s*ArgumentOutOfRangeException/.test(c)
+            && /\bthrow\s*;/.test(c)
+            && /finally\s*\{/.test(c)
+            && /Fin\s+garantizado/i.test(c)
+  }
+];
+
+/* ═══════════════════════════════════════
+   STATE & NAV
+═══════════════════════════════════════ */
+let currentSlide = 0;
+let currentEx = 0;
+let solvedExercises = new Set();
+let unlockedExercises = new Set([0]);
+
+function buildSlides(){
+  const w = document.getElementById('slides-wrapper');
+  slides.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className = 'slide';
+    d.id = `slide-${i}`;
+    d.innerHTML = s.render();
+    w.appendChild(d);
+  });
+}
+
+function showSlide(idx){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`slide-${idx}`).classList.add('active');
+  const total = slides.length;
+  document.getElementById('slide-counter').textContent = `${idx+1} / ${total}`;
+  document.getElementById('btn-prev').disabled = idx===0;
+  document.getElementById('btn-next').disabled = idx===total-1;
+  document.getElementById('progress-bar').style.width = (idx/(total-1)*100)+'%';
+  if(slides[idx].isRunner) buildRunnerUI();
+}
+
+function navigate(dir){
+  const n = currentSlide+dir;
+  if(n<0||n>=slides.length) return;
+  currentSlide=n; showSlide(currentSlide);
+}
+
+/* ─── RUNNER ─── */
+function buildRunnerUI(){
+  const tabs = document.getElementById('exercise-tabs');
+  if(!tabs) return;
+  tabs.innerHTML='';
+  exercises.forEach((ex,i)=>{
+    const li=document.createElement('li'); li.className='nav-item';
+    const a=document.createElement('a');
+    a.className='nav-link'+(solvedExercises.has(i)?' solved':'')+((!unlockedExercises.has(i))?' locked':'')+(i===currentEx?' active':'');
+    a.textContent = solvedExercises.has(i)?`✓ ${ex.id}`:String(ex.id).padStart(2,'0');
+    a.title = ex.title;
+    if(unlockedExercises.has(i)){
+      a.onclick=()=>{ currentEx=i; buildRunnerUI(); };
+    } else {
+      a.onclick=()=>Swal.fire({icon:'info',title:'🔒 Bloqueado',text:`Completa el ejercicio ${i} primero.`,background:'#0f1620',color:'#dde6f0',confirmButtonColor:'#00ffa3'});
+    }
+    li.appendChild(a); tabs.appendChild(li);
+  });
+  loadExercise(currentEx);
+  updateProgress();
+}
+
+function loadExercise(i){
+  const ex=exercises[i];
+  const desc=document.getElementById('ex-description');
+  const ed=document.getElementById('ex-editor');
+  const fb=document.getElementById('feedback-box');
+  if(!desc||!ed) return;
+  desc.innerHTML=`<strong style="color:var(--accent)">${ex.title}</strong><br>${ex.description}`;
+  ed.value=ex.template;
+  fb.style.display='none';
+}
+
+function resetEditor(){ document.getElementById('ex-editor').value=exercises[currentEx].template; document.getElementById('feedback-box').style.display='none'; }
+
+function showHintSwal(){
+  Swal.fire({icon:'info',title:'<span style="color:var(--warn)">💡 Pista</span>',
+    html:`<span style="font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#c9d1d9">${exercises[currentEx].hint}</span>`,
+    background:'#0f1620',color:'#dde6f0',confirmButtonColor:'#00ffa3'});
+}
+
+function updateProgress(){
+  const el=document.getElementById('ex-progress');
+  if(el) el.textContent=`${solvedExercises.size} / ${exercises.length} resueltos`;
+}
+
+function runExercise(){
+  const code=document.getElementById('ex-editor').value;
+  const ex=exercises[currentEx];
+  const fb=document.getElementById('feedback-box');
+  const passed=ex.check(code);
+  fb.style.display='block';
+  if(passed){
+    fb.style.background='rgba(0,255,163,.07)';
+    fb.style.borderColor='rgba(0,255,163,.28)';
+    fb.style.color='var(--success)';
+    fb.innerHTML=`<i class="fas fa-circle-check me-2"></i><strong>¡Correcto!</strong> ${currentEx<exercises.length-1?'Siguiente ejercicio desbloqueado.':'¡Completaste los 10 ejercicios!'}`;
+    if(!solvedExercises.has(currentEx)){ solvedExercises.add(currentEx); if(currentEx+1<exercises.length) unlockedExercises.add(currentEx+1); }
+    Swal.fire({icon:'success',title:'✅ ¡Ejercicio correcto!',
+      html:currentEx<exercises.length-1?`Ejercicio <strong>${currentEx+2}</strong> desbloqueado.`:`🎉 ¡Completaste los <strong>10 ejercicios</strong> de finally!`,
+      background:'#0f1620',color:'#dde6f0',confirmButtonColor:'#00ffa3',timer:2600,timerProgressBar:true,
+      showConfirmButton:true,confirmButtonText:currentEx<exercises.length-1?'Siguiente →':'🎓 Fin'
+    }).then(()=>{ if(currentEx+1<exercises.length){ currentEx++; buildRunnerUI(); } });
+  } else {
+    fb.style.background='rgba(248,113,113,.07)';
+    fb.style.borderColor='rgba(248,113,113,.28)';
+    fb.style.color='var(--danger)';
+    fb.innerHTML=`<i class="fas fa-circle-xmark me-2"></i><strong>Incorrecto.</strong> Revisa tu código o usa el botón <strong>Pista</strong>.`;
+  }
+  buildRunnerUI();
+}
+
+function showSlideMenu(){
+  const items=slides.map((s,i)=>
+    `<li style="padding:8px 12px;cursor:pointer;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:${i===currentSlide?'var(--accent)':'#c9d1d9'};background:${i===currentSlide?'rgba(0,255,163,.08)':'transparent'}"
+     onclick="Swal.close();currentSlide=${i};showSlide(${i})">
+       <span style="color:var(--muted);margin-right:8px">${String(i+1).padStart(2,'0')}</span>${s.title}
+     </li>`
+  ).join('');
+  Swal.fire({title:'<span style="color:var(--accent);font-size:.95rem;letter-spacing:3px">DIAPOSITIVAS</span>',
+    html:`<ul style="list-style:none;padding:0;max-height:320px;overflow-y:auto">${items}</ul>`,
+    background:'#0f1620',color:'#dde6f0',showConfirmButton:false,showCloseButton:true,width:400});
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+document.addEventListener('keydown',e=>{
+  if(document.activeElement?.id==='ex-editor') return;
+  if(e.key==='ArrowRight'||e.key==='PageDown') navigate(1);
+  if(e.key==='ArrowLeft' ||e.key==='PageUp')   navigate(-1);
+  if(e.key==='f'||e.key==='F') toggleFullscreen();
+});
+
+buildSlides();
+showSlide(0);
+</script>
+</body>
+</html>

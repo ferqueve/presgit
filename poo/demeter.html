@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Don't Talk to Strangers — Ley de Demeter (GRASP)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0c08;
+  --bg2:#161109;
+  --card:#1c1610;
+  --card2:#241b12;
+  --line:#3a2d1c;
+  --ink:#e9effb;
+  --muted:#94a5c6;
+  --teal:#fbbf24;
+  --teal-dim:rgba(251,191,36,.14);
+  --orange:#f87171;
+  --orange-dim:rgba(248,113,113,.14);
+  --ok:#3ddc84;
+  --bad:#ff6b81;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1100px 600px at 85% -10%, rgba(251,191,36,.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(248,113,113,.08), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Sora',system-ui,sans-serif;
+  overflow:hidden;
+}
+code,pre,kbd,.mono,textarea.sql-input{font-family:'Fira Code',monospace}
+
+/* ---------- frame ---------- */
+#progressbar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--orange));width:0%;z-index:60;transition:width .35s ease}
+header.hud{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;pointer-events:none;
+}
+.hud .brand{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted)}
+.hud .brand .prompt{
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:4px 10px;color:var(--teal);font-family:'Fira Code',monospace;font-size:.8rem;
+}
+.hud .right{display:flex;align-items:center;gap:10px;pointer-events:auto}
+.badge-slide{
+  background:var(--card);border:1px solid var(--line);color:var(--muted);
+  font-family:'Fira Code',monospace;font-size:.8rem;border-radius:8px;padding:4px 12px;
+}
+.badge-score{
+  background:var(--orange-dim);border:1px solid rgba(248,113,113,.4);color:var(--orange);
+  font-family:'Fira Code',monospace;font-size:.8rem;border-radius:8px;padding:4px 12px;
+}
+
+/* ---------- slides ---------- */
+.slide{
+  position:absolute;inset:0;display:none;
+  padding:84px 7vw 96px;overflow-y:auto;
+}
+.slide.active{display:block}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Fira Code',monospace;font-size:.78rem;letter-spacing:.08em;
+  color:var(--teal);background:var(--teal-dim);border:1px solid rgba(251,191,36,.35);
+  border-radius:999px;padding:5px 14px;margin-bottom:14px;text-transform:uppercase;
+}
+.eyebrow.naranja{color:var(--orange);background:var(--orange-dim);border-color:rgba(248,113,113,.4)}
+h1.title{font-weight:800;font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin-bottom:.4em}
+h2.stitle{font-weight:800;font-size:clamp(1.5rem,3.4vw,2.3rem);margin-bottom:.5em}
+.lead-x{color:var(--muted);font-size:1.05rem;max-width:62ch}
+.accent{color:var(--teal)}
+.accent-o{color:var(--orange)}
+
+.card-x{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:20px 22px;height:100%;
+}
+.card-x h5{font-weight:700;display:flex;align-items:center;gap:10px}
+.card-x h5 i{color:var(--teal)}
+.card-x p,.card-x li{color:var(--muted);font-size:.95rem;margin-bottom:.3rem}
+.card-x.hl{border-color:rgba(251,191,36,.5);box-shadow:0 0 0 1px rgba(251,191,36,.2) inset}
+.card-x.warn{border-color:rgba(248,113,113,.5)}
+.card-x.warn h5 i{color:var(--orange)}
+
+pre.code{
+  background:#0c0905;border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;color:#d7e3ff;font-size:.92rem;line-height:1.6;overflow-x:auto;margin:0;
+}
+pre.code .kw{color:var(--teal);font-weight:600}
+pre.code .str{color:var(--orange)}
+pre.code .num{color:#c792ea}
+pre.code .com{color:#5b6b8f;font-style:italic}
+.code-head{
+  display:flex;align-items:center;gap:8px;background:#0c0905;border:1px solid var(--line);
+  border-bottom:none;border-radius:12px 12px 0 0;padding:8px 14px;
+  font-family:'Fira Code',monospace;font-size:.75rem;color:var(--muted);
+}
+.code-head .dot{width:9px;height:9px;border-radius:50%}
+.code-head + pre.code{border-radius:0 0 12px 12px}
+
+table.tbl{width:100%;border-collapse:collapse;font-size:.9rem}
+table.tbl th{
+  background:var(--card2);color:var(--teal);font-family:'Fira Code',monospace;
+  font-weight:600;font-size:.8rem;padding:9px 12px;border:1px solid var(--line);text-align:left;
+}
+table.tbl td{padding:8px 12px;border:1px solid var(--line);color:var(--ink)}
+table.tbl td.mut{color:var(--muted)}
+table.tbl tr.bad td{background:rgba(255,107,129,.08)}
+table.tbl td .pk{color:var(--orange);font-weight:600}
+table.tbl td .fk{color:var(--teal);font-weight:600}
+
+.kbd{
+  background:var(--card);border:1px solid var(--line);border-bottom-width:3px;
+  border-radius:7px;padding:2px 9px;font-family:'Fira Code',monospace;font-size:.8rem;color:var(--ink);
+}
+ul.checks{list-style:none;padding-left:0}
+ul.checks li{padding-left:1.7em;position:relative;margin-bottom:.5rem;color:var(--muted)}
+ul.checks li::before{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;color:var(--teal);position:absolute;left:0}
+ul.crosses li::before{content:'\f00d';color:var(--bad)}
+
+.big-num{font-family:'Fira Code',monospace;font-weight:600;font-size:2.4rem;color:var(--teal)}
+.pill-time{
+  font-family:'Fira Code',monospace;font-size:.78rem;color:var(--orange);
+  background:var(--orange-dim);border-radius:6px;padding:2px 10px;white-space:nowrap;
+}
+.agenda-row{
+  display:flex;align-items:center;gap:16px;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin-bottom:10px;
+}
+.agenda-row .n{font-family:'Fira Code',monospace;color:var(--teal);font-weight:600;min-width:2ch}
+.agenda-row .t{flex:1}
+
+/* relación diagrams */
+.rel-box{
+  background:var(--card2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 16px;font-family:'Fira Code',monospace;font-size:.85rem;text-align:center;
+}
+.rel-arrow{color:var(--orange);font-family:'Fira Code',monospace;font-size:.85rem;text-align:center}
+
+/* ---------- lab ---------- */
+.exercise{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:18px;
+}
+.exercise.done{border-color:rgba(61,220,132,.55);box-shadow:0 0 0 1px rgba(61,220,132,.25) inset}
+.exercise .ex-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.exercise .ex-num{
+  font-family:'Fira Code',monospace;color:var(--orange);font-weight:600;font-size:.85rem;
+}
+.exercise .ex-status{font-size:1.1rem;color:var(--muted)}
+.exercise.done .ex-status{color:var(--ok)}
+.exercise p.enun{color:var(--ink);font-size:.97rem;margin-bottom:10px}
+textarea.sql-input{
+  width:100%;background:#0c0905;border:1px solid var(--line);border-radius:10px;
+  color:#d7e3ff;font-size:.95rem;padding:12px 14px;resize:vertical;min-height:64px;
+  caret-color:var(--teal);
+}
+textarea.sql-input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(251,191,36,.15)}
+textarea.sql-input::placeholder{color:#44557d}
+.btn-verify{
+  background:var(--teal);border:none;color:#2a1c02;font-weight:700;border-radius:9px;padding:8px 18px;
+}
+.btn-verify:hover{background:#3ee2d2;color:#2a1c02}
+.btn-hint{
+  background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 14px;
+}
+.btn-hint:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ---------- nav ---------- */
+nav.navbtns{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;
+  background:linear-gradient(transparent, rgba(11,18,32,.92) 40%);
+}
+.btn-nav{
+  background:var(--card);border:1px solid var(--line);color:var(--ink);
+  border-radius:10px;padding:9px 20px;font-weight:600;
+}
+.btn-nav:hover{border-color:var(--teal);color:var(--teal)}
+.btn-nav:disabled{opacity:.35}
+.nav-help{color:var(--muted);font-size:.8rem;font-family:'Fira Code',monospace}
+
+/* scrollbars */
+.slide::-webkit-scrollbar{width:8px}
+.slide::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+/* SweetAlert dark fixes */
+.swal2-popup{font-family:'Sora',sans-serif!important}
+.swal-radio-list{display:flex;flex-direction:column;gap:10px;text-align:left}
+.swal-radio-list label{
+  display:flex;gap:10px;align-items:flex-start;background:var(--card2);
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;color:var(--ink);
+  font-size:.95rem;
+}
+.swal-radio-list label:hover{border-color:var(--teal)}
+.swal-radio-list input{margin-top:4px;accent-color:var(--teal)}
+
+@media (max-width:768px){
+  .slide{padding:78px 5vw 100px}
+  .nav-help{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .animate__animated{animation:none!important}
+}
+
+.exercise{position:relative}
+.exercise.locked{pointer-events:none}
+.exercise.locked > *{opacity:.25;filter:blur(1px)}
+.exercise.locked::after{
+  content:'\1F512  Completá el ejercicio anterior para desbloquear';
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Fira Code',monospace;font-size:.85rem;color:var(--muted);
+  background:rgba(15,12,8,.55);border-radius:16px;opacity:1;filter:none;
+}
+.chain{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-family:'Fira Code',monospace;font-size:.8rem}
+.chain .nodo{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:6px 12px;color:var(--ink)}
+.chain .nodo.bad{border-color:var(--bad);color:var(--bad)}
+.chain .fl{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div id="progressbar"></div>
+
+<header class="hud">
+  <div class="brand">
+    <span class="prompt">csharp&gt;</span>
+    <span class="d-none d-md-inline">Programación II · GRASP · Ley de Demeter</span>
+  </div>
+  <div class="right">
+    <span class="badge-score" id="scoreBadge" title="Puntos de la clase"><i class="fa-solid fa-star"></i> 0 pts</span>
+    <span class="badge-slide" id="slideBadge">1 / 25</span>
+  </div>
+</header>
+
+<main id="deck">
+
+<!-- 1. PORTADA -->
+<section class="slide">
+  <div class="d-flex flex-column justify-content-center" style="min-height:70vh">
+    <span class="eyebrow"><i class="fa-solid fa-user-secret"></i> Programación II · Patrones GRASP</span>
+    <h1 class="title">Don't Talk to Strangers<br><span class="accent">La Ley de Demeter</span></h1>
+    <p class="lead-x">Por qué navegar objetos indirectos acopla tu código a estructuras ajenas · Quiénes son los "conocidos" de un objeto · Cómo el patrón Visitor resuelve la recorrida sin hablar con extraños</p>
+    <div class="mt-4 d-flex gap-3 flex-wrap">
+      <span class="badge-slide"><i class="fa-solid fa-book"></i> Larman — Applying UML and Patterns</span>
+      <span class="badge-slide"><i class="fa-solid fa-unlock"></i> 6 ejercicios desbloqueables</span>
+    </div>
+    <p class="mt-5 nav-help">Navegá con <span class="kbd">←</span> <span class="kbd">→</span> o los botones de abajo</p>
+  </div>
+</section>
+
+<!-- 2. AGENDA -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-list-check"></i> Hoja de ruta</span>
+  <h2 class="stitle">El recorrido de hoy</h2>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-8">
+      <div class="agenda-row"><span class="n">01</span><span class="t">Contexto: los patrones GRASP y dónde encaja Demeter</span></div>
+      <div class="agenda-row"><span class="n">02</span><span class="t">El problema: objetos indirectos y trenes de llamadas</span></div>
+      <div class="agenda-row"><span class="n">03</span><span class="t">La regla: los 5 "conocidos" de un objeto</span></div>
+      <div class="agenda-row"><span class="n">04</span><span class="t">La solución general: delegar en los objetos directos</span></div>
+      <div class="agenda-row"><span class="n">05</span><span class="t">El patrón Visitor: Accept / Visit paso a paso</span></div>
+      <div class="agenda-row"><span class="n">06</span><span class="t">El premio: nuevos formatos sin tocar la estructura</span></div>
+      <div class="agenda-row"><span class="n">07</span><span class="t"><strong class="accent-o">Cadena de ejercicios desbloqueables</strong></span></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-x hl">
+        <h5><i class="fa-solid fa-bullseye"></i> Al final vas a poder</h5>
+        <ul class="checks mt-3">
+          <li>Detectar violaciones de Demeter en código real</li>
+          <li>Justificar por qué el acoplamiento estructural es un problema</li>
+          <li>Implementar Accept/Visit en una estructura de objetos</li>
+          <li>Explicar por qué Visitor respeta la ley</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. CONTEXTO GRASP -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-compass"></i> Contexto</span>
+  <h2 class="stitle">GRASP: asignar responsabilidades con criterio</h2>
+  <p class="lead-x">Los patrones <strong class="accent">GRASP</strong> (General Responsibility Assignment Software Patterns) fueron planteados por <strong>Craig Larman</strong> en <em>Applying UML and Patterns</em> (1998). No son recetas de código: son criterios para decidir <strong>qué clase debe hacer qué cosa</strong>.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-7">
+      <div class="d-flex flex-wrap gap-2">
+        <span class="badge-slide">Expert</span>
+        <span class="badge-slide">Creator</span>
+        <span class="badge-slide">Controller</span>
+        <span class="badge-slide" style="border-color:var(--teal);color:var(--teal)">Low Coupling</span>
+        <span class="badge-slide">High Cohesion</span>
+        <span class="badge-slide">Polymorphism</span>
+        <span class="badge-slide">Pure Fabrication</span>
+        <span class="badge-slide">Indirection</span>
+        <span class="badge-slide" style="border-color:var(--orange);color:var(--orange)">Don't Talk to Strangers</span>
+        <span class="badge-slide">Protected Variations</span>
+      </div>
+      <div class="card-x h-auto mt-3">
+        <h5><i class="fa-solid fa-link-slash"></i> Demeter es hija de Low Coupling</h5>
+        <p>Ya sabemos que el acoplamiento alto es enemigo del cambio. <strong>Don't Talk to Strangers</strong> ataca una forma específica y traicionera de acoplamiento: la que se cuela <em>aunque todas las clases estén bien encapsuladas</em>.</p>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x warn">
+        <h5><i class="fa-solid fa-masks-theater"></i> ¿Por qué "Demeter"?</h5>
+        <p>El nombre viene del <em>Proyecto Demeter</em> (1987), donde se formuló la regla. La consigna popular la resume mejor: <strong class="accent-o">no hables con extraños</strong> — un objeto solo debería enviar mensajes a sus conocidos cercanos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. EL PROBLEMA: CÓDIGO -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-bug"></i> El problema</span>
+  <h2 class="stitle">Bien encapsulado… y sin embargo acoplado</h2>
+  <p class="lead-x"><span class="mono">PlainSaleContent</span> conoce solo una <span class="mono">Sale</span>. Pero mirá hasta dónde llega navegando:</p>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> PlainSaleContent.cs · v1</div>
+      <pre class="code"><span class="kw">public class</span> PlainSaleContent : ISaleContent
+{
+    <span class="kw">private</span> Sale sale;
+
+    <span class="kw">public</span> PlainSaleContent(Sale sale)
+    {
+        <span class="kw">this</span>.sale = sale;
+    }
+
+    <span class="kw">public string</span> GetTextToPrint()
+    {
+        <span class="kw">string</span> result = $<span class="str">"Fecha: {this.sale.DateTime}\n"</span>;
+<mark style="background:rgba(248,113,113,.18);color:inherit;display:block">        <span class="kw">foreach</span> (SalesLineItem item <span class="kw">in</span> <span class="kw">this</span>.sale)</mark>
+        {
+<mark style="background:rgba(248,113,113,.18);color:inherit;display:block">            result = result + $<span class="str">"{item.Quantity} de '{item.Product.Description}' "</span> +</mark>
+<mark style="background:rgba(248,113,113,.18);color:inherit;display:block">                $<span class="str">"a ${item.Product.Price}\n"</span>;</mark>
+        }
+        result = result + $<span class="str">"Total: ${this.sale.Total}"</span>;
+        <span class="kw">return</span> result;
+    }
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x h-auto mb-3">
+        <h5><i class="fa-solid fa-shield-halved"></i> La encapsulación está intacta</h5>
+        <p><span class="mono">Sale</span> guarda sus <span class="mono">SalesLineItem</span> en una lista <strong>privada</strong>, que solo se modifica vía <span class="mono">AddLineItem</span> / <span class="mono">RemoveLineItem</span>. Nadie rompió ninguna regla de visibilidad.</p>
+      </div>
+      <div class="card-x warn h-auto">
+        <h5><i class="fa-solid fa-user-secret"></i> Y sin embargo…</h5>
+        <p>Vía <span class="mono">IEnumerable</span>, <span class="mono">PlainSaleContent</span> llega a los <span class="mono">SalesLineItem</span>, y desde ahí a <span class="mono">ProductSpecification</span>. Para esta clase, esos son <strong class="accent-o">objetos indirectos</strong>: extraños con los que está conversando.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. POR QUÉ DUELE -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-train"></i> El problema</span>
+  <h2 class="stitle">El "tren de llamadas" y su costo</h2>
+  <p class="lead-x">La forma más visible de la violación es la cadena de puntos. Cada vagón agregado es una estructura interna ajena de la que ahora dependés:</p>
+  <div class="card-x mt-3">
+    <div class="chain">
+      <span class="nodo">item</span><span class="fl">──▶</span>
+      <span class="nodo bad">.Product</span><span class="fl">──▶</span>
+      <span class="nodo bad">.Description</span>
+    </div>
+    <p class="mt-3">El objeto que escribe esto conoce: ① que el item tiene un producto, ② que el producto tiene una descripción, ③ los tipos de ambos. Tres conocimientos que no le corresponden.</p>
+  </div>
+  <div class="row g-4 mt-2">
+    <div class="col-md-4">
+      <div class="card-x warn">
+        <h5><i class="fa-solid fa-house-crack"></i> Fragilidad</h5>
+        <p>Si mañana <span class="mono">SalesLineItem</span> deja de exponer <span class="mono">Product</span>, o el producto reestructura sus datos, <strong>se rompe una clase que ni siquiera es parte de esa estructura</strong>.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-x warn">
+        <h5><i class="fa-solid fa-virus"></i> Cambios en cascada</h5>
+        <p>Un cambio interno se propaga a todos los que navegaron la estructura. El costo de modificar deja de ser local: eso es exactamente acoplamiento alto.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-x warn">
+        <h5><i class="fa-solid fa-vial-circle-check"></i> Difícil de testear</h5>
+        <p>Para probar la clase necesitás armar toda la cadena de objetos reales o mocks anidados: el test te está gritando que hay demasiado conocimiento estructural.</p>
+      </div>
+    </div>
+  </div>
+  <div class="card-x mt-4">
+    <h5><i class="fa-solid fa-circle-question"></i> El problema en una pregunta</h5>
+    <p><strong class="accent">¿Cómo evitar conocer la estructura de objetos indirectos?</strong> Esa es la pregunta que la guía responde.</p>
+  </div>
+</section>
+
+<!-- 6. LOS 5 CONOCIDOS -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-handshake"></i> La regla</span>
+  <h2 class="stitle">¿Con quién SÍ puede hablar un objeto?</h2>
+  <p class="lead-x">Dentro de un método, un objeto solo debería enviar mensajes o acceder a atributos de sus <strong class="accent">objetos directos</strong>. Son exactamente estos cinco:</p>
+  <div class="row g-3 mt-2">
+    <div class="col-md-6 col-lg-4"><div class="card-x"><h5><span class="big-num" style="font-size:1.4rem">1</span> Él mismo</h5><p>El propio objeto: <span class="mono accent">this</span> en C#. Hablarte a vos mismo siempre está permitido.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="card-x"><h5><span class="big-num" style="font-size:1.4rem">2</span> Sus argumentos</h5><p>Los objetos recibidos como <strong>parámetros</strong> del método. Te los presentaron formalmente: son conocidos.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="card-x"><h5><span class="big-num" style="font-size:1.4rem">3</span> Sus atributos</h5><p>Los objetos referenciados por <strong>variables de instancia</strong> propias.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="card-x"><h5><span class="big-num" style="font-size:1.4rem">4</span> Sus colecciones</h5><p>Los objetos contenidos en una <strong>colección que es atributo</strong> del propio objeto.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="card-x"><h5><span class="big-num" style="font-size:1.4rem">5</span> Sus criaturas</h5><p>Los objetos <strong>creados dentro del método</strong> (con <span class="mono">new</span>). Si lo creaste, lo conocés.</p></div></div>
+    <div class="col-md-6 col-lg-4"><div class="card-x warn"><h5><i class="fa-solid fa-ban"></i> Todos los demás</h5><p>Son <strong class="accent-o">extraños</strong>. Típicamente: lo que obtenés como resultado de pedirle algo a un conocido. A esos, ni mensajes ni atributos.</p></div></div>
+  </div>
+  <div class="text-center mt-4">
+    <button class="btn btn-verify btn-lg" onclick="quizConocidos()"><i class="fa-solid fa-gamepad"></i> Mini-quiz: ¿conocido o extraño?</button>
+  </div>
+</section>
+
+<!-- 7. SOLUCIÓN GENERAL -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-hand-point-right"></i> La solución</span>
+  <h2 class="stitle">Delegar: que el directo hable con el indirecto</h2>
+  <p class="lead-x">La solución de Larman: <strong class="accent">asignar la responsabilidad de colaborar con los objetos indirectos a los objetos directos</strong>. Yo le hablo a mi conocido; mi conocido le habla a los suyos.</p>
+  <div class="row g-4 mt-2 align-items-center">
+    <div class="col-lg-6">
+      <div class="card-x">
+        <h5><i class="fa-solid fa-xmark" style="color:var(--bad)"></i> Hablando con extraños</h5>
+        <div class="chain mt-2">
+          <span class="nodo">PlainSaleContent</span><span class="fl">→</span>
+          <span class="nodo">Sale</span><span class="fl">→</span>
+          <span class="nodo bad">SalesLineItem</span><span class="fl">→</span>
+          <span class="nodo bad">ProductSpecification</span>
+        </div>
+        <p class="mt-2">Un solo objeto conoce toda la cadena.</p>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card-x hl">
+        <h5><i class="fa-solid fa-check accent"></i> Delegando</h5>
+        <div class="chain mt-2">
+          <span class="nodo">PlainSaleContent</span><span class="fl">→</span><span class="nodo">Sale</span>
+        </div>
+        <div class="chain mt-1">
+          <span class="nodo">Sale</span><span class="fl">→</span><span class="nodo">SalesLineItem</span>
+        </div>
+        <div class="chain mt-1">
+          <span class="nodo">SalesLineItem</span><span class="fl">→</span><span class="nodo">ProductSpecification</span>
+        </div>
+        <p class="mt-2">Cada objeto habla solo con el siguiente eslabón: conocimiento local, acoplamiento bajo.</p>
+      </div>
+    </div>
+  </div>
+  <div class="card-x mt-4">
+    <h5><i class="fa-solid fa-route"></i> ¿Y cómo recorremos una estructura entera sin violar la regla?</h5>
+    <p>Para eso existe un patrón del catálogo de la <em>Gang of Four</em> (Gamma, Helm, Johnson y Vlissides — <em>Design Patterns</em>): el patrón <strong class="accent">Visitor</strong>. Vamos a verlo en acción sobre nuestra venta.</p>
+  </div>
+</section>
+
+<!-- 8. VISITOR: IDEA -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-person-walking-luggage"></i> Patrón Visitor</span>
+  <h2 class="stitle">Visitor: la idea en dos mensajes</h2>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-6">
+      <div class="card-x h-auto mb-3">
+        <h5><i class="fa-solid fa-door-open"></i> <span class="mono">Accept(visitor)</span></h5>
+        <p>Cada objeto de la estructura tiene un método <span class="mono accent">Accept</span> que recibe un <span class="mono">Visitor</span>. Su trabajo es mínimo: <strong>abrirle la puerta</strong> y presentarse.</p>
+      </div>
+      <div class="card-x h-auto">
+        <h5><i class="fa-solid fa-eye"></i> <span class="mono">Visit(objeto)</span></h5>
+        <p>El visitante tiene un método <span class="mono accent">Visit</span> <strong>por cada tipo</strong> de la estructura. Ahí vive la lógica de qué hacer con cada uno.</p>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> el corazón del patrón</div>
+      <pre class="code"><span class="com">// en cada clase de la estructura:</span>
+<span class="kw">public void</span> Accept(Visitor visitor)
+{
+    visitor.Visit(<span class="kw">this</span>);
+}</pre>
+      <div class="card-x h-auto mt-3 warn">
+        <h5><i class="fa-solid fa-arrows-rotate"></i> El truco: doble despacho</h5>
+        <p>El objeto se pasa <strong>a sí mismo</strong> (<span class="mono">this</span>) como argumento. Así, cuando el visitante ejecuta su <span class="mono">Visit</span>, el objeto que recibe <strong>llegó como parámetro</strong>… es decir, llegó como <strong class="accent">conocido</strong>. Demeter feliz.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. ACCEPT EN LAS TRES CLASES -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-person-walking-luggage"></i> Patrón Visitor</span>
+  <h2 class="stitle">Paso 1: <span class="mono accent">Accept</span> en toda la estructura</h2>
+  <p class="lead-x">Las tres clases de la venta reciben el mismo método. Solo se muestra lo nuevo; los <span class="mono">…</span> representan el código que ya existía.</p>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-4">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> Sale.cs</div>
+      <pre class="code"><span class="kw">public class</span> Sale : IEnumerable
+{
+    …
+<mark style="background:rgba(251,191,36,.14);color:inherit;display:block">    <span class="kw">public void</span> Accept(Visitor visitor)
+    {
+        visitor.Visit(<span class="kw">this</span>);
+    }</mark>
+}</pre>
+    </div>
+    <div class="col-lg-4">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> SalesLineItem.cs</div>
+      <pre class="code"><span class="kw">public class</span> SalesLineItem
+{
+    …
+<mark style="background:rgba(251,191,36,.14);color:inherit;display:block">    <span class="kw">public void</span> Accept(Visitor visitor)
+    {
+        visitor.Visit(<span class="kw">this</span>);
+    }</mark>
+}</pre>
+    </div>
+    <div class="col-lg-4">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> ProductSpecification.cs</div>
+      <pre class="code"><span class="kw">public class</span> ProductSpecification
+{
+    …
+<mark style="background:rgba(251,191,36,.14);color:inherit;display:block">    <span class="kw">public void</span> Accept(Visitor visitor)
+    {
+        visitor.Visit(<span class="kw">this</span>);
+    }</mark>
+}</pre>
+    </div>
+  </div>
+  <div class="card-x mt-4">
+    <h5><i class="fa-solid fa-magnifying-glass"></i> Observación</h5>
+    <p>El método es <strong>idéntico en las tres clases</strong>, pero no se puede heredar de una superclase común: en cada clase, <span class="mono">this</span> tiene un tipo distinto, y eso es justamente lo que hace que se invoque el <span class="mono">Visit</span> correcto (sobrecarga por tipo).</p>
+  </div>
+</section>
+
+<!-- 10. CLASE VISITOR -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-person-walking-luggage"></i> Patrón Visitor</span>
+  <h2 class="stitle">Paso 2: la clase abstracta <span class="mono accent">Visitor</span></h2>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-6">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> Visitor.cs</div>
+      <pre class="code"><span class="kw">public abstract class</span> Visitor
+{
+    <span class="kw">public string</span> Content
+    {
+        <span class="kw">get</span>
+        {
+            <span class="kw">return this</span>.ContentBuilder.ToString();
+        }
+    }
+
+    <span class="kw">protected</span> StringBuilder ContentBuilder { <span class="kw">get</span>; }
+        = <span class="kw">new</span> StringBuilder();
+
+    <span class="kw">public abstract void</span> Visit(Sale sale);
+
+    <span class="kw">public abstract void</span> Visit(SalesLineItem lineItem);
+
+    <span class="kw">public abstract void</span> Visit(ProductSpecification product);
+}</pre>
+    </div>
+    <div class="col-lg-6">
+      <ul class="checks mt-2">
+        <li>Un <span class="mono">Visit</span> abstracto <strong>por cada tipo</strong> de la estructura: Sale, SalesLineItem y ProductSpecification.</li>
+        <li><span class="mono">Content</span> expone el texto construido durante la recorrida.</li>
+        <li><span class="mono">ContentBuilder</span> es un <span class="mono">StringBuilder</span> <strong>protegido</strong>: las subclases concretas lo usan para ir acumulando texto de forma eficiente.</li>
+      </ul>
+      <div class="card-x h-auto mt-3 hl">
+        <h5><i class="fa-solid fa-sitemap"></i> Lo que viene</h5>
+        <p>Dos visitantes concretos van a heredar de acá: uno que arma <strong>texto plano</strong> y otro que arma <strong>Markdown</strong>. Misma estructura recorrida, dos resultados distintos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. PLAINCONTENTVISITOR -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-person-walking-luggage"></i> Patrón Visitor</span>
+  <h2 class="stitle">Paso 3: un visitante concreto</h2>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> PlainContentVisitor.cs</div>
+      <pre class="code"><span class="kw">public class</span> PlainContentVisitor : Visitor
+{
+    <span class="kw">public override void</span> Visit(Sale sale)
+    {
+        <span class="kw">this</span>.ContentBuilder.Clear();
+        <span class="kw">this</span>.ContentBuilder.Append($<span class="str">"Fecha: {sale.DateTime}\n"</span>);
+        <span class="kw">foreach</span> (SalesLineItem item <span class="kw">in</span> sale)
+        {
+            item.Accept(<span class="kw">this</span>);
+        }
+
+        <span class="kw">this</span>.ContentBuilder.Append($<span class="str">"Total: ${sale.Total}"</span>);
+    }
+
+    <span class="kw">public override void</span> Visit(SalesLineItem item)
+    {
+        <span class="kw">this</span>.ContentBuilder.Append($<span class="str">"{item.Quantity} de "</span>);
+        item.Product.Accept(<span class="kw">this</span>);
+    }
+
+    <span class="kw">public override void</span> Visit(ProductSpecification product)
+    {
+        <span class="kw">this</span>.ContentBuilder.Append($<span class="str">"'{product.Description}' a ${product.Price}\n"</span>);
+    }
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x h-auto mb-3 hl">
+        <h5><i class="fa-solid fa-scale-balanced"></i> ¿Por qué esto NO viola Demeter?</h5>
+        <p>Cada <span class="mono">Visit</span> recibe el objeto con el que interactúa <strong class="accent">como argumento</strong>: es un conocido, no un extraño. El visitante nunca navega una cadena que no le pertenece — la estructura misma le va entregando cada objeto.</p>
+      </div>
+      <div class="card-x h-auto">
+        <h5><i class="fa-solid fa-arrows-spin"></i> La danza completa</h5>
+        <p><span class="mono">Visit(Sale)</span> recorre los items y a cada uno le dice <span class="mono">Accept(this)</span> → el item responde <span class="mono">Visit(item)</span> → que delega en el producto con <span class="mono">Accept(this)</span> → que responde <span class="mono">Visit(product)</span>. Ping-pong entre estructura y visitante.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. MARKDOWN + RESULTADO -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-gift"></i> El premio</span>
+  <h2 class="stitle">Nuevos formatos sin tocar la estructura</h2>
+  <p class="lead-x"><span class="mono">MarkdownContentVisitor</span> hereda de <span class="mono">Visitor</span> y produce una tabla Markdown. <strong class="accent">Sale, SalesLineItem y ProductSpecification no cambiaron ni una línea.</strong></p>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> MarkdownContentVisitor.cs (fragmento)</div>
+      <pre class="code"><span class="kw">public class</span> MarkdownContentVisitor : Visitor
+{
+    <span class="kw">public override void</span> Visit(Sale sale)
+    {
+        <span class="kw">this</span>.ContentBuilder.Clear();
+        <span class="kw">this</span>.ContentBuilder.Append($<span class="str">"Fecha: {sale.DateTime}\n"</span> +
+            <span class="str">"Qty|Prod|Price|\n"</span> +
+            <span class="str">"|---|:---------:|-----:|\n"</span>);
+
+        <span class="kw">foreach</span> (SalesLineItem item <span class="kw">in</span> sale)
+        {
+            item.Accept(<span class="kw">this</span>);
+        }
+
+        <span class="kw">this</span>.ContentBuilder.Append($<span class="str">"**Total: ${sale.Total}**"</span>);
+    }
+    …
+}</pre>
+      <div class="code-head mt-3"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> PlainSaleContent.cs · v2</div>
+      <pre class="code"><span class="kw">public string</span> GetTextToPrint()
+{
+<mark style="background:rgba(251,191,36,.14);color:inherit;display:block">    Visitor visitor = <span class="kw">new</span> PlainContentVisitor();
+    <span class="kw">this</span>.sale.Accept(visitor);
+    <span class="kw">return</span> visitor.Content;</mark>
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x h-auto mb-3">
+        <h5><i class="fa-solid fa-code-compare"></i> Antes vs después</h5>
+        <p><strong>v1:</strong> <span class="mono">GetTextToPrint</span> navegaba <span class="mono">item.Product.Description</span> — conocía 3 niveles de estructura.<br>
+        <strong>v2:</strong> crea un visitante, le pide a la venta que lo acepte, y lee el resultado. Conoce <strong>un solo nivel</strong>.</p>
+      </div>
+      <div class="card-x h-auto hl">
+        <h5><i class="fa-solid fa-rocket"></i> Extensible por diseño</h5>
+        <p>¿Mañana querés HTML? ¿JSON? ¿Un ticket térmico? Una subclase nueva de <span class="mono">Visitor</span> y listo. La estructura de la venta queda <strong>cerrada a modificación, abierta a extensión</strong> — ¿les suena de OCP?</p>
+      </div>
+      <div class="text-center mt-3">
+        <button class="btn btn-verify btn-lg" onclick="quizVisitor()"><i class="fa-solid fa-gamepad"></i> Mini-quiz Visitor</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13. LAB INTRO -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-unlock"></i> Ejercicios desbloqueables</span>
+  <h2 class="stitle">La cadena: 6 ejercicios, uno habilita al siguiente</h2>
+  <p class="lead-x">Vas a construir el patrón completo para una clase nueva: <span class="mono accent">Pedido</span>. Cada ejercicio se desbloquea al resolver el anterior. Corrección instantánea por patrón: espacios libres, mayúsculas en palabras clave según convención C#, <span class="mono">;</span> opcional donde corresponda.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-7">
+      <div class="agenda-row"><span class="n">E1</span><span class="t">Detectar el tren de llamadas</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E2</span><span class="t">Firma del método Accept</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E3</span><span class="t">Cuerpo del método Accept</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E4</span><span class="t">El Visit abstracto en la clase Visitor</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E5</span><span class="t">Arrancar la recorrida</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">★</span><span class="t"><strong class="accent-o">Desafío:</strong> la delegación dentro del visitante</span><span class="pill-time">20 pts</span></div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x hl">
+        <h5><i class="fa-solid fa-circle-info"></i> Reglas</h5>
+        <ul class="checks mt-2">
+          <li>Escribí <strong>solo lo que pide</strong> cada enunciado (una línea o una firma).</li>
+          <li>Pista disponible: el ejercicio pasa a valer la mitad.</li>
+          <li>Los candados se abren en orden — nada de saltearse pasos.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="text-center mt-4">
+    <button class="btn btn-verify btn-lg" onclick="nextSlide()"><i class="fa-solid fa-play"></i> Empezar la cadena</button>
+  </div>
+</section>
+
+<!-- 14. LAB E1-E3 -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-unlock"></i> Cadena · Parte 1</span>
+  <h2 class="stitle">Ejercicios 1 a 3 <span class="nav-help lab-progress"></span></h2>
+
+  <div class="exercise" id="ex1">
+    <div class="ex-head"><span class="ex-num">E1 · DETECTIVE DE TRENES</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">En este método de la clase <span class="mono">ReporteBancario</span> hay una violación a Demeter:</p>
+    <pre class="code mb-2"><span class="kw">public string</span> Resumen(Banco banco)
+{
+    <span class="kw">decimal</span> saldo = banco.Cliente.Cuenta.Saldo;
+    <span class="kw">return</span> $<span class="str">"Saldo: {saldo}"</span>;
+}</pre>
+    <p class="enun">Escribí <strong>solo la expresión</strong> que navega objetos indirectos (el "tren" completo, sin el tipo ni la asignación).</p>
+    <textarea class="sql-input" id="in1" rows="1" spellcheck="false" placeholder="// la expresión del tren"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(1)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(1)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex2">
+    <div class="ex-head"><span class="ex-num">E2 · LA PUERTA DE ENTRADA</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">Vamos a aplicar Visitor a la clase <span class="mono accent">Pedido</span>. Escribí la <strong>firma</strong> del método <span class="mono">Accept</span> (visibilidad pública, sin retorno, recibe un <span class="mono">Visitor</span>; sin el cuerpo, solo la firma).</p>
+    <textarea class="sql-input" id="in2" rows="1" spellcheck="false" placeholder="// public ... Accept(...)"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(2)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(2)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex3">
+    <div class="ex-head"><span class="ex-num">E3 · ABRIR LA PUERTA</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">Ahora el <strong>cuerpo</strong> de ese <span class="mono">Accept</span>: la única línea donde el pedido le pide al visitante que lo visite, presentándose a sí mismo. (El parámetro se llama <span class="mono">visitor</span>.)</p>
+    <textarea class="sql-input" id="in3" rows="1" spellcheck="false" placeholder="// una sola línea"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(3)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(3)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+</section>
+
+<!-- 15. LAB E4-E6 -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-unlock"></i> Cadena · Parte 2</span>
+  <h2 class="stitle">Ejercicios 4 a 6 <span class="nav-help lab-progress"></span></h2>
+
+  <div class="exercise locked" id="ex4">
+    <div class="ex-head"><span class="ex-num">E4 · EL CONTRATO DEL VISITANTE</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">En la clase abstracta <span class="mono">Visitor</span>, declará el método <span class="mono">Visit</span> <strong>abstracto</strong> para la clase <span class="mono accent">Pedido</span> (el parámetro se llama <span class="mono">pedido</span>).</p>
+    <textarea class="sql-input" id="in4" rows="1" spellcheck="false" placeholder="// public abstract ..."></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(4)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(4)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex5">
+    <div class="ex-head"><span class="ex-num">E5 · QUE EMPIECE LA RECORRIDA</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">En <span class="mono">GetTextToPrint</span> de la versión 2, ya existe <span class="mono">Visitor visitor = new PlainContentVisitor();</span>. Escribí la línea siguiente: la que le pide a la venta (atributo <span class="mono">sale</span>) que acepte al visitante.</p>
+    <textarea class="sql-input" id="in5" rows="1" spellcheck="false" placeholder="// una sola línea"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(5)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(5)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex6">
+    <div class="ex-head"><span class="ex-num">★ DESAFÍO · EL PING-PONG</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">Dentro de <span class="mono">Visit(SalesLineItem item)</span> del visitante concreto, escribí la línea con la que el ítem <strong>delega la visita a su producto</strong> (propiedad <span class="mono">Product</span>), para que el visitante reciba al producto como conocido en el próximo <span class="mono">Visit</span>.</p>
+    <textarea class="sql-input" id="in6" rows="1" spellcheck="false" placeholder="// una sola línea"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(6)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(6)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+</section>
+
+<!-- 16. CIERRE -->
+<section class="slide">
+  <div class="d-flex flex-column justify-content-center" style="min-height:70vh">
+    <span class="eyebrow"><i class="fa-solid fa-flag-checkered"></i> Cierre</span>
+    <h2 class="stitle">Lo que te llevás de hoy</h2>
+    <div class="row g-4 mt-1">
+      <div class="col-md-6">
+        <ul class="checks">
+          <li>La encapsulación no alcanza: navegar objetos indirectos también acopla.</li>
+          <li>Los 5 conocidos: this, argumentos, atributos, elementos de colecciones propias y objetos creados en el método.</li>
+          <li>La solución es delegar: cada objeto habla solo con el eslabón siguiente.</li>
+          <li>Visitor recorre estructuras sin violar la ley: cada Visit recibe su objeto como argumento.</li>
+          <li>Bonus: la estructura queda abierta a extensión (nuevos formatos) sin modificación.</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <div class="card-x hl">
+          <h5><i class="fa-solid fa-house-laptop"></i> Para seguir</h5>
+          <p>Cloná el repo del curso (<span class="mono">ucudal/PII_Demeter</span>), compará v1 contra v2, y escribí tu propio <span class="mono">HtmlContentVisitor</span> que genere una tabla HTML. Si la estructura de la venta no necesita cambios, lo hiciste bien. Consultá también el patrón Visitor en Refactoring Guru y el libro de la Gang of Four.</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <button class="btn btn-verify btn-lg" onclick="showFinalScore()"><i class="fa-solid fa-trophy"></i> Ver mi puntaje final</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="navbtns">
+  <button class="btn-nav" id="btnPrev" onclick="prevSlide()"><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+  <span class="nav-help"><span class="kbd">←</span> <span class="kbd">→</span> navegar · <span class="kbd">Inicio</span>/<span class="kbd">Fin</span> saltar</span>
+  <button class="btn-nav" id="btnNext" onclick="nextSlide()">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+/* ================= NAVEGACIÓN ================= */
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const swalBase = { background:'#1c1610', color:'#e9effb', confirmButtonColor:'#fbbf24', cancelButtonColor:'#3a2d1c' };
+
+function showSlide(i, dir = 1){
+  if(i < 0 || i >= slides.length) return;
+  slides[current].classList.remove('active');
+  current = i;
+  const s = slides[current];
+  s.classList.add('active');
+  s.scrollTop = 0;
+  s.classList.remove('animate__animated','animate__fadeInRight','animate__fadeInLeft');
+  void s.offsetWidth;
+  s.classList.add('animate__animated', dir >= 0 ? 'animate__fadeInRight' : 'animate__fadeInLeft');
+  document.getElementById('slideBadge').textContent = (current+1) + ' / ' + slides.length;
+  document.getElementById('progressbar').style.width = ((current+1)/slides.length*100) + '%';
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').disabled = current === slides.length-1;
+}
+function nextSlide(){ showSlide(current+1, 1); }
+function prevSlide(){ showSlide(current-1, -1); }
+
+document.addEventListener('keydown', e => {
+  if(e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  if(Swal.isVisible()) return;
+  if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if(e.key === 'ArrowLeft'  || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+  if(e.key === 'Home'){ e.preventDefault(); showSlide(0,-1); }
+  if(e.key === 'End'){ e.preventDefault(); showSlide(slides.length-1,1); }
+});
+
+/* ================= PUNTAJE ================= */
+let score = 0;
+function addPoints(p){
+  score += p;
+  const b = document.getElementById('scoreBadge');
+  b.innerHTML = '<i class="fa-solid fa-star"></i> ' + score + ' pts';
+  b.classList.remove('animate__animated','animate__bounce');
+  void b.offsetWidth;
+  b.classList.add('animate__animated','animate__bounce');
+}
+
+/* ================= QUIZZES ================= */
+function runQuiz(title, question, options, correctIndex, explanation, points = 10){
+  const inputs = options.map((o,i) => `<label><input type="radio" name="qz" value="${i}"><span>${o}</span></label>`).join('');
+  Swal.fire({
+    ...swalBase, title,
+    html: `<p style="text-align:left;margin-bottom:14px">${question}</p><div class="swal-radio-list">${inputs}</div>`,
+    confirmButtonText: 'Responder', showCancelButton: true, cancelButtonText: 'Cancelar',
+    showClass: { popup: 'animate__animated animate__zoomIn animate__faster' },
+    hideClass: { popup: 'animate__animated animate__zoomOut animate__faster' },
+    preConfirm: () => {
+      const sel = document.querySelector('input[name="qz"]:checked');
+      if(!sel){ Swal.showValidationMessage('Elegí una opción'); return false; }
+      return parseInt(sel.value);
+    }
+  }).then(res => {
+    if(!res.isConfirmed) return;
+    if(res.value === correctIndex){
+      addPoints(points);
+      Swal.fire({ ...swalBase, icon:'success', title:'¡Correcto! +' + points + ' pts',
+        html:`<p style="text-align:left">${explanation}</p>`, showClass:{popup:'animate__animated animate__tada'} });
+    } else {
+      Swal.fire({ ...swalBase, icon:'error', title:'No es esa…',
+        html:`<p style="text-align:left">La respuesta correcta era: <strong style="color:#fbbf24">${options[correctIndex]}</strong></p><p style="text-align:left">${explanation}</p>`,
+        showClass:{popup:'animate__animated animate__shakeX'} });
+    }
+  });
+}
+
+function quizConocidos(){
+  runQuiz('Mini-quiz · ¿Conocido o extraño?',
+    'Dentro de un método de la clase <code>Taller</code> que recibe <code>Auto auto</code> como parámetro, se ejecuta <code>auto.Motor.Encender()</code>. ¿Cuál es el diagnóstico?',
+    ['Todo bien: auto es un argumento, así que puedo usar lo que tenga adentro',
+     'auto es conocido, pero auto.Motor es un extraño: violación de Demeter',
+     'Violación doble: ni auto ni auto.Motor son conocidos',
+     'Depende de si Motor es una clase pública'],
+    1,
+    '<code>auto</code> llegó como argumento → conocido, puedo enviarle mensajes. Pero <code>auto.Motor</code> es el resultado de pedirle algo a un conocido: un <strong>objeto indirecto</strong>. Lo correcto sería <code>auto.Encender()</code> y que el auto delegue en su propio motor.');
+}
+function quizVisitor(){
+  runQuiz('Mini-quiz · Visitor',
+    'En <code>PlainContentVisitor</code>, el método <code>Visit(SalesLineItem item)</code> usa <code>item.Quantity</code>. ¿Por qué esto NO viola la Ley de Demeter?',
+    ['Porque Quantity es una propiedad pública',
+     'Porque item llegó como argumento del método: es un conocido',
+     'Porque el visitante hereda de Visitor',
+     'Sí la viola, pero es un mal menor aceptado'],
+    1,
+    'La clave del patrón: gracias a <code>Accept(this)</code>, cada objeto de la estructura llega al visitante <strong>como parámetro</strong> de su <code>Visit</code>. Argumento = conocido = Demeter se respeta, sin importar cuán profunda sea la estructura.');
+}
+
+/* ================= CADENA DE EJERCICIOS (regex + unlock) ================= */
+const exercises = {
+  1: {
+    points: 10,
+    regex: /^\s*banco\.Cliente\.Cuenta\.Saldo\s*;?\s*$/i,
+    hint: 'Es la cadena de puntos completa que aparece a la derecha del signo igual, desde el parámetro hasta el dato final.',
+    success: 'Ese es el tren: <code>banco</code> es conocido (argumento), pero <code>.Cliente</code>, <code>.Cuenta</code> y <code>.Saldo</code> son tres vagones de estructura ajena. Lo sano: <code>banco.GetSaldoCliente()</code> y que cada eslabón delegue.',
+    errorHint: 'Buscá la expresión con más puntos encadenados: arranca en el parámetro <code>banco</code> y termina en <code>Saldo</code>. Escribila tal cual, sin el tipo ni la asignación.'
+  },
+  2: {
+    points: 10,
+    regex: /^\s*public\s+void\s+Accept\s*\(\s*Visitor\s+[A-Za-z_]\w*\s*\)\s*\{?\s*$/,
+    hint: 'Mirá la slide "Paso 1": es la misma firma en todas las clases de la estructura. Público, no retorna nada, y recibe un <code>Visitor</code>.',
+    success: 'Firma perfecta. Igual que en <code>Sale</code>, <code>SalesLineItem</code> y <code>ProductSpecification</code>: la puerta de entrada es siempre la misma.',
+    errorHint: 'La forma es: <code>public void Accept(Visitor visitor)</code> — respetá las mayúsculas de C#: <code>Accept</code> y <code>Visitor</code> con mayúscula inicial, <code>public void</code> en minúscula.'
+  },
+  3: {
+    points: 10,
+    regex: /^\s*visitor\.Visit\s*\(\s*this\s*\)\s*;?\s*$/,
+    hint: 'El objeto le dice al visitante "visitame a mí": un mensaje <code>Visit</code> con un argumento muy especial que se refiere a sí mismo.',
+    success: '¡El doble despacho en acción! Al pasarse como <code>this</code>, el compilador elige el <code>Visit(Pedido)</code> correcto, y el pedido llega al visitante como argumento — como conocido.',
+    errorHint: 'Es exactamente: <code>visitor.Visit(this);</code> — el parámetro <code>visitor</code> recibe el mensaje <code>Visit</code> con <code>this</code> como argumento.'
+  },
+  4: {
+    points: 10,
+    regex: /^\s*public\s+abstract\s+void\s+Visit\s*\(\s*Pedido\s+[A-Za-z_]\w*\s*\)\s*;?\s*$/,
+    hint: 'Mirá la clase <code>Visitor</code> del Paso 2: hay un <code>Visit</code> abstracto por cada tipo. Agregá el de <code>Pedido</code> con la misma forma.',
+    success: 'Contrato firmado: ahora todo visitante concreto está obligado a decidir qué hacer cuando visita un <code>Pedido</code>.',
+    errorHint: 'La forma es: <code>public abstract void Visit(Pedido pedido);</code> — abstracto, sin cuerpo, terminado en punto y coma.'
+  },
+  5: {
+    points: 10,
+    regex: /^\s*(this\.)?sale\.Accept\s*\(\s*visitor\s*\)\s*;?\s*$/,
+    hint: 'El que arranca la recorrida no es el visitante: es la estructura. Le pedís al atributo <code>sale</code> que acepte al <code>visitor</code>.',
+    success: 'Recorrida lanzada. Fijate la elegancia: <code>GetTextToPrint</code> ahora habla solo con su atributo directo. Un nivel de conocimiento, cero extraños.',
+    errorHint: 'Es: <code>this.sale.Accept(visitor);</code> (el <code>this.</code> es opcional). El mensaje va dirigido a la venta, no al visitante.'
+  },
+  6: {
+    points: 20,
+    regex: /^\s*item\.Product\.Accept\s*\(\s*this\s*\)\s*;?\s*$/,
+    hint: 'Dentro del <code>Visit</code>, <code>item</code> es conocido (argumento). Para que el producto también llegue como conocido al próximo <code>Visit</code>, el ítem le pasa el visitante a su producto con el mismo mecanismo de siempre… y el visitante actual es <code>this</code>.',
+    success: '¡Cadena completa! <code>item</code> es argumento (conocido), y con <code>Accept(this)</code> el producto entrará al próximo <code>Visit</code> también como argumento. El ping-pong estructura↔visitante mantiene a Demeter contenta en cada paso.',
+    errorHint: 'Es: <code>item.Product.Accept(this);</code> — desde la propiedad <code>Product</code> del ítem, se invoca <code>Accept</code> pasando el visitante actual, que adentro de la clase visitante es <code>this</code>.'
+  }
+};
+const exState = {};
+for(const k in exercises) exState[k] = { done:false, hinted:false };
+const TOTAL_EX = Object.keys(exercises).length;
+const MAX_PTS = 2*10 + Object.values(exercises).reduce((a,e) => a + e.points, 0);
+
+function updateLabProgress(){
+  const done = Object.values(exState).filter(s => s.done).length;
+  document.querySelectorAll('.lab-progress').forEach(el => {
+    el.textContent = '· completados: ' + done + ' / ' + TOTAL_EX;
+  });
+}
+
+function unlockExercise(n){
+  const card = document.getElementById('ex'+n);
+  if(!card || !card.classList.contains('locked')) return;
+  card.classList.remove('locked');
+  card.classList.add('animate__animated','animate__pulse');
+}
+
+function checkExercise(n){
+  const ex = exercises[n];
+  const value = document.getElementById('in'+n).value;
+  if(!value.trim()){
+    Swal.fire({ ...swalBase, icon:'question', title:'Está vacío', text:'Escribí tu respuesta antes de verificar.' });
+    return;
+  }
+  if(ex.regex.test(value)){
+    const first = !exState[n].done;
+    exState[n].done = true;
+    const card = document.getElementById('ex'+n);
+    card.classList.add('done');
+    card.querySelector('.ex-status').innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+    let pts = 0;
+    if(first){ pts = exState[n].hinted ? Math.floor(ex.points/2) : ex.points; addPoints(pts); }
+    unlockExercise(n+1);
+    updateLabProgress();
+    const last = n === TOTAL_EX;
+    Swal.fire({ ...swalBase, icon:'success',
+      title: first ? '¡Correcto! +' + pts + ' pts' : '¡Correcto!',
+      html:`<p style="text-align:left">${ex.success}</p>` + (last ? '' : '<p style="text-align:left;color:#94a5c6;font-size:.85rem">🔓 Siguiente ejercicio desbloqueado.</p>'),
+      showClass:{popup:'animate__animated animate__tada'}, timer:4500, timerProgressBar:true });
+    if(last && Object.values(exState).every(s => s.done)){
+      setTimeout(showFinalScore, 4700);
+    }
+  } else {
+    Swal.fire({ ...swalBase, icon:'error', title:'Todavía no…',
+      html:`<p style="text-align:left">${ex.errorHint}</p>`,
+      showClass:{popup:'animate__animated animate__shakeX'} });
+  }
+}
+
+function showHint(n){
+  exState[n].hinted = true;
+  const half = Math.floor(exercises[n].points/2);
+  Swal.fire({ ...swalBase, icon:'info', title:'Pista · Ejercicio ' + n,
+    html:`<p style="text-align:left">${exercises[n].hint}</p><p style="text-align:left;color:#94a5c6;font-size:.85rem">Usar la pista reduce el puntaje de este ejercicio a ${half} pts.</p>` });
+}
+
+/* ================= PUNTAJE FINAL ================= */
+function showFinalScore(){
+  const done = Object.values(exState).filter(s => s.done).length;
+  const pct = Math.round(score / MAX_PTS * 100);
+  let nivel, icon;
+  if(pct >= 85){ nivel = '🏆 Arquitecto que no habla con extraños'; icon = 'success'; }
+  else if(pct >= 60){ nivel = '⭐ Demeter aprobaría tu código'; icon = 'success'; }
+  else if(pct >= 30){ nivel = '📈 En camino — repasá los 5 conocidos y el doble despacho'; icon = 'info'; }
+  else { nivel = '🔁 Recorré la teoría y reintentá la cadena'; icon = 'info'; }
+  Swal.fire({ ...swalBase, icon, title: score + ' / ' + MAX_PTS + ' puntos',
+    html:`<p style="font-size:1.05rem;margin-bottom:8px">${nivel}</p>
+          <p>Cadena de ejercicios: <strong style="color:#f87171">${done} / ${TOTAL_EX}</strong> · Efectividad: <strong style="color:#fbbf24">${pct}%</strong></p>`,
+    confirmButtonText:'Cerrar', showClass:{popup:'animate__animated animate__zoomIn'} });
+}
+
+/* ================= INIT ================= */
+slides[0].classList.add('active','animate__animated','animate__fadeIn');
+document.getElementById('slideBadge').textContent = '1 / ' + slides.length;
+document.getElementById('progressbar').style.width = (1/slides.length*100) + '%';
+document.getElementById('btnPrev').disabled = true;
+updateLabProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bot de Discord en C# con patrón Façade (Programación II)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0c08;
+  --bg2:#161109;
+  --card:#1c1610;
+  --card2:#241b12;
+  --line:#3a2d1c;
+  --ink:#e9effb;
+  --muted:#94a5c6;
+  --teal:#fbbf24;
+  --teal-dim:rgba(251,191,36,.14);
+  --orange:#f87171;
+  --orange-dim:rgba(248,113,113,.14);
+  --ok:#3ddc84;
+  --bad:#ff6b81;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1100px 600px at 85% -10%, rgba(251,191,36,.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(248,113,113,.08), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Sora',system-ui,sans-serif;
+  overflow:hidden;
+}
+code,pre,kbd,.mono,textarea.sql-input{font-family:'Fira Code',monospace}
+
+/* ---------- frame ---------- */
+#progressbar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--orange));width:0%;z-index:60;transition:width .35s ease}
+header.hud{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;pointer-events:none;
+}
+.hud .brand{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted)}
+.hud .brand .prompt{
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:4px 10px;color:var(--teal);font-family:'Fira Code',monospace;font-size:.8rem;
+}
+.hud .right{display:flex;align-items:center;gap:10px;pointer-events:auto}
+.badge-slide{
+  background:var(--card);border:1px solid var(--line);color:var(--muted);
+  font-family:'Fira Code',monospace;font-size:.8rem;border-radius:8px;padding:4px 12px;
+}
+.badge-score{
+  background:var(--orange-dim);border:1px solid rgba(248,113,113,.4);color:var(--orange);
+  font-family:'Fira Code',monospace;font-size:.8rem;border-radius:8px;padding:4px 12px;
+}
+
+/* ---------- slides ---------- */
+.slide{
+  position:absolute;inset:0;display:none;
+  padding:84px 7vw 96px;overflow-y:auto;
+}
+.slide.active{display:block}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Fira Code',monospace;font-size:.78rem;letter-spacing:.08em;
+  color:var(--teal);background:var(--teal-dim);border:1px solid rgba(251,191,36,.35);
+  border-radius:999px;padding:5px 14px;margin-bottom:14px;text-transform:uppercase;
+}
+.eyebrow.naranja{color:var(--orange);background:var(--orange-dim);border-color:rgba(248,113,113,.4)}
+h1.title{font-weight:800;font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin-bottom:.4em}
+h2.stitle{font-weight:800;font-size:clamp(1.5rem,3.4vw,2.3rem);margin-bottom:.5em}
+.lead-x{color:var(--muted);font-size:1.05rem;max-width:62ch}
+.accent{color:var(--teal)}
+.accent-o{color:var(--orange)}
+
+.card-x{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:20px 22px;height:100%;
+}
+.card-x h5{font-weight:700;display:flex;align-items:center;gap:10px}
+.card-x h5 i{color:var(--teal)}
+.card-x p,.card-x li{color:var(--muted);font-size:.95rem;margin-bottom:.3rem}
+.card-x.hl{border-color:rgba(251,191,36,.5);box-shadow:0 0 0 1px rgba(251,191,36,.2) inset}
+.card-x.warn{border-color:rgba(248,113,113,.5)}
+.card-x.warn h5 i{color:var(--orange)}
+
+pre.code{
+  background:#0c0905;border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;color:#d7e3ff;font-size:.92rem;line-height:1.6;overflow-x:auto;margin:0;
+}
+pre.code .kw{color:var(--teal);font-weight:600}
+pre.code .str{color:var(--orange)}
+pre.code .num{color:#c792ea}
+pre.code .com{color:#5b6b8f;font-style:italic}
+.code-head{
+  display:flex;align-items:center;gap:8px;background:#0c0905;border:1px solid var(--line);
+  border-bottom:none;border-radius:12px 12px 0 0;padding:8px 14px;
+  font-family:'Fira Code',monospace;font-size:.75rem;color:var(--muted);
+}
+.code-head .dot{width:9px;height:9px;border-radius:50%}
+.code-head + pre.code{border-radius:0 0 12px 12px}
+
+table.tbl{width:100%;border-collapse:collapse;font-size:.9rem}
+table.tbl th{
+  background:var(--card2);color:var(--teal);font-family:'Fira Code',monospace;
+  font-weight:600;font-size:.8rem;padding:9px 12px;border:1px solid var(--line);text-align:left;
+}
+table.tbl td{padding:8px 12px;border:1px solid var(--line);color:var(--ink)}
+table.tbl td.mut{color:var(--muted)}
+table.tbl tr.bad td{background:rgba(255,107,129,.08)}
+table.tbl td .pk{color:var(--orange);font-weight:600}
+table.tbl td .fk{color:var(--teal);font-weight:600}
+
+.kbd{
+  background:var(--card);border:1px solid var(--line);border-bottom-width:3px;
+  border-radius:7px;padding:2px 9px;font-family:'Fira Code',monospace;font-size:.8rem;color:var(--ink);
+}
+ul.checks{list-style:none;padding-left:0}
+ul.checks li{padding-left:1.7em;position:relative;margin-bottom:.5rem;color:var(--muted)}
+ul.checks li::before{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;color:var(--teal);position:absolute;left:0}
+ul.crosses li::before{content:'\f00d';color:var(--bad)}
+
+.big-num{font-family:'Fira Code',monospace;font-weight:600;font-size:2.4rem;color:var(--teal)}
+.pill-time{
+  font-family:'Fira Code',monospace;font-size:.78rem;color:var(--orange);
+  background:var(--orange-dim);border-radius:6px;padding:2px 10px;white-space:nowrap;
+}
+.agenda-row{
+  display:flex;align-items:center;gap:16px;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin-bottom:10px;
+}
+.agenda-row .n{font-family:'Fira Code',monospace;color:var(--teal);font-weight:600;min-width:2ch}
+.agenda-row .t{flex:1}
+
+/* relación diagrams */
+.rel-box{
+  background:var(--card2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 16px;font-family:'Fira Code',monospace;font-size:.85rem;text-align:center;
+}
+.rel-arrow{color:var(--orange);font-family:'Fira Code',monospace;font-size:.85rem;text-align:center}
+
+/* ---------- lab ---------- */
+.exercise{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:18px;
+}
+.exercise.done{border-color:rgba(61,220,132,.55);box-shadow:0 0 0 1px rgba(61,220,132,.25) inset}
+.exercise .ex-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.exercise .ex-num{
+  font-family:'Fira Code',monospace;color:var(--orange);font-weight:600;font-size:.85rem;
+}
+.exercise .ex-status{font-size:1.1rem;color:var(--muted)}
+.exercise.done .ex-status{color:var(--ok)}
+.exercise p.enun{color:var(--ink);font-size:.97rem;margin-bottom:10px}
+textarea.sql-input{
+  width:100%;background:#0c0905;border:1px solid var(--line);border-radius:10px;
+  color:#d7e3ff;font-size:.95rem;padding:12px 14px;resize:vertical;min-height:64px;
+  caret-color:var(--teal);
+}
+textarea.sql-input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(251,191,36,.15)}
+textarea.sql-input::placeholder{color:#44557d}
+.btn-verify{
+  background:var(--teal);border:none;color:#2a1c02;font-weight:700;border-radius:9px;padding:8px 18px;
+}
+.btn-verify:hover{background:#3ee2d2;color:#2a1c02}
+.btn-hint{
+  background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 14px;
+}
+.btn-hint:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ---------- nav ---------- */
+nav.navbtns{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;
+  background:linear-gradient(transparent, rgba(11,18,32,.92) 40%);
+}
+.btn-nav{
+  background:var(--card);border:1px solid var(--line);color:var(--ink);
+  border-radius:10px;padding:9px 20px;font-weight:600;
+}
+.btn-nav:hover{border-color:var(--teal);color:var(--teal)}
+.btn-nav:disabled{opacity:.35}
+.nav-help{color:var(--muted);font-size:.8rem;font-family:'Fira Code',monospace}
+
+/* scrollbars */
+.slide::-webkit-scrollbar{width:8px}
+.slide::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+/* SweetAlert dark fixes */
+.swal2-popup{font-family:'Sora',sans-serif!important}
+.swal-radio-list{display:flex;flex-direction:column;gap:10px;text-align:left}
+.swal-radio-list label{
+  display:flex;gap:10px;align-items:flex-start;background:var(--card2);
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;color:var(--ink);
+  font-size:.95rem;
+}
+.swal-radio-list label:hover{border-color:var(--teal)}
+.swal-radio-list input{margin-top:4px;accent-color:var(--teal)}
+
+@media (max-width:768px){
+  .slide{padding:78px 5vw 100px}
+  .nav-help{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .animate__animated{animation:none!important}
+}
+
+.exercise{position:relative}
+.exercise.locked{pointer-events:none}
+.exercise.locked > *{opacity:.25;filter:blur(1px)}
+.exercise.locked::after{
+  content:'\1F512  Completá el ejercicio anterior para desbloquear';
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Fira Code',monospace;font-size:.85rem;color:var(--muted);
+  background:rgba(15,12,8,.55);border-radius:16px;opacity:1;filter:none;
+}
+.capa{
+  background:var(--card2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 14px;text-align:center;font-family:'Fira Code',monospace;
+}
+.capa.disc{border-color:#5865F2;color:#a8b3ff}
+.capa.cmd{border-color:var(--orange);color:var(--orange)}
+.capa.fac{border-color:var(--teal);color:var(--teal)}
+.capa.dom{border-color:var(--muted);color:var(--muted)}
+.disc-msg{
+  background:#36393f;border-radius:8px;padding:10px 14px;color:#dcddde;
+  font-size:.85rem;font-family:'gg sans','Sora',sans-serif;border-left:4px solid #5865F2;
+}
+.disc-msg .nick{color:#5865F2;font-weight:600}
+.disc-msg .bot{background:#5865F2;color:#fff;font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle}
+.disc-msg .cmd-text{color:#fbbf24;font-family:'Fira Code',monospace}
+</style>
+</head>
+<body>
+
+<div id="progressbar"></div>
+
+<header class="hud">
+  <div class="brand">
+    <span class="prompt">csharp&gt;</span>
+    <span class="d-none d-md-inline">Programación II · Façade · Bot de Discord</span>
+  </div>
+  <div class="right">
+    <span class="badge-score" id="scoreBadge" title="Puntos de la clase"><i class="fa-solid fa-star"></i> 0 pts</span>
+    <span class="badge-slide" id="slideBadge">1 / 25</span>
+  </div>
+</header>
+
+<main id="deck">
+
+<!-- 1. PORTADA -->
+<section class="slide">
+  <div class="d-flex flex-column justify-content-center" style="min-height:70vh">
+    <span class="eyebrow"><i class="fa-brands fa-discord"></i> Programación II · Patrones · Façade</span>
+    <h1 class="title">Un bot de Discord en C#<br>con el patrón <span class="accent">Façade</span></h1>
+    <p class="lead-x">Cómo separar el dominio del transporte · Por qué la fachada permite probar y postergar el bot · Singleton, inyección de dependencias y secretos · Recorrido completo de la demo del repositorio</p>
+    <div class="mt-4 d-flex gap-3 flex-wrap">
+      <span class="badge-slide"><i class="fa-solid fa-book"></i> Refactoring Guru · Façade (GoF)</span>
+      <span class="badge-slide"><i class="fa-solid fa-unlock"></i> 6 ejercicios desbloqueables</span>
+    </div>
+    <p class="mt-5 nav-help">Navegá con <span class="kbd">←</span> <span class="kbd">→</span> o los botones de abajo</p>
+  </div>
+</section>
+
+<!-- 2. AGENDA -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-list-check"></i> Hoja de ruta</span>
+  <h2 class="stitle">El recorrido de hoy</h2>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-8">
+      <div class="agenda-row"><span class="n">01</span><span class="t">Façade: el patrón, su intención y la metáfora</span></div>
+      <div class="agenda-row"><span class="n">02</span><span class="t">El problema concreto: bot + dominio enredados</span></div>
+      <div class="agenda-row"><span class="n">03</span><span class="t">Arquitectura en capas: Discord → Commands → Façade → Domain</span></div>
+      <div class="agenda-row"><span class="n">04</span><span class="t">El dominio: User, Role y el repositorio</span></div>
+      <div class="agenda-row"><span class="n">05</span><span class="t">La clase Facade: singleton e inyección para tests</span></div>
+      <div class="agenda-row"><span class="n">06</span><span class="t">El primer admin: un secreto fuera del repo</span></div>
+      <div class="agenda-row"><span class="n">07</span><span class="t">El bot en sí: comandos y la magia de "una sola línea"</span></div>
+      <div class="agenda-row"><span class="n">08</span><span class="t">Modo dual: la fachada se prueba sin Discord</span></div>
+      <div class="agenda-row"><span class="n">09</span><span class="t"><strong class="accent-o">Cadena de ejercicios desbloqueables</strong></span></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-x hl">
+        <h5><i class="fa-solid fa-bullseye"></i> Al final vas a poder</h5>
+        <ul class="checks mt-3">
+          <li>Reconocer cuándo una clase es una fachada</li>
+          <li>Diseñar una fachada para tu propio proyecto</li>
+          <li>Probar el dominio sin levantar el bot</li>
+          <li>Justificar el patrón ante el equipo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. PATRÓN -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-building"></i> El patrón</span>
+  <h2 class="stitle">Façade: la puerta única a un subsistema</h2>
+  <p class="lead-x">Un <strong class="accent">patrón estructural</strong> del catálogo de la <em>Gang of Four</em>. Provee una <strong>interfaz simple y unificada</strong> a un conjunto de clases más complejo. El cliente habla con la fachada; la fachada coordina por dentro.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-6">
+      <div class="card-x">
+        <h5><i class="fa-solid fa-quote-left"></i> Intención</h5>
+        <p>Reducir el acoplamiento entre un cliente y un subsistema compuesto por muchas clases. El cliente no necesita conocer la estructura interna ni el orden en que se invocan las operaciones — solo conoce <strong>la fachada</strong>.</p>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card-x hl">
+        <h5><i class="fa-solid fa-bell-concierge"></i> La metáfora</h5>
+        <p>Pensá en la <strong class="accent">recepción de un hotel</strong>. No vas hasta lavandería para pedir toallas, ni hasta la cocina para que te suban un café, ni a la sala de máquinas si no funciona el aire. Vas a recepción. Recepción coordina con todos los servicios internos. Para vos, el hotel es <em>una sola interfaz</em>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="card-x mt-4 warn">
+    <h5><i class="fa-solid fa-circle-info"></i> Antes de seguir: ¿qué NO es Façade?</h5>
+    <p>No es ocultar un objeto detrás de otro objeto idéntico (eso es Proxy). No es agregar comportamiento dinámicamente (eso es Decorator). No es convertir una interfaz en otra incompatible (eso es Adapter). Façade <strong>simplifica</strong> el acceso a varios objetos coordinados — su valor no está en lo que hace, sino en lo que <em>oculta</em>.</p>
+  </div>
+</section>
+
+<!-- 4. PROBLEMA -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-bug"></i> El problema</span>
+  <h2 class="stitle">Sin fachada: bot y dominio se enredan</h2>
+  <p class="lead-x">Imaginá que el comando de Discord conoce directamente todas las clases del dominio. Cada comando del bot toca usuarios, roles y repositorios. Veámoslo:</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> UserInfoCommand.cs · versión SIN façade (hipotética)</div>
+      <pre class="code"><span class="kw">public async Task</span> ExecuteAsync(<span class="kw">string</span> displayName = <span class="kw">null</span>)
+{
+    <span class="kw">var</span> repository = <span class="kw">new</span> UsersRepository();
+    User user = repository.Find(displayName);
+    <span class="kw">if</span> (user == <span class="kw">null</span>) {
+        <span class="kw">await</span> ReplyAsync(<span class="str">"Usuario no existe"</span>);
+        <span class="kw">return</span>;
+    }
+    <span class="kw">string</span> roles = <span class="kw">string</span>.Join(<span class="str">", "</span>, user.Roles);
+    <span class="kw">await</span> ReplyAsync($<span class="str">"Tiene roles: {roles}"</span>);
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x warn h-auto mb-3">
+        <h5><i class="fa-solid fa-link"></i> ¿Qué se rompe acá?</h5>
+        <ul class="checks crosses mt-2">
+          <li>El comando conoce <span class="mono">UsersRepository</span>, <span class="mono">User</span> y <span class="mono">Role</span>: tres clases.</li>
+          <li>Si la lógica de "qué decir cuando no existe" cambia, hay que tocar cada comando.</li>
+          <li>Probar la lógica requiere levantar Discord o mockear el contexto del bot.</li>
+          <li>Cada vez que se quiera agregar una funcionalidad, los detalles del dominio se repiten en otro comando.</li>
+        </ul>
+      </div>
+      <div class="card-x h-auto hl">
+        <h5><i class="fa-solid fa-lightbulb"></i> Lo que queremos</h5>
+        <p>Que el comando le diga a UN objeto: <em>"¿qué información hay del usuario X?"</em>, reciba la respuesta lista, y la devuelva. Nada más.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. ARQUITECTURA EN CAPAS -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-layer-group"></i> Solución</span>
+  <h2 class="stitle">Cuatro capas, una sola puerta</h2>
+  <p class="lead-x">La demo organiza el código en cuatro capas. Las flechas marcan la dirección permitida de conocimiento — y notá que <strong class="accent">la fachada es el único punto por donde pasa todo</strong>.</p>
+  <svg viewBox="0 0 1100 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arquitectura de capas" style="width:100%;max-width:1050px;display:block;margin:20px auto 0">
+    <defs>
+      <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#f87171"/>
+      </marker>
+    </defs>
+    <g font-family="Fira Code, monospace" text-anchor="middle">
+      <rect x="20" y="40" width="220" height="240" rx="14" fill="#0c0905" stroke="#5865F2" stroke-width="2"/>
+      <text x="130" y="65" fill="#a8b3ff" font-size="13" font-weight="600">DISCORD</text>
+      <text x="130" y="90" fill="#94a5c6" font-size="10">(externo)</text>
+      <rect x="40" y="110" width="180" height="36" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="130" y="133" fill="#dcddde" font-size="11">usuario escribe !who</text>
+      <rect x="40" y="160" width="180" height="36" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="130" y="183" fill="#dcddde" font-size="11">bot recibe mensaje</text>
+      <rect x="40" y="210" width="180" height="36" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="130" y="233" fill="#dcddde" font-size="11">bot envía respuesta</text>
+
+      <line x1="240" y1="160" x2="298" y2="160" stroke="#f87171" stroke-width="2.5" marker-end="url(#arr2)"/>
+
+      <rect x="300" y="40" width="220" height="240" rx="14" fill="#0c0905" stroke="#fbbf24" stroke-width="2"/>
+      <text x="410" y="65" fill="#fbbf24" font-size="13" font-weight="600">COMMANDS</text>
+      <text x="410" y="90" fill="#94a5c6" font-size="10">adaptador Discord ↔ Façade</text>
+      <rect x="320" y="110" width="180" height="36" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="410" y="133" fill="#fbbf24" font-size="11">UserInfoCommand</text>
+      <rect x="320" y="160" width="180" height="36" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="410" y="183" fill="#fbbf24" font-size="11">PingCommand</text>
+      <rect x="320" y="210" width="180" height="36" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="410" y="233" fill="#94a5c6" font-size="11">CommandHelper</text>
+
+      <line x1="520" y1="160" x2="578" y2="160" stroke="#f87171" stroke-width="2.5" marker-end="url(#arr2)"/>
+
+      <rect x="580" y="40" width="220" height="240" rx="14" fill="#0c0905" stroke="#fbbf24" stroke-width="3"/>
+      <text x="690" y="65" fill="#fbbf24" font-size="14" font-weight="700">FAÇADE</text>
+      <text x="690" y="90" fill="#94a5c6" font-size="10">la puerta única</text>
+      <rect x="600" y="120" width="180" height="64" rx="8" fill="#1c1610" stroke="#fbbf24"/>
+      <text x="690" y="145" fill="#fbbf24" font-size="13" font-weight="600">Facade</text>
+      <text x="690" y="167" fill="#94a5c6" font-size="10">.Instance</text>
+      <rect x="600" y="200" width="180" height="50" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="690" y="222" fill="#fbbf24" font-size="11">GetUserInfo(name)</text>
+      <text x="690" y="240" fill="#94a5c6" font-size="9">→ string</text>
+
+      <line x1="800" y1="160" x2="858" y2="160" stroke="#f87171" stroke-width="2.5" marker-end="url(#arr2)"/>
+
+      <rect x="860" y="40" width="220" height="240" rx="14" fill="#0c0905" stroke="#94a5c6" stroke-width="2"/>
+      <text x="970" y="65" fill="#94a5c6" font-size="13" font-weight="600">DOMAIN</text>
+      <text x="970" y="90" fill="#94a5c6" font-size="10">la lógica de negocio</text>
+      <rect x="880" y="110" width="180" height="34" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="970" y="131" fill="#e9effb" font-size="11">User</text>
+      <rect x="880" y="152" wIdth="180" height="34" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="970" y="173" fill="#e9effb" font-size="11">Role</text>
+      <rect x="880" y="194" width="180" height="34" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="970" y="215" fill="#e9effb" font-size="11">IUsersRepository</text>
+      <rect x="880" y="236" width="180" height="34" rx="8" fill="#241b12" stroke="#322657"/>
+      <text x="970" y="257" fill="#e9effb" font-size="11">UsersRepository</text>
+    </g>
+  </svg>
+  <div class="card-x mt-3">
+    <h5><i class="fa-solid fa-shield"></i> La regla de oro de las capas</h5>
+    <p><strong class="accent">Commands NO conoce Domain.</strong> Solo conoce a <span class="mono">Facade</span>. Si mañana cambia <span class="mono">User</span> o <span class="mono">UsersRepository</span>, los comandos no se enteran. Y al revés: el dominio no sabe que existe Discord.</p>
+  </div>
+</section>
+
+<!-- 6. DOMAIN -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-database"></i> Capa Domain</span>
+  <h2 class="stitle">Las clases del dominio: simples y encapsuladas</h2>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-4">
+      <div class="card-x">
+        <h5><i class="fa-solid fa-user"></i> User</h5>
+        <p>Tiene <span class="mono">UserName</span> y una colección <strong>privada</strong> de roles. Expone <span class="mono">AddRole</span>, <span class="mono">RemoveRole</span>, <span class="mono">HasRole</span> y un <span class="mono">Roles</span> de solo lectura.</p>
+        <pre class="code mt-2" style="font-size:.78rem"><span class="kw">private</span> ICollection&lt;Role&gt; roles
+    = <span class="kw">new</span> HashSet&lt;Role&gt;();
+<span class="kw">public</span> IReadOnlyCollection&lt;Role&gt; Roles</pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-x">
+        <h5><i class="fa-solid fa-id-badge"></i> Role</h5>
+        <p>Solo tiene <span class="mono">Name</span>, validado en el constructor. Dos roles "comunes" pre-construidos como propiedades estáticas:</p>
+        <pre class="code mt-2" style="font-size:.78rem"><span class="kw">public static</span> Role Admin { <span class="kw">get</span>; }
+    = <span class="kw">new</span> Role(<span class="str">"Admin"</span>);
+<span class="kw">public static</span> Role User { <span class="kw">get</span>; }
+    = <span class="kw">new</span> Role(<span class="str">"User"</span>);</pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-x hl">
+        <h5><i class="fa-solid fa-box-archive"></i> UsersRepository</h5>
+        <p>Implementa <strong><span class="mono">IUsersRepository</span></strong> (interfaz). Guarda usuarios y los busca por nombre. La interfaz permite <strong class="accent">mockearlo en tests</strong>.</p>
+        <pre class="code mt-2" style="font-size:.78rem">User Find(<span class="kw">string</span> userName);
+IReadOnlyCollection&lt;User&gt; AllUsers</pre>
+      </div>
+    </div>
+  </div>
+  <div class="card-x mt-4">
+    <h5><i class="fa-solid fa-quote-left"></i> Detalle importante</h5>
+    <p>Estas clases <strong>no saben que existe Discord</strong>, ni la fachada, ni nada externo. Son puro dominio: representan el negocio "usuarios con roles" y nada más. Esa es la condición que hace posible la fachada.</p>
+  </div>
+  <div class="text-center mt-3">
+    <button class="btn btn-verify btn-lg" onclick="quizDominio()"><i class="fa-solid fa-gamepad"></i> Mini-quiz: encapsulación del dominio</button>
+  </div>
+</section>
+
+<!-- 7. FACADE EN CÓDIGO -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-door-open"></i> La Façade</span>
+  <h2 class="stitle">Anatomía de la clase <span class="mono accent">Facade</span></h2>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> Facade.cs (resumido)</div>
+      <pre class="code"><span class="kw">public class</span> Facade
+{
+    <span class="kw">private static</span> Facade instance;
+
+    <span class="com">// constructor privado: nadie crea instancias desde afuera</span>
+    <span class="kw">private</span> Facade()
+    {
+        <span class="kw">this</span>.usersRepository = <span class="kw">new</span> UsersRepository();
+    }
+
+    <span class="com">// constructor interno: para inyectar un mock en tests</span>
+    <span class="kw">internal</span> Facade(IUsersRepository repository)
+    {
+        ArgumentNullException.ThrowIfNull(repository);
+        <span class="kw">this</span>.usersRepository = repository;
+    }
+
+    <span class="kw">public static</span> Facade Instance
+    {
+        <span class="kw">get</span>
+        {
+            <span class="kw">if</span> (instance == <span class="kw">null</span>)
+            {
+                instance = <span class="kw">new</span> Facade();
+            }
+            <span class="kw">return</span> instance;
+        }
+    }
+
+    <span class="kw">private</span> IUsersRepository usersRepository;
+
+    <span class="kw">public string</span> GetUserInfo(<span class="kw">string</span> userName) { … }
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x h-auto mb-3">
+        <h5><i class="fa-solid fa-1"></i> Singleton</h5>
+        <p>Constructor privado + propiedad estática <span class="mono">Instance</span>. Solo existe <strong>una</strong> fachada en toda la aplicación. Los comandos siempre obtienen la misma.</p>
+      </div>
+      <div class="card-x h-auto mb-3 hl">
+        <h5><i class="fa-solid fa-flask-vial"></i> El constructor <span class="mono">internal</span></h5>
+        <p>Existe específicamente para tests: permite construir una fachada con un <span class="mono">IUsersRepository</span> falso. Decisión de diseño consciente: el patrón Façade <strong class="accent">habilita el testing aislado</strong>.</p>
+      </div>
+      <div class="card-x h-auto warn">
+        <h5><i class="fa-solid fa-triangle-exclamation"></i> Ojo con el singleton</h5>
+        <p>Esta implementación NO es thread-safe (dos hilos podrían crear dos instancias en la primera invocación concurrente). Para el bot de la demo alcanza, pero es bueno saberlo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. GETUSERINFO -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-door-open"></i> La Façade</span>
+  <h2 class="stitle">El método clave: <span class="mono accent">GetUserInfo</span></h2>
+  <p class="lead-x">Acá vive la única lógica que los comandos necesitan invocar para responder al usuario. Coordina con el repositorio y formatea el mensaje:</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> Facade.cs · método</div>
+      <pre class="code"><span class="kw">public string</span> GetUserInfo(<span class="kw">string</span> userName)
+{
+    <span class="kw">string</span> result;
+    User userFound = <span class="kw">this</span>.usersRepository.Find(userName);
+
+    <span class="kw">if</span> (userFound == <span class="kw">null</span>)
+    {
+        result = $<span class="str">"El usuario de Discord '{userName}' no es "</span> +
+                 $<span class="str">"usuario de esta aplicación."</span>;
+    }
+    <span class="kw">else</span>
+    {
+        <span class="kw">string</span> roles = <span class="kw">string</span>.Join(<span class="str">", "</span>, userFound.Roles);
+        result = $<span class="str">"El usuario '{userName}' tiene los roles "</span> +
+                 $<span class="str">"'{roles}' en esta aplicación."</span>;
+    }
+
+    <span class="kw">return</span> result;
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <ul class="checks mt-2">
+        <li>Recibe un <span class="mono">string</span>, devuelve un <span class="mono">string</span>. Más simple imposible.</li>
+        <li>El cliente (el comando) <strong>nunca</strong> ve <span class="mono">User</span> ni <span class="mono">Role</span>: la fachada los maneja por dentro.</li>
+        <li>Si mañana cambiamos el mensaje, lo tocamos en <strong>un solo lugar</strong>.</li>
+        <li>Si cambia el dominio (otra forma de buscar usuarios), los comandos no se enteran.</li>
+      </ul>
+      <div class="card-x h-auto mt-3 hl">
+        <h5><i class="fa-solid fa-magnifying-glass"></i> Notá lo que está pasando</h5>
+        <p>Esto es <strong class="accent">la fachada haciendo su trabajo</strong>: traduce una operación de negocio compleja ("buscar usuario, ver si existe, listar sus roles, formatear el resultado") en una llamada simple ("dame info de X").</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. PRIMER ADMIN -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-user-shield"></i> Bootstrapping</span>
+  <h2 class="stitle">El acertijo del primer administrador</h2>
+  <p class="lead-x">Las historias de usuario dicen: <strong>"solo un admin puede crear otros usuarios"</strong>. Pero entonces… ¿quién crea al primer admin? Es el problema clásico del huevo y la gallina.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-6">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> UsersRepository.cs (extracto)</div>
+      <pre class="code"><span class="kw">private void</span> AddFirstAdmin()
+{
+    <span class="kw">var</span> configuration = <span class="kw">new</span> ConfigurationBuilder()
+        .AddUserSecrets(Assembly.GetExecutingAssembly())
+        .Build();
+
+    <span class="kw">string</span> firstAdminName = configuration[<span class="str">"FirstAdmin"</span>];
+    <span class="kw">if</span> (<span class="kw">string</span>.IsNullOrEmpty(firstAdminName))
+    {
+        <span class="kw">throw new</span> InvalidOperationException(
+            <span class="str">"Falta el primer administrador."</span>);
+    }
+
+    User firstAdmin = <span class="kw">new</span> User(firstAdminName);
+    firstAdmin.AddRole(Role.Admin);
+    firstAdmin.AddRole(Role.User);
+    <span class="kw">this</span>.users.Add(firstAdmin);
+}</pre>
+    </div>
+    <div class="col-lg-6">
+      <div class="card-x h-auto mb-3">
+        <h5><i class="fa-solid fa-key"></i> La solución</h5>
+        <p>El constructor del repositorio <strong>siembra</strong> al primer admin. Su nombre viene de <span class="mono accent">secrets.json</span>: un archivo local en cada máquina, <strong>fuera del repo de GitHub</strong>.</p>
+      </div>
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> ~/.microsoft/usersecrets/.../secrets.json</div>
+      <pre class="code">{
+  <span class="str">"DiscordToken"</span>: <span class="str">"&lt;token&gt;"</span>,
+  <span class="str">"FirstAdmin"</span>: <span class="str">"&lt;usuario_discord&gt;"</span>
+}</pre>
+      <div class="card-x h-auto warn mt-3">
+        <h5><i class="fa-solid fa-lock"></i> ¿Por qué tanto trabajo?</h5>
+        <p>Si el token y el nombre fueran a GitHub, cualquiera que viera el repo podría operar tu bot. Esta práctica de <strong class="accent-o">secretos por máquina</strong> escala bien: en producción se reemplaza por variables de entorno o un secret manager.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. COMANDO USERINFO -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-brands fa-discord"></i> Capa Commands</span>
+  <h2 class="stitle">El comando que TODO el bot necesita escribir</h2>
+  <p class="lead-x"><span class="mono">UserInfoCommand</span> responde a <span class="mono accent-o">!who [usuario]</span>. Toda su conexión con el dominio es <strong>una sola línea</strong>. Buscala:</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> UserInfoCommand.cs</div>
+      <pre class="code"><span class="kw">public class</span> UserInfoCommand : ModuleBase&lt;SocketCommandContext&gt;
+{
+    [Command(<span class="str">"who"</span>)]
+    <span class="kw">public async Task</span> ExecuteAsync(
+        [Remainder] <span class="kw">string</span> displayName = <span class="kw">null</span>)
+    {
+        <span class="kw">if</span> (displayName != <span class="kw">null</span>)
+        {
+            SocketGuildUser user =
+                CommandHelper.GetUser(Context, displayName);
+            <span class="kw">if</span> (user == <span class="kw">null</span>)
+                <span class="kw">await</span> ReplyAsync($<span class="str">"No encuentro '{displayName}'"</span>);
+        }
+
+        <span class="kw">string</span> userName =
+            displayName ?? CommandHelper.GetDisplayName(Context);
+
+<mark style="background:rgba(251,191,36,.20);color:inherit;display:block">        <span class="kw">string</span> result = Facade.Instance.GetUserInfo(userName);</mark>
+
+        <span class="kw">await</span> ReplyAsync(result);
+    }
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x h-auto mb-3 hl">
+        <h5><i class="fa-solid fa-bullseye"></i> La línea resaltada</h5>
+        <p>Es la <strong>única</strong> en todo el comando que toca el dominio. Todo lo demás es plomería de Discord: obtener el nombre, manejar el parámetro opcional, responder al canal.</p>
+      </div>
+      <div class="card-x h-auto">
+        <h5><i class="fa-solid fa-arrows-rotate"></i> ¿Y para un comando nuevo?</h5>
+        <p>Cualquier comando futuro (<span class="mono">!adduser</span>, <span class="mono">!addrole</span>, <span class="mono">!list</span>…) va a tener exactamente la misma estructura: extraer parámetros del contexto de Discord, llamar a <strong class="accent">un método de la fachada</strong>, devolver la respuesta. La fachada crece; los comandos son siempre delgados.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. FLUJO COMPLETO -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-route"></i> El flujo completo</span>
+  <h2 class="stitle">Un mensaje, de punta a punta</h2>
+  <p class="lead-x">Seguí el viaje de un <span class="mono accent-o">!who Fernando</span> desde el servidor de Discord hasta el dominio y de vuelta:</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-6">
+      <div class="disc-msg mb-2"><span class="nick">@Fer</span>: <span class="cmd-text">!who Fernando</span></div>
+      <div class="text-center" style="color:var(--bad);font-size:1.2rem">▼</div>
+      <div class="capa disc mb-2"><strong>Bot.HandleCommandAsync</strong><br><span style="font-size:.7rem;opacity:.8">detecta el prefijo '!' y delega</span></div>
+      <div class="text-center" style="color:var(--bad);font-size:1.2rem">▼</div>
+      <div class="capa cmd mb-2"><strong>UserInfoCommand.ExecuteAsync</strong><br><span style="font-size:.7rem;opacity:.8">resuelve "Fernando" como displayName</span></div>
+      <div class="text-center" style="color:var(--bad);font-size:1.2rem">▼</div>
+      <div class="capa fac mb-2"><strong>Facade.Instance.GetUserInfo("Fernando")</strong><br><span style="font-size:.7rem;opacity:.8">pregunta al repositorio</span></div>
+      <div class="text-center" style="color:var(--bad);font-size:1.2rem">▼</div>
+      <div class="capa dom mb-2"><strong>usersRepository.Find("Fernando")</strong><br><span style="font-size:.7rem;opacity:.8">recorre la lista y devuelve User</span></div>
+    </div>
+    <div class="col-lg-6">
+      <div class="capa dom mb-2"><strong>User encontrado</strong><br><span style="font-size:.7rem;opacity:.8">UserName + Roles {Admin, User}</span></div>
+      <div class="text-center" style="color:var(--teal);font-size:1.2rem">▲</div>
+      <div class="capa fac mb-2"><strong>Facade arma el string</strong><br><span style="font-size:.7rem;opacity:.8">"El usuario 'Fernando' tiene los roles 'Admin, User'…"</span></div>
+      <div class="text-center" style="color:var(--teal);font-size:1.2rem">▲</div>
+      <div class="capa cmd mb-2"><strong>ReplyAsync(result)</strong><br><span style="font-size:.7rem;opacity:.8">manda el mensaje al canal</span></div>
+      <div class="text-center" style="color:var(--teal);font-size:1.2rem">▲</div>
+      <div class="disc-msg mb-2"><span class="nick">DemoBot<span class="bot">BOT</span></span><br>El usuario 'Fernando' tiene los roles 'Admin, User' en esta aplicación.</div>
+      <div class="card-x mt-3 hl">
+        <h5><i class="fa-solid fa-lightbulb"></i> ¿Notaste?</h5>
+        <p>Las capas <strong class="accent">no se saltean</strong>. El comando no consulta al repositorio. La fachada no escribe en el canal. Cada una hace su parte.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. MODO DUAL -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-arrows-split-up-and-left"></i> El premio</span>
+  <h2 class="stitle">Modo dual: la fachada vive sin Discord</h2>
+  <p class="lead-x">El <span class="mono">Program.cs</span> de la demo prueba el punto en código: si recibe un argumento, invoca directamente a la fachada; si no, levanta el bot.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-6">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> Program.cs</div>
+      <pre class="code"><span class="kw">private static void</span> Main(<span class="kw">string</span> [] args)
+{
+    <span class="kw">if</span> (args.Length != 0)
+    {
+        DemoFacade(args);   <span class="com">// sin bot</span>
+    }
+    <span class="kw">else</span>
+    {
+        DemoBot();          <span class="com">// con bot</span>
+    }
+}
+
+<span class="kw">private static void</span> DemoFacade(<span class="kw">string</span> [] args)
+{
+    <span class="kw">if</span> (args.Length &gt; 0)
+    {
+        Console.WriteLine(
+            Facade.Instance.GetUserInfo(args[<span class="num">0</span>]));
+    }
+}
+
+<span class="kw">private static void</span> DemoBot()
+{
+    BotLoader.LoadAsync().GetAwaiter().GetResult();
+}</pre>
+    </div>
+    <div class="col-lg-6">
+      <div class="card-x h-auto mb-3">
+        <h5><i class="fa-solid fa-terminal"></i> Probarla sin Discord</h5>
+        <pre class="code mt-2" style="font-size:.78rem">$ dotnet run -- Fernando
+
+El usuario 'Fernando' tiene
+los roles 'Admin, User' en
+esta aplicación.</pre>
+      </div>
+      <div class="card-x h-auto hl">
+        <h5><i class="fa-solid fa-quote-left"></i> La cita clave del teórico</h5>
+        <p><em>"Es posible programar toda la funcionalidad pedida en la façade sin preocuparse por el bot de Discord, y agregar al final la funcionalidad del bot sin modificaciones a la façade."</em></p>
+        <p class="mt-2">Esto no es una promesa: es un hecho demostrable. Toda la suite de tests (<span class="mono">FacadeTests</span>) corre <strong>sin Discord, sin secrets.json, sin token</strong>. Solo con un mock del repositorio.</p>
+      </div>
+    </div>
+  </div>
+  <div class="text-center mt-3">
+    <button class="btn btn-verify btn-lg" onclick="quizDual()"><i class="fa-solid fa-gamepad"></i> Mini-quiz: modo dual</button>
+  </div>
+</section>
+
+<!-- 13. TESTS -->
+<section class="slide">
+  <span class="eyebrow"><i class="fa-solid fa-vial"></i> Testing</span>
+  <h2 class="stitle">Por qué Façade es tan fácil de probar</h2>
+  <p class="lead-x">El constructor <span class="mono">internal</span> y la interfaz <span class="mono">IUsersRepository</span> trabajan juntos: en el test inyectamos un mock y la fachada queda aislada.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-7">
+      <div class="code-head"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span> FacadeTests.cs (extracto)</div>
+      <pre class="code">[Test]
+<span class="kw">public void</span> GetUserInfo_WhenUserNotFound_ReturnsNotFoundMessage()
+{
+    Mock&lt;IUsersRepository&gt; mockedRepository;
+    <span class="kw">var</span> facade = CreateFacadeWithMockRepo(<span class="kw">out</span> mockedRepository);
+    mockedRepository.Setup(r =&gt; r.Find(<span class="str">"Test"</span>)).Returns((User)<span class="kw">null</span>);
+
+    <span class="kw">var</span> actual = facade.GetUserInfo(<span class="str">"Test"</span>);
+
+    Assert.That(actual, Is.EqualTo(
+        <span class="str">"El usuario de Discord 'Test' no es usuario de esta aplicación."</span>));
+}</pre>
+    </div>
+    <div class="col-lg-5">
+      <ul class="checks mt-2">
+        <li><strong>Sin Discord:</strong> el test no necesita un servidor ni un token.</li>
+        <li><strong>Sin base de datos:</strong> el repositorio real (que lee secrets.json) ni se construye.</li>
+        <li><strong>Determinístico:</strong> el mock responde exactamente lo que pedimos.</li>
+        <li><strong>Rápido:</strong> milisegundos por test, no segundos.</li>
+      </ul>
+      <div class="card-x h-auto mt-3">
+        <h5><i class="fa-solid fa-handshake"></i> El cierre del argumento</h5>
+        <p>La fachada no es solo una "puerta": es <strong class="accent">un punto de testing y de evolución</strong>. Por eso ese constructor <span class="mono">internal</span> existe con todo el comentario explicativo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14. LAB INTRO -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-unlock"></i> Ejercicios desbloqueables</span>
+  <h2 class="stitle">Construyamos un nuevo método de la fachada</h2>
+  <p class="lead-x">Vas a extender la fachada con la operación <strong class="accent">"agregar un nuevo usuario común"</strong>. El comando que la usa va a ser <span class="mono accent-o">!adduser &lt;nombre&gt;</span>. La cadena son 6 pasos: cada uno desbloquea al siguiente.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-lg-7">
+      <div class="agenda-row"><span class="n">E1</span><span class="t">Detectar el patrón en una línea</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E2</span><span class="t">Singleton: la línea de creación lazy</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E3</span><span class="t">Firma del nuevo método en la fachada</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E4</span><span class="t">El método Add en IUsersRepository</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">E5</span><span class="t">El cuerpo del nuevo método de la fachada</span><span class="pill-time">10 pts</span></div>
+      <div class="agenda-row"><span class="n">★</span><span class="t"><strong class="accent-o">Desafío:</strong> el comando !adduser que delega en la fachada</span><span class="pill-time">20 pts</span></div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-x hl">
+        <h5><i class="fa-solid fa-circle-info"></i> Reglas</h5>
+        <ul class="checks mt-2">
+          <li>Escribí <strong>solo</strong> lo que pide cada enunciado (una línea o una firma).</li>
+          <li>Las palabras clave de C# en minúscula (<span class="mono">public</span>, <span class="mono">new</span>, <span class="mono">void</span>); los tipos con la convención (<span class="mono">User</span>, <span class="mono">Role</span>).</li>
+          <li>El <span class="mono">;</span> final es opcional.</li>
+          <li>Pista disponible: reduce el puntaje a la mitad.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="text-center mt-4">
+    <button class="btn btn-verify btn-lg" onclick="nextSlide()"><i class="fa-solid fa-play"></i> Empezar la cadena</button>
+  </div>
+</section>
+
+<!-- 15. LAB E1-E3 -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-unlock"></i> Cadena · Parte 1</span>
+  <h2 class="stitle">Ejercicios 1 a 3 <span class="nav-help lab-progress"></span></h2>
+
+  <div class="exercise" id="ex1">
+    <div class="ex-head"><span class="ex-num">E1 · DETECTIVE</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">En este comando hipotético hay UNA línea que <strong>respeta el patrón Façade</strong> (el comando le delega al dominio sin conocer sus detalles internos). Copiala tal cual aparece, sin la indentación.</p>
+    <pre class="code mb-2"><span class="kw">public async Task</span> ExecuteAsync(<span class="kw">string</span> name)
+{
+    <span class="kw">var</span> repo = <span class="kw">new</span> UsersRepository();
+    User u = repo.Find(name);
+    <span class="kw">string</span> result = Facade.Instance.GetUserInfo(name);
+    <span class="kw">await</span> ReplyAsync(result);
+}</pre>
+    <textarea class="sql-input" id="in1" rows="1" spellcheck="false" placeholder="// la línea que respeta Façade"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(1)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(1)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex2">
+    <div class="ex-head"><span class="ex-num">E2 · SINGLETON LAZY</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">En la propiedad estática <span class="mono">Instance</span>, dentro del <span class="mono">if (instance == null)</span>, escribí la línea que <strong>crea</strong> la instancia única usando el constructor privado.</p>
+    <textarea class="sql-input" id="in2" rows="1" spellcheck="false" placeholder="// la línea de creación"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(2)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(2)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex3">
+    <div class="ex-head"><span class="ex-num">E3 · FIRMA EN LA FAÇADE</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">Vamos a agregar un nuevo método a la fachada para que los comandos puedan crear usuarios. Escribí la <strong>firma</strong> del método <span class="mono accent">AddUser</span>: pública, sin retorno, recibe un <span class="mono">string userName</span>. (Solo la firma, sin el cuerpo.)</p>
+    <textarea class="sql-input" id="in3" rows="1" spellcheck="false" placeholder="// public ..."></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(3)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(3)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+</section>
+
+<!-- 16. LAB E4-E6 -->
+<section class="slide">
+  <span class="eyebrow naranja"><i class="fa-solid fa-unlock"></i> Cadena · Parte 2</span>
+  <h2 class="stitle">Ejercicios 4 a 6 <span class="nav-help lab-progress"></span></h2>
+
+  <div class="exercise locked" id="ex4">
+    <div class="ex-head"><span class="ex-num">E4 · IUsersRepository.Add</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">Para que la fachada pueda agregar usuarios, el repositorio debe exponer un método. Declará en la interfaz <span class="mono">IUsersRepository</span> el método <span class="mono accent">Add</span> que recibe un <span class="mono">User user</span> y no retorna nada. (Solo la declaración, terminada en <span class="mono">;</span>.)</p>
+    <textarea class="sql-input" id="in4" rows="1" spellcheck="false" placeholder="// void Add(...);"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(4)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(4)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex5">
+    <div class="ex-head"><span class="ex-num">E5 · CUERPO DEL MÉTODO</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">Dentro del método <span class="mono">AddUser(string userName)</span> de la fachada, ya validaste el parámetro. Ahora creá un nuevo <span class="mono">User</span> con el nombre recibido, asignalo a una variable local llamada <span class="mono">newUser</span>. (Una sola línea con la declaración, asignación y <span class="mono">new</span>.)</p>
+    <textarea class="sql-input" id="in5" rows="1" spellcheck="false" placeholder="// User newUser = ..."></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(5)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(5)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+
+  <div class="exercise locked" id="ex6">
+    <div class="ex-head"><span class="ex-num">★ DESAFÍO · EL COMANDO !adduser</span><span class="ex-status"><i class="fa-regular fa-circle"></i></span></div>
+    <p class="enun">En el nuevo comando <span class="mono accent-o">AddUserCommand</span>, dentro de su <span class="mono">ExecuteAsync(string name)</span>, escribí la <strong>única línea</strong> que delega en la fachada para crear el usuario. Recordá: el comando NO debe ver <span class="mono">User</span> ni <span class="mono">UsersRepository</span>, solo a <span class="mono">Facade</span>.</p>
+    <textarea class="sql-input" id="in6" rows="1" spellcheck="false" placeholder="// la línea de delegación"></textarea>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-verify" onclick="checkExercise(6)"><i class="fa-solid fa-check"></i> Verificar</button>
+      <button class="btn btn-hint" onclick="showHint(6)"><i class="fa-regular fa-lightbulb"></i> Pista</button>
+    </div>
+  </div>
+</section>
+
+<!-- 17. CIERRE -->
+<section class="slide">
+  <div class="d-flex flex-column justify-content-center" style="min-height:70vh">
+    <span class="eyebrow"><i class="fa-solid fa-flag-checkered"></i> Cierre</span>
+    <h2 class="stitle">Lo que te llevás de hoy</h2>
+    <div class="row g-4 mt-1">
+      <div class="col-md-6">
+        <ul class="checks">
+          <li>Façade es una puerta única a un subsistema: el cliente conoce poco, la fachada coordina mucho.</li>
+          <li>Cuatro capas en la demo: Discord → Commands → Façade → Domain.</li>
+          <li>El comando se conecta al dominio por <em>una sola línea</em> — todo lo demás es plomería.</li>
+          <li>El constructor <span class="mono">internal</span> + <span class="mono">IUsersRepository</span> habilitan testing aislado.</li>
+          <li>El modo dual del <span class="mono">Program</span> demuestra: la fachada vive sin Discord.</li>
+          <li>El primer admin sale de <span class="mono">secrets.json</span>: nunca al repo.</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <div class="card-x hl">
+          <h5><i class="fa-solid fa-house-laptop"></i> Para seguir</h5>
+          <p>Cloná <span class="mono">PII_DiscordBot_Demo</span>, creá tu <span class="mono">secrets.json</span> con tu token y tu nombre de Discord, y probá:</p>
+          <pre class="code mt-2" style="font-size:.78rem">$ dotnet run -- TuNombreDiscord</pre>
+          <p class="mt-2">Después implementá <span class="mono">!adduser</span> con los ejercicios que acabás de hacer. Recordá: en las historias de usuario reales, solo un admin debería poder ejecutarlo — esa validación también va en la fachada.</p>
+        </div>
+        <div class="card-x warn h-auto mt-3">
+          <h5><i class="fa-solid fa-triangle-exclamation"></i> Lectura obligatoria del teórico</h5>
+          <p><em>"Esto es una demo. No tomen este ejemplo como la solución correcta de ninguna de las historias de usuario."</em> Es un esqueleto para empezar a pensar, no la entrega.</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-4">
+      <button class="btn btn-verify btn-lg" onclick="showFinalScore()"><i class="fa-solid fa-trophy"></i> Ver mi puntaje final</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="navbtns">
+  <button class="btn-nav" id="btnPrev" onclick="prevSlide()"><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+  <span class="nav-help"><span class="kbd">←</span> <span class="kbd">→</span> navegar · <span class="kbd">Inicio</span>/<span class="kbd">Fin</span> saltar</span>
+  <button class="btn-nav" id="btnNext" onclick="nextSlide()">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+/* ================= NAVEGACIÓN ================= */
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const swalBase = { background:'#1c1610', color:'#e9effb', confirmButtonColor:'#fbbf24', cancelButtonColor:'#3a2d1c' };
+
+function showSlide(i, dir = 1){
+  if(i < 0 || i >= slides.length) return;
+  slides[current].classList.remove('active');
+  current = i;
+  const s = slides[current];
+  s.classList.add('active');
+  s.scrollTop = 0;
+  s.classList.remove('animate__animated','animate__fadeInRight','animate__fadeInLeft');
+  void s.offsetWidth;
+  s.classList.add('animate__animated', dir >= 0 ? 'animate__fadeInRight' : 'animate__fadeInLeft');
+  document.getElementById('slideBadge').textContent = (current+1) + ' / ' + slides.length;
+  document.getElementById('progressbar').style.width = ((current+1)/slides.length*100) + '%';
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').disabled = current === slides.length-1;
+}
+function nextSlide(){ showSlide(current+1, 1); }
+function prevSlide(){ showSlide(current-1, -1); }
+
+document.addEventListener('keydown', e => {
+  if(e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  if(Swal.isVisible()) return;
+  if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if(e.key === 'ArrowLeft'  || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+  if(e.key === 'Home'){ e.preventDefault(); showSlide(0,-1); }
+  if(e.key === 'End'){ e.preventDefault(); showSlide(slides.length-1,1); }
+});
+
+/* ================= PUNTAJE ================= */
+let score = 0;
+function addPoints(p){
+  score += p;
+  const b = document.getElementById('scoreBadge');
+  b.innerHTML = '<i class="fa-solid fa-star"></i> ' + score + ' pts';
+  b.classList.remove('animate__animated','animate__bounce');
+  void b.offsetWidth;
+  b.classList.add('animate__animated','animate__bounce');
+}
+
+/* ================= QUIZZES ================= */
+function runQuiz(title, question, options, correctIndex, explanation, points = 10){
+  const inputs = options.map((o,i) => `<label><input type="radio" name="qz" value="${i}"><span>${o}</span></label>`).join('');
+  Swal.fire({
+    ...swalBase, title,
+    html: `<p style="text-align:left;margin-bottom:14px">${question}</p><div class="swal-radio-list">${inputs}</div>`,
+    confirmButtonText: 'Responder', showCancelButton: true, cancelButtonText: 'Cancelar',
+    showClass: { popup: 'animate__animated animate__zoomIn animate__faster' },
+    hideClass: { popup: 'animate__animated animate__zoomOut animate__faster' },
+    preConfirm: () => {
+      const sel = document.querySelector('input[name="qz"]:checked');
+      if(!sel){ Swal.showValidationMessage('Elegí una opción'); return false; }
+      return parseInt(sel.value);
+    }
+  }).then(res => {
+    if(!res.isConfirmed) return;
+    if(res.value === correctIndex){
+      addPoints(points);
+      Swal.fire({ ...swalBase, icon:'success', title:'¡Correcto! +' + points + ' pts',
+        html:`<p style="text-align:left">${explanation}</p>`, showClass:{popup:'animate__animated animate__tada'} });
+    } else {
+      Swal.fire({ ...swalBase, icon:'error', title:'No es esa…',
+        html:`<p style="text-align:left">La respuesta correcta era: <strong style="color:#fbbf24">${options[correctIndex]}</strong></p><p style="text-align:left">${explanation}</p>`,
+        showClass:{popup:'animate__animated animate__shakeX'} });
+    }
+  });
+}
+
+function quizDominio(){
+  runQuiz('Mini-quiz · Dominio',
+    'La colección de roles de <code>User</code> es <code>private ICollection&lt;Role&gt; roles</code>, pero la propiedad pública <code>Roles</code> devuelve <code>IReadOnlyCollection&lt;Role&gt;</code>. ¿Por qué esta asimetría?',
+    ['Para ahorrar memoria',
+     'Para impedir que el código cliente modifique la colección interna',
+     'Porque IReadOnlyCollection es más rápido',
+     'Es un descuido del autor'],
+    1,
+    'Es una decisión de encapsulación: la lista interna es mutable (porque <code>AddRole</code>/<code>RemoveRole</code> la necesitan así por dentro), pero hacia afuera la exponemos como <strong>solo lectura</strong>, para que nadie agregue o quite roles salteándose los métodos del User.');
+}
+function quizDual(){
+  runQuiz('Mini-quiz · El modo dual',
+    '¿Qué afirmación describe MEJOR lo que demuestra el <code>if (args.Length != 0)</code> del Program.cs?',
+    ['Que la fachada se puede llamar desde la línea de comandos como atajo de desarrollo',
+     'Que el dominio funciona completo sin que el bot de Discord siquiera se cargue',
+     'Que el bot puede ejecutar comandos desde la terminal',
+     'Que es una forma de debuggear cuando Discord está caído'],
+    1,
+    'Es la prueba en código del principio del teórico: <strong>toda la funcionalidad vive en la fachada</strong>, y el bot es solo una manera de invocarla. Si Discord desaparece mañana, la fachada y el dominio siguen funcionando — y la opción 1 también es cierta, pero la 2 captura el principio de diseño.');
+}
+
+/* ================= CADENA DE EJERCICIOS ================= */
+const exercises = {
+  1: {
+    points: 10,
+    regex: /^\s*string\s+result\s*=\s*Facade\.Instance\.GetUserInfo\s*\(\s*name\s*\)\s*;?\s*$/,
+    hint: 'Buscá la línea que NO crea repositorios ni toca <code>User</code> directamente, sino que le pide el resultado <strong>terminado</strong> a la fachada.',
+    success: 'Esa es la línea que respeta el patrón: el comando solo conoce a <code>Facade</code> y recibe el resultado ya armado. Las otras dos líneas violan el patrón al instanciar el repositorio y manejar <code>User</code>.',
+    errorHint: 'Es exactamente: <code>string result = Facade.Instance.GetUserInfo(name);</code> — copialá tal cual aparece en el código de la slide.'
+  },
+  2: {
+    points: 10,
+    regex: /^\s*instance\s*=\s*new\s+Facade\s*\(\s*\)\s*;?\s*$/,
+    hint: 'Dentro del getter, hay que asignarle al campo estático <code>instance</code> una nueva instancia usando el constructor sin parámetros.',
+    success: 'Esa es la creación perezosa (<em>lazy</em>): la fachada solo se construye la primera vez que alguien pide <code>Facade.Instance</code>. Como el constructor es privado, esta es la única forma de crearla.',
+    errorHint: 'Es: <code>instance = new Facade();</code> — campo <code>instance</code> (en minúscula), asignación, <code>new Facade()</code> con paréntesis vacíos.'
+  },
+  3: {
+    points: 10,
+    regex: /^\s*public\s+void\s+AddUser\s*\(\s*string\s+[A-Za-z_]\w*\s*\)\s*\{?\s*$/,
+    hint: 'La forma es la misma que cualquier método público de la fachada: <code>public void NombreMetodo(tipo parametro)</code>. Sin retorno (<code>void</code>), recibe un <code>string</code>.',
+    success: 'Firma correcta. Ahora la fachada tiene un método nuevo en su interfaz pública, y los comandos pueden invocarlo sin conocer cómo se crea un <code>User</code> por dentro.',
+    errorHint: 'La forma es: <code>public void AddUser(string userName)</code> — respetá las mayúsculas: <code>AddUser</code> con A y U mayúsculas, <code>public void</code> y <code>string</code> en minúscula.'
+  },
+  4: {
+    points: 10,
+    regex: /^\s*void\s+Add\s*\(\s*User\s+[A-Za-z_]\w*\s*\)\s*;\s*$/,
+    hint: 'En una interfaz, los métodos se <strong>declaran</strong>: no llevan modificador de visibilidad y terminan en <code>;</code>. Sin retorno, recibe un <code>User</code>.',
+    success: 'Declaración correcta. La interfaz ahora obliga a cualquier implementación (la real y los mocks de los tests) a tener este método.',
+    errorHint: 'En una interfaz: <code>void Add(User user);</code> — sin <code>public</code> (en una interfaz no va), con <code>User</code> con U mayúscula, y terminado en punto y coma.'
+  },
+  5: {
+    points: 10,
+    regex: /^\s*User\s+newUser\s*=\s*new\s+User\s*\(\s*userName\s*\)\s*;?\s*$/,
+    hint: 'La forma es <code>Tipo variable = new Tipo(argumento);</code>. El tipo es <code>User</code>, la variable se llama <code>newUser</code>, y se construye con el <code>userName</code> que recibió el método.',
+    success: 'Variable creada. El próximo paso (que no te toca acá) sería darle el rol <code>Role.User</code> y agregarla al repositorio con <code>this.usersRepository.Add(newUser)</code>. Y todo eso pasa <strong>adentro</strong> de la fachada: el comando no se entera.',
+    errorHint: 'Es: <code>User newUser = new User(userName);</code> — <code>User</code> con U mayúscula a la izquierda y a la derecha del <code>=</code>, <code>newUser</code> en camelCase, y el parámetro es <code>userName</code>.'
+  },
+  6: {
+    points: 20,
+    regex: /^\s*Facade\.Instance\.AddUser\s*\(\s*name\s*\)\s*;?\s*$/,
+    hint: 'Pensalo en términos de la línea que ya conocés de <code>UserInfoCommand</code>: <code>Facade.Instance.GetUserInfo(userName)</code>. Acá es lo mismo pero con el método nuevo, y el parámetro se llama <code>name</code>.',
+    success: '¡Cadena cerrada! El comando hace solo dos cosas: extraer el parámetro de Discord (<code>name</code>) y delegarlo a la fachada. Cero conocimiento de <code>User</code>, cero conocimiento del repositorio. Esto es Façade en pleno trabajo.',
+    errorHint: 'Es: <code>Facade.Instance.AddUser(name);</code> — la misma forma que <code>Facade.Instance.GetUserInfo(...)</code>, con el método nuevo y el parámetro <code>name</code> que recibió el comando.'
+  }
+};
+const exState = {};
+for(const k in exercises) exState[k] = { done:false, hinted:false };
+const TOTAL_EX = Object.keys(exercises).length;
+const MAX_PTS = 2*10 + Object.values(exercises).reduce((a,e) => a + e.points, 0);
+
+function updateLabProgress(){
+  const done = Object.values(exState).filter(s => s.done).length;
+  document.querySelectorAll('.lab-progress').forEach(el => {
+    el.textContent = '· completados: ' + done + ' / ' + TOTAL_EX;
+  });
+}
+
+function unlockExercise(n){
+  const card = document.getElementById('ex'+n);
+  if(!card || !card.classList.contains('locked')) return;
+  card.classList.remove('locked');
+  card.classList.add('animate__animated','animate__pulse');
+}
+
+function checkExercise(n){
+  const ex = exercises[n];
+  const value = document.getElementById('in'+n).value;
+  if(!value.trim()){
+    Swal.fire({ ...swalBase, icon:'question', title:'Está vacío', text:'Escribí tu respuesta antes de verificar.' });
+    return;
+  }
+  if(ex.regex.test(value)){
+    const first = !exState[n].done;
+    exState[n].done = true;
+    const card = document.getElementById('ex'+n);
+    card.classList.add('done');
+    card.querySelector('.ex-status').innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+    let pts = 0;
+    if(first){ pts = exState[n].hinted ? Math.floor(ex.points/2) : ex.points; addPoints(pts); }
+    unlockExercise(n+1);
+    updateLabProgress();
+    const last = n === TOTAL_EX;
+    Swal.fire({ ...swalBase, icon:'success',
+      title: first ? '¡Correcto! +' + pts + ' pts' : '¡Correcto!',
+      html:`<p style="text-align:left">${ex.success}</p>` + (last ? '' : '<p style="text-align:left;color:#94a5c6;font-size:.85rem">🔓 Siguiente ejercicio desbloqueado.</p>'),
+      showClass:{popup:'animate__animated animate__tada'}, timer:4500, timerProgressBar:true });
+    if(last && Object.values(exState).every(s => s.done)){
+      setTimeout(showFinalScore, 4700);
+    }
+  } else {
+    Swal.fire({ ...swalBase, icon:'error', title:'Todavía no…',
+      html:`<p style="text-align:left">${ex.errorHint}</p>`,
+      showClass:{popup:'animate__animated animate__shakeX'} });
+  }
+}
+
+function showHint(n){
+  exState[n].hinted = true;
+  const half = Math.floor(exercises[n].points/2);
+  Swal.fire({ ...swalBase, icon:'info', title:'Pista · Ejercicio ' + n,
+    html:`<p style="text-align:left">${exercises[n].hint}</p><p style="text-align:left;color:#94a5c6;font-size:.85rem">Usar la pista reduce el puntaje de este ejercicio a ${half} pts.</p>` });
+}
+
+/* ================= PUNTAJE FINAL ================= */
+function showFinalScore(){
+  const done = Object.values(exState).filter(s => s.done).length;
+  const pct = Math.round(score / MAX_PTS * 100);
+  let nivel, icon;
+  if(pct >= 85){ nivel = '🏆 Arquitecto de fachadas'; icon = 'success'; }
+  else if(pct >= 60){ nivel = '⭐ El bot y el dominio te entienden'; icon = 'success'; }
+  else if(pct >= 30){ nivel = '📈 En camino — repasá las capas y el modo dual'; icon = 'info'; }
+  else { nivel = '🔁 Recorré el flujo completo y reintentá'; icon = 'info'; }
+  Swal.fire({ ...swalBase, icon, title: score + ' / ' + MAX_PTS + ' puntos',
+    html:`<p style="font-size:1.05rem;margin-bottom:8px">${nivel}</p>
+          <p>Cadena de ejercicios: <strong style="color:#f87171">${done} / ${TOTAL_EX}</strong> · Efectividad: <strong style="color:#fbbf24">${pct}%</strong></p>`,
+    confirmButtonText:'Cerrar', showClass:{popup:'animate__animated animate__zoomIn'} });
+}
+
+/* ================= INIT ================= */
+slides[0].classList.add('active','animate__animated','animate__fadeIn');
+document.getElementById('slideBadge').textContent = '1 / ' + slides.length;
+document.getElementById('progressbar').style.width = (1/slides.length*100) + '%';
+document.getElementById('btnPrev').disabled = true;
+updateLabProgress();
+</script>
+</body>
+</html>
